@@ -1,0 +1,57 @@
+---
+title: "Capabilities Overview"
+description: "How Wolffish's capability system works"
+---
+
+# Capabilities Overview
+
+A capability is a self-contained folder in `brain/cerebellum/` that gives Wolffish a new ability. Capabilities are how Wolffish learns to do things — run shell commands, read files, interact with git, search the web, send messages.
+
+## Two Types of Capabilities
+
+<CardGroup cols={2}>
+  <Card title="Pure Skills" icon="file-lines">
+    A SKILL.md file only. The markdown body contains instructions the LLM follows using its existing abilities. No code needed. Example: `git/` — the LLM uses shell commands to run git operations based on the SKILL.md instructions.
+  </Card>
+  <Card title="Plugin Capabilities" icon="plug">
+    A SKILL.md file plus a `plugin/` folder with executable code. The plugin exports tools that the LLM can call directly. Example: `shell/` — the plugin wraps `child_process` to provide a `shell_exec` tool.
+  </Card>
+</CardGroup>
+
+## Capability Folder Structure
+
+```
+brain/cerebellum/my-capability/
+├── SKILL.md              # Required: frontmatter + instructions
+└── plugin/               # Optional: executable code
+    └── index.mjs         # Plugin entry point
+```
+
+## How Capabilities Are Loaded
+
+On startup, `cerebellum.ts` scans `brain/cerebellum/` and for each folder:
+
+1. Reads and parses the SKILL.md frontmatter (YAML)
+2. Extracts tool definitions, danger patterns, confirm patterns, and triggers
+3. If a `plugin/` folder exists, dynamic-imports `plugin/index.mjs`
+4. Calls `init(context)` on the plugin, passing `pluginDir` and `workspaceRoot`
+5. Registers all tools with the agent's tool definitions
+
+## How Capabilities Are Selected
+
+Not every capability is included in every LLM call. The `ras` (attention filter) uses the `triggers` field from SKILL.md frontmatter to score relevance against the user's message. Only capabilities that pass the relevance threshold are included in the context.
+
+## Built-In Capabilities
+
+Wolffish ships with these capabilities in the default workspace:
+
+| Capability | Type | Description |
+|---|---|---|
+| `shell` | Plugin | Execute shell commands via `shell_exec` |
+| `filesystem` | Plugin | Read, write, and patch files |
+| `git` | Pure Skill | Git operations via shell commands |
+| `introspect` | Plugin | Self-awareness: status, performance, memory tools |
+
+<Card title="Create Your Own" icon="plus" href="/extending/creating-capabilities">
+  Learn how to build a new capability from scratch.
+</Card>

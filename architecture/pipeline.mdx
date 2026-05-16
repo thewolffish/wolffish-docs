@@ -1,0 +1,83 @@
+---
+title: "The Agent Pipeline"
+description: "How a message flows through Wolffish from input to response"
+---
+
+# The Agent Pipeline
+
+Every message follows this exact path through the system. No exceptions, no shortcuts.
+
+```
+User message
+  → prefrontal.buildContext()
+    → thalamus.stream()
+      → broca.streamToUI()
+        → wernicke.parse()
+          → [if tool calls: amygdala → motor → cerebellum → loop]
+            → hippocampus.appendEpisode()
+              → basalganglia.recordOutcome()
+                → done
+```
+
+## Step-by-Step
+
+### 1. Message Received
+
+The user sends a message from the chat UI. It arrives in the main process via IPC and enters the agent loop.
+
+### 2. Context Assembly (prefrontal)
+
+This is the most important step. The prefrontal cortex:
+
+1. Reads all workspace markdown files (identity, memory, skills)
+2. Calls `cerebellum` for tool definitions from loaded capabilities
+3. Calls `cortex` for memory search results (SQLite FTS5)
+4. Passes all candidates through `ras` for relevance scoring
+5. Applies token budget allocation (15% identity / 10% prefrontal / 30% memory / 20% skills / 25% history)
+6. Assembles the final system prompt with XML tags
+7. Writes a debug snapshot to `brain/prefrontal/.debug/`
+
+<Info>
+  You can inspect exactly what the LLM received by reading the debug snapshot files. This is how you debug "why did Wolffish do that?" questions.
+</Info>
+
+### 3. LLM Call (thalamus)
+
+The assembled context goes to `thalamus.stream()`, which:
+
+1. Checks `net.isOnline()` for instant offline detection
+2. Tries the primary provider (Claude, OpenAI, or Ollama based on config)
+3. If the primary fails, cascades to the next healthy provider
+4. Returns a unified `StreamChunk` async generator
+
+### 4. Response Streaming (broca)
+
+`broca` receives the stream chunks and pipes them to the renderer via IPC for real-time display in the chat UI.
+
+### 5. Response Parsing (wernicke)
+
+`wernicke` parses the streamed response, normalizing across provider formats:
+- **Anthropic**: `tool_use` content blocks
+- **OpenAI**: `function_call` objects
+- **Ollama**: structured JSON in response
+
+All three are normalized into a single `ToolCall` type: `{ name, args, id }`.
+
+### 6. Tool Execution Loop (if tool calls detected)
+
+If `wernicke` finds tool calls, the loop begins (max 8 iterations):
+
+1. **amygdala.classify()** — Checks the tool call against danger patterns loaded from SKILL.md files. Three outcomes: `safe` (proceed), `confirm` (show approval dialog), `block` (deny).
+2. **motor.execute()** — Creates a `TASK-{id}.md` file, logs the step, calls the plugin with retry logic (3x with 2s/6s/18s backoff).
+3. **cerebellum.executeTool()** — Routes the call to the correct capability plugin.
+4. Results go back to the LLM for the next iteration.
+
+### 7. Memory (hippocampus + basalganglia)
+
+After the response is complete:
+- `hippocampus` appends a summary of the turn to today's episode file (`brain/hippocampus/episodes/YYYY-MM-DD.md`)
+- `basalganglia` records the outcome (success/failure/denial) to today's feedback file
+
+### What's Not in the Pipeline
+
+There are no LLM calls for classification, routing, or context selection. Those are all deterministic code operations. The LLM is called exactly once for the response (plus once per tool-use iteration). This keeps the pipeline fast, cheap, and predictable.

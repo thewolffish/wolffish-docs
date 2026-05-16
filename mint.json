@@ -1,0 +1,98 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "Wolffish",
+  "logo": {
+    "dark": "/logo/dark.svg",
+    "light": "/logo/light.svg"
+  },
+  "favicon": "/favicon.svg",
+  "colors": {
+    "primary": "#1E40AF",
+    "light": "#3B82F6",
+    "dark": "#1E3A8A",
+    "anchors": {
+      "from": "#1E40AF",
+      "to": "#3B82F6"
+    }
+  },
+  "topbarLinks": [
+    {
+      "name": "GitHub",
+      "url": "https://github.com/younesalturkey/wolffish"
+    }
+  ],
+  "topbarCtaButton": {
+    "name": "Download",
+    "url": "https://github.com/younesalturkey/wolffish/releases"
+  },
+  "tabs": [
+    {
+      "name": "API Reference",
+      "url": "api-reference"
+    }
+  ],
+  "anchors": [
+    {
+      "name": "GitHub",
+      "icon": "github",
+      "url": "https://github.com/younesalturkey/wolffish"
+    },
+    {
+      "name": "Community",
+      "icon": "discord",
+      "url": "https://discord.gg/wolffish"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Get Started",
+      "pages": [
+        "introduction/overview",
+        "introduction/philosophy",
+        "getting-started/installation",
+        "getting-started/first-launch",
+        "getting-started/quickstart"
+      ]
+    },
+    {
+      "group": "Architecture",
+      "pages": [
+        "architecture/overview",
+        "architecture/pipeline",
+        "architecture/brain-modules",
+        "architecture/workspace"
+      ]
+    },
+    {
+      "group": "Capabilities",
+      "pages": [
+        "capabilities/overview",
+        "capabilities/skill-md-reference",
+        "capabilities/writing-plugins",
+        "capabilities/built-in-capabilities"
+      ]
+    },
+    {
+      "group": "Configuration",
+      "pages": [
+        "configuration/soul-md",
+        "configuration/user-md",
+        "configuration/agents-md",
+        "configuration/config-json",
+        "configuration/providers"
+      ]
+    },
+    {
+      "group": "Extending Wolffish",
+      "pages": [
+        "extending/creating-capabilities",
+        "extending/community-capabilities",
+        "extending/safety-patterns"
+      ]
+    }
+  ],
+  "footerSocials": {
+    "x": "https://x.com/purecloud_sa",
+    "github": "https://github.com/younesalturkey"
+  }
+}

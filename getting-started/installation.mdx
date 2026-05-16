@@ -1,0 +1,94 @@
+---
+title: "Installation"
+description: "Install Wolffish on macOS, Windows, or Linux"
+---
+
+# Installation
+
+## Prerequisites
+
+<AccordionGroup>
+  <Accordion title="Node.js (Required)" defaultOpen>
+    Wolffish capability plugins are `.mjs` files that execute in a Node.js runtime. Install Node.js 20+ from [nodejs.org](https://nodejs.org) or via a version manager like `nvm` or `fnm`.
+
+    ```bash
+    node --version   # Must be v20.0.0 or higher
+    ```
+  </Accordion>
+
+  <Accordion title="Ollama (Required)" defaultOpen>
+    Wolffish depends on Ollama for local LLM inference — it's not optional. Install it from [ollama.com](https://ollama.com).
+
+    After installing, pull a model:
+    ```bash
+    ollama pull gemma3:4b
+    ```
+
+    Wolffish detects Ollama automatically on launch and won't function without it.
+  </Accordion>
+
+  <Accordion title="Cloud Providers (Optional)">
+    For higher quality responses, configure API keys for one or both:
+    - **Anthropic (Claude)**: Get an API key at [console.anthropic.com](https://console.anthropic.com)
+    - **OpenAI (GPT)**: Get an API key at [platform.openai.com](https://platform.openai.com)
+
+    You'll configure these in Wolffish's settings after installation. Cloud providers enhance quality but cascade back to Ollama on failure.
+  </Accordion>
+</AccordionGroup>
+
+## Download
+
+<Tabs>
+  <Tab title="macOS">
+    Download the latest `.dmg` from the [releases page](https://github.com/younesalturkey/wolffish/releases).
+
+    1. Open the `.dmg` file
+    2. Drag Wolffish to your Applications folder
+    3. Launch Wolffish from Applications
+
+    <Note>
+      On first launch, macOS may warn about an unidentified developer. Right-click the app and select "Open" to bypass this.
+    </Note>
+  </Tab>
+
+  <Tab title="Windows">
+    Download the latest `.exe` installer from the [releases page](https://github.com/younesalturkey/wolffish/releases).
+
+    1. Run the installer
+    2. Follow the setup wizard
+    3. Launch Wolffish from the Start menu
+  </Tab>
+
+  <Tab title="Linux">
+    Download the latest `.AppImage` from the [releases page](https://github.com/younesalturkey/wolffish/releases).
+
+    ```bash
+    chmod +x Wolffish-*.AppImage
+    ./Wolffish-*.AppImage
+    ```
+  </Tab>
+</Tabs>
+
+## Build from Source
+
+```bash
+git clone https://github.com/younesalturkey/wolffish.git
+cd wolffish
+npm install
+npm run dev
+```
+
+<Warning>
+  Building from source requires Node.js 20+ and npm. Native modules (better-sqlite3) will be compiled during `npm install` via `electron-rebuild`.
+</Warning>
+
+## Verify Installation
+
+On first launch, Wolffish creates `~/.wolffish/workspace/` with default configuration files. You should see the onboarding screen prompting you to select an Ollama model.
+
+To verify everything is working:
+1. Select a model (e.g., `gemma3:4b`)
+2. Send a test message like "Hello, what can you do?"
+3. You should see a streaming response
+
+If Ollama is not detected, Wolffish will guide you through the setup process.

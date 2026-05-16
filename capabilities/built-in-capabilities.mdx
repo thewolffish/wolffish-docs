@@ -1,0 +1,52 @@
+---
+title: "Built-in Capabilities"
+description: "Capabilities that ship with Wolffish by default"
+---
+
+# Built-in Capabilities
+
+These capabilities are included in the default workspace when Wolffish creates `~/.wolffish/workspace/` on first launch.
+
+## shell
+
+**Type:** Plugin
+
+Wraps Node.js `child_process` to execute shell commands. Provides the `shell_exec` tool with a `command` parameter (string) and an optional `background` parameter (boolean) for detached processes.
+
+Danger patterns block destructive commands like `rm -rf /`, `sudo rm`, and `chmod 777`. Confirm patterns require approval for operations like `npm install`, `git push`, and `docker rm`.
+
+## filesystem
+
+**Type:** Plugin
+
+Wraps Node.js `fs` for file operations. Provides three tools:
+
+- `file_read` — Read file contents
+- `file_write` — Write content to a file (creates or overwrites)
+- `file_patch` — Apply targeted edits to an existing file
+
+## git
+
+**Type:** Pure Skill (no plugin)
+
+Provides git instructions to the LLM via SKILL.md. The LLM uses `shell_exec` to run git commands. Instructions include using conventional commit format, running `git status` first, and showing diffs before committing.
+
+## introspect
+
+**Type:** Plugin
+
+Self-awareness capability. Provides three tools:
+
+- `wolffish_status` — Current task counts, uptime, active providers
+- `wolffish_performance` — Success rates from basalganglia feedback
+- `wolffish_memory` — Recent episode summaries and memory stats
+
+When you ask "how are you doing?" or "what have you been up to?", the LLM calls these tools to read its own state.
+
+## Modifying Built-in Capabilities
+
+All built-in capabilities are just folders in your workspace. You can edit their SKILL.md files to change behavior, add new danger patterns, or modify tool instructions. Changes take effect on the next message — no restart needed.
+
+<Warning>
+  If you delete a built-in capability, Wolffish won't recreate it automatically. Keep a backup or use git to version your workspace.
+</Warning>

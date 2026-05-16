@@ -1,0 +1,56 @@
+---
+title: "Providers"
+description: "Configure LLM providers: Anthropic, OpenAI, and Ollama"
+---
+
+# Providers
+
+Wolffish communicates with LLMs via three providers using pure `fetch()` — no SDKs. Each provider has its own streaming format and tool-calling convention, which `wernicke.ts` normalizes into a single interface.
+
+## Anthropic (Claude)
+
+```
+POST https://api.anthropic.com/v1/messages
+```
+
+Uses SSE streaming. Tool calls arrive as `tool_use` content blocks. Configure your API key in Settings or directly in `config.json`.
+
+Best for: Complex reasoning, detailed instructions following, nuanced tool use.
+
+## OpenAI (GPT)
+
+```
+POST https://api.openai.com/v1/chat/completions
+```
+
+Uses SSE streaming. Tool calls arrive as `function_call` objects. Configure your API key in Settings or directly in `config.json`.
+
+Best for: General-purpose tasks, broad knowledge, fast responses.
+
+## Ollama (Local)
+
+```
+POST http://localhost:11434/api/chat
+```
+
+Uses NDJSON streaming. Tool calls arrive as structured JSON in the response. No API key needed — runs entirely on your machine.
+
+Best for: Privacy, offline use, zero-cost experimentation, always-available fallback.
+
+## Health Tracking
+
+The `thalamus` tracks each provider's health independently:
+
+- **Failure count** — Incremented on each failed request
+- **Backoff cooldown** — Exponential backoff after failures
+- **Online check** — `net.isOnline()` for instant offline detection
+
+When a provider fails, it enters a cooldown period before being retried. The cascade skips unhealthy providers and goes directly to the next available one.
+
+## Choosing a Primary Provider
+
+Set your primary provider in Settings or `config.json`. The cascade always falls back in order: Claude → OpenAI → Ollama. Your primary provider is tried first, then the cascade takes over on failure.
+
+<Tip>
+  For the best experience, keep Ollama running with a pulled model as your safety net. Even if you primarily use Claude, having a local fallback means you're never stuck without a response.
+</Tip>

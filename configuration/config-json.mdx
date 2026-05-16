@@ -1,0 +1,59 @@
+---
+title: "config.json"
+description: "Application configuration reference"
+---
+
+# config.json
+
+Located at `brain/config.json`, this file stores application-level settings. It's read on startup and can be modified via the Settings UI or by editing the file directly.
+
+## Configuration Fields
+
+```json
+{
+  "mind": {
+    "provider": "ollama",
+    "model": "gemma3:4b"
+  },
+  "providers": {
+    "anthropic": {
+      "apiKey": "",
+      "model": "claude-sonnet-4-20250514"
+    },
+    "openai": {
+      "apiKey": "",
+      "model": "gpt-4o"
+    },
+    "ollama": {
+      "host": "http://localhost:11434",
+      "model": "gemma3:4b"
+    }
+  },
+  "language": "en"
+}
+```
+
+## Field Reference
+
+| Field | Description |
+|---|---|
+| `mind.provider` | Active LLM provider: `anthropic`, `openai`, or `ollama` |
+| `mind.model` | Active model name |
+| `providers.anthropic.apiKey` | Anthropic API key |
+| `providers.openai.apiKey` | OpenAI API key |
+| `providers.ollama.host` | Ollama server URL (default: `http://localhost:11434`) |
+| `language` | UI language: `en` (English) or `ar` (Arabic) |
+
+## Provider Cascade
+
+When the active provider fails, Wolffish cascades through alternatives:
+
+```
+Claude → OpenAI → Ollama
+```
+
+Providers without configured API keys are skipped. Ollama is always available as the final fallback (assuming it's running).
+
+<Info>
+  API keys are stored in plain text in config.json. This is by design — Wolffish is a local-first app and your workspace is your own. If you version-control your workspace with git, add `brain/config.json` to `.gitignore`.
+</Info>

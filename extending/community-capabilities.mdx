@@ -1,0 +1,47 @@
+---
+title: "Community Capabilities"
+description: "Install and share capabilities with the community"
+---
+
+# Community Capabilities
+
+Wolffish capabilities are self-contained folders. This makes them trivially shareable — clone a repo into your cerebellum directory and it just works.
+
+## Installing a Community Capability
+
+```bash
+cd ~/.wolffish/workspace/brain/cerebellum/
+git clone https://github.com/someone/wolffish-capability-name.git capability-name
+```
+
+Restart Wolffish (or wait for the brainstem file watcher to detect the new folder), and the capability is loaded automatically.
+
+## Sharing Your Capability
+
+To share a capability you've built:
+
+1. Make sure the folder is self-contained (no references to files outside the capability folder)
+2. Initialize a git repo in the capability folder
+3. Push to GitHub (or any git host)
+4. Others can clone it directly into their `brain/cerebellum/`
+
+## Structure Requirements
+
+A shareable capability should include:
+
+```
+my-capability/
+├── SKILL.md              # Required
+├── plugin/               # Optional
+│   └── index.mjs
+├── README.md             # Recommended: usage instructions
+└── LICENSE               # Recommended: license terms
+```
+
+## Security Considerations
+
+<Warning>
+  Community plugins execute with full Node.js access in the Electron main process. Review any plugin code before installing. The amygdala gates tool execution but not plugin initialization — a malicious `init()` function runs on startup without any safety check.
+</Warning>
+
+Only install capabilities from sources you trust. Review the `plugin/index.mjs` file before adding it to your workspace.

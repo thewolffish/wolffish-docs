@@ -1,0 +1,70 @@
+---
+title: "Workspace Architecture"
+description: "The ~/.wolffish/workspace/ directory structure explained"
+---
+
+# Workspace Architecture
+
+Everything Wolffish knows, remembers, and can do lives in `~/.wolffish/workspace/`. This is your agent's brain on disk — readable, editable, and git-versionable.
+
+## Directory Structure
+
+```
+~/.wolffish/workspace/
+└── brain/
+    ├── identity/
+    │   ├── soul.md                    # Agent personality
+    │   └── user.md                    # User profile
+    ├── prefrontal/
+    │   ├── agents.md                  # Agent procedures + tool usage rules
+    │   └── .debug/                    # Context snapshots (auto-created)
+    ├── cerebellum/                    # Capabilities
+    │   ├── shell/                     # Shell commands (SKILL.md + plugin/)
+    │   ├── filesystem/                # File operations (SKILL.md + plugin/)
+    │   ├── git/                       # Git operations (SKILL.md only)
+    │   └── introspect/                # Self-awareness (SKILL.md + plugin/)
+    ├── hippocampus/
+    │   ├── episodes/YYYY-MM-DD.md     # Daily conversation logs
+    │   ├── consolidated/YYYY-WNN.md   # Weekly summaries
+    │   └── knowledge/                 # Long-term facts (topic files)
+    ├── motor/tasks/TASK-{id}.md       # Task execution logs
+    ├── basalganglia/YYYY-MM-DD.md     # Daily feedback logs
+    ├── brainstem/heartbeat.md         # Cron schedule definitions
+    ├── corpus/YYYY-MM-DD.log.md       # Daily event logs
+    ├── conversations/                 # Chat history
+    ├── cortex.db                      # SQLite FTS5 index (disposable)
+    └── config.json                    # App configuration
+```
+
+## Key Principles
+
+**Markdown is truth, `cortex.db` is cache.** The SQLite database is fully disposable. Delete it and Wolffish rebuilds it from the markdown files on next launch. Never edit `cortex.db` directly — edit the markdown source files instead.
+
+**Daily files over growing files.** Episodes, feedback, and event logs are split by day (`YYYY-MM-DD.md`). This keeps individual files small, makes them easy to browse, and allows the brainstem to clean up old logs automatically.
+
+**Capabilities are self-contained.** Each folder under `brain/cerebellum/` is a complete capability. You can delete any of them without affecting the core system. You can add new ones by dropping in a folder.
+
+## Inspecting the Workspace
+
+You can open `~/.wolffish/workspace/` in VS Code or any text editor to see your agent's entire state. Some useful things to inspect:
+
+| What You Want to Know | Where to Look |
+|---|---|
+| What context was sent to the LLM | `brain/prefrontal/.debug/context-*.md` |
+| What the agent remembers about today | `brain/hippocampus/episodes/YYYY-MM-DD.md` |
+| What tools were called and what happened | `brain/motor/tasks/TASK-*.md` |
+| Whether the agent is learning your preferences | `brain/basalganglia/YYYY-MM-DD.md` |
+| Every event that fired | `brain/corpus/YYYY-MM-DD.log.md` |
+
+## Version Control
+
+You can `git init` the workspace directory to version-control your agent's brain. This lets you track changes to personality, review memory evolution, roll back configuration changes, and share your agent setup with others.
+
+```bash
+cd ~/.wolffish/workspace
+git init
+echo "brain/cortex.db" >> .gitignore
+echo "brain/prefrontal/.debug/" >> .gitignore
+git add .
+git commit -m "Initial brain state"
+```

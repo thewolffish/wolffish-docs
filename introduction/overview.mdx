@@ -1,0 +1,49 @@
+---
+title: "What is Wolffish?"
+description: "A local-first, markdown-powered personal AI desktop agent"
+---
+
+# What is Wolffish?
+
+Wolffish is a local-first, markdown-powered personal AI desktop app built with Electron. It runs on macOS, Windows, and Linux, and maps the human brain's architecture onto a deterministic software pipeline where 15 runtime modules each handle one specific function — routing input, building context, managing memory, executing tools, enforcing safety, and learning from outcomes.
+
+## The Core Idea
+
+**Markdown is the source of truth for all agent behavior.** The TypeScript code is pure plumbing — it reads markdown, calls LLMs, executes tools, and writes markdown back. To change what the agent does, you edit a markdown file, not code. The LLM reads these instructions at runtime, so behavior evolves without rebuilds.
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="Local-First" icon="house">
+    Works 100% offline with local Ollama models. Cloud providers enhance quality but are never required.
+  </Card>
+  <Card title="Markdown-Powered" icon="file-lines">
+    Your agent's entire brain is readable, editable, and version-controllable markdown files.
+  </Card>
+  <Card title="Deterministic Pipeline" icon="diagram-project">
+    The same input follows the same path through the same gates every time. The LLM adds creativity at one specific point.
+  </Card>
+  <Card title="Extensible Capabilities" icon="puzzle-piece">
+    Add new abilities by dropping a folder with a SKILL.md file. No code changes required.
+  </Card>
+</CardGroup>
+
+## How It Works
+
+Wolffish talks to LLMs via three providers: Anthropic (Claude), OpenAI (GPT), and Ollama (local models like Gemma 4 and Qwen 3.5). It cascades through them with automatic fallback — cloud first for quality, local as a reliable fallback that works offline.
+
+Everything lives in one folder: `~/.wolffish/`. Delete it and you're back to factory defaults. No system-level daemons, no crontabs, no registry entries, no scattered config files.
+
+```
+User message → Context Assembly → LLM Call → Tool Execution → Memory → Response
+```
+
+Each step is handled by a dedicated brain module, and every step is inspectable via markdown files.
+
+## Who Is It For?
+
+Wolffish is for developers who want a personal AI agent they fully understand, can debug by reading markdown files, and can extend by writing new SKILL.md files. If you want to own your AI tools rather than rent them, Wolffish is for you.
+
+<Card title="Get Started" icon="rocket" href="/getting-started/installation">
+  Install Wolffish and run your first conversation in under 5 minutes.
+</Card>

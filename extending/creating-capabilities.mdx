@@ -1,0 +1,117 @@
+---
+title: "Creating Capabilities"
+description: "Step-by-step guide to building a new Wolffish capability"
+---
+
+# Creating Capabilities
+
+This guide walks through creating a new capability from scratch. By the end, you'll have a working capability that Wolffish discovers, loads, and makes available to the LLM.
+
+## Step 1: Create the Folder
+
+```bash
+mkdir -p ~/.wolffish/workspace/brain/cerebellum/my-capability
+```
+
+## Step 2: Write the SKILL.md
+
+Create `SKILL.md` with YAML frontmatter and markdown instructions:
+
+```yaml
+---
+name: my-capability
+description: What this capability does in one sentence
+triggers:
+  - keyword1
+  - keyword2
+tools:
+  - name: my_tool
+    description: What this tool does
+    parameters:
+      type: object
+      properties:
+        input:
+          type: string
+          description: The input to process
+      required:
+        - input
+---
+
+# My Capability
+
+Instructions for the LLM on how to use this capability.
+
+When the user asks about [topic], use the `my_tool` tool with the relevant input.
+Always [specific behavior guideline].
+Never [specific constraint].
+```
+
+## Step 3: Write the Plugin (Optional)
+
+If your capability needs custom code, create `plugin/index.mjs`:
+
+```javascript
+export default {
+  name: 'my-capability',
+  tools: ['my_tool'],
+
+  async init(context) {
+    // context.pluginDir — path to this plugin folder
+    // context.workspaceRoot — path to ~/.wolffish/workspace/
+  },
+
+  async execute(toolName, args) {
+    if (toolName === 'my_tool') {
+      // Your logic here
+      const result = doSomething(args.input)
+      return { success: true, output: result }
+    }
+    return { success: false, output: '', error: `Unknown tool: ${toolName}` }
+  },
+
+  async destroy() {
+    // Cleanup on shutdown
+  }
+}
+```
+
+## Step 4: Add Safety Patterns (If Needed)
+
+If your tool can perform dangerous operations, add patterns to the SKILL.md frontmatter:
+
+```yaml
+danger_patterns:
+  - "dangerous_regex_here"
+confirm_patterns:
+  - "risky_but_allowed_regex"
+```
+
+## Step 5: Test It
+
+Send a message that matches your triggers. Check:
+
+1. **Context debug file** (`brain/prefrontal/.debug/`) — Is your SKILL.md included in the context?
+2. **Event log** (`brain/corpus/`) — Is `tool.called` fired with your tool name?
+3. **Task log** (`brain/motor/tasks/`) — Does the task file show successful execution?
+
+## Pure Skill vs Plugin: When to Use Which
+
+Use a **pure skill** when your capability can be accomplished with existing tools (like `shell_exec` or `file_read`). The SKILL.md instructions teach the LLM how to combine existing tools for the task.
+
+Use a **plugin** when you need custom logic that can't be expressed as shell commands or file operations — API calls, data processing, custom protocols, etc.
+
+<Tip>
+  Start with a pure skill. If you find the LLM struggles with complex tool chains, upgrade to a plugin. Pure skills are simpler to write, debug, and share.
+</Tip>
+
+## Capability Checklist
+
+Before shipping your capability:
+
+- [ ] SKILL.md has accurate triggers (test with different phrasings)
+- [ ] Tool parameter descriptions are clear (the LLM reads them)
+- [ ] Danger patterns cover all destructive operations
+- [ ] Confirm patterns cover risky-but-legitimate operations
+- [ ] Plugin handles errors gracefully (returns `ToolResult` with `success: false`)
+- [ ] The markdown body has clear, specific instructions
+- [ ] Tested with both cloud and local models

@@ -1,0 +1,54 @@
+---
+title: "Quickstart"
+description: "Start using Wolffish in 5 minutes"
+---
+
+# Quickstart
+
+This guide gets you from zero to a working agent in 5 minutes.
+
+## 1. Send a Message
+
+Type anything in the chat box. Wolffish assembles context from your workspace files, calls the LLM, and streams the response. Try:
+
+```
+What files are in my home directory?
+```
+
+If shell capabilities are enabled, the agent will call the `shell_exec` tool, and you'll see an approval dialog for potentially dangerous commands.
+
+## 2. Inspect What Happened
+
+After the conversation, check these files:
+
+| File | What It Shows |
+|---|---|
+| `brain/prefrontal/.debug/context-*.md` | The exact prompt sent to the LLM |
+| `brain/hippocampus/episodes/YYYY-MM-DD.md` | The conversation summary saved to memory |
+| `brain/corpus/YYYY-MM-DD.log.md` | Every event that fired during the pipeline |
+| `brain/motor/tasks/TASK-*.md` | Step-by-step log of any tool executions |
+
+## 3. Add a Capability
+
+Create a new folder in `brain/cerebellum/` with a `SKILL.md` file:
+
+```
+brain/cerebellum/my-skill/
+└── SKILL.md
+```
+
+The SKILL.md frontmatter registers the capability with the system. The markdown body contains instructions the LLM reads at runtime. See [Creating Capabilities](/extending/creating-capabilities) for the full guide.
+
+## 4. Edit Your Agent's Personality
+
+Open `brain/identity/soul.md` in any text editor. Changes take effect on the next message — no restart needed.
+
+## 5. Configure Providers
+
+In Settings, add API keys for cloud providers. The cascade order is:
+
+```
+Claude → OpenAI → Ollama (local)
+```
+
+If the primary provider fails, Wolffish automatically falls back to the next one. If you're offline, it goes straight to Ollama.

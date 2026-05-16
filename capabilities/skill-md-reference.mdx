@@ -1,0 +1,119 @@
+---
+title: "SKILL.md Reference"
+description: "Complete reference for the SKILL.md frontmatter and body format"
+---
+
+# SKILL.md Reference
+
+Every capability requires a `SKILL.md` file. It has two parts: YAML frontmatter (machine-readable metadata) and a markdown body (LLM-readable instructions).
+
+## Frontmatter Fields
+
+```yaml
+---
+name: my-capability
+version: 1.0.0
+description: A short description of what this capability does
+triggers:
+  - keyword1
+  - keyword2
+  - keyword3
+tools:
+  - name: my_tool
+    description: What this tool does
+    parameters:
+      type: object
+      properties:
+        arg1:
+          type: string
+          description: What arg1 is for
+        arg2:
+          type: number
+          description: What arg2 is for
+      required:
+        - arg1
+danger_patterns:
+  - "rm -rf"
+  - "sudo"
+confirm_patterns:
+  - "npm install"
+  - "git push"
+requires:
+  - shell
+---
+```
+
+### Field Reference
+
+| Field | Required | Description |
+|---|---|---|
+| `name` | Yes | Unique identifier for the capability |
+| `version` | No | Semantic version for update logic |
+| `description` | Yes | Short description shown in tool definitions |
+| `triggers` | Yes | Keywords for RAS relevance matching |
+| `tools` | No | JSON Schema tool definitions for the LLM API |
+| `danger_patterns` | No | Regex patterns that amygdala will **block** |
+| `confirm_patterns` | No | Regex patterns that amygdala will **require approval** for |
+| `requires` | No | Other capabilities this one depends on |
+
+## Tools Schema
+
+The `tools` array follows the standard JSON Schema format used by LLM tool-calling APIs. Each tool needs a `name`, `description`, and `parameters` object.
+
+```yaml
+tools:
+  - name: shell_exec
+    description: Execute a shell command and return stdout/stderr
+    parameters:
+      type: object
+      properties:
+        command:
+          type: string
+          description: The shell command to execute
+        background:
+          type: boolean
+          description: Run the command detached in the background
+      required:
+        - command
+```
+
+<Warning>
+  Tool names must be unique across all loaded capabilities. If two capabilities define the same tool name, the second one will overwrite the first.
+</Warning>
+
+## Danger and Confirm Patterns
+
+These are regex patterns matched against `toolName + " " + JSON.stringify(args)`. The amygdala uses them to gate tool calls.
+
+- **danger_patterns**: Matched calls are **blocked**. The LLM receives a denial message.
+- **confirm_patterns**: Matched calls trigger an **approval dialog** in the UI. The user must approve before execution.
+
+Calls that match neither pattern are classified as **safe** and execute immediately.
+
+## Markdown Body
+
+Everything below the frontmatter `---` is the markdown body. The LLM reads this at runtime when the capability is relevant. Write it as direct instructions to the LLM:
+
+```markdown
+---
+name: git
+triggers:
+  - git
+  - commit
+  - branch
+  - merge
+---
+
+# Git Operations
+
+You have access to git through shell commands. When the user asks about git:
+
+1. Always run `git status` first to understand the current state
+2. Use conventional commit format: `type(scope): description`
+3. Never force-push without explicit confirmation
+4. Show diffs before committing when the user hasn't reviewed changes
+```
+
+<Tip>
+  The markdown body is where you encode expert knowledge. Write the instructions as if you're teaching a smart junior developer how to use the tool correctly. The better the instructions, the better the agent performs.
+</Tip>
