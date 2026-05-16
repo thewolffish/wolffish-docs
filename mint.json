@@ -43,9 +43,21 @@
       "url": "https://discord.gg/wolffish"
     }
   ],
+  "versions": [
+    {
+      "name": "English",
+      "locale": "en",
+      "default": true
+    },
+    {
+      "name": "العربية",
+      "locale": "ar"
+    }
+  ],
   "navigation": [
     {
       "group": "Get Started",
+      "version": "English",
       "pages": [
         "introduction/overview",
         "introduction/philosophy",
@@ -56,6 +68,7 @@
     },
     {
       "group": "Architecture",
+      "version": "English",
       "pages": [
         "architecture/overview",
         "architecture/pipeline",
@@ -65,6 +78,7 @@
     },
     {
       "group": "Capabilities",
+      "version": "English",
       "pages": [
         "capabilities/overview",
         "capabilities/skill-md-reference",
@@ -74,6 +88,7 @@
     },
     {
       "group": "Configuration",
+      "version": "English",
       "pages": [
         "configuration/soul-md",
         "configuration/user-md",
@@ -84,10 +99,62 @@
     },
     {
       "group": "Extending Wolffish",
+      "version": "English",
       "pages": [
         "extending/creating-capabilities",
         "extending/community-capabilities",
         "extending/safety-patterns"
+      ]
+    },
+    {
+      "group": "ابدأ هنا",
+      "version": "العربية",
+      "pages": [
+        "ar/introduction/overview",
+        "ar/introduction/philosophy",
+        "ar/getting-started/installation",
+        "ar/getting-started/first-launch",
+        "ar/getting-started/quickstart"
+      ]
+    },
+    {
+      "group": "البنية",
+      "version": "العربية",
+      "pages": [
+        "ar/architecture/overview",
+        "ar/architecture/pipeline",
+        "ar/architecture/brain-modules",
+        "ar/architecture/workspace"
+      ]
+    },
+    {
+      "group": "القدرات",
+      "version": "العربية",
+      "pages": [
+        "ar/capabilities/overview",
+        "ar/capabilities/skill-md-reference",
+        "ar/capabilities/writing-plugins",
+        "ar/capabilities/built-in-capabilities"
+      ]
+    },
+    {
+      "group": "التكوين",
+      "version": "العربية",
+      "pages": [
+        "ar/configuration/soul-md",
+        "ar/configuration/user-md",
+        "ar/configuration/agents-md",
+        "ar/configuration/config-json",
+        "ar/configuration/providers"
+      ]
+    },
+    {
+      "group": "توسيع Wolffish",
+      "version": "العربية",
+      "pages": [
+        "ar/extending/creating-capabilities",
+        "ar/extending/community-capabilities",
+        "ar/extending/safety-patterns"
       ]
     }
   ],

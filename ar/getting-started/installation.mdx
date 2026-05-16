@@ -1,0 +1,94 @@
+---
+title: "التثبيت"
+description: "ثبّت Wolffish على macOS أو Windows أو Linux"
+---
+
+# التثبيت
+
+## المتطلبات المسبقة
+
+<AccordionGroup>
+  <Accordion title="Node.js (مطلوب)" defaultOpen>
+    إضافات قدرات Wolffish هي ملفات `.mjs` تنفَّذ في بيئة تشغيل Node.js. ثبّت Node.js 20+ من [nodejs.org](https://nodejs.org) أو عبر مدير إصدارات مثل `nvm` أو `fnm`.
+
+    ```bash
+    node --version   # يجب أن يكون v20.0.0 أو أعلى
+    ```
+  </Accordion>
+
+  <Accordion title="Ollama (مطلوب)" defaultOpen>
+    يعتمد Wolffish على Ollama للاستدلال المحلي على نماذج اللغة الكبيرة — وهذا ليس اختياريًا. ثبّته من [ollama.com](https://ollama.com).
+
+    بعد التثبيت، نزّل نموذجًا:
+    ```bash
+    ollama pull gemma3:4b
+    ```
+
+    يكتشف Wolffish وجود Ollama تلقائيًا عند التشغيل ولن يعمل بدونه.
+  </Accordion>
+
+  <Accordion title="مزودو السحابة (اختياري)">
+    للحصول على ردود بجودة أعلى، أعدّ مفاتيح API لأحدهما أو كليهما:
+    - **Anthropic (Claude)**: احصل على مفتاح API من [console.anthropic.com](https://console.anthropic.com)
+    - **OpenAI (GPT)**: احصل على مفتاح API من [platform.openai.com](https://platform.openai.com)
+
+    ستضبط هذه المفاتيح في إعدادات Wolffish بعد التثبيت. يحسّن مزودو السحابة الجودة لكنهم يتدرجون إلى Ollama عند الفشل.
+  </Accordion>
+</AccordionGroup>
+
+## التنزيل
+
+<Tabs>
+  <Tab title="macOS">
+    نزّل أحدث ملف `.dmg` من [صفحة الإصدارات](https://github.com/younesalturkey/wolffish/releases).
+
+    1. افتح ملف `.dmg`
+    2. اسحب Wolffish إلى مجلد التطبيقات
+    3. شغّل Wolffish من مجلد التطبيقات
+
+    <Note>
+      عند التشغيل الأول، قد يحذّر macOS من مطور غير معرَّف. انقر بزر الفأرة الأيمن على التطبيق واختر "فتح" لتجاوز ذلك.
+    </Note>
+  </Tab>
+
+  <Tab title="Windows">
+    نزّل أحدث مثبّت `.exe` من [صفحة الإصدارات](https://github.com/younesalturkey/wolffish/releases).
+
+    1. شغّل المثبّت
+    2. اتبع معالج الإعداد
+    3. شغّل Wolffish من قائمة ابدأ
+  </Tab>
+
+  <Tab title="Linux">
+    نزّل أحدث `.AppImage` من [صفحة الإصدارات](https://github.com/younesalturkey/wolffish/releases).
+
+    ```bash
+    chmod +x Wolffish-*.AppImage
+    ./Wolffish-*.AppImage
+    ```
+  </Tab>
+</Tabs>
+
+## البناء من المصدر
+
+```bash
+git clone https://github.com/younesalturkey/wolffish.git
+cd wolffish
+npm install
+npm run dev
+```
+
+<Warning>
+  يتطلب البناء من المصدر Node.js 20+ وnpm. سيتم تجميع الوحدات الأصلية (better-sqlite3) أثناء `npm install` عبر `electron-rebuild`.
+</Warning>
+
+## التحقق من التثبيت
+
+عند التشغيل الأول، ينشئ Wolffish المجلد `~/.wolffish/workspace/` مع ملفات التكوين الافتراضية. ينبغي أن ترى شاشة الإعداد الأولي تطلب منك اختيار نموذج Ollama.
+
+للتحقق من أن كل شيء يعمل:
+1. اختر نموذجًا (مثل `gemma3:4b`)
+2. أرسل رسالة تجريبية مثل "مرحبًا، ماذا يمكنك أن تفعل؟"
+3. ينبغي أن ترى ردًا متدفقًا
+
+إذا لم يُكتشف Ollama، سيرشدك Wolffish خلال عملية الإعداد.

@@ -1,0 +1,59 @@
+---
+title: "config.json"
+description: "مرجع تكوين التطبيق"
+---
+
+# config.json
+
+يقع في `brain/config.json`، ويخزّن هذا الملف إعدادات على مستوى التطبيق. يُقرأ عند بدء التشغيل ويمكن تعديله عبر واجهة الإعدادات أو بتحرير الملف مباشرة.
+
+## حقول التكوين
+
+```json
+{
+  "mind": {
+    "provider": "ollama",
+    "model": "gemma3:4b"
+  },
+  "providers": {
+    "anthropic": {
+      "apiKey": "",
+      "model": "claude-sonnet-4-20250514"
+    },
+    "openai": {
+      "apiKey": "",
+      "model": "gpt-4o"
+    },
+    "ollama": {
+      "host": "http://localhost:11434",
+      "model": "gemma3:4b"
+    }
+  },
+  "language": "en"
+}
+```
+
+## مرجع الحقول
+
+| الحقل | الوصف |
+|---|---|
+| `mind.provider` | مزود نموذج اللغة النشط: `anthropic` أو `openai` أو `ollama` |
+| `mind.model` | اسم النموذج النشط |
+| `providers.anthropic.apiKey` | مفتاح API لـ Anthropic |
+| `providers.openai.apiKey` | مفتاح API لـ OpenAI |
+| `providers.ollama.host` | عنوان خادم Ollama (افتراضيًا: `http://localhost:11434`) |
+| `language` | لغة الواجهة: `en` (الإنجليزية) أو `ar` (العربية) |
+
+## تدرّج المزودين
+
+عندما يفشل المزود النشط، يتدرج Wolffish عبر البدائل:
+
+```
+Claude → OpenAI → Ollama
+```
+
+تُتخطى المزودات التي لا تحتوي على مفاتيح API مُكوَّنة. Ollama متاح دائمًا كبديل أخير (بافتراض أنه يعمل).
+
+<Info>
+  تُخزَّن مفاتيح API بنص صريح في config.json. هذا متعمَّد — Wolffish تطبيق يعمل محليًا أولًا ومساحة عملك ملكك. إذا كنت تستخدم git لإدارة إصدارات مساحة عملك، أضف `brain/config.json` إلى `.gitignore`.
+</Info>

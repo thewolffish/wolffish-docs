@@ -1,0 +1,70 @@
+---
+title: "بنية مساحة العمل"
+description: "شرح بنية مجلد ~/.wolffish/workspace/"
+---
+
+# بنية مساحة العمل
+
+كل ما يعرفه Wolffish ويتذكره ويستطيع فعله يعيش في `~/.wolffish/workspace/`. هذا هو دماغ وكيلك على القرص — قابل للقراءة، وقابل للتحرير، وقابل لإدارة الإصدار بـ git.
+
+## بنية المجلد
+
+```
+~/.wolffish/workspace/
+└── brain/
+    ├── identity/
+    │   ├── soul.md                    # شخصية الوكيل
+    │   └── user.md                    # ملف المستخدم
+    ├── prefrontal/
+    │   ├── agents.md                  # إجراءات الوكيل + قواعد استخدام الأدوات
+    │   └── .debug/                    # لقطات السياق (تُنشأ تلقائيًا)
+    ├── cerebellum/                    # القدرات
+    │   ├── shell/                     # أوامر الشل (SKILL.md + plugin/)
+    │   ├── filesystem/                # عمليات الملفات (SKILL.md + plugin/)
+    │   ├── git/                       # عمليات git (SKILL.md فقط)
+    │   └── introspect/                # الوعي الذاتي (SKILL.md + plugin/)
+    ├── hippocampus/
+    │   ├── episodes/YYYY-MM-DD.md     # سجلات المحادثة اليومية
+    │   ├── consolidated/YYYY-WNN.md   # ملخصات أسبوعية
+    │   └── knowledge/                 # حقائق طويلة المدى (ملفات موضوعية)
+    ├── motor/tasks/TASK-{id}.md       # سجلات تنفيذ المهام
+    ├── basalganglia/YYYY-MM-DD.md     # سجلات الملاحظات اليومية
+    ├── brainstem/heartbeat.md         # تعريفات جدول cron
+    ├── corpus/YYYY-MM-DD.log.md       # سجلات الأحداث اليومية
+    ├── conversations/                 # سجل الدردشة
+    ├── cortex.db                      # فهرس SQLite FTS5 (قابل للتخلص)
+    └── config.json                    # تكوين التطبيق
+```
+
+## المبادئ الرئيسية
+
+**Markdown هو الحقيقة، و`cortex.db` هو الذاكرة المخبأة.** قاعدة بيانات SQLite قابلة للتخلص بالكامل. احذفها وسيُعيد Wolffish بناءها من ملفات Markdown عند التشغيل التالي. لا تحرّر `cortex.db` مباشرة أبدًا — حرّر ملفات Markdown المصدر بدلًا من ذلك.
+
+**ملفات يومية بدل ملفات تنمو بلا توقف.** الحلقات والملاحظات وسجلات الأحداث مقسَّمة حسب اليوم (`YYYY-MM-DD.md`). هذا يبقي الملفات الفردية صغيرة، ويسهّل تصفحها، ويتيح لـ brainstem تنظيف السجلات القديمة تلقائيًا.
+
+**القدرات مكتفية بذاتها.** كل مجلد تحت `brain/cerebellum/` هو قدرة كاملة. يمكنك حذف أي منها دون التأثير على النواة. يمكنك إضافة قدرات جديدة بإسقاط مجلد.
+
+## فحص مساحة العمل
+
+يمكنك فتح `~/.wolffish/workspace/` في VS Code أو أي محرر نصوص لمشاهدة حالة وكيلك بالكامل. بعض الأشياء المفيدة للفحص:
+
+| ما تريد معرفته | أين تنظر |
+|---|---|
+| ما السياق الذي أُرسل إلى نموذج اللغة | `brain/prefrontal/.debug/context-*.md` |
+| ما يتذكره الوكيل عن اليوم | `brain/hippocampus/episodes/YYYY-MM-DD.md` |
+| ما الأدوات التي استُدعيت وماذا حدث | `brain/motor/tasks/TASK-*.md` |
+| هل يتعلم الوكيل تفضيلاتك | `brain/basalganglia/YYYY-MM-DD.md` |
+| كل حدث أُطلق | `brain/corpus/YYYY-MM-DD.log.md` |
+
+## التحكم في الإصدار
+
+يمكنك تنفيذ `git init` على مجلد مساحة العمل لإدارة إصدارات دماغ وكيلك. هذا يتيح لك تتبع تغييرات الشخصية، ومراجعة تطور الذاكرة، والتراجع عن تغييرات التكوين، ومشاركة إعدادات وكيلك مع الآخرين.
+
+```bash
+cd ~/.wolffish/workspace
+git init
+echo "brain/cortex.db" >> .gitignore
+echo "brain/prefrontal/.debug/" >> .gitignore
+git add .
+git commit -m "Initial brain state"
+```

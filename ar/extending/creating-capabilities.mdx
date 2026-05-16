@@ -1,0 +1,117 @@
+---
+title: "إنشاء القدرات"
+description: "دليل خطوة بخطوة لبناء قدرة Wolffish جديدة"
+---
+
+# إنشاء القدرات
+
+يوضّح هذا الدليل عملية إنشاء قدرة جديدة من الصفر. ستحصل في نهايته على قدرة عاملة يكتشفها Wolffish ويحمّلها ويتيحها لنموذج اللغة.
+
+## الخطوة 1: أنشئ المجلد
+
+```bash
+mkdir -p ~/.wolffish/workspace/brain/cerebellum/my-capability
+```
+
+## الخطوة 2: اكتب SKILL.md
+
+أنشئ `SKILL.md` بواجهة YAML وتعليمات Markdown:
+
+```yaml
+---
+name: my-capability
+description: What this capability does in one sentence
+triggers:
+  - keyword1
+  - keyword2
+tools:
+  - name: my_tool
+    description: What this tool does
+    parameters:
+      type: object
+      properties:
+        input:
+          type: string
+          description: The input to process
+      required:
+        - input
+---
+
+# My Capability
+
+Instructions for the LLM on how to use this capability.
+
+When the user asks about [topic], use the `my_tool` tool with the relevant input.
+Always [specific behavior guideline].
+Never [specific constraint].
+```
+
+## الخطوة 3: اكتب الإضافة (اختياري)
+
+إذا احتاجت قدرتك إلى كود مخصص، أنشئ `plugin/index.mjs`:
+
+```javascript
+export default {
+  name: 'my-capability',
+  tools: ['my_tool'],
+
+  async init(context) {
+    // context.pluginDir — path to this plugin folder
+    // context.workspaceRoot — path to ~/.wolffish/workspace/
+  },
+
+  async execute(toolName, args) {
+    if (toolName === 'my_tool') {
+      // Your logic here
+      const result = doSomething(args.input)
+      return { success: true, output: result }
+    }
+    return { success: false, output: '', error: `Unknown tool: ${toolName}` }
+  },
+
+  async destroy() {
+    // Cleanup on shutdown
+  }
+}
+```
+
+## الخطوة 4: أضف أنماط أمان (إذا لزم الأمر)
+
+إذا كانت أداتك قادرة على إجراء عمليات خطرة، أضف أنماطًا إلى واجهة YAML لـ SKILL.md:
+
+```yaml
+danger_patterns:
+  - "dangerous_regex_here"
+confirm_patterns:
+  - "risky_but_allowed_regex"
+```
+
+## الخطوة 5: اختبرها
+
+أرسل رسالة تطابق مشغّلاتك. تحقق من:
+
+1. **ملف تصحيح السياق** (`brain/prefrontal/.debug/`) — هل أُدرج ملف SKILL.md الخاص بك في السياق؟
+2. **سجل الأحداث** (`brain/corpus/`) — هل أُطلق `tool.called` باسم أداتك؟
+3. **سجل المهام** (`brain/motor/tasks/`) — هل يُظهر ملف المهمة تنفيذًا ناجحًا؟
+
+## مهارة نقية مقابل إضافة: متى تستخدم أيًا منهما
+
+استخدم **مهارة نقية** عندما يمكن إنجاز قدرتك باستخدام أدوات موجودة (مثل `shell_exec` أو `file_read`). تعلّم تعليمات SKILL.md نموذج اللغة كيف يجمع الأدوات الحالية لإنجاز المهمة.
+
+استخدم **إضافة** عندما تحتاج إلى منطق مخصص لا يمكن التعبير عنه بأوامر شل أو عمليات ملفات — استدعاءات واجهات برمجية، ومعالجة بيانات، وبروتوكولات مخصصة، إلخ.
+
+<Tip>
+  ابدأ بمهارة نقية. إذا وجدت أن نموذج اللغة يكافح مع سلاسل أدوات معقدة، رقّ إلى إضافة. المهارات النقية أبسط في الكتابة والتصحيح والمشاركة.
+</Tip>
+
+## قائمة فحص القدرة
+
+قبل شحن قدرتك:
+
+- [ ] يحتوي SKILL.md على مشغّلات دقيقة (اختبر بصيغ مختلفة)
+- [ ] أوصاف معاملات الأدوات واضحة (يقرؤها نموذج اللغة)
+- [ ] أنماط الخطر تغطي كل العمليات المدمرة
+- [ ] أنماط التأكيد تغطي العمليات الخطرة لكنها مشروعة
+- [ ] تتعامل الإضافة مع الأخطاء بأناقة (تُرجع `ToolResult` بقيمة `success: false`)
+- [ ] متن Markdown يحتوي على تعليمات واضحة ومحددة
+- [ ] تم الاختبار مع نماذج سحابية ومحلية على حد سواء
