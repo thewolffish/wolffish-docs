@@ -45,7 +45,11 @@
         {
           "anchor": "Community",
           "icon": "discord",
-          "href": "https://discord.gg/wolffish"
+          "href": "https://discord.gg/F5Ue36PzQ",
+          "color": {
+            "light": "#00d4ff",
+            "dark": "#00d4ff"
+          }
         }
       ]
     },
