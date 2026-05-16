@@ -1,0 +1,250 @@
+---
+title: "The Event Bus (Corpus)"
+description: "How brain modules communicate through typed pub/sub events"
+---
+
+# The Event Bus (Corpus)
+
+The corpus callosum connects all brain regions. Modules never import each other — they communicate exclusively through typed events on the corpus. This keeps the system modular, inspectable, and easy to extend.
+
+## Architecture
+
+Built on [mitt](https://github.com/developit/mitt) — a lightweight typed event emitter (200 bytes). Every module receives the corpus singleton in its constructor:
+
+```typescript
+class MyModule {
+  constructor(private corpus: Corpus) {
+    this.corpus.on('input.received', this.handleInput.bind(this))
+  }
+}
+```
+
+The corpus is initialized first during startup and passed to all other modules. No module ever imports another module directly.
+
+## Usage
+
+```typescript
+// Emit an event
+corpus.emit('tool.called', {
+  name: 'shell_exec',
+  args: { command: 'ls -la' },
+  taskId: 'TASK-42'
+})
+
+// Listen for an event
+corpus.on('tool.completed', (payload) => {
+  console.log(`${payload.name} finished in ${payload.duration}ms`)
+})
+
+// Listen for all events (wildcard)
+corpus.on('*', (type, payload) => {
+  log(`[${type}] ${JSON.stringify(payload)}`)
+})
+```
+
+<Info>
+  The wildcard handler is what produces the daily log files. Every event that flows through corpus is captured and flushed to disk.
+</Info>
+
+## Event Categories
+
+Over 30 typed events are defined in the `CorpusEvent` enum. They group into these categories:
+
+### Input Events
+
+| Event | Emitted By | Payload |
+|---|---|---|
+| `input.received` | Main process | `{ content, channelId, conversationId }` |
+| `input.classified` | Prefrontal | `{ intent, confidence }` |
+| `input.routed` | Prefrontal | `{ provider, model }` |
+
+### Context Events
+
+| Event | Emitted By | Payload |
+|---|---|---|
+| `context.built` | Prefrontal | `{ tokens, sections }` |
+| `context.trimmed` | RAS | `{ before, after, dropped }` |
+
+### LLM Events
+
+| Event | Emitted By | Payload |
+|---|---|---|
+| `llm.response` | Thalamus | `{ provider, model, tokens }` |
+| `llm.error` | Thalamus | `{ provider, error, willRetry }` |
+| `llm.token` | Thalamus | `{ delta }` |
+
+### Tool Events
+
+| Event | Emitted By | Payload |
+|---|---|---|
+| `tool.called` | Motor | `{ name, args, taskId }` |
+| `tool.completed` | Motor | `{ name, output, duration, taskId }` |
+| `tool.failed` | Motor | `{ name, error, attempt, taskId }` |
+| `tool.parsed` | Wernicke | `{ calls }` |
+
+### Safety Events
+
+| Event | Emitted By | Payload |
+|---|---|---|
+| `safety.allowed` | Amygdala | `{ toolName, classification }` |
+| `safety.blocked` | Amygdala | `{ toolName, reason }` |
+| `safety.approved` | Amygdala | `{ toolName, channelId }` |
+| `safety.denied` | Amygdala | `{ toolName, channelId }` |
+
+### Task Events
+
+| Event | Emitted By | Payload |
+|---|---|---|
+| `task.created` | Motor | `{ taskId, toolName }` |
+| `task.started` | Motor | `{ taskId, attempt }` |
+| `task.stepCompleted` | Motor | `{ taskId, step, duration }` |
+| `task.completed` | Motor | `{ taskId, success, totalDuration }` |
+| `task.failed` | Motor | `{ taskId, error, attempts }` |
+| `task.stopped` | Motor | `{ taskId, reason }` |
+
+### Memory Events
+
+| Event | Emitted By | Payload |
+|---|---|---|
+| `memory.saved` | Hippocampus | `{ type, path }` |
+| `memory.consolidated` | Brainstem | `{ week, episodeCount }` |
+| `memory.promoted` | Brainstem | `{ topic, path }` |
+
+### Health Events
+
+| Event | Emitted By | Payload |
+|---|---|---|
+| `health.ok` | Hypothalamus | `{ metrics }` |
+| `health.warning` | Hypothalamus | `{ resource, value, threshold }` |
+| `health.critical` | Hypothalamus | `{ resource, value, threshold }` |
+| `resource.low.context` | Hypothalamus | `{ used, max }` |
+| `resource.low.memory` | Hypothalamus | `{ used, max }` |
+| `resource.low.disk` | Hypothalamus | `{ used, max }` |
+
+### Learning Events
+
+| Event | Emitted By | Payload |
+|---|---|---|
+| `outcome.recorded` | Basal Ganglia | `{ type, toolName, args }` |
+| `preference.learned` | Basal Ganglia | `{ pattern, preference }` |
+
+### System Events
+
+| Event | Emitted By | Payload |
+|---|---|---|
+| `scheduler.tick` | Brainstem | `{ jobName, schedule }` |
+| `watcher.changed` | Brainstem | `{ path, changeType }` |
+| `cortex.reindexed` | Cortex | `{ path, action }` |
+
+## Event Logging
+
+Every event is logged to daily markdown files at `brain/corpus/YYYY-MM-DD.log.md`. A 2-second buffer flush batches writes for performance:
+
+```markdown
+## 2026-05-16
+
+09:15:02 | input.received | {"content":"What PRs need review?","channelId":"desktop"}
+09:15:02 | context.built | {"tokens":7842,"sections":12}
+09:15:03 | input.routed | {"provider":"anthropic","model":"claude-sonnet-4-20250514"}
+09:15:04 | tool.called | {"name":"github_prs","args":{"state":"open"},"taskId":"TASK-89"}
+09:15:05 | safety.allowed | {"toolName":"github_prs","classification":"safe"}
+09:15:06 | tool.completed | {"name":"github_prs","duration":1204,"taskId":"TASK-89"}
+09:15:07 | llm.response | {"provider":"anthropic","tokens":342}
+09:15:07 | memory.saved | {"type":"episode","path":"episodes/2026-05-16.md"}
+```
+
+Old logs are automatically cleaned after 7 days to prevent unbounded disk growth.
+
+<Tip>
+  Read the corpus logs when debugging unexpected behavior. They show you the exact sequence of events that occurred — which module did what and when.
+</Tip>
+
+## Subscribing and Unsubscribing
+
+```typescript
+// Subscribe — returns an unsubscribe function
+const off = corpus.on('task.completed', (payload) => {
+  console.log('Task done:', payload.taskId)
+})
+
+// Unsubscribe when done
+off()
+```
+
+The turn runner uses this pattern to subscribe to events for the duration of a turn, then unsubscribes in the `finally` block.
+
+## Adding New Events
+
+To add a new event type:
+
+1. Add it to the `CorpusEvent` enum in `src/main/runtime/corpus/corpus.ts`
+2. Define its payload type in the `CorpusEvents` interface
+3. Emit it from the relevant module
+4. Subscribe to it from any module that needs to react
+
+The event is automatically logged by the wildcard handler — no extra wiring needed.
+
+## Design Benefits
+
+The event bus architecture provides:
+
+- **Module independence**: modules can be developed, tested, and upgraded independently
+- **Full observability**: every interaction is logged and timestamped
+- **Easy extension**: new modules subscribe to existing events without modifying producers
+- **Testability**: mock the corpus in tests and verify events are emitted correctly
+
+## Practical Example: Hypothalamus Health Monitoring
+
+The hypothalamus demonstrates how a module uses corpus to monitor the entire system without importing any other module:
+
+```typescript
+class Hypothalamus {
+  private failureCount = 0
+  private lastContextTokens = 0
+
+  constructor(private corpus: Corpus) {
+    // Listen for problems from other modules
+    corpus.on('llm.error', () => {
+      this.failureCount++
+      if (this.failureCount > 5) {
+        corpus.emit('health.warning', {
+          resource: 'llm',
+          value: this.failureCount,
+          threshold: 5
+        })
+      }
+    })
+
+    corpus.on('context.built', (payload) => {
+      this.lastContextTokens = payload.tokens
+      if (payload.tokens > 180_000) {
+        corpus.emit('resource.low.context', {
+          used: payload.tokens,
+          max: 200_000
+        })
+      }
+    })
+
+    corpus.on('tool.failed', (payload) => {
+      if (payload.attempt >= 3) {
+        corpus.emit('health.warning', {
+          resource: 'tool',
+          value: payload.name,
+          threshold: 'max retries exceeded'
+        })
+      }
+    })
+
+    // Reset failure count on success
+    corpus.on('llm.response', () => {
+      this.failureCount = 0
+    })
+  }
+}
+```
+
+The hypothalamus never touches the thalamus, motor, or prefrontal modules directly. It observes their behavior through events and raises its own events when thresholds are crossed. Any module can then react to health warnings — the UI can show an indicator, the brainstem can trigger a diagnostic job, and the prefrontal can include health context in the next prompt.
+
+<Warning>
+  Event handlers should be fast and non-blocking. Heavy work triggered by an event should be deferred (setTimeout, queueMicrotask) to avoid slowing down the event producer.
+</Warning>

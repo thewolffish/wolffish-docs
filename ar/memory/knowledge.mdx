@@ -1,0 +1,143 @@
+---
+title: "ملفات المعرفة"
+description: "حقائق طويلة المدى عن الأشخاص والمشاريع والتفضيلات والقرارات"
+---
+
+# ملفات المعرفة
+
+ملفات المعرفة هي الذاكرة الدائمة للوكيل — حقائق طويلة المدى تبقى إلى أجل غير مسمى ومتاحة دائماً في السياق. بينما تلتقط الأحداث ما حدث ويضغط التجميع الجدول الزمني، تُخزّن ملفات المعرفة ما *يعرفه* Wolffish عنك وعن عالمك وتفضيلاتك.
+
+## الموقع
+
+```
+~/.wolffish/workspace/brain/hippocampus/knowledge/
+├── people.md
+├── projects.md
+├── preferences.md
+├── technical.md
+└── decisions.md
+```
+
+## الملفات الخمسة الافتراضية
+
+| الملف | الغرض |
+|---|---|
+| `people.md` | الأشخاص الذين تتعامل معهم — الأسماء، الأدوار، العلاقات، السياق |
+| `projects.md` | المشاريع الحالية والسابقة — التقنيات، الحالة، القرارات الرئيسية |
+| `preferences.md` | تفضيلاتك الشخصية — الأدوات، سير العمل، أسلوب التواصل |
+| `technical.md` | حقائق تقنية — البيئات، API، مواقع بيانات الاعتماد، الاتفاقيات |
+| `decisions.md` | القرارات التي اتخذتها — المبررات، القيود، النتائج |
+
+<Info>
+  تُنشأ هذه الملفات الخمسة عند أول تشغيل. يمكنك إضافة المزيد من ملفات المعرفة — الوكيل يقرأ كل شيء في مجلد `knowledge/`. أنشئ `books.md` أو `health.md` أو أي تصنيفات تناسب حياتك.
+</Info>
+
+## كيف تُكتب المعرفة
+
+تدخل المعرفة إلى النظام عبر ثلاثة مسارات:
+
+### 1. الترقية التلقائية (بقيادة LLM)
+
+أثناء التجميع، يحدد LLM الأنماط التي تستحق التخزين الدائم. إذا ظهر نفس التفضيل عبر عدة أسابيع، أو استمر مشروع في الظهور، تُرقِّي عملية التجميع هذا المحتوى إلى ملف المعرفة المناسب.
+
+### 2. الكتابة المباشرة من الوكيل
+
+عندما تقول شيئاً مثل "تذكّر أنني أفضل conventional commits" أو "اسم مديرتي سارة"، يكتب الوكيل مباشرة في ملف المعرفة المناسب أثناء المحادثة. إجراءات `agents.core.md` توجّه Wolffish لتحديث المعرفة كلما تعلّم حقيقة جديدة طويلة المدى.
+
+### 3. التعديل اليدوي
+
+افتح أي ملف معرفة في محررك وعدّله. مراقب الملفات في brainstem يكتشف التغيير، ويُعيد cortex فهرسته، والمحادثة التالية ستستخدم المعلومات المحدّثة.
+
+## أولوية السياق
+
+ملفات المعرفة لها أعلى أولوية ذاكرة بعد ملفات الهوية (`soul.md`، `user.md`). تُضمَّن **دائماً** في تجميع السياق — على عكس ملفات الأحداث والملفات المُجمَّعة التي تمر عبر تقييم RAS. المنطق بسيط: إذا طلبت من الوكيل تذكّر شيء بشكل دائم، يجب أن يكون متاحاً دائماً.
+
+## مثال: preferences.md بعد عدة أسابيع
+
+```markdown
+# Preferences
+
+## Development
+- Package manager: pnpm (never npm or yarn)
+- Commit style: conventional commits (feat:, fix:, chore:)
+- Validation: Zod at all API boundaries
+- Testing: Vitest for unit tests, Playwright for e2e
+- Formatting: Biome over ESLint+Prettier
+
+## Communication
+- Prefers concise answers with code examples over lengthy explanations
+- Likes bullet points over paragraphs for technical content
+- Wants to be warned before destructive operations, even if flagged safe
+
+## Workflow
+- Morning sessions (08:00–12:00) for deep work — avoid scheduling interruptions
+- Prefers creating a new branch per feature, never commits directly to main
+- Likes PRs reviewed before merge, even on solo projects
+
+## Tools
+- Editor: VS Code with Vim keybindings
+- Terminal: Warp
+- Browser: Arc for development, Chrome for testing
+- Notes: Obsidian with daily notes
+```
+
+## مثال: people.md
+
+```markdown
+# People
+
+## Sarah (Manager)
+- Engineering manager at current company
+- Prefers async communication over meetings
+- Reviews PRs on Tuesdays and Thursdays
+
+## Omar (Co-founder)
+- Working on the billing service together
+- Handles infrastructure and deployment
+- Timezone: UTC+3 (Riyadh)
+
+## Alex (Design)
+- UI/UX designer on the product team
+- Shares Figma links for review — always check mobile breakpoints
+```
+
+## إرشادات التعديل
+
+<Tabs>
+  <Tab title="إضافة حقائق">
+    أخبر Wolffish أثناء المحادثة:
+    - "تذكّر أن مفتاح API الخاص بي لـ Stripe في 1Password"
+    - "سجّل أننا قررنا استخدام PostgreSQL بدلاً من MySQL للخدمة الجديدة"
+    - "رحلتي إلى الرياض في 3 يونيو"
+
+    الوكيل سيكتب في ملف المعرفة المناسب.
+  </Tab>
+  <Tab title="تصحيح حقائق">
+    إذا كان لدى Wolffish معلومات قديمة:
+    - "حدّث تفضيلاتي — انتقلت من yarn إلى pnpm"
+    - "سارة حصلت على ترقية، هي الآن نائبة رئيس الهندسة"
+
+    أو عدّل الملف مباشرة في محررك.
+  </Tab>
+  <Tab title="حذف حقائق">
+    احذف السطر من ملف المعرفة، أو أخبر Wolffish:
+    - "انسَ مشروع خدمة الفوترة، تم إلغاؤه"
+
+    الوكيل سيحذف الإدخال.
+  </Tab>
+</Tabs>
+
+<Tip>
+  ملفات المعرفة تعمل بشكل أفضل عندما تكون موجزة. كل إدخال يجب أن يكون حقيقة، وليس قصة. إذا وجدت ملف معرفة يتجاوز 100 سطر، فكّر في تقسيمه إلى عدة ملفات موضوعية.
+</Tip>
+
+## ملفات معرفة مخصصة
+
+أنشئ أي ملف `.md` في مجلد `knowledge/` وسيصبح جزءاً من الذاكرة الدائمة للوكيل:
+
+```bash
+# Create a new knowledge file
+touch ~/.wolffish/workspace/brain/hippocampus/knowledge/health.md
+```
+
+مراقب الملفات في brainstem سيكتشفه، وسيُفهرسه cortex، وستضمّنه وحدة prefrontal في تجميع السياق بنفس أولوية الملفات الخمسة الافتراضية.

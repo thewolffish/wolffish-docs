@@ -1,0 +1,144 @@
+---
+title: "لقطات التصحيح"
+description: "فحص السياق الدقيق المُرسل إلى LLM في كل دور"
+---
+
+# لقطات التصحيح
+
+لقطات التصحيح هي أكثر أداة تصحيح مفيدة في Wolffish. تُظهر لك **بالضبط** محث النظام الذي تم تجميعه وإرساله إلى LLM في كل دور — بدون تجريد، بدون تلخيص، النص الحرفي.
+
+## الموقع
+
+```
+brain/prefrontal/.debug/context-{timestamp}.md
+```
+
+تُكتب لقطة جديدة بواسطة `prefrontal.buildContext()` في كل دور. صيغة الطابع الزمني هي `YYYYMMDD-HHmmss-SSS` (بدقة الميلي ثانية).
+
+<Note>
+لقطات التصحيح مؤقتة. يتم تنظيف اللقطات القديمة تلقائياً لمنع تضخم القرص. إذا كنت بحاجة للاحتفاظ بواحدة، انسخها خارج مجلد `.debug/`.
+</Note>
+
+## ما بداخلها
+
+كل لقطة تصحيح تحتوي على محث النظام الكامل المُجمّع لذلك الدور. يتضمن ذلك:
+
+- **الهوية** — تعليمات الشخصية والسلوك من soul.md
+- **ملف المستخدم** — سياق user.md حول من أنت
+- **تعليمات الوكيل** — قواعد تنسيق agents.md
+- **شظايا الذاكرة** — الحلقات التي اختارها RAS كمرتبطة بهذا الدور
+- **تعليمات المهارات** — محتويات SKILL.md للقدرات المطابقة
+- **تعريفات الأدوات** — مخططات JSON للأدوات المتاحة
+- **سجل المحادثة** — الرسائل الأخيرة ضمن ميزانية الرموز
+- **تخصيص ميزانية الرموز** — كم عدد الرموز التي استهلكها كل قسم
+
+## قراءة لقطة تصحيح
+
+تستخدم اللقطة وسوم XML لتحديد كل قسم. إليك مثال مُشرح:
+
+```markdown
+<!-- Debug Snapshot: 20250516-143022-847 -->
+<!-- Turn ID: turn-a8f3c -->
+<!-- Token budget: 32000 / 32768 used -->
+
+<identity>
+You are Wolffish, a personal AI assistant...
+[Contents of soul.md]
+</identity>
+
+<user>
+Name: Younes
+Preferences: ...
+[Contents of user.md]
+</user>
+
+<agents>
+[Contents of agents.md — multi-agent coordination rules]
+</agents>
+
+<memory>
+<!-- RAS selected 3 fragments (threshold: 0.4) -->
+<!-- Fragment 1: score 0.87, from episode-2025-05-14-meeting.md -->
+Yesterday's meeting discussed the API refactor timeline...
+
+<!-- Fragment 2: score 0.62, from episode-2025-05-15-preferences.md -->
+User prefers TypeScript over JavaScript...
+
+<!-- Fragment 3: score 0.41, from episode-2025-05-10-project.md -->
+The project uses PostgreSQL 16...
+</memory>
+
+<skills>
+<!-- cerebellum loaded 2 capabilities for this turn -->
+<!-- Skill: shell (score: 0.91) -->
+You have access to a shell_exec tool...
+[Body of shell/SKILL.md]
+
+<!-- Skill: filesystem (score: 0.78) -->
+You have access to file reading and writing tools...
+[Body of filesystem/SKILL.md]
+</skills>
+
+<tools>
+[
+  {
+    "name": "shell_exec",
+    "description": "Execute a shell command",
+    "parameters": { ... }
+  },
+  {
+    "name": "read_file",
+    "description": "Read a file from disk",
+    "parameters": { ... }
+  }
+]
+</tools>
+
+<history>
+[User]: Can you check if the server is running?
+[Assistant]: I'll check that for you...
+[User]: Also restart it if it's down
+</history>
+```
+
+## ما الذي تبحث عنه
+
+<AccordionGroup>
+  <Accordion title="قدرة مفقودة؟">
+    تحقق من قسم `<skills>`. إذا لم تكن قدرتك مُدرجة، فالمشكلة في تسجيل RAS. انظر حقل `triggers` في واجهة SKILL.md — رسالة المستخدم لم تطابق أي مُحفّزات فوق عتبة الصلة.
+
+    التعليق فوق كل مهارة يُظهر درجة صلتها. إذا لم تكن مهارتك موجودة على الإطلاق، فدرجتها كانت تحت العتبة (الافتراضي 0.3).
+  </Accordion>
+
+  <Accordion title="ذاكرة خاطئة أو غير مرتبطة؟">
+    تحقق من قسم `<memory>`. كل شظية تُظهر درجة صلتها وملف الحلقة المصدر. إذا ضمّن RAS شظايا غير مرتبطة، فإما:
+    - محتوى الحلقة ذو إشارة ضعيفة (عدّل ملف الحلقة مباشرة)
+    - عتبة RAS منخفضة جداً (ارفعها في config.json)
+    - فهرس cortex يحتاج لإعادة بناء (احذف `cortex.db`، أعد تشغيل Wolffish)
+  </Accordion>
+
+  <Accordion title="سلوك غير متوقع؟">
+    اقرأ قسمي `<identity>` و `<agents>` بعناية. يتبع LLM هذه التعليمات حرفياً. إذا كان السلوك غير متوقع، فقد تكون التعليمات غامضة أو متناقضة. عدّل `soul.md` أو `agents.md` للتوضيح.
+  </Accordion>
+
+  <Accordion title="سياق مفقود / سجل محادثة مبتور؟">
+    تحقق من تعليق ميزانية الرموز في أعلى اللقطة. إذا رأيت شيئاً مثل `31500 / 32768 used`، فالسياق ممتلئ تقريباً. يتم بتر قسم `<history>` أولاً للبقاء ضمن الميزانية.
+
+    الحلول: قلل المهارات المُحمّلة، اختصر soul.md، أو زِد نافذة سياق النموذج في إعدادات المزود.
+  </Accordion>
+
+  <Accordion title="أداة غير متاحة؟">
+    تحقق من قسم `<tools>`. إذا لم تكن الأداة مُدرجة، فإما:
+    - لم يتم اختيار القدرة الأم بواسطة RAS (تحقق من `<skills>`)
+    - فشل تحميل الإضافة (تحقق من سجل الأحداث لأحداث `capability.error`)
+    - مخطط الأداة مشوّه (تحقق من تصدير `plugin/index.mjs`)
+  </Accordion>
+</AccordionGroup>
+
+## قاعدة الـ 90%
+
+<Tip>
+إذا فعل Wolffish شيئاً خاطئاً، ففي 90% من الحالات الإجابة في لقطة التصحيح. النموذج لا يمكنه التصرف إلا بناءً على ما يراه — إذا لم تكن المعلومات الصحيحة في السياق، لم يكن بإمكان النموذج استخدامها.
+</Tip>
+
+ابدأ من هنا. دائماً.

@@ -1,0 +1,176 @@
+---
+title: "GitHub"
+description: "تكامل المستودعات والمشكلات وطلبات السحب و CI/CD"
+---
+
+# GitHub
+
+يربط تكامل GitHub تطبيق Wolffish بواجهة GitHub API لإدارة المستودعات والمشكلات وطلبات السحب وسير العمل والإصدارات والمزيد. يستخدم رمز وصول شخصي (PAT) للمصادقة.
+
+## الإعداد
+
+<Steps>
+  <Step title="إنشاء رمز">
+    انتقل إلى [github.com/settings/tokens](https://github.com/settings/tokens) وأنشئ رمز وصول شخصي جديد (كلاسيكي أو دقيق).
+  </Step>
+  <Step title="اختيار النطاقات">
+    للحصول على الوظائف الكاملة، اختر كحد أدنى: `repo` و`read:org`. راجع جدول النطاقات أدناه للتفاصيل.
+  </Step>
+  <Step title="التهيئة في Wolffish">
+    افتح الإعدادات > التكاملات > GitHub والصق رمزك.
+  </Step>
+</Steps>
+
+### نطاقات الرمز المطلوبة
+
+| النطاق | يمنح الوصول إلى |
+|---|---|
+| `repo` | التحكم الكامل بالمستودعات الخاصة (المشكلات، طلبات السحب، الشفرة، الإصدارات، سير العمل) |
+| `read:org` | وصول للقراءة فقط لعضويات المنظمة والفرق |
+
+### النطاقات الاختيارية
+
+| النطاق | يمنح الوصول إلى |
+|---|---|
+| `gist` | إنشاء وإدارة المقتطفات |
+| `notifications` | قراءة الإشعارات |
+| `workflow` | تشغيل أحداث إرسال سير عمل GitHub Actions |
+
+<Tip>
+  توفر الرموز الدقيقة صلاحيات أكثر تحديدًا لكنها تتطلب تهيئة لكل مستودع. الرموز الكلاسيكية مع `repo` + `read:org` هي أبسط طريقة للحصول على الوظائف الكاملة.
+</Tip>
+
+## قدرتان، منصة واحدة
+
+يفصل Wolffish بين عمليات git المحلية وعمليات GitHub API عن بُعد:
+
+<CardGroup cols={2}>
+  <Card title="git (مهارة صرفة)" icon="code-branch">
+    عمليات git المحلية — commit و branch و merge و rebase و diff و log. تستخدم `shell_exec` لتنفيذ أوامر git. لا حاجة لرمز.
+  </Card>
+  <Card title="github (إضافة)" icon="github">
+    عمليات GitHub API عن بُعد — المشكلات وطلبات السحب وسير العمل والإصدارات. تستخدم Octokit لاستدعاء GitHub REST API. تتطلب رمز PAT.
+  </Card>
+</CardGroup>
+
+قدرة `git` متاحة دائمًا (هي مهارة صرفة تستخدم أوامر الطرفية). قدرة `github` تتطلب رمزًا مهيّأً لإجراء استدعاءات API.
+
+## الأدوات المتاحة
+
+### المستودعات
+
+| الأداة | الوصف |
+|---|---|
+| `github_list_repos` | عرض المستودعات للمستخدم المصادق أو منظمة |
+| `github_star_repo` | تمييز مستودع بنجمة |
+| `github_fork_repo` | عمل نسخة من مستودع إلى حسابك |
+| `github_compare_branches` | مقارنة فرعين (عدد الالتزامات المتقدمة/المتأخرة، إحصائيات الفروقات) |
+| `github_list_branches` | عرض فروع مستودع |
+
+### المشكلات
+
+| الأداة | الوصف |
+|---|---|
+| `github_create_issue` | إنشاء مشكلة جديدة |
+| `github_read_issue` | قراءة مشكلة مع تعليقاتها |
+| `github_update_issue` | تحديث عنوان المشكلة أو محتواها أو تصنيفاتها أو المكلّفين بها أو حالتها |
+| `github_list_issues` | عرض المشكلات مع فلاتر (الحالة، التصنيفات، المكلّف) |
+| `github_manage_labels` | إنشاء أو تحديث أو حذف التصنيفات |
+| `github_manage_milestones` | إنشاء أو تحديث أو حذف المعالم |
+
+### طلبات السحب
+
+| الأداة | الوصف |
+|---|---|
+| `github_create_pr` | إنشاء طلب سحب جديد |
+| `github_list_prs` | عرض طلبات السحب مع فلاتر |
+| `github_merge_pr` | دمج طلب سحب (merge أو squash أو rebase) |
+| `github_review_pr` | تقديم مراجعة (موافقة، طلب تعديلات، تعليق) |
+
+### CI/CD وسير العمل
+
+| الأداة | الوصف |
+|---|---|
+| `github_list_workflows` | عرض سير عمل GitHub Actions لمستودع |
+| `github_trigger_workflow` | تشغيل حدث إرسال سير عمل |
+| `github_list_notifications` | عرض الإشعارات غير المقروءة |
+
+### الإصدارات والمقتطفات
+
+| الأداة | الوصف |
+|---|---|
+| `github_create_release` | إنشاء إصدار جديد مع وسم |
+| `github_manage_gists` | إنشاء أو عرض أو تحديث المقتطفات |
+
+## المحفّزات
+
+تُفعّل قدرة GitHub عندما تتطابق رسالتك مع أي من هذه الأنماط:
+
+```
+github, pull request, PR, merge, issue, issues,
+repo, repository, CI, actions, workflow, release,
+gist, notification, star, fork, branch, compare
+```
+
+<Note>
+  أوامر git المحلية (commit و push و diff و log) تُفعّل قدرة `git`، وليس `github`. إذا قلت "ادفع إلى origin"، تنفّذ مهارة `git` الأمر `git push` عبر `shell_exec`. إذا قلت "أنشئ طلب سحب"، تستدعي إضافة `github` واجهة GitHub API.
+</Note>
+
+## أمثلة على سير العمل
+
+<AccordionGroup>
+  <Accordion title="إنشاء طلب سحب">
+    ```
+    You: "Create a PR for my current branch"
+    Wolffish: Reads the current branch name, detects the remote, and calls
+    github_create_pr with the branch as head and main as base.
+    ```
+  </Accordion>
+  <Accordion title="عرض المشكلات المفتوحة">
+    ```
+    You: "What are the open issues on wolffish-app?"
+    Wolffish: Calls github_list_issues with state=open and returns a formatted list
+    with titles, labels, and assignees.
+    ```
+  </Accordion>
+  <Accordion title="فحص حالة CI">
+    ```
+    You: "What's the CI status on my latest PR?"
+    Wolffish: Lists recent PRs, finds yours, and checks the workflow run status.
+    ```
+  </Accordion>
+  <Accordion title="تشغيل عملية نشر">
+    ```
+    You: "Trigger the deploy workflow on main"
+    Wolffish: Calls github_trigger_workflow with the workflow ID and ref=main.
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## مرجع التهيئة
+
+يُخزّن رمز GitHub كمتغير في الإعدادات:
+
+```json
+{
+  "variables": {
+    "GITHUB_TOKEN": "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  }
+}
+```
+
+بدلًا من ذلك، يمكنك تعيينه في `config.json`:
+
+```json
+{
+  "integrations": {
+    "github": {
+      "token": "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    }
+  }
+}
+```
+
+<Warning>
+  لا تضف أبدًا رمز GitHub PAT إلى نظام التحكم بالإصدارات. إذا كنت تخزّن مساحة العمل في git، تأكد من إضافة `config.json` وأي ملف متغيرات إلى `.gitignore`.
+</Warning>

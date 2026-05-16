@@ -1,0 +1,109 @@
+---
+title: "Channels Overview"
+description: "How Wolffish communicates — Electron UI, Telegram, and WhatsApp"
+---
+
+# Channels Overview
+
+Wolffish communicates through three channels: the Electron desktop UI, a Telegram bot, and WhatsApp direct messaging. All three run the same brain pipeline — the only difference is how input arrives and how output is rendered.
+
+## The Three Channels
+
+<CardGroup cols={3}>
+  <Card title="Electron UI" icon="desktop">
+    The native desktop interface. Real-time streaming, rich markdown, approval dialogs, and full conversation management.
+  </Card>
+  <Card title="Telegram" icon="paper-plane">
+    A personal bot that responds to your private messages. Inline buttons for approvals, HTML formatting, file handling.
+  </Card>
+  <Card title="WhatsApp" icon="message">
+    Direct messaging via WhatsApp Web protocol. Text-based approvals, voice note transcription, automatic reconnection.
+  </Card>
+</CardGroup>
+
+## Architecture
+
+Every channel feeds into the same pipeline. The channel is just a transport layer — it receives user input, hands it to the brain, and renders whatever comes back.
+
+```
+User ─┬─ Electron UI ──┐
+      ├─ Telegram Bot ──┼──► TurnRunner ──► Agent Pipeline ──► TurnRouter ──► Channel ──► User
+      └─ WhatsApp ──────┘
+```
+
+## The TurnSink Interface
+
+Each channel implements the `TurnSink` interface — the contract for receiving pipeline output:
+
+```typescript
+interface TurnSink {
+  onSegment(segment: StreamSegment): void     // Streamed text/tool-use chunks
+  onTurnEvent(event: TurnEvent): void         // Status changes (thinking, executing, done)
+  onApprovalRequest(req: ApprovalRequest): void  // Amygdala flagged a tool call
+  onDone(summary: TurnSummary): void          // Turn completed successfully
+  onError(error: TurnError): void             // Turn failed
+}
+```
+
+The Electron UI renders `onSegment` as real-time streaming markdown. Telegram formats segments as HTML messages. WhatsApp sends plain text. Same data, different presentation.
+
+## The TurnRunner
+
+The TurnRunner serializes turns across all channels. Only one turn runs at a time — if messages arrive from multiple channels simultaneously, they queue behind a Promise chain.
+
+```
+Turn from Telegram → [running]
+Turn from Electron → [queued]
+Turn from WhatsApp → [queued]
+```
+
+This prevents race conditions in memory writes, tool execution, and context assembly. The queue is FIFO — first message in, first message processed.
+
+<Note>
+  If a turn is already running and a new message arrives on a different channel, the sender receives a brief acknowledgment that their message is queued. They don't have to wait in silence.
+</Note>
+
+## The TurnRouter
+
+When the amygdala flags a tool call for approval, the TurnRouter routes the approval request to whichever channel owns the active turn. If you started a conversation in Telegram, the approval button appears in Telegram — not in the Electron UI.
+
+The routing logic is straightforward:
+
+1. Each turn carries a `channelId` (electron, telegram, or whatsapp)
+2. When `amygdala.classify()` returns `confirm`, the TurnRunner emits an approval request
+3. The TurnRouter looks up the active turn's `channelId` and calls `onApprovalRequest` on that channel's sink
+4. The channel presents the approval in its native format (dialog, inline button, or text prompt)
+5. The user's response flows back to the TurnRunner to continue or abort
+
+## Shared State
+
+All channels share the same brain state:
+
+- **Memory** — same hippocampus episodes, same cortex index
+- **Knowledge** — same workspace markdown files
+- **Conversations** — a conversation started in Telegram can be resumed in the Electron UI or WhatsApp
+- **Capabilities** — same loaded skills and plugins
+
+<Tip>
+  You can start a long-running task in the desktop UI, leave your desk, and check on progress or continue the conversation from Telegram on your phone.
+</Tip>
+
+## Channel Comparison
+
+| Feature | Electron UI | Telegram | WhatsApp |
+|---|---|---|---|
+| Streaming | Real-time chunks | Batched messages | Batched messages |
+| Formatting | Rich markdown | HTML subset | Plain text |
+| Approvals | Native dialog | Inline buttons | Text prompt |
+| Files | Drag and drop | Attachments | Media messages |
+| Voice | N/A | Voice notes | Voice notes |
+| Reconnection | Always on | Persistent | Auto-reconnect |
+
+<CardGroup cols={2}>
+  <Card title="Telegram Channel" icon="paper-plane" href="/channels/telegram">
+    Set up and use the Telegram bot.
+  </Card>
+  <Card title="WhatsApp Channel" icon="message" href="/channels/whatsapp">
+    Set up and use WhatsApp messaging.
+  </Card>
+</CardGroup>

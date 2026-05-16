@@ -6,22 +6,23 @@
     "light": "#3B82F6",
     "dark": "#1E3A8A"
   },
-  "favicon": "/favicon.svg",
   "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    "dark": "/static/icon.png",
+    "light": "/static/icon.png"
   },
+  "favicon": "/static/favicon.png",
+  "css": "/static/custom.css",
   "navbar": {
     "links": [
       {
         "label": "GitHub",
-        "href": "https://github.com/younesalturkey/wolffish"
+        "href": "https://github.com/thewolffish/wolffish-app"
       }
     ],
     "primary": {
       "type": "button",
       "label": "Download",
-      "href": "https://github.com/younesalturkey/wolffish/releases"
+      "href": "https://github.com/thewolffish/wolffish-app/releases"
     }
   },
   "footer": {
@@ -45,7 +46,7 @@
         {
           "anchor": "Community",
           "icon": "discord",
-          "href": "https://discord.gg/F5Ue36PzQ",
+          "href": "https://discord.com/invite/F5Ue36PzQ",
           "color": {
             "light": "#00d4ff",
             "dark": "#00d4ff"
@@ -72,12 +73,14 @@
                 ]
               },
               {
-                "group": "Architecture",
+                "group": "Core Concepts",
                 "pages": [
+                  "architecture/gods-creation",
                   "architecture/overview",
                   "architecture/pipeline",
                   "architecture/brain-modules",
-                  "architecture/workspace"
+                  "architecture/workspace",
+                  "architecture/event-bus"
                 ]
               },
               {
@@ -90,21 +93,71 @@
                 ]
               },
               {
+                "group": "Channels",
+                "pages": [
+                  "channels/overview",
+                  "channels/telegram",
+                  "channels/whatsapp"
+                ]
+              },
+              {
+                "group": "Integrations",
+                "pages": [
+                  "integrations/overview",
+                  "integrations/google-workspace",
+                  "integrations/github",
+                  "integrations/notion"
+                ]
+              },
+              {
+                "group": "Memory & Learning",
+                "pages": [
+                  "memory/overview",
+                  "memory/episodes",
+                  "memory/consolidation",
+                  "memory/knowledge",
+                  "memory/feedback-loop"
+                ]
+              },
+              {
                 "group": "Configuration",
                 "pages": [
                   "configuration/soul-md",
                   "configuration/user-md",
                   "configuration/agents-md",
                   "configuration/config-json",
-                  "configuration/providers"
+                  "configuration/providers",
+                  "configuration/variables",
+                  "configuration/heartbeat"
+                ]
+              },
+              {
+                "group": "Debugging",
+                "pages": [
+                  "debugging/overview",
+                  "debugging/debug-snapshots",
+                  "debugging/event-logs",
+                  "debugging/task-files",
+                  "debugging/troubleshooting"
                 ]
               },
               {
                 "group": "Extending Wolffish",
                 "pages": [
                   "extending/creating-capabilities",
+                  "extending/advanced-plugins",
+                  "extending/adding-channels",
                   "extending/community-capabilities",
                   "extending/safety-patterns"
+                ]
+              },
+              {
+                "group": "Development",
+                "pages": [
+                  "development/setup",
+                  "development/project-structure",
+                  "development/contributing",
+                  "development/adding-brain-modules"
                 ]
               }
             ]
@@ -128,12 +181,14 @@
                 ]
               },
               {
-                "group": "البنية",
+                "group": "المفاهيم الأساسية",
                 "pages": [
+                  "ar/architecture/gods-creation",
                   "ar/architecture/overview",
                   "ar/architecture/pipeline",
                   "ar/architecture/brain-modules",
-                  "ar/architecture/workspace"
+                  "ar/architecture/workspace",
+                  "ar/architecture/event-bus"
                 ]
               },
               {
@@ -146,21 +201,71 @@
                 ]
               },
               {
+                "group": "القنوات",
+                "pages": [
+                  "ar/channels/overview",
+                  "ar/channels/telegram",
+                  "ar/channels/whatsapp"
+                ]
+              },
+              {
+                "group": "التكاملات",
+                "pages": [
+                  "ar/integrations/overview",
+                  "ar/integrations/google-workspace",
+                  "ar/integrations/github",
+                  "ar/integrations/notion"
+                ]
+              },
+              {
+                "group": "الذاكرة والتعلم",
+                "pages": [
+                  "ar/memory/overview",
+                  "ar/memory/episodes",
+                  "ar/memory/consolidation",
+                  "ar/memory/knowledge",
+                  "ar/memory/feedback-loop"
+                ]
+              },
+              {
                 "group": "التكوين",
                 "pages": [
                   "ar/configuration/soul-md",
                   "ar/configuration/user-md",
                   "ar/configuration/agents-md",
                   "ar/configuration/config-json",
-                  "ar/configuration/providers"
+                  "ar/configuration/providers",
+                  "ar/configuration/variables",
+                  "ar/configuration/heartbeat"
+                ]
+              },
+              {
+                "group": "التشخيص",
+                "pages": [
+                  "ar/debugging/overview",
+                  "ar/debugging/debug-snapshots",
+                  "ar/debugging/event-logs",
+                  "ar/debugging/task-files",
+                  "ar/debugging/troubleshooting"
                 ]
               },
               {
                 "group": "توسيع Wolffish",
                 "pages": [
                   "ar/extending/creating-capabilities",
+                  "ar/extending/advanced-plugins",
+                  "ar/extending/adding-channels",
                   "ar/extending/community-capabilities",
                   "ar/extending/safety-patterns"
+                ]
+              },
+              {
+                "group": "التطوير",
+                "pages": [
+                  "ar/development/setup",
+                  "ar/development/project-structure",
+                  "ar/development/contributing",
+                  "ar/development/adding-brain-modules"
                 ]
               }
             ]

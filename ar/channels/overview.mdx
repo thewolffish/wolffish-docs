@@ -1,0 +1,109 @@
+---
+title: "نظرة عامة على القنوات"
+description: "كيف يتواصل Wolffish — واجهة Electron، و Telegram، و WhatsApp"
+---
+
+# نظرة عامة على القنوات
+
+يتواصل Wolffish من خلال ثلاث قنوات: واجهة سطح المكتب عبر Electron، وبوت Telegram، والمراسلة المباشرة عبر WhatsApp. تعمل القنوات الثلاث بنفس خط معالجة الذكاء — الفرق الوحيد هو كيفية وصول المدخلات وكيفية عرض المخرجات.
+
+## القنوات الثلاث
+
+<CardGroup cols={3}>
+  <Card title="واجهة Electron" icon="desktop">
+    واجهة سطح المكتب الأصلية. بث لحظي، تنسيق Markdown غني، نوافذ موافقة، وإدارة كاملة للمحادثات.
+  </Card>
+  <Card title="Telegram" icon="paper-plane">
+    بوت شخصي يستجيب لرسائلك الخاصة. أزرار مضمّنة للموافقات، تنسيق HTML، ومعالجة الملفات.
+  </Card>
+  <Card title="WhatsApp" icon="message">
+    مراسلة مباشرة عبر بروتوكول WhatsApp Web. موافقات نصية، تحويل الرسائل الصوتية لنص، وإعادة اتصال تلقائية.
+  </Card>
+</CardGroup>
+
+## البنية المعمارية
+
+كل قناة تصب في نفس خط المعالجة. القناة هي مجرد طبقة نقل — تستقبل مدخلات المستخدم، وتسلّمها للذكاء، ثم تعرض ما يعود منه.
+
+```
+User ─┬─ Electron UI ──┐
+      ├─ Telegram Bot ──┼──► TurnRunner ──► Agent Pipeline ──► TurnRouter ──► Channel ──► User
+      └─ WhatsApp ──────┘
+```
+
+## واجهة TurnSink
+
+كل قناة تنفّذ واجهة `TurnSink` — وهي العقد الذي يحدد كيفية استقبال مخرجات خط المعالجة:
+
+```typescript
+interface TurnSink {
+  onSegment(segment: StreamSegment): void     // Streamed text/tool-use chunks
+  onTurnEvent(event: TurnEvent): void         // Status changes (thinking, executing, done)
+  onApprovalRequest(req: ApprovalRequest): void  // Amygdala flagged a tool call
+  onDone(summary: TurnSummary): void          // Turn completed successfully
+  onError(error: TurnError): void             // Turn failed
+}
+```
+
+واجهة Electron تعرض `onSegment` كبث لحظي بتنسيق Markdown. أما Telegram فيصيغ الأجزاء كرسائل HTML. بينما يرسل WhatsApp نصًا عاديًا. نفس البيانات، عرض مختلف.
+
+## مُشغّل الأدوار TurnRunner
+
+يقوم TurnRunner بتسلسل الأدوار عبر جميع القنوات. دور واحد فقط يعمل في كل مرة — إذا وصلت رسائل من عدة قنوات في نفس الوقت، فإنها تصطف في سلسلة انتظار.
+
+```
+Turn from Telegram → [running]
+Turn from Electron → [queued]
+Turn from WhatsApp → [queued]
+```
+
+هذا يمنع تعارض العمليات في كتابة الذاكرة، وتنفيذ الأدوات، وتجميع السياق. قائمة الانتظار تعمل بنظام الأول دخولًا الأول خروجًا (FIFO).
+
+<Note>
+  إذا كان هناك دور يعمل حاليًا ووصلت رسالة جديدة من قناة مختلفة، يتلقى المرسل إشعارًا مختصرًا بأن رسالته في قائمة الانتظار. لن يضطر للانتظار في صمت.
+</Note>
+
+## موجّه الأدوار TurnRouter
+
+عندما تُصنّف الـ amygdala استدعاء أداة على أنه يحتاج موافقة، يوجّه TurnRouter طلب الموافقة إلى القناة المالكة للدور النشط. إذا بدأت محادثة في Telegram، يظهر زر الموافقة في Telegram — وليس في واجهة Electron.
+
+منطق التوجيه واضح ومباشر:
+
+1. كل دور يحمل معرّف قناة `channelId` (electron أو telegram أو whatsapp)
+2. عندما يُرجع `amygdala.classify()` القيمة `confirm`، يُصدر TurnRunner طلب موافقة
+3. يبحث TurnRouter عن `channelId` الخاص بالدور النشط ويستدعي `onApprovalRequest` على واجهة TurnSink لتلك القناة
+4. تعرض القناة الموافقة بشكلها الأصلي (نافذة حوار، أو زر مضمّن، أو رسالة نصية)
+5. يعود رد المستخدم إلى TurnRunner لمتابعة العملية أو إلغائها
+
+## الحالة المشتركة
+
+جميع القنوات تتشارك نفس حالة الذكاء:
+
+- **الذاكرة** — نفس حلقات hippocampus، ونفس فهرس cortex
+- **المعرفة** — نفس ملفات Markdown في مساحة العمل
+- **المحادثات** — محادثة بدأت في Telegram يمكن استكمالها في واجهة Electron أو WhatsApp
+- **القدرات** — نفس المهارات والإضافات المحمّلة
+
+<Tip>
+  يمكنك بدء مهمة طويلة في واجهة سطح المكتب، ثم مغادرة مكتبك، ومتابعة التقدم أو إكمال المحادثة من Telegram على هاتفك.
+</Tip>
+
+## مقارنة القنوات
+
+| الميزة | واجهة Electron | Telegram | WhatsApp |
+|---|---|---|---|
+| البث | أجزاء لحظية | رسائل مجمّعة | رسائل مجمّعة |
+| التنسيق | Markdown غني | مجموعة فرعية من HTML | نص عادي |
+| الموافقات | نافذة حوار أصلية | أزرار مضمّنة | رسالة نصية |
+| الملفات | سحب وإفلات | مرفقات | رسائل وسائط |
+| الصوت | غير متاح | رسائل صوتية | رسائل صوتية |
+| إعادة الاتصال | متصل دائمًا | مستمر | إعادة اتصال تلقائية |
+
+<CardGroup cols={2}>
+  <Card title="قناة Telegram" icon="paper-plane" href="/ar/channels/telegram">
+    إعداد واستخدام بوت Telegram.
+  </Card>
+  <Card title="قناة WhatsApp" icon="message" href="/ar/channels/whatsapp">
+    إعداد واستخدام مراسلة WhatsApp.
+  </Card>
+</CardGroup>

@@ -1,0 +1,195 @@
+---
+title: "Notion"
+description: "Pages, databases, and knowledge bases in Notion"
+---
+
+# Notion
+
+The Notion integration connects Wolffish to your Notion workspace for searching, reading, creating, and querying pages and databases. It uses a Notion internal integration token for authentication.
+
+## Setup
+
+<Steps>
+  <Step title="Create an Integration">
+    Go to [notion.so/my-integrations](https://www.notion.so/my-integrations) and click "New integration". Give it a name (e.g., "Wolffish") and select the workspace.
+  </Step>
+  <Step title="Copy the Token">
+    After creation, copy the Internal Integration Token (starts with `ntn_` or `secret_`).
+  </Step>
+  <Step title="Configure in Wolffish">
+    Open Settings > Integrations > Notion and paste the token.
+  </Step>
+  <Step title="Share Pages with the Integration">
+    In Notion, open each page or database you want Wolffish to access. Click the "..." menu > "Connections" > find your integration and connect it.
+  </Step>
+</Steps>
+
+<Warning>
+  The integration can only access pages and databases that have been explicitly shared with it. If Wolffish can't find a page, check that the page's Connections include your integration.
+</Warning>
+
+## Available Tools
+
+### Search and Read
+
+| Tool | Description |
+|---|---|
+| `notion_search` | Search pages and databases by title or content |
+| `notion_read_page` | Read page properties (title, dates, tags, etc.) |
+| `notion_read_blocks` | Read the block content of a page (paragraphs, lists, code, etc.) |
+
+### Create and Update
+
+| Tool | Description |
+|---|---|
+| `notion_create_page` | Create a new page in a parent page or database |
+| `notion_update_page` | Update page properties |
+| `notion_append_blocks` | Append new blocks to the end of a page |
+
+### Databases
+
+| Tool | Description |
+|---|---|
+| `notion_create_database` | Create a new database with defined properties |
+| `notion_query_database` | Query a database with filters and sorts |
+| `notion_add_comment` | Add a comment to a page or discussion |
+
+## Database Querying
+
+The `notion_query_database` tool supports Notion's filter and sort format:
+
+```json
+{
+  "database_id": "abc123...",
+  "filter": {
+    "property": "Status",
+    "status": {
+      "equals": "In Progress"
+    }
+  },
+  "sorts": [
+    {
+      "property": "Priority",
+      "direction": "descending"
+    }
+  ]
+}
+```
+
+Compound filters are supported:
+
+```json
+{
+  "filter": {
+    "and": [
+      {
+        "property": "Status",
+        "status": { "equals": "In Progress" }
+      },
+      {
+        "property": "Assignee",
+        "people": { "contains": "user-id-here" }
+      }
+    ]
+  }
+}
+```
+
+<Tip>
+  You don't need to write raw filter JSON yourself. Just describe what you want — "show me tasks assigned to me that are in progress" — and the LLM constructs the appropriate filter.
+</Tip>
+
+## Supported Block Types
+
+When creating or appending content, Wolffish supports these Notion block types:
+
+| Block Type | Description |
+|---|---|
+| `paragraph` | Standard text paragraph |
+| `heading_1` | Large heading |
+| `heading_2` | Medium heading |
+| `heading_3` | Small heading |
+| `bulleted_list_item` | Bulleted list item |
+| `numbered_list_item` | Numbered list item |
+| `toggle` | Collapsible toggle block |
+| `code` | Code block with language syntax |
+| `quote` | Block quote |
+| `callout` | Callout with icon |
+| `divider` | Horizontal divider |
+| `table` | Table block |
+| `bookmark` | Bookmarked URL |
+
+## Triggers
+
+The Notion capability activates when your message matches any of these patterns:
+
+```
+notion, workspace, wiki, knowledge base,
+database, page, kanban, board, backlog,
+sprint, project tracker, notes
+```
+
+## Example Workflows
+
+<AccordionGroup>
+  <Accordion title="Search your workspace">
+    ```
+    You: "Search my Notion for the API spec"
+    Wolffish: Calls notion_search with "API spec" and returns matching pages
+    with titles and parent locations.
+    ```
+  </Accordion>
+  <Accordion title="Add a page to a database">
+    ```
+    You: "Add a new task to my project database: implement login flow, priority high"
+    Wolffish: Calls notion_create_page with the database as parent and sets
+    the Title, Status, and Priority properties.
+    ```
+  </Accordion>
+  <Accordion title="Query tasks in progress">
+    ```
+    You: "What tasks are in progress?"
+    Wolffish: Calls notion_query_database with a Status = "In Progress" filter
+    and returns matching entries with their properties.
+    ```
+  </Accordion>
+  <Accordion title="Append content to a page">
+    ```
+    You: "Add a section about error handling to my API documentation page"
+    Wolffish: Searches for the page, then calls notion_append_blocks with
+    heading and paragraph blocks containing the new content.
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Configuration Reference
+
+The Notion token is stored as a Variable in Settings:
+
+```json
+{
+  "variables": {
+    "NOTION_TOKEN": "ntn_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  }
+}
+```
+
+Alternatively, in `config.json`:
+
+```json
+{
+  "integrations": {
+    "notion": {
+      "token": "ntn_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    }
+  }
+}
+```
+
+<Info>
+  Notion's API has rate limits (3 requests per second for integrations). Wolffish handles retries with exponential backoff automatically through the `motor` module. If you're doing bulk operations, responses may be slightly slower than usual.
+</Info>
+
+<Warning>
+  Never share your Notion integration token. Anyone with the token can read and modify all pages the integration has access to. If you suspect a token leak, rotate it immediately at [notion.so/my-integrations](https://www.notion.so/my-integrations).
+</Warning>

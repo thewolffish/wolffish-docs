@@ -1,0 +1,142 @@
+---
+title: "The Feedback Loop"
+description: "How basal ganglia learns from outcomes — approvals, denials, successes, and failures"
+---
+
+# The Feedback Loop
+
+Memory tells Wolffish what happened. The feedback loop tells it what *worked*. The `basalganglia` module records the outcome of every interaction — whether tool calls succeeded, whether you approved or denied flagged operations, and what approaches produced good results. Over time, this builds learned behavioral preferences without explicit programming.
+
+## Location
+
+```
+~/.wolffish/workspace/brain/basalganglia/YYYY-MM-DD.md
+```
+
+Feedback entries are written to one file per day, append-only. Each day's outcomes accumulate in that day's file, and older files are preserved. When the agent needs recent feedback context, it concatenates the last N days of files.
+
+## Four Outcome Types
+
+| Outcome | Trigger | Meaning |
+|---|---|---|
+| `success` | Tool call completed without error | This approach worked |
+| `failure` | Tool call threw an error or returned an error state | This approach didn't work |
+| `approval` | User approved a flagged tool call (amygdala `confirm` level) | User trusts this operation |
+| `denial` | User rejected a flagged tool call | User doesn't want this |
+
+## How Feedback Is Recorded
+
+After every turn, `basalganglia.recordOutcome()` appends an entry:
+
+```typescript
+// Simplified from src/main/runtime/basalganglia.ts
+async recordOutcome(entry: FeedbackEntry): Promise<void> {
+  const line = [
+    `- ${format(new Date(), 'yyyy-MM-dd HH:mm')}`,
+    `| ${entry.outcome}`,
+    `| ${entry.toolName}`,
+    `| ${truncate(JSON.stringify(entry.args), 200)}`,
+    `| ${entry.context}`,
+  ].join(' ')
+
+  await appendFile(this.feedbackPath, line + '\n')
+  this.corpus.emit('feedback.recorded', entry)
+}
+```
+
+Each entry captures:
+- **Timestamp** — when it happened
+- **Outcome** — success, failure, approval, or denial
+- **Tool name** — which capability was invoked
+- **Truncated args** — what was passed (capped at ~200 characters for readability)
+- **Context** — brief description of the surrounding conversation
+
+## Example Feedback Entries
+
+```markdown
+# Feedback Log
+
+- 2026-05-14 09:12 | success | shell_exec | {"command":"pnpm test","cwd":"/Users/you/project"} | ran tests after implementing useServerAction hook
+- 2026-05-14 09:30 | approval | shell_exec | {"command":"git push origin feat/server-actions","cwd":"/Users/you/project"} | user approved push to feature branch
+- 2026-05-15 11:45 | denial | shell_exec | {"command":"rm -rf node_modules","cwd":"/Users/you/project"} | user denied recursive delete in project root
+- 2026-05-15 14:20 | failure | web_search | {"query":"site:internal.company.com deployment docs"} | search returned no results, internal site not indexed
+- 2026-05-16 08:55 | success | shell_exec | {"command":"git commit -m \"feat: add billing webhook handler\"","cwd":"/Users/you/billing"} | conventional commit format used
+- 2026-05-16 10:03 | approval | file_write | {"path":"/Users/you/billing/src/webhooks.ts","content":"..."} | user approved writing new file to project
+```
+
+## How Feedback Influences Behavior
+
+The `prefrontal` module reads feedback entries during context assembly. The LLM sees patterns in what worked and what didn't, and adjusts its approach accordingly.
+
+### The Interface
+
+`basalganglia` exposes two methods to `prefrontal`:
+
+```typescript
+// Get learned preferences from feedback history
+getPreferences(): FeedbackPreference[]
+
+// Score a proposed approach based on historical outcomes
+scoreApproach(toolName: string, argsPattern: string): ApproachScore
+```
+
+### What the LLM Learns
+
+Over time, patterns emerge from accumulated feedback:
+
+<AccordionGroup>
+  <Accordion title="Commit style preferences">
+    After several `success` outcomes on commits with conventional format (`feat:`, `fix:`, `chore:`), the LLM learns to always use this format. If a non-conventional commit was ever `denied`, that reinforces the preference.
+  </Accordion>
+  <Accordion title="Safe operations">
+    If the user consistently `approves` git pushes to feature branches, Wolffish learns that these are low-risk. If the user consistently `denies` force pushes, it learns to avoid suggesting them — or to flag them more prominently.
+  </Accordion>
+  <Accordion title="Error recovery">
+    After a `failure` from a specific approach (e.g., searching an internal site that isn't indexed), the LLM learns to try alternative approaches next time (e.g., asking the user for the URL directly).
+  </Accordion>
+  <Accordion title="Tool preferences">
+    If `pnpm` commands always succeed but `npm` commands were denied once, the LLM learns your package manager preference from outcomes — not just from `preferences.md`.
+  </Accordion>
+</AccordionGroup>
+
+## Growing With You
+
+This is the mechanism that makes Wolffish adaptive over time. It's not just remembering facts (knowledge files do that) — it's remembering what *worked in practice*. The combination creates an agent that:
+
+1. **Knows your preferences** (knowledge) — what you said you want
+2. **Knows what actually works** (feedback) — what produced good outcomes
+3. **Avoids past mistakes** (failure records) — what went wrong before
+
+<Tip>
+  The feedback loop is most powerful for tool-use patterns. If you find Wolffish repeatedly suggesting an approach you don't like, deny it once explicitly and explain why. The denial + context gets recorded and shapes future behavior.
+</Tip>
+
+## Inspecting and Editing Feedback
+
+The feedback file is plain markdown. You can:
+
+- **Read it** to understand why Wolffish behaves a certain way
+- **Delete entries** to "unlearn" a pattern (e.g., remove old denials that no longer apply)
+- **Add entries** to seed behavior (e.g., add a denial for `rm -rf /` even if it never happened)
+
+```bash
+# View today's feedback
+cat ~/.wolffish/workspace/brain/basalganglia/$(date +%Y-%m-%d).md
+
+# View recent days
+ls -la ~/.wolffish/workspace/brain/basalganglia/
+```
+
+<Warning>
+  Deleting all files in the basalganglia folder resets all learned behavioral preferences. Wolffish will still have knowledge files and episodes, but it loses its sense of what worked and what didn't. This is a clean slate for the reward system only.
+</Warning>
+
+## Feedback vs. Knowledge
+
+| Aspect | Knowledge Files | Feedback Loop |
+|---|---|---|
+| Stores | Facts and preferences | Outcomes and patterns |
+| Written by | LLM promotion + direct writes | Automatic after every turn |
+| Answers | "What does the user want?" | "What actually works?" |
+| Example | "User prefers pnpm" | "pnpm install succeeded 47 times, npm denied once" |
+| Editing | Common and encouraged | Rare, mostly for corrections |

@@ -1,0 +1,176 @@
+---
+title: "GitHub"
+description: "Repositories, issues, pull requests, and CI/CD integration"
+---
+
+# GitHub
+
+The GitHub integration connects Wolffish to the GitHub API for managing repositories, issues, pull requests, workflows, releases, and more. It uses a personal access token (PAT) for authentication.
+
+## Setup
+
+<Steps>
+  <Step title="Generate a Token">
+    Go to [github.com/settings/tokens](https://github.com/settings/tokens) and create a new personal access token (classic or fine-grained).
+  </Step>
+  <Step title="Select Scopes">
+    For full functionality, select at minimum: `repo` and `read:org`. See the scopes table below for details.
+  </Step>
+  <Step title="Configure in Wolffish">
+    Open Settings > Integrations > GitHub and paste your token.
+  </Step>
+</Steps>
+
+### Required Token Scopes
+
+| Scope | Grants Access To |
+|---|---|
+| `repo` | Full control of private repositories (issues, PRs, code, releases, workflows) |
+| `read:org` | Read-only access to organization membership and teams |
+
+### Optional Scopes
+
+| Scope | Grants Access To |
+|---|---|
+| `gist` | Create and manage gists |
+| `notifications` | Read notifications |
+| `workflow` | Trigger GitHub Actions workflow dispatches |
+
+<Tip>
+  Fine-grained tokens offer more precise permissions but require per-repository configuration. Classic tokens with `repo` + `read:org` are the simplest path to full functionality.
+</Tip>
+
+## Two Capabilities, One Platform
+
+Wolffish separates local git operations from remote GitHub API operations:
+
+<CardGroup cols={2}>
+  <Card title="git (Pure Skill)" icon="code-branch">
+    Local git operations — commit, branch, merge, rebase, diff, log. Uses `shell_exec` to run git commands. No token needed.
+  </Card>
+  <Card title="github (Plugin)" icon="github">
+    Remote GitHub API operations — issues, PRs, workflows, releases. Uses Octokit to call the GitHub REST API. Requires a PAT.
+  </Card>
+</CardGroup>
+
+The `git` capability is always available (it's a pure skill that uses shell commands). The `github` capability requires a configured token to make API calls.
+
+## Available Tools
+
+### Repositories
+
+| Tool | Description |
+|---|---|
+| `github_list_repos` | List repositories for the authenticated user or an organization |
+| `github_star_repo` | Star a repository |
+| `github_fork_repo` | Fork a repository to your account |
+| `github_compare_branches` | Compare two branches (ahead/behind count, diff stats) |
+| `github_list_branches` | List branches for a repository |
+
+### Issues
+
+| Tool | Description |
+|---|---|
+| `github_create_issue` | Create a new issue |
+| `github_read_issue` | Read an issue with comments |
+| `github_update_issue` | Update issue title, body, labels, assignees, or state |
+| `github_list_issues` | List issues with filters (state, labels, assignee) |
+| `github_manage_labels` | Create, update, or delete labels |
+| `github_manage_milestones` | Create, update, or delete milestones |
+
+### Pull Requests
+
+| Tool | Description |
+|---|---|
+| `github_create_pr` | Create a new pull request |
+| `github_list_prs` | List pull requests with filters |
+| `github_merge_pr` | Merge a pull request (merge, squash, or rebase) |
+| `github_review_pr` | Submit a review (approve, request changes, comment) |
+
+### CI/CD and Workflows
+
+| Tool | Description |
+|---|---|
+| `github_list_workflows` | List GitHub Actions workflows for a repository |
+| `github_trigger_workflow` | Trigger a workflow dispatch event |
+| `github_list_notifications` | List unread notifications |
+
+### Releases and Gists
+
+| Tool | Description |
+|---|---|
+| `github_create_release` | Create a new release with tag |
+| `github_manage_gists` | Create, list, or update gists |
+
+## Triggers
+
+The GitHub capability activates when your message matches any of these patterns:
+
+```
+github, pull request, PR, merge, issue, issues,
+repo, repository, CI, actions, workflow, release,
+gist, notification, star, fork, branch, compare
+```
+
+<Note>
+  Local git commands (commit, push, diff, log) trigger the `git` capability, not `github`. If you say "push to origin", the `git` skill runs `git push` via `shell_exec`. If you say "create a PR", the `github` plugin calls the GitHub API.
+</Note>
+
+## Example Workflows
+
+<AccordionGroup>
+  <Accordion title="Create a pull request">
+    ```
+    You: "Create a PR for my current branch"
+    Wolffish: Reads the current branch name, detects the remote, and calls
+    github_create_pr with the branch as head and main as base.
+    ```
+  </Accordion>
+  <Accordion title="List open issues">
+    ```
+    You: "What are the open issues on wolffish-app?"
+    Wolffish: Calls github_list_issues with state=open and returns a formatted list
+    with titles, labels, and assignees.
+    ```
+  </Accordion>
+  <Accordion title="Check CI status">
+    ```
+    You: "What's the CI status on my latest PR?"
+    Wolffish: Lists recent PRs, finds yours, and checks the workflow run status.
+    ```
+  </Accordion>
+  <Accordion title="Trigger a deployment">
+    ```
+    You: "Trigger the deploy workflow on main"
+    Wolffish: Calls github_trigger_workflow with the workflow ID and ref=main.
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Configuration Reference
+
+The GitHub token is stored as a Variable in Settings:
+
+```json
+{
+  "variables": {
+    "GITHUB_TOKEN": "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  }
+}
+```
+
+Alternatively, you can set it in `config.json`:
+
+```json
+{
+  "integrations": {
+    "github": {
+      "token": "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    }
+  }
+}
+```
+
+<Warning>
+  Never commit your GitHub PAT to version control. If you store your workspace in git, ensure `config.json` and any variables file are in `.gitignore`.
+</Warning>

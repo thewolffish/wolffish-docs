@@ -5,34 +5,31 @@ description: "ثبّت Wolffish على macOS أو Windows أو Linux"
 
 # التثبيت
 
+Wolffish تطبيق Electron مستقل بالكامل. لا حاجة لـ Node.js أو Python أو Docker. فقط ثبّت وشغّل.
+
 ## المتطلبات المسبقة
 
 <AccordionGroup>
-  <Accordion title="Node.js (مطلوب)" defaultOpen>
-    إضافات قدرات Wolffish هي ملفات `.mjs` تنفَّذ في بيئة تشغيل Node.js. ثبّت Node.js 20+ من [nodejs.org](https://nodejs.org) أو عبر مدير إصدارات مثل `nvm` أو `fnm`.
-
-    ```bash
-    node --version   # يجب أن يكون v20.0.0 أو أعلى
-    ```
-  </Accordion>
-
   <Accordion title="Ollama (مطلوب)" defaultOpen>
-    يعتمد Wolffish على Ollama للاستدلال المحلي على نماذج اللغة الكبيرة — وهذا ليس اختياريًا. ثبّته من [ollama.com](https://ollama.com).
+    يتطلب Wolffish وجود Ollama للاستدلال المحلي على نماذج اللغة الكبيرة. بدونه، لن يكون للوكيل أي قدرة على التفكير أو الاستجابة. ثبّته من [ollama.com](https://ollama.com)، ثم عُد إلى Wolffish.
 
-    بعد التثبيت، نزّل نموذجًا:
-    ```bash
-    ollama pull gemma3:4b
-    ```
-
-    يكتشف Wolffish وجود Ollama تلقائيًا عند التشغيل ولن يعمل بدونه.
+    هذا كل شيء — يتكامل Wolffish مباشرة مع Ollama وسيساعدك في اختيار وتنزيل نموذج عند التشغيل الأول. لا حاجة لأوامر في الطرفية.
   </Accordion>
 
-  <Accordion title="مزودو السحابة (اختياري)">
-    للحصول على ردود بجودة أعلى، أعدّ مفاتيح API لأحدهما أو كليهما:
+  <Accordion title="مزودو السحابة (موصى بهم للتجربة الكاملة)">
+    للمهام الوكيلية المعقدة والردود الأعلى جودة، أعدّ مفاتيح API لأحدهما أو كليهما:
     - **Anthropic (Claude)**: احصل على مفتاح API من [console.anthropic.com](https://console.anthropic.com)
     - **OpenAI (GPT)**: احصل على مفتاح API من [platform.openai.com](https://platform.openai.com)
 
-    ستضبط هذه المفاتيح في إعدادات Wolffish بعد التثبيت. يحسّن مزودو السحابة الجودة لكنهم يتدرجون إلى Ollama عند الفشل.
+    ستضبط هذه المفاتيح في إعدادات Wolffish بعد التثبيت. يحاول تسلسل LLM استخدام مزودي السحابة أولاً ثم يعود إلى Ollama. للمهام البسيطة يكفي Ollama وحده، لكن مزودي السحابة مطلوبون للتجربة الكاملة والمهام المعقدة متعددة الخطوات.
+
+    <Note>
+      يمكن لـ Wolffish العمل محلياً بالكامل بدون مزودي سحابة — لكن المهام الوكيلية تتطلب نماذج كبيرة عالية القدرة (70B+ معامل) مثل Llama 3 70B أو Qwen 2.5 72B أو DeepSeek-V2. تشغيل هذه يتطلب 48GB+ ذاكرة أو بطاقة رسومات متقدمة، وهو ما لا يملكه معظم الناس. مدعوم لكن غير موصى به لمعظم الأجهزة.
+    </Note>
+  </Accordion>
+
+  <Accordion title="أذونات macOS">
+    لقدرة computer-use، سيطلب macOS منك منح أذ��نات **الوصول** و**تسجيل الشاشة**. هذه مطلوبة فقط إذا أردت أن يتفاعل Wolffish مع شاشتك.
   </Accordion>
 </AccordionGroup>
 
@@ -40,7 +37,7 @@ description: "ثبّت Wolffish على macOS أو Windows أو Linux"
 
 <Tabs>
   <Tab title="macOS">
-    نزّل أحدث ملف `.dmg` من [صفحة الإصدارات](https://github.com/younesalturkey/wolffish/releases).
+    نزّل أحدث ملف `.dmg` من [صفحة الإصدارات](https://github.com/thewolffish/wolffish-app/releases).
 
     1. افتح ملف `.dmg`
     2. اسحب Wolffish إلى مجلد التطبيقات
@@ -52,43 +49,79 @@ description: "ثبّت Wolffish على macOS أو Windows أو Linux"
   </Tab>
 
   <Tab title="Windows">
-    نزّل أحدث مثبّت `.exe` من [صفحة الإصدارات](https://github.com/younesalturkey/wolffish/releases).
+    نزّل أحدث مثبّت `.exe` من [صفحة الإصدارات](https://github.com/thewolffish/wolffish-app/releases).
 
-    1. شغّل المثبّت
+    1. شغّل مثبّت NSIS
     2. اتبع معالج الإعداد
     3. شغّل Wolffish من قائمة ابدأ
+
+    جميع الأذونات تُمنح تلقائياً على Windows.
   </Tab>
 
   <Tab title="Linux">
-    نزّل أحدث `.AppImage` من [صفحة الإصدارات](https://github.com/younesalturkey/wolffish/releases).
+    نزّل أحدث `.AppImage` من [صفحة الإصدارات](https://github.com/thewolffish/wolffish-app/releases).
 
     ```bash
     chmod +x Wolffish-*.AppImage
     ./Wolffish-*.AppImage
     ```
+
+    <Warning>
+      X11 مطلوب. Wayland غير مدعوم حالياً لقدرة computer-use.
+    </Warning>
   </Tab>
 </Tabs>
 
+## ما المضمّن
+
+لا تحتاج لتثبيت أي شيء آخر. Electron يضمّن Node.js وChromium داخلياً. يأتي التطبيق مع:
+
+- بيئة التشغيل (Node.js + Chromium)
+- أكثر من 20 قدرة مدمجة
+- SQLite (فهرس البحث FTS5)
+- جميع محولات القنوات (سطح المكتب، Telegram، WhatsApp)
+
+## المتطلبات حسب نظام التشغيل
+
+| | macOS | Windows | Linux |
+|---|---|---|---|
+| **طريقة التثبيت** | `.dmg` ← سحب للتطبيقات | مثبّت NSIS (`.exe`) | AppImage (تفعيل الصلاحية، تشغيل) |
+| **هل Node.js مطلوب؟** | لا | لا | لا |
+| **تبعيات التشغيل** | لا شيء | لا شيء | لا شيء |
+| **للذكاء المحلي** | Ollama (مطلوب) | Ollama (مطلوب) | Ollama (مطلوب) |
+| **للذكاء السحابي** | مفتاح API (Anthropic أو OpenAI) | مفتاح API | مفتاح API |
+| **الأذونات** | الوصول + تسجيل الشاشة | تلقائية | X11 مطلوب |
+
+أدوات النظام مثل `ffmpeg` و`git` **ليست متطلبات مسبقة**. عندما تحتاج قدرة لأداة، يكتشف Wolffish أنها مفقودة ويعرض تثبيتها لك (عبر مدير حزم نظامك)، بموافقتك. الوكيل يدير التبعيات أثناء التشغيل.
+
 ## البناء من المصدر
 
+<Warning>
+  البناء من المصدر مخصص للمساهمين فقط. المستخدمون العاديون يجب أن يستخدموا المثبّتات الجاهزة أعلاه.
+</Warning>
+
 ```bash
-git clone https://github.com/younesalturkey/wolffish.git
-cd wolffish
+git clone https://github.com/thewolffish/wolffish-app.git
+cd wolffish-app
 npm install
 npm run dev
 ```
 
-<Warning>
-  يتطلب البناء من المصدر Node.js 20+ وnpm. سيتم تجميع الوحدات الأصلية (better-sqlite3) أثناء `npm install` عبر `electron-rebuild`.
-</Warning>
+يتطلب البناء من المصدر Node.js 20+ وnpm. الوحدات الأصلية (better-sqlite3) تُجمّع أثناء `npm install` عبر `electron-rebuild`.
 
 ## التحقق من التثبيت
 
-عند التشغيل الأول، ينشئ Wolffish المجلد `~/.wolffish/workspace/` مع ملفات التكوين الافتراضية. ينبغي أن ترى شاشة الإعداد الأولي تطلب منك اختيار نموذج Ollama.
+عند التشغيل الأول، ينشئ Wolffish المجلد `~/.wolffish/workspace/` مع ملفات التكوين الافتراضية. ستوجّهك عملية الإعداد خلال اختيار نموذج والبدء.
 
 للتحقق من أن كل شيء يعمل:
-1. اختر نموذجًا (مثل `gemma3:4b`)
-2. أرسل رسالة تجريبية مثل "مرحبًا، ماذا يمكنك أن تفعل؟"
-3. ينبغي أن ترى ردًا متدفقًا
+1. اتبع توجيهات الإعداد لاختيار وتنزيل نموذج
+2. أرسل رسالة تجريبية مثل "مرحباً، ماذا يمكنك أن تفعل؟"
+3. ينبغي أن ترى رداً متدفقاً
 
-إذا لم يُكتشف Ollama، سيرشدك Wolffish خلال عملية الإعداد.
+إذا لم يُكتشف Ollama، سيرشدك Wolffish خلال تثبيته.
+
+## إلغاء التثبيت
+
+جميع بيانات المستخدم موجودة في `~/.wolffish/`. لإلغاء التثبيت بالكامل:
+1. احذف التطبيق
+2. أزل مجلد البيانات: `rm -rf ~/.wolffish/`

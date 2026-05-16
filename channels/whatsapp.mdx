@@ -1,0 +1,148 @@
+---
+title: "WhatsApp Channel"
+description: "Connect Wolffish to WhatsApp for messaging"
+---
+
+# WhatsApp Channel
+
+The WhatsApp channel connects Wolffish to your WhatsApp account via the Web protocol. No official API needed, no business account required — just scan a QR code and your personal AI is available in WhatsApp.
+
+## Setup
+
+<Tabs>
+  <Tab title="Step 1: Enable">
+    In Wolffish, open **Settings > WhatsApp** and toggle the channel on. A QR code will appear.
+  </Tab>
+  <Tab title="Step 2: Scan QR">
+    Open WhatsApp on your phone:
+    - **iOS**: Settings > Linked Devices > Link a Device
+    - **Android**: Menu (three dots) > Linked Devices > Link a Device
+
+    Scan the QR code displayed in Wolffish.
+  </Tab>
+  <Tab title="Step 3: Connected">
+    Once authenticated, the status changes to **Connected**. The session persists across Wolffish restarts — you won't need to scan again unless you unlink the device.
+  </Tab>
+</Tabs>
+
+<Info>
+  Wolffish connects as a linked device using WhatsApp's multi-device protocol. Your phone doesn't need to stay online after the initial pairing.
+</Info>
+
+## Connection Flow
+
+```
+QR displayed → Phone scans → Multi-device auth → Session keys stored → Persistent connection
+```
+
+The session keys are stored locally in your workspace. As long as you don't unlink the device from WhatsApp's settings, the connection persists indefinitely.
+
+## Commands
+
+The same slash commands available in Telegram work in WhatsApp:
+
+| Command | Action |
+|---|---|
+| `/stop` | Cancel the currently running task |
+| `/new` | Start a fresh conversation |
+| `/resume` | Continue the previous conversation |
+| `/delete` | Delete the current conversation |
+| `/current` | Show which conversation is active |
+| `/status` | System report (model, memory usage, uptime) |
+| `/local` | Switch to local model (Ollama) |
+| `/cloud` | Switch to cloud model (Claude/OpenAI) |
+
+Send any command as a regular WhatsApp message — no special formatting needed.
+
+## Approval Flow
+
+When the amygdala flags a tool call, WhatsApp uses text-based prompts since inline buttons aren't available:
+
+```
+[Approval Required]
+
+Wolffish wants to execute:
+  shell_exec: npm install express
+
+Reply "approve" to proceed or "deny" to abort.
+```
+
+The turn pauses until you reply. Responses are case-insensitive — `approve`, `Approve`, `APPROVE`, `yes`, and `y` all work.
+
+<Note>
+  Unlike Telegram's inline buttons, WhatsApp approvals are regular text messages. The channel recognizes approval/denial keywords only when an approval request is pending.
+</Note>
+
+## Reconnection
+
+If the WebSocket connection drops (network change, sleep/wake, server restart), Wolffish reconnects automatically with exponential backoff:
+
+| Attempt | Delay |
+|---|---|
+| 1 | 2 seconds |
+| 2 | 4 seconds |
+| 3 | 8 seconds |
+| 4 | 16 seconds |
+| 5-12 | 30 seconds (capped) |
+
+After 12 failed attempts, Wolffish stops retrying and marks the channel as disconnected. You can manually reconnect from Settings or wait for the next app restart.
+
+<Tip>
+  In practice, reconnection succeeds on the first or second attempt for transient network issues. The full 12-attempt sequence only exhausts if the session has been revoked from your phone.
+</Tip>
+
+## Stale Message Handling
+
+Messages older than 3 hours are ignored by default. This prevents Wolffish from processing a backlog of messages that accumulated while it was offline — those messages likely no longer need a response.
+
+The threshold is configurable in `config.json`:
+
+```json
+{
+  "channels": {
+    "whatsapp": {
+      "staleMessageThresholdMs": 10800000
+    }
+  }
+}
+```
+
+Set to `0` to disable stale message filtering and process everything regardless of age.
+
+## Voice Notes
+
+Voice notes sent in WhatsApp are transcribed via Wolffish's STT (speech-to-text) capability and processed as regular text input. The transcription happens locally before the message enters the brain pipeline.
+
+## Busy Handling
+
+If a turn is already running when a new WhatsApp message arrives, Wolffish sends a brief acknowledgment:
+
+```
+I'm working on something right now. Your message is queued
+and I'll get to it when I'm done.
+```
+
+The message enters the TurnRunner queue and processes in order once the current turn completes.
+
+## Conversation Mapping
+
+Each WhatsApp JID (phone number identifier) maps to a Wolffish conversation. In practice:
+
+- Messages you send to yourself (via "Message Yourself" in WhatsApp) create one conversation
+- If you configure Wolffish to respond to a specific contact, that contact's JID gets its own conversation
+
+Conversations are shared across channels — you can start in WhatsApp and continue in the Electron UI or Telegram.
+
+## Under the Hood
+
+The WhatsApp channel uses [Baileys](https://github.com/WhiskeySockets/Baileys), an open-source TypeScript implementation of the WhatsApp Web protocol. Baileys handles:
+
+- QR code generation and multi-device authentication
+- WebSocket connection management
+- Message encryption/decryption (Signal protocol)
+- Media download and upload
+- Presence and typing indicators
+
+<Warning>
+  Baileys is a third-party library that reverse-engineers the WhatsApp Web protocol. While widely used and stable, it is not officially supported by Meta. WhatsApp protocol changes may occasionally require library updates.
+</Warning>

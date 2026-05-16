@@ -1,0 +1,85 @@
+---
+title: "How Memory Works"
+description: "Wolffish's three-tier memory system — episodes, consolidation, and knowledge"
+---
+
+# How Memory Works
+
+Wolffish's memory system mirrors the human hippocampus. Information flows through three stages: capture, consolidate, integrate. Raw events get logged instantly, compressed into patterns over time, and eventually promoted into permanent understanding.
+
+## The Three Tiers
+
+| Tier | Location | Written By | LLM Required |
+|---|---|---|---|
+| Episodes | `hippocampus/episodes/YYYY-MM-DD.md` | Every turn (append) | No |
+| Consolidated | `hippocampus/consolidated/YYYY-WNN.md` | Nightly compaction | Yes |
+| Knowledge | `hippocampus/knowledge/*.md` | Promotion + direct writes | Yes |
+
+All memory lives as markdown files inside your workspace:
+
+```
+~/.wolffish/workspace/brain/hippocampus/
+├── episodes/
+│   ├── 2026-05-14.md
+│   ├── 2026-05-15.md
+│   └── 2026-05-16.md
+├── consolidated/
+│   ├── 2026-W19.md
+│   └── 2026-W20.md
+└── knowledge/
+    ├── people.md
+    ├── projects.md
+    ├── preferences.md
+    ├── technical.md
+    └── decisions.md
+```
+
+## The Flow
+
+```
+Message arrives
+  → hippocampus.appendEpisode()     [instant, no LLM]
+    → brainstem nightly compaction   [LLM summarizes episodes]
+      → knowledge promotion          [LLM extracts lasting facts]
+```
+
+<Info>
+  Episode logging is a simple file append — no LLM call, no latency cost. The expensive summarization work happens during nightly compaction when you're not waiting for a response.
+</Info>
+
+## How Memory Gets Into Context
+
+The `prefrontal` module assembles context before every LLM call. It pulls memory candidates from all three tiers, passes them through the **RAS** (Reticular Activating System) for relevance scoring, and includes only what matters for the current message.
+
+The RAS uses keyword-based scoring with a 0.25 minimum threshold. A memory fragment about "React performance" won't appear in context when you're asking about "grocery list ideas."
+
+### Token Budget
+
+Memory gets 30% of the total context window. Within that budget, the RAS allocates space based on relevance scores — not tier priority. A highly relevant episode from yesterday can outrank a less relevant knowledge file entry.
+
+## The Cortex Index
+
+All markdown files in `hippocampus/` are indexed by the `cortex` module (SQLite FTS5 with BM25 ranking). This means memory is full-text searchable without scanning files on disk. The index is fully disposable — delete `cortex.db` and it rebuilds automatically from the source markdown.
+
+<Tip>
+  You can manually edit any memory file at any time. Wolffish reads them as-is. The cortex will re-index changes automatically via the brainstem file watcher.
+</Tip>
+
+## No Black Boxes
+
+Every memory operation produces a readable markdown file. You can open `~/.wolffish/workspace/brain/hippocampus/` in any editor and see exactly what Wolffish remembers, why it consolidated certain themes, and what it considers permanent knowledge. Delete a file and it's forgotten. Edit a file and the edit takes effect immediately.
+
+<CardGroup cols={2}>
+  <Card title="Episodes" icon="clock" href="/memory/episodes">
+    Daily conversation logs — the raw stream of what happened.
+  </Card>
+  <Card title="Consolidation" icon="compress" href="/memory/consolidation">
+    How episodes compress into weekly summaries.
+  </Card>
+  <Card title="Knowledge" icon="brain" href="/memory/knowledge">
+    Long-term facts about people, projects, and preferences.
+  </Card>
+  <Card title="Feedback Loop" icon="arrows-spin" href="/memory/feedback-loop">
+    How outcomes shape future behavior.
+  </Card>
+</CardGroup>

@@ -1,0 +1,99 @@
+---
+title: "Episodes"
+description: "Daily conversation logs — the raw stream of what happened"
+---
+
+# Episodes
+
+Episodes are the raw stream of everything that happened. Every conversation turn gets a one-line summary appended to today's episode file. No filtering, no summarization, no LLM call — just a formatted timestamp and description.
+
+## Location
+
+```
+~/.wolffish/workspace/brain/hippocampus/episodes/
+├── 2026-05-14.md
+├── 2026-05-15.md
+└── 2026-05-16.md
+```
+
+Each file is named by date: `YYYY-MM-DD.md`.
+
+## How Episodes Are Written
+
+After every turn completes, `hippocampus.appendEpisode()` writes a single line to today's file:
+
+```typescript
+// Simplified from src/main/runtime/hippocampus.ts
+async appendEpisode(summary: string): Promise<void> {
+  const today = format(new Date(), 'yyyy-MM-dd')
+  const file = join(this.episodesDir, `${today}.md`)
+  const line = `- ${format(new Date(), 'HH:mm')} — ${summary}\n`
+  await appendFile(file, line)
+  this.corpus.emit('memory.episode.appended', { file, summary })
+}
+```
+
+<Info>
+  No LLM call is involved. The summary is derived from the conversation turn directly — it's a deterministic extraction of what happened, not a generated summary. This keeps episode logging instant and free.
+</Info>
+
+## Example Episode File
+
+Here's what `2026-05-16.md` might look like after a day of use:
+
+```markdown
+# Episodes — 2026-05-16
+
+- 08:32 — Asked about React 19 Server Components, discussed streaming patterns
+- 08:45 — Generated a useServerAction hook with error boundaries
+- 09:10 — Reviewed PR #247, suggested simplifying the auth middleware
+- 11:30 — Searched for flights to Riyadh, compared prices on Google Flights
+- 14:15 — Explained the difference between consolidation and knowledge promotion
+- 16:02 — Created a new capability plugin for Notion integration
+- 17:40 — User said "remember I prefer pnpm over npm" → updated preferences.md
+```
+
+## How Episodes Are Used
+
+### Context Assembly
+
+The `prefrontal` module loads the most recent 3 days of episodes by default during context assembly. These pass through the RAS for relevance scoring — only entries that match the current conversation topic make it into the final context.
+
+### Consolidation Input
+
+Episodes are the raw input for nightly consolidation. The brainstem scheduler reads episode files, sends them to an LLM for summarization, and produces a compressed weekly file. After consolidation, episodes remain on disk (they're never deleted automatically).
+
+### Cortex Search
+
+All episode files are indexed by the cortex (SQLite FTS5). When you ask "what did we discuss about auth last week?", the cortex searches episode entries and returns matching fragments with BM25 relevance ranking.
+
+## Manual Editing
+
+Episode files are plain markdown. You can:
+
+- **Delete entries** you don't want remembered
+- **Add entries** to seed context (e.g., "- 09:00 — Started the new billing service project")
+- **Edit entries** to correct inaccuracies
+
+Changes are picked up by the brainstem file watcher and re-indexed in the cortex automatically.
+
+<Warning>
+  If you delete an episode file entirely, that day's history is gone from memory. The cortex will remove it from the search index on the next file-watch cycle.
+</Warning>
+
+## Configuration
+
+Episodes are always written — there's no toggle to disable them. They're the foundation of the entire memory system. However, you can control how many days of episodes load into context:
+
+```json
+// config.json
+{
+  "memory": {
+    "episodeDaysInContext": 3
+  }
+}
+```
+
+<Tip>
+  Increase `episodeDaysInContext` if you have long-running projects and want more historical context. Decrease it if your conversations are mostly independent and you want to save token budget for other memory tiers.
+</Tip>

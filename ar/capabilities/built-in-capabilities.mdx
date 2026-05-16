@@ -1,52 +1,323 @@
 ---
 title: "القدرات المضمَّنة"
-description: "القدرات التي تأتي مع Wolffish افتراضيًا"
+description: "أكثر من 20 قدرة تأتي مع Wolffish افتراضياً"
 ---
 
 # القدرات المضمَّنة
 
-تأتي هذه القدرات ضمن مساحة العمل الافتراضية عند إنشاء Wolffish لمجلد `~/.wolffish/workspace/` عند التشغيل الأول.
+تأتي هذه القدرات ضمن مساحة العمل الافتراضية عند إنشاء Wolffish لمجلد `~/.wolffish/workspace/` عند التشغيل الأول. كل قدرة تتواجد في مجلدها الخاص تحت `brain/cerebellum/`.
 
-## shell
+<Note>
+**بدون حواجز اصطناعية.** بُني Wolffish لنماذج أذكى وأكثر قدرة. أزلنا المهل الزمنية المشفرة وحدود النتائج والقيود التعسفية من جميع إضافات القدرات. النموذج يقرر متى يضع مهلة زمنية وكم نتيجة يطلب. الأوامر تعمل حتى تنتهي طبيعياً. الحدود الوحيدة المتبقية هي حماية الذاكرة من النفاد (100MB للمستندات، 500MB للصوت، 100KB مخزن الإخراج) — تحمي الذاكرة، لا تقيّد الوظائف.
+</Note>
 
-**النوع:** إضافة
+## النظام الأساسي
 
-تغلّف `child_process` في Node.js لتنفيذ أوامر الشل. توفر أداة `shell_exec` مع معامل `command` (سلسلة نصية) ومعامل اختياري `background` (قيمة منطقية) للعمليات المنفصلة.
+<AccordionGroup>
+  <Accordion title="shell — تنفيذ أوامر الشل" defaultOpen>
+    **النوع:** إضافة | **المحفزات:** run, execute, command, terminal, shell, bash, npm, npx, git, pip, docker, curl
 
-تحجب أنماط الخطر الأوامر المدمرة مثل `rm -rf /` و`sudo rm` و`chmod 777`. تتطلب أنماط التأكيد موافقة لعمليات مثل `npm install` و`git push` و`docker rm`.
+    تغلّف `child_process` في Node.js لتنفيذ أوامر الشل. الأداة المحورية التي تعتمد عليها العديد من القدرات الأخرى.
 
-## filesystem
+    **الأدوات:**
+    - `shell_exec` — تشغيل أمر مع دعم اختياري لمسار العمل، المهلة الزمنية (افتراضي 120 ثانية، الحد الأدنى 60 ثانية)، ووضع الخلفية
 
-**النوع:** إضافة
+    **الأمان:**
+    - **حظر:** `mkfs`، `dd if=` (تدمير على مستوى القرص)
+    - **مدمر:** `rm -rf`، `sudo` (يتطلب موافقة)
+    - **تأكيد:** تثبيت الحزم، عمليات docker
 
-تغلّف `fs` في Node.js لعمليات الملفات. توفر ثلاث أدوات:
+    وضع الخلفية (`background: true`) يفصل العملية ويعيد رقم PID فورًا — استخدمه لخوادم التطوير والمراقبين والعمليات طويلة التشغيل.
+  </Accordion>
 
-- `file_read` — قراءة محتوى الملف
-- `file_write` — كتابة محتوى إلى ملف (ينشئ أو يستبدل)
-- `file_patch` — تطبيق تعديلات موجَّهة على ملف موجود
+  <Accordion title="filesystem — قراءة وكتابة وتعديل الملفات">
+    **النوع:** إضافة | **المحفزات:** file, read, write, edit, create, save, open, patch, modify, folder, directory
 
-## git
+    تغلّف `fs` في Node.js لعمليات الملفات الدقيقة دون الحاجة للشل.
 
-**النوع:** مهارة نقية (بدون إضافة)
+    **الأدوات:**
+    - `file_read` — قراءة محتوى الملف مع نطاق أسطر اختياري
+    - `file_write` — إنشاء أو استبدال ملف (يدعم وضع الإلحاق)
+    - `file_patch` — البحث والاستبدال لنص حرفي في ملف
 
-توفر تعليمات git لنموذج اللغة عبر SKILL.md. يستخدم نموذج اللغة `shell_exec` لتشغيل أوامر git. تشمل التعليمات استخدام تنسيق الالتزام التقليدي، وتشغيل `git status` أولًا، وعرض التغييرات قبل الالتزام.
+    يُفضَّل استخدام هذه الأدوات بدلاً من `shell_exec` لعمليات الملفات — فهي أسرع وأكثر أمانًا وتنتج سجلات تدقيق أنظف.
+  </Accordion>
 
-## introspect
+  <Accordion title="package-manager — تثبيت الحزم عبر المنصات">
+    **النوع:** إضافة | **المحفزات:** install, package, brew, winget, apt, dependency
 
-**النوع:** إضافة
+    يكتشف ويستخدم مدير الحزم المناسب للنظام: Homebrew (macOS)، winget (Windows)، apt (Debian/Ubuntu)، dnf (Fedora/RHEL).
 
-قدرة الوعي الذاتي. توفر ثلاث أدوات:
+    **الأدوات:**
+    - `pkg_check` — فحص مدير الحزم المتاح
+    - `pkg_install_manager` — تثبيت Homebrew على macOS إن لم يكن موجودًا
+    - `pkg_install` — تثبيت حزمة مع حل الاسم المناسب لكل منصة
 
-- `wolffish_status` — أعداد المهام الحالية، ووقت التشغيل، والمزودين النشطين
-- `wolffish_performance` — معدلات النجاح من ملاحظات basalganglia
-- `wolffish_memory` — ملخصات الحلقات الأخيرة وإحصائيات الذاكرة
+    القدرات الأخرى تُعلن عن اعتماداتها عبر حقل `packages` في SKILL.md — ومدير الحزم يحل الاسم الصحيح لكل منصة.
+  </Accordion>
 
-عندما تسأل "كيف حالك؟" أو "ماذا كنت تفعل؟"، يستدعي نموذج اللغة هذه الأدوات لقراءة حالته الخاصة.
+  <Accordion title="node — بيئة تشغيل Node.js">
+    **النوع:** إضافة | **المحفزات:** node, npm, npx, nvm, javascript, js, typescript, ts
 
-## تعديل القدرات المضمَّنة
+    يتحقق من تثبيت Node.js ويثبّته عبر مدير الحزم إن لم يكن موجودًا.
 
-كل القدرات المضمَّنة هي مجرد مجلدات في مساحة عملك. يمكنك تحرير ملفات SKILL.md الخاصة بها لتغيير السلوك، أو إضافة أنماط خطر جديدة، أو تعديل تعليمات الأدوات. تسري التغييرات على الرسالة التالية — لا حاجة لإعادة التشغيل.
+    **الأدوات:**
+    - `node_check` — التحقق من تثبيت Node.js والحصول على الإصدار
+    - `node_install` — تثبيت Node.js عبر مدير حزم النظام
+
+    بعد التثبيت، استخدم `shell_exec` لأوامر `node` و`npm` و`npx`.
+  </Accordion>
+</AccordionGroup>
+
+## الويب والبحث
+
+<AccordionGroup>
+  <Accordion title="web-search — البحث في الويب وقراءة الصفحات">
+    **النوع:** إضافة | **المحفزات:** search, google, look up, find online, web, browse, latest, news, documentation
+
+    بحث ويب واسترجاع صفحات للحصول على معلومات حديثة.
+
+    **الأدوات:**
+    - `web_search` — البحث في الويب، يُعيد العناوين والمقتطفات والروابط (حتى 10 نتائج)
+    - `web_fetch` — جلب النص الكامل لصفحة ويب (حتى 15000 حرف)
+
+    استخدم `web_search` للاكتشاف، ثم `web_fetch` لقراءة نتائج محددة بالتفصيل. إذا تم تكوين مفتاح Brave API في المتغيرات، يفضل الوكيل أداة بحث Brave بدلاً من ذلك.
+  </Accordion>
+
+  <Accordion title="browser — أتمتة المتصفح بدون واجهة">
+    **النوع:** إضافة | **المحفزات:** browser, web, website, navigate, login, scrape, screenshot, form, click, automate
+
+    يُطلق نسخة Chromium بدون واجهة للمهام التفاعلية — ملء النماذج، النقر على الأزرار، التنقل في تطبيقات الصفحة الواحدة، واستخراج المحتوى المُنشأ بـ JavaScript.
+
+    **الأدوات:**
+    - `browser_launch` — بدء جلسة متصفح
+    - `browser_navigate` — الانتقال إلى رابط
+    - `browser_click` — النقر على عنصر
+    - `browser_type` — كتابة نص في حقل إدخال
+    - `browser_screenshot` — التقاط الصفحة الحالية
+    - `browser_evaluate` — تنفيذ JavaScript في سياق الصفحة
+    - `browser_close` — إنهاء الجلسة
+
+    استخدم `web_fetch` للصفحات الثابتة — استخدم المتصفح فقط عندما تحتاج للتفاعل.
+  </Accordion>
+</AccordionGroup>
+
+## المستندات والوسائط
+
+<AccordionGroup>
+  <Accordion title="document — مستندات Word والنصوص المنسقة">
+    **النوع:** إضافة | **المحفزات:** document, word, docx, report, letter, memo, template, convert document
+
+    قراءة وإنشاء وتعديل وتحويل المستندات (docx, html, markdown, نص عادي).
+
+    **الأدوات:**
+    - `document_read` — استخراج المحتوى كنص أو HTML أو Markdown
+    - `document_create` — إنشاء ملف .docx مع عناوين وفقرات وجداول وصور
+    - `document_modify` — تعديل المستندات الموجودة
+    - `document_convert` — التحويل بين الصيغ
+    - `document_merge` — دمج مستندات متعددة
+  </Accordion>
+
+  <Accordion title="pdf — إنشاء ومعالجة ملفات PDF">
+    **النوع:** إضافة | **المحفزات:** pdf, merge pdf, split pdf, watermark, form fill, encrypt pdf, compress pdf
+
+    حزمة أدوات PDF كاملة مع دعم الاتجاه من اليمين لليسار والعربية.
+
+    **الأدوات:**
+    - `pdf_read` — استخراج النص والبيانات الوصفية والبنية
+    - `pdf_create` — إنشاء ملفات PDF مع عناوين وفقرات وصور وجداول (يدعم RTL مع خطوط مخصصة)
+    - `pdf_merge` — دمج عدة ملفات PDF
+    - `pdf_split` — استخراج نطاقات صفحات في ملفات منفصلة
+    - `pdf_secure` — تشفير/فك تشفير بكلمات مرور
+    - `pdf_compress` — تقليل حجم الملف
+    - `pdf_watermark` — إضافة علامات مائية نصية
+  </Accordion>
+
+  <Accordion title="spreadsheet — ملفات Excel و CSV">
+    **النوع:** إضافة | **المحفزات:** spreadsheet, excel, xlsx, csv, tsv, table, data, formula, chart
+
+    قراءة وإنشاء وتعديل وتحليل ملفات جداول البيانات.
+
+    **الأدوات:**
+    - `spreadsheet_read` — قراءة xlsx/csv/tsv مع اختيار ورقة ونطاق خلايا اختياري
+    - `spreadsheet_create` — إنشاء جداول بيانات جديدة مع أوراق وأعمدة وصفوف وأنماط متعددة
+    - `spreadsheet_modify` — تعديل الملفات الموجودة
+    - `spreadsheet_analyze` — حساب الإحصائيات والملخصات
+  </Accordion>
+
+  <Accordion title="ffmpeg — معالجة الصوت والفيديو">
+    **النوع:** إضافة | **المحفزات:** ffmpeg, video, audio, convert, transcode, compress
+
+    يغلّف واجهة FFmpeg لمعالجة الوسائط المتعددة.
+
+    **الأدوات:**
+    - `ffmpeg_check` — التحقق من تثبيت ffmpeg
+    - `ffmpeg_install` — التثبيت عبر مدير الحزم
+    - `ffmpeg_run` — تشغيل أي أمر ffmpeg
+
+    يتطلب تثبيت ffmpeg على النظام. القدرة تتحقق تلقائيًا وتعرض التثبيت.
+  </Accordion>
+</AccordionGroup>
+
+## الصوت
+
+<AccordionGroup>
+  <Accordion title="speech-to-text — تحويل الكلام إلى نص مع Whisper">
+    **النوع:** إضافة | **المحفزات:** transcribe, speech to text, stt, whisper, audio to text, dictation
+
+    تحويل الكلام إلى نص محليًا باستخدام OpenAI Whisper. يدعم أكثر من 99 لغة مع كشف تلقائي. يعمل بالكامل محليًا — بدون مفاتيح API، بدون سحابة.
+
+    **الأدوات:**
+    - `stt_transcribe` — نسخ ملف صوتي من مسار محدد
+    - `stt_transcribe_upload` — نسخ ملف تم رفعه في المحادثة الحالية
+
+    النماذج المتاحة: tiny، base (افتراضي)، small، medium، large. النماذج الأكبر أكثر دقة لكن أبطأ.
+  </Accordion>
+
+  <Accordion title="text-to-speech — إنشاء مذكرات صوتية">
+    **النوع:** إضافة | **المحفزات:** voice, speak, say, audio, read aloud, voice memo, tts
+
+    تحويل النص إلى كلام عصبي لإنشاء ردود منطوقة ومذكرات صوتية.
+
+    **الأدوات:**
+    - `voice_generate` — تحويل النص إلى MP3 (يُعيد مسار الملف)
+    - `voice_respond` — الرد بالكامل كمذكرة صوتية (الصوت هو الرد)
+    - `voice_list` — عرض جميع ملفات المذكرات الصوتية
+
+    الأصوات تشمل en-US-AriaNeural (أنثى)، en-US-GuyNeural (ذكر)، ar-SA-HamedNeural (عربي ذكر)، ar-SA-ZariyahNeural (عربية أنثى). يستخدم edge-tts.
+  </Accordion>
+</AccordionGroup>
+
+## التحكم بالإصدارات والبرمجة
+
+<AccordionGroup>
+  <Accordion title="git — عمليات Git (مهارة نقية)">
+    **النوع:** مهارة نقية (بدون إضافة) | **المحفزات:** git, commit, branch, merge, push, pull, PR, diff, stash, rebase
+
+    يعلّم نموذج اللغة كيفية استخدام `shell_exec` لعمليات Git وفق تفضيلات المستخدم. التعليمات تشمل:
+
+    - تشغيل `git status` دائمًا قبل إجراء تغييرات
+    - استخدام تنسيق Conventional Commits: `type(scope): subject`
+    - عرض التغييرات ورسائل الالتزام المقترحة قبل التنفيذ
+    - تسمية الفروع: بادئات `feature/`، `fix/`، `chore/` مع kebab-case
+
+    بما أنها مهارة نقية، فليس لها إضافة — تعتمد على قدرة shell.
+  </Accordion>
+
+  <Accordion title="github — تكامل GitHub API">
+    **النوع:** إضافة | **المحفزات:** github, pull request, PR, issue, repo, CI, actions, workflow, release, gist
+
+    وصول كامل لـ GitHub API عبر Octokit. يتطلب رمز وصول شخصي (الإعدادات > GitHub).
+
+    **الأدوات:** عرض المستودعات، إنشاء/قراءة/تحديث Issues، إنشاء/عرض/دمج PRs، عرض الفروع، تشغيل Workflows، إنشاء الإصدارات، إدارة Gists، إدارة التسميات/المعالم، مراجعة PRs، عرض الإشعارات.
+
+    راجع [تكامل GitHub](/ar/integrations/github) للإعداد والاستخدام الكامل.
+  </Accordion>
+</AccordionGroup>
+
+## الخدمات الخارجية
+
+<AccordionGroup>
+  <Accordion title="google — Google Workspace">
+    **النوع:** إضافة | **المحفزات:** google, gmail, email, inbox, drive, calendar, events, contacts, tasks, sheets
+
+    Gmail، Drive، Calendar، Contacts، Tasks، و Sheets عبر OAuth. دعم حسابات متعددة.
+
+    **الأدوات:** بحث/قراءة/إرسال/رد/أرشفة Gmail، عرض/رفع/تنزيل Drive، عمليات CRUD للتقويم، جهات الاتصال، المهام، قراءة/كتابة Sheets.
+
+    راجع [تكامل Google Workspace](/ar/integrations/google-workspace) للإعداد الكامل.
+  </Accordion>
+
+  <Accordion title="notion — صفحات وقواعد بيانات Notion">
+    **النوع:** إضافة | **المحفزات:** notion, workspace, wiki, knowledge base, database, page, kanban, board
+
+    قراءة وإنشاء وإدارة محتوى Notion عبر Notion API.
+
+    **الأدوات:** بحث، قراءة الصفحات، قراءة الكتل، إنشاء الصفحات، تحديث الصفحات، إلحاق الكتل، إنشاء/استعلام قواعد البيانات، إضافة التعليقات.
+
+    راجع [تكامل Notion](/ar/integrations/notion) للإعداد الكامل.
+  </Accordion>
+
+  <Accordion title="cloudflared — كشف الخدمات المحلية">
+    **النوع:** إضافة | **المحفزات:** cloudflare, tunnel, cloudflared, expose, public url
+
+    إنشاء أنفاق Cloudflare سريعة لكشف المنافذ المحلية على الإنترنت.
+
+    **الأدوات:**
+    - `cloudflared_check` — فحص تثبيت cloudflared
+    - `cloudflared_install` — التثبيت عبر مدير الحزم
+    - `cloudflared_tunnel` — إنشاء نفق لمنفذ محلي (يُعيد رابطًا عامًا)
+
+    يتطلب دائمًا تأكيد المستخدم قبل كشف خدمة محلية.
+  </Accordion>
+</AccordionGroup>
+
+## أتمتة سطح المكتب
+
+<AccordionGroup>
+  <Accordion title="computer-use — التفاعل مع الشاشة">
+    **النوع:** إضافة | **المحفزات:** screenshot, click, screen, desktop, mouse, keyboard, computer use, automate, UI
+
+    أتمتة سطح المكتب للمهام البصرية — لقطات شاشة، نقرات الماوس، كتابة لوحة المفاتيح، التمرير.
+
+    **الأدوات:**
+    - `computer_screenshot` — التقاط الشاشة الكاملة
+    - `computer_mouse_move` — تحريك المؤشر
+    - `computer_mouse_click` — النقر في موقع محدد
+    - `computer_keyboard_type` — كتابة نص
+    - `computer_keyboard_press` — ضغط مجموعات مفاتيح
+    - `computer_scroll` — التمرير
+
+    يجب تفعيله في الإعدادات > Computer Use. يرى الوكيل لقطات الشاشة ويمكنه التفاعل مع أي تطبيق.
+  </Accordion>
+</AccordionGroup>
+
+## المرح
+
+<AccordionGroup>
+  <Accordion title="memes — إنشاء والبحث عن ميمز">
+    **النوع:** إضافة | **المحفزات:** meme, funny, gif, laugh, humor, joke, celebrate, lol
+
+    إنشاء ميمز بتعليقات من قوالب شائعة أو البحث عن صور GIF للردود.
+
+    **الأدوات:**
+    - `meme_generate` — إنشاء ميم من قالب (drake, fry, buzz, distracted-boyfriend, this-is-fine, إلخ)
+    - `meme_templates` — عرض القوالب المتاحة
+    - `gif_search` — البحث عن صور GIF
+    - `gif_trending` — الحصول على الصور الرائجة
+    - `add_to_chat` — إدراج الميم/GIF في المحادثة
+
+    يستخدم memegen (بدون إعداد) أو imgflip (مع بيانات اعتماد).
+  </Accordion>
+
+  <Accordion title="introspect — الوعي الذاتي">
+    **النوع:** إضافة | **المحفزات:** status, health, performance, how are you, what do you know, uptime, stats
+
+    يتيح لـ Wolffish الإجابة عن أسئلة حول حالته بقراءة ملفات مساحة العمل.
+
+    **الأدوات:**
+    - `wolffish_status` — وقت التشغيل، المزود النشط، القدرات المحمَّلة، صحة النظام
+    - `wolffish_performance` — معدلات نجاح المهام، الأدوات الأكثر استخدامًا
+    - `wolffish_memory` — مواضيع المحادثات الأخيرة ومجالات المعرفة
+
+    للقراءة فقط — لا يعدل مساحة العمل أبدًا. اسأل "كيف حالك؟" للحصول على بيانات حقيقية، لا مجاملات.
+  </Accordion>
+</AccordionGroup>
+
+## تخصيص القدرات
+
+القدرات المضمَّنة تُدار وتُحدَّث بواسطة Wolffish — لا تعدّلها مباشرة، فتغييراتك ستُكتب فوقها عند التحديث التالي. بدلاً من ذلك:
+
+- **عطّل** قدرة مضمَّنة من الإعدادات إن لم تحتجها
+- **انسخها** — انسخ المجلد باسم جديد، ثم عدّل النسخة كما تشاء
+- **أنشئ قدرتك الخاصة** من الصفر باتباع نفس البنية
+
+تسري التغييرات على القدرات المخصصة على الرسالة التالية — لا حاجة لإعادة التشغيل.
 
 <Warning>
-  إذا حذفت قدرة مضمَّنة، فلن يُعيد Wolffish إنشاءها تلقائيًا. احتفظ بنسخة احتياطية أو استخدم git لإدارة إصدار مساحة عملك.
+  القدرات المخصصة لا تُحفظ احتياطيًا تلقائيًا. إذا حذفت قدرة أنشأتها أنت، فستختفي — ليس لدى Wolffish نسخة منها. استخدم git أو احتفظ بنسخة احتياطية يدوية من مجلد `brain/cerebellum/`. القدرات المضمَّنة تُستعاد تلقائيًا دائمًا عند التشغيل.
 </Warning>
+
+<Tip>
+  ابدأ بقراءة SKILL.md لأي قدرة مضمَّنة لفهم النمط. ثم أنشئ قدرتك الخاصة باتباع نفس البنية. راجع [إنشاء القدرات](/ar/extending/creating-capabilities) لدليل خطوة بخطوة.
+</Tip>

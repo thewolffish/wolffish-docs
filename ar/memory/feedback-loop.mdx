@@ -1,0 +1,142 @@
+---
+title: "حلقة التغذية الراجعة"
+description: "كيف يتعلم basalganglia من النتائج — الموافقات والرفض والنجاحات والإخفاقات"
+---
+
+# حلقة التغذية الراجعة
+
+الذاكرة تُخبر Wolffish بما حدث. حلقة التغذية الراجعة تُخبره بما *نجح*. وحدة basalganglia تُسجِّل نتيجة كل تفاعل — سواء نجحت استدعاءات الأدوات، أو وافقت أو رفضت عمليات مُعلَّمة، وما هي الأساليب التي أنتجت نتائج جيدة. بمرور الوقت، يُبني هذا تفضيلات سلوكية مُتعلَّمة بدون برمجة صريحة.
+
+## الموقع
+
+```
+~/.wolffish/workspace/brain/basalganglia/YYYY-MM-DD.md
+```
+
+تُكتب إدخالات التغذية الراجعة في ملف واحد لكل يوم، بالإلحاق فقط. نتائج كل يوم تتراكم في ملف ذلك اليوم، والملفات القديمة تُحفظ. عندما يحتاج الوكيل سياق التغذية الراجعة الأخيرة، يُجمّع آخر N يوم من الملفات.
+
+## أربعة أنواع من النتائج
+
+| النتيجة | المُحفِّز | المعنى |
+|---|---|---|
+| `success` | استدعاء أداة اكتمل بدون خطأ | هذا الأسلوب نجح |
+| `failure` | استدعاء أداة أعاد خطأ أو حالة خطأ | هذا الأسلوب لم ينجح |
+| `approval` | المستخدم وافق على استدعاء أداة مُعلَّم (مستوى `confirm` في amygdala) | المستخدم يثق بهذه العملية |
+| `denial` | المستخدم رفض استدعاء أداة مُعلَّم | المستخدم لا يريد هذا |
+
+## كيف تُسجَّل التغذية الراجعة
+
+بعد كل دورة محادثة، تُلحق `basalganglia.recordOutcome()` إدخالاً:
+
+```typescript
+// Simplified from src/main/runtime/basalganglia.ts
+async recordOutcome(entry: FeedbackEntry): Promise<void> {
+  const line = [
+    `- ${format(new Date(), 'yyyy-MM-dd HH:mm')}`,
+    `| ${entry.outcome}`,
+    `| ${entry.toolName}`,
+    `| ${truncate(JSON.stringify(entry.args), 200)}`,
+    `| ${entry.context}`,
+  ].join(' ')
+
+  await appendFile(this.feedbackPath, line + '\n')
+  this.corpus.emit('feedback.recorded', entry)
+}
+```
+
+كل إدخال يلتقط:
+- **الطابع الزمني** — متى حدث
+- **النتيجة** — نجاح، إخفاق، موافقة، أو رفض
+- **اسم الأداة** — أي قدرة تم استدعاؤها
+- **المعاملات المقتطعة** — ما تم تمريره (بحد أقصى ~200 حرف للقراءة)
+- **السياق** — وصف مختصر للمحادثة المحيطة
+
+## أمثلة على إدخالات التغذية الراجعة
+
+```markdown
+# Feedback Log
+
+- 2026-05-14 09:12 | success | shell_exec | {"command":"pnpm test","cwd":"/Users/you/project"} | ran tests after implementing useServerAction hook
+- 2026-05-14 09:30 | approval | shell_exec | {"command":"git push origin feat/server-actions","cwd":"/Users/you/project"} | user approved push to feature branch
+- 2026-05-15 11:45 | denial | shell_exec | {"command":"rm -rf node_modules","cwd":"/Users/you/project"} | user denied recursive delete in project root
+- 2026-05-15 14:20 | failure | web_search | {"query":"site:internal.company.com deployment docs"} | search returned no results, internal site not indexed
+- 2026-05-16 08:55 | success | shell_exec | {"command":"git commit -m \"feat: add billing webhook handler\"","cwd":"/Users/you/billing"} | conventional commit format used
+- 2026-05-16 10:03 | approval | file_write | {"path":"/Users/you/billing/src/webhooks.ts","content":"..."} | user approved writing new file to project
+```
+
+## كيف تؤثر التغذية الراجعة على السلوك
+
+وحدة prefrontal تقرأ إدخالات التغذية الراجعة أثناء تجميع السياق. يرى LLM أنماطاً فيما نجح وما لم ينجح، ويُعدِّل أسلوبه وفقاً لذلك.
+
+### الواجهة
+
+يُتيح basalganglia طريقتين لوحدة prefrontal:
+
+```typescript
+// Get learned preferences from feedback history
+getPreferences(): FeedbackPreference[]
+
+// Score a proposed approach based on historical outcomes
+scoreApproach(toolName: string, argsPattern: string): ApproachScore
+```
+
+### ما يتعلمه LLM
+
+بمرور الوقت، تظهر أنماط من التغذية الراجعة المتراكمة:
+
+<AccordionGroup>
+  <Accordion title="تفضيلات أسلوب الالتزام">
+    بعد عدة نتائج `success` على التزامات بتنسيق conventional (`feat:`، `fix:`، `chore:`)، يتعلم LLM استخدام هذا التنسيق دائماً. إذا تم `denial` لالتزام غير conventional، فهذا يُعزز التفضيل.
+  </Accordion>
+  <Accordion title="العمليات الآمنة">
+    إذا وافق المستخدم باستمرار (`approves`) على دفع git إلى فروع الميزات، يتعلم Wolffish أن هذه عمليات منخفضة المخاطر. إذا رفض المستخدم باستمرار (`denies`) الدفع القسري، يتعلم تجنب اقتراحها — أو تعليمها بشكل أبرز.
+  </Accordion>
+  <Accordion title="التعافي من الأخطاء">
+    بعد `failure` من أسلوب معين (مثلاً: البحث في موقع داخلي غير مُفهرَس)، يتعلم LLM تجربة أساليب بديلة في المرة القادمة (مثلاً: سؤال المستخدم عن الرابط مباشرة).
+  </Accordion>
+  <Accordion title="تفضيلات الأدوات">
+    إذا نجحت أوامر `pnpm` دائماً لكن تم رفض أوامر `npm` مرة، يتعلم LLM تفضيل مدير الحزم الخاص بك من النتائج — وليس فقط من `preferences.md`.
+  </Accordion>
+</AccordionGroup>
+
+## ينمو معك
+
+هذه هي الآلية التي تجعل Wolffish تكيفياً بمرور الوقت. إنه لا يتذكر الحقائق فقط (هذا ما تفعله ملفات المعرفة) — بل يتذكر ما *نجح عملياً*. هذا المزيج يُنشئ وكيلاً:
+
+1. **يعرف تفضيلاتك** (المعرفة) — ما قلت أنك تريده
+2. **يعرف ما ينجح فعلاً** (التغذية الراجعة) — ما أنتج نتائج جيدة
+3. **يتجنب الأخطاء السابقة** (سجلات الإخفاق) — ما لم ينجح سابقاً
+
+<Tip>
+  حلقة التغذية الراجعة هي الأقوى لأنماط استخدام الأدوات. إذا وجدت Wolffish يقترح أسلوباً لا تحبه باستمرار، ارفضه مرة صراحة واشرح السبب. الرفض + السياق يُسجَّل ويُشكِّل السلوك المستقبلي.
+</Tip>
+
+## فحص وتعديل التغذية الراجعة
+
+ملف التغذية الراجعة هو Markdown عادي. يمكنك:
+
+- **قراءته** لفهم لماذا يتصرف Wolffish بطريقة معينة
+- **حذف إدخالات** لـ "إلغاء تعلُّم" نمط (مثلاً: حذف رفضات قديمة لم تعد سارية)
+- **إضافة إدخالات** لتغذية السلوك (مثلاً: إضافة رفض لـ `rm -rf /` حتى لو لم يحدث أبداً)
+
+```bash
+# View today's feedback
+cat ~/.wolffish/workspace/brain/basalganglia/$(date +%Y-%m-%d).md
+
+# View recent days
+ls -la ~/.wolffish/workspace/brain/basalganglia/
+```
+
+<Warning>
+  حذف جميع الملفات في مجلد basalganglia يُعيد تعيين جميع التفضيلات السلوكية المُتعلَّمة. سيظل لدى Wolffish ملفات المعرفة والأحداث، لكنه يفقد إحساسه بما نجح وما لم ينجح. هذه إعادة تعيين كاملة لنظام المكافآت فقط.
+</Warning>
+
+## التغذية الراجعة مقابل المعرفة
+
+| الجانب | ملفات المعرفة | حلقة التغذية الراجعة |
+|---|---|---|
+| تُخزِّن | حقائق وتفضيلات | نتائج وأنماط |
+| تُكتب بواسطة | ترقية LLM + كتابة مباشرة | تلقائياً بعد كل دورة محادثة |
+| تُجيب على | "ماذا يريد المستخدم؟" | "ما الذي ينجح فعلاً؟" |
+| مثال | "المستخدم يفضل pnpm" | "pnpm install نجح 47 مرة، npm رُفض مرة واحدة" |
+| التعديل | شائع ومُشجَّع | نادر، غالباً للتصحيحات |

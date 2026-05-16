@@ -1,0 +1,250 @@
+---
+title: "ناقل الأحداث (Corpus)"
+description: "كيف تتواصل وحدات الدماغ عبر أحداث مُصنّفة بنظام النشر والاشتراك"
+---
+
+# ناقل الأحداث (Corpus)
+
+يربط corpus callosum جميع مناطق الدماغ. لا تستورد الوحدات بعضها البعض أبداً — بل تتواصل حصرياً عبر أحداث مُصنّفة على corpus. هذا يبقي النظام معيارياً وقابلاً للفحص وسهل التوسيع.
+
+## البنية المعمارية
+
+مبني على [mitt](https://github.com/developit/mitt) — مُرسِل أحداث مُصنّف خفيف الوزن (200 بايت). كل وحدة تستقبل مثيل corpus الوحيد في مُنشئها:
+
+```typescript
+class MyModule {
+  constructor(private corpus: Corpus) {
+    this.corpus.on('input.received', this.handleInput.bind(this))
+  }
+}
+```
+
+يتم تهيئة corpus أولاً أثناء بدء التشغيل ويُمرَّر إلى جميع الوحدات الأخرى. لا تستورد أي وحدة وحدة أخرى مباشرة.
+
+## الاستخدام
+
+```typescript
+// Emit an event
+corpus.emit('tool.called', {
+  name: 'shell_exec',
+  args: { command: 'ls -la' },
+  taskId: 'TASK-42'
+})
+
+// Listen for an event
+corpus.on('tool.completed', (payload) => {
+  console.log(`${payload.name} finished in ${payload.duration}ms`)
+})
+
+// Listen for all events (wildcard)
+corpus.on('*', (type, payload) => {
+  log(`[${type}] ${JSON.stringify(payload)}`)
+})
+```
+
+<Info>
+  مُعالج أحرف البدل هو ما يُنتج ملفات السجل اليومية. كل حدث يمر عبر corpus يتم التقاطه وكتابته على القرص.
+</Info>
+
+## فئات الأحداث
+
+تم تعريف أكثر من 30 حدثاً مُصنّفاً في تعداد `CorpusEvent`. وهي تتجمع في هذه الفئات:
+
+### أحداث الإدخال
+
+| الحدث | صادر من | الحمولة |
+|---|---|---|
+| `input.received` | العملية الرئيسية | `{ content, channelId, conversationId }` |
+| `input.classified` | Prefrontal | `{ intent, confidence }` |
+| `input.routed` | Prefrontal | `{ provider, model }` |
+
+### أحداث السياق
+
+| الحدث | صادر من | الحمولة |
+|---|---|---|
+| `context.built` | Prefrontal | `{ tokens, sections }` |
+| `context.trimmed` | RAS | `{ before, after, dropped }` |
+
+### أحداث LLM
+
+| الحدث | صادر من | الحمولة |
+|---|---|---|
+| `llm.response` | Thalamus | `{ provider, model, tokens }` |
+| `llm.error` | Thalamus | `{ provider, error, willRetry }` |
+| `llm.token` | Thalamus | `{ delta }` |
+
+### أحداث الأدوات
+
+| الحدث | صادر من | الحمولة |
+|---|---|---|
+| `tool.called` | Motor | `{ name, args, taskId }` |
+| `tool.completed` | Motor | `{ name, output, duration, taskId }` |
+| `tool.failed` | Motor | `{ name, error, attempt, taskId }` |
+| `tool.parsed` | Wernicke | `{ calls }` |
+
+### أحداث الأمان
+
+| الحدث | صادر من | الحمولة |
+|---|---|---|
+| `safety.allowed` | Amygdala | `{ toolName, classification }` |
+| `safety.blocked` | Amygdala | `{ toolName, reason }` |
+| `safety.approved` | Amygdala | `{ toolName, channelId }` |
+| `safety.denied` | Amygdala | `{ toolName, channelId }` |
+
+### أحداث المهام
+
+| الحدث | صادر من | الحمولة |
+|---|---|---|
+| `task.created` | Motor | `{ taskId, toolName }` |
+| `task.started` | Motor | `{ taskId, attempt }` |
+| `task.stepCompleted` | Motor | `{ taskId, step, duration }` |
+| `task.completed` | Motor | `{ taskId, success, totalDuration }` |
+| `task.failed` | Motor | `{ taskId, error, attempts }` |
+| `task.stopped` | Motor | `{ taskId, reason }` |
+
+### أحداث الذاكرة
+
+| الحدث | صادر من | الحمولة |
+|---|---|---|
+| `memory.saved` | Hippocampus | `{ type, path }` |
+| `memory.consolidated` | Brainstem | `{ week, episodeCount }` |
+| `memory.promoted` | Brainstem | `{ topic, path }` |
+
+### أحداث الصحة
+
+| الحدث | صادر من | الحمولة |
+|---|---|---|
+| `health.ok` | Hypothalamus | `{ metrics }` |
+| `health.warning` | Hypothalamus | `{ resource, value, threshold }` |
+| `health.critical` | Hypothalamus | `{ resource, value, threshold }` |
+| `resource.low.context` | Hypothalamus | `{ used, max }` |
+| `resource.low.memory` | Hypothalamus | `{ used, max }` |
+| `resource.low.disk` | Hypothalamus | `{ used, max }` |
+
+### أحداث التعلم
+
+| الحدث | صادر من | الحمولة |
+|---|---|---|
+| `outcome.recorded` | Basal Ganglia | `{ type, toolName, args }` |
+| `preference.learned` | Basal Ganglia | `{ pattern, preference }` |
+
+### أحداث النظام
+
+| الحدث | صادر من | الحمولة |
+|---|---|---|
+| `scheduler.tick` | Brainstem | `{ jobName, schedule }` |
+| `watcher.changed` | Brainstem | `{ path, changeType }` |
+| `cortex.reindexed` | Cortex | `{ path, action }` |
+
+## تسجيل الأحداث
+
+يتم تسجيل كل حدث في ملفات Markdown يومية في `brain/corpus/YYYY-MM-DD.log.md`. يتم تجميع عمليات الكتابة في ذاكرة مؤقتة مدتها ثانيتان لتحسين الأداء:
+
+```markdown
+## 2026-05-16
+
+09:15:02 | input.received | {"content":"What PRs need review?","channelId":"desktop"}
+09:15:02 | context.built | {"tokens":7842,"sections":12}
+09:15:03 | input.routed | {"provider":"anthropic","model":"claude-sonnet-4-20250514"}
+09:15:04 | tool.called | {"name":"github_prs","args":{"state":"open"},"taskId":"TASK-89"}
+09:15:05 | safety.allowed | {"toolName":"github_prs","classification":"safe"}
+09:15:06 | tool.completed | {"name":"github_prs","duration":1204,"taskId":"TASK-89"}
+09:15:07 | llm.response | {"provider":"anthropic","tokens":342}
+09:15:07 | memory.saved | {"type":"episode","path":"episodes/2026-05-16.md"}
+```
+
+يتم تنظيف السجلات القديمة تلقائياً بعد 7 أيام لمنع النمو غير المحدود لاستخدام القرص.
+
+<Tip>
+  اقرأ سجلات corpus عند تصحيح سلوك غير متوقع. تُظهر لك التسلسل الدقيق للأحداث التي وقعت — أي وحدة فعلت ماذا ومتى.
+</Tip>
+
+## الاشتراك وإلغاء الاشتراك
+
+```typescript
+// Subscribe — returns an unsubscribe function
+const off = corpus.on('task.completed', (payload) => {
+  console.log('Task done:', payload.taskId)
+})
+
+// Unsubscribe when done
+off()
+```
+
+يستخدم مُشغّل الدور هذا النمط للاشتراك في الأحداث طوال مدة الدور، ثم يلغي الاشتراك في كتلة `finally`.
+
+## إضافة أحداث جديدة
+
+لإضافة نوع حدث جديد:
+
+1. أضفه إلى تعداد `CorpusEvent` في `src/main/runtime/corpus/corpus.ts`
+2. عرّف نوع حمولته في واجهة `CorpusEvents`
+3. أرسله من الوحدة المعنية
+4. اشترك فيه من أي وحدة تحتاج للتفاعل
+
+يتم تسجيل الحدث تلقائياً بواسطة مُعالج أحرف البدل — لا حاجة لتوصيل إضافي.
+
+## فوائد التصميم
+
+توفر بنية ناقل الأحداث:
+
+- **استقلال الوحدات**: يمكن تطوير واختبار وتحديث الوحدات بشكل مستقل
+- **قابلية مراقبة كاملة**: كل تفاعل يتم تسجيله مع طابع زمني
+- **سهولة التوسيع**: الوحدات الجديدة تشترك في الأحداث الموجودة دون تعديل المُنتجين
+- **قابلية الاختبار**: استخدم corpus وهمي في الاختبارات وتحقق من إرسال الأحداث بشكل صحيح
+
+## مثال عملي: مراقبة صحة Hypothalamus
+
+يوضح hypothalamus كيف تستخدم الوحدة corpus لمراقبة النظام بأكمله دون استيراد أي وحدة أخرى:
+
+```typescript
+class Hypothalamus {
+  private failureCount = 0
+  private lastContextTokens = 0
+
+  constructor(private corpus: Corpus) {
+    // Listen for problems from other modules
+    corpus.on('llm.error', () => {
+      this.failureCount++
+      if (this.failureCount > 5) {
+        corpus.emit('health.warning', {
+          resource: 'llm',
+          value: this.failureCount,
+          threshold: 5
+        })
+      }
+    })
+
+    corpus.on('context.built', (payload) => {
+      this.lastContextTokens = payload.tokens
+      if (payload.tokens > 180_000) {
+        corpus.emit('resource.low.context', {
+          used: payload.tokens,
+          max: 200_000
+        })
+      }
+    })
+
+    corpus.on('tool.failed', (payload) => {
+      if (payload.attempt >= 3) {
+        corpus.emit('health.warning', {
+          resource: 'tool',
+          value: payload.name,
+          threshold: 'max retries exceeded'
+        })
+      }
+    })
+
+    // Reset failure count on success
+    corpus.on('llm.response', () => {
+      this.failureCount = 0
+    })
+  }
+}
+```
+
+لا يلمس hypothalamus وحدات thalamus أو motor أو prefrontal مباشرة. بل يراقب سلوكها عبر الأحداث ويطلق أحداثه الخاصة عند تجاوز الحدود. يمكن لأي وحدة بعد ذلك التفاعل مع تحذيرات الصحة — يمكن لواجهة المستخدم عرض مؤشر، ويمكن لـ brainstem تشغيل مهمة تشخيصية، ويمكن لـ prefrontal تضمين سياق الصحة في المحث التالي.
+
+<Warning>
+  يجب أن تكون مُعالجات الأحداث سريعة وغير حاجبة. يجب تأجيل العمل الثقيل الناتج عن حدث (setTimeout أو queueMicrotask) لتجنب إبطاء مُنتج الحدث.
+</Warning>

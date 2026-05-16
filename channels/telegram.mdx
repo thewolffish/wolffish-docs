@@ -1,0 +1,131 @@
+---
+title: "Telegram Channel"
+description: "Connect Wolffish to Telegram as a personal bot"
+---
+
+# Telegram Channel
+
+The Telegram channel turns Wolffish into a personal bot that responds to your private messages. Same brain, same capabilities, accessible from any device with Telegram installed.
+
+## Setup
+
+<Tabs>
+  <Tab title="Step 1: Create Bot">
+    Open Telegram and message [@BotFather](https://t.me/BotFather):
+
+    ```
+    /newbot
+    ```
+
+    Follow the prompts to name your bot. BotFather will give you a token like:
+
+    ```
+    7123456789:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw
+    ```
+
+    Copy this token.
+  </Tab>
+  <Tab title="Step 2: Configure Wolffish">
+    In Wolffish, open **Settings > Telegram** and paste your bot token. Click **Connect**.
+
+    Wolffish will verify the token and confirm the connection. Your bot is now live.
+  </Tab>
+  <Tab title="Step 3: Start Chatting">
+    Open your bot in Telegram (search for its username) and send any message. Wolffish will respond through the same brain pipeline as the desktop UI.
+  </Tab>
+</Tabs>
+
+<Warning>
+  Keep your bot token secret. Anyone with the token can receive messages sent to your bot. If compromised, revoke it via BotFather with `/revoke` and reconfigure in Wolffish.
+</Warning>
+
+## Commands
+
+The bot recognizes these slash commands:
+
+| Command | Action |
+|---|---|
+| `/stop` | Cancel the currently running task |
+| `/new` | Start a fresh conversation |
+| `/resume` | Continue the previous conversation |
+| `/delete` | Delete the current conversation |
+| `/current` | Show which conversation is active |
+| `/status` | System report (model, memory usage, uptime) |
+| `/local` | Switch to local model (Ollama) |
+| `/cloud` | Switch to cloud model (Claude/OpenAI) |
+
+## Approval Flow
+
+When the amygdala flags a tool call as potentially dangerous, Wolffish sends an inline keyboard in Telegram:
+
+```
+Wolffish wants to execute:
+  shell_exec: rm -rf ./build/
+
+[Approve] [Deny]
+```
+
+Tap **Approve** to proceed or **Deny** to abort. The turn pauses until you respond — no timeout, no automatic approval.
+
+<Info>
+  Approval requests include the full tool name and arguments so you can make an informed decision. Dangerous commands (file deletion, network calls, system modifications) always require approval.
+</Info>
+
+## Conversation Management
+
+Each Telegram chat maps to a Wolffish conversation. The mapping is:
+
+- **Private chat with your bot** = one conversation thread
+- Use `/new` to start fresh (previous conversation is preserved in memory)
+- Use `/resume` to return to the last active conversation
+- Use `/delete` to remove the current conversation from history
+
+Conversations are shared across channels. A conversation started in Telegram appears in the Electron UI's conversation list, and vice versa.
+
+## File Handling
+
+The bot can receive and process:
+
+- **Images** — screenshots, photos, diagrams (processed via vision capabilities)
+- **Documents** — PDFs, text files, code files (content extracted and passed to the brain)
+- **Voice notes** — transcribed via STT and processed as text input
+
+Send a file with or without a caption. If you include a caption, it becomes the user message with the file as context. If no caption, Wolffish infers intent from the file content.
+
+## Response Formatting
+
+Wolffish formats responses using Telegram's HTML subset:
+
+```html
+<b>bold</b>
+<i>italic</i>
+<code>inline code</code>
+<pre>code block</pre>
+<a href="url">link text</a>
+```
+
+Long responses are split at logical boundaries (paragraph breaks, list items) to stay within Telegram's message length limits. Code blocks are preserved intact where possible.
+
+## Under the Hood
+
+The Telegram channel is built on the [grammy](https://grammy.dev/) library — a modern, TypeScript-first framework for building Telegram bots. Grammy handles:
+
+- Long polling for message updates
+- Inline keyboard management for approvals
+- File upload/download
+- Message formatting and splitting
+- Error recovery and reconnection
+
+## Sensitive Data Filter
+
+Wolffish includes an optional filter that discards messages containing credentials before they reach the agent. It is **off by default** — discussing secrets is a legitimate part of many workflows (setting up integrations, debugging auth, rotating keys).
+
+**Enable it:** Settings → Wolffish → Block sensitive data in messages
+
+When enabled, any incoming message matching a credential pattern is immediately discarded in its entirety. The turn does not process, nothing is stored, and the user receives a short notification. This applies equally to Desktop, Telegram, and WhatsApp.
+
+**Patterns detected:** passwords (`password:`, `my password is...`), API keys (`api_key:`, `secret_key:`), access tokens (`access_token:`, `bearer_token:`), SSH/RSA/PGP private keys (`-----BEGIN PRIVATE KEY-----`), private key phrases (`private_key:`, `ssh_key:`).
+
+<Note>
+  When the filter is off (default), messages are processed normally regardless of content. If you work with credentials frequently, this is expected behavior — store secrets in Settings → Variables instead of pasting them in chat.
+</Note>

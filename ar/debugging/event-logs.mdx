@@ -1,0 +1,167 @@
+---
+title: "سجلات الأحداث"
+description: "يسجل ناقل أحداث corpus كل حدث في ملفات Markdown يومية"
+---
+
+# سجلات الأحداث
+
+كل حدث يُطلق في Wolffish يتم تسجيله في ملف Markdown يومي. يمنحك هذا سجلاً زمنياً كاملاً لكل ما حدث — المدخلات والتصنيفات واستدعاءات LLM وتنفيذ الأدوات وقرارات الأمان وعمليات الذاكرة والمزيد.
+
+## الموقع
+
+```
+brain/corpus/YYYY-MM-DD.log.md
+```
+
+ملف واحد في اليوم. سجل اليوم دائماً في:
+```bash
+brain/corpus/$(date +%Y-%m-%d).log.md
+```
+
+## كيف يعمل
+
+يلفّ ناقل أحداث `corpus` كل استدعاء `emit()` بالتسجيل. يتم تخزين الأحداث مؤقتاً لمدة ثانيتين قبل الكتابة على القرص — ليس بالوقت الفعلي تماماً، لكنه قريب بما يكفي لتصحيح الأخطاء.
+
+<Info>
+يتم تنظيف سجلات الأحداث تلقائياً بعد 7 أيام. إذا كنت بحاجة للاحتفاظ بالسجلات لفترة أطول، انسخها خارج مجلد `corpus/` أو عدّل مدة الاحتفاظ في `config.json`.
+</Info>
+
+## أنواع الأحداث
+
+يُصدر النظام أكثر من 30 نوع حدث. إليك الأكثر فائدة لتصحيح الأخطاء:
+
+| الحدث | متى يُطلق |
+|---|---|
+| `input.received` | المستخدم يرسل رسالة |
+| `input.classified` | يتم تحديد نية الرسالة |
+| `context.built` | prefrontal ينتهي من تجميع السياق |
+| `llm.request` | يُرسل الطلب إلى مزود LLM |
+| `llm.response` | LLM يُرجع استجابة |
+| `llm.stream.start` | يبدأ البث |
+| `llm.stream.end` | يكتمل البث |
+| `tool.called` | LLM يطلب استدعاء أداة |
+| `tool.completed` | ينجح تنفيذ الأداة |
+| `tool.failed` | يفشل تنفيذ الأداة |
+| `safety.allowed` | amygdala يسمح بالعملية |
+| `safety.blocked` | amygdala يحظر العملية |
+| `safety.approved` | المستخدم يوافق على عملية محظورة |
+| `safety.denied` | المستخدم يرفض عملية محظورة |
+| `task.created` | motor يبدأ مهمة جديدة |
+| `task.step` | خطوة مهمة تكتمل |
+| `task.completed` | المهمة تنتهي بنجاح |
+| `task.failed` | المهمة تفشل بعد إعادة المحاولات |
+| `memory.saved` | hippocampus يحفظ حلقة |
+| `memory.retrieved` | hippocampus يسترجع شظايا |
+| `capability.loaded` | cerebellum يُحمّل قدرة |
+| `capability.error` | فشل تحميل قدرة |
+| `health.warning` | hypothalamus يكتشف مشكلة |
+| `health.critical` | صحة النظام متدهورة |
+
+## صيغة السجل
+
+كل إدخال يبدو هكذا:
+
+```markdown
+## 14:30:22.847 [input.received]
+- **turnId**: turn-a8f3c
+- **channel**: desktop
+- **content**: Can you check if the server is running?
+
+## 14:30:22.901 [input.classified]
+- **turnId**: turn-a8f3c
+- **intent**: tool_use
+- **confidence**: 0.94
+
+## 14:30:23.156 [context.built]
+- **turnId**: turn-a8f3c
+- **tokens**: 8420
+- **skills**: shell, filesystem
+- **memoryFragments**: 2
+
+## 14:30:24.302 [llm.response]
+- **turnId**: turn-a8f3c
+- **provider**: openai
+- **model**: gpt-4o
+- **toolCalls**: 1
+- **inputTokens**: 8420
+- **outputTokens**: 89
+
+## 14:30:24.310 [tool.called]
+- **turnId**: turn-a8f3c
+- **taskId**: TASK-1747
+- **tool**: shell_exec
+- **args**: {"command": "systemctl status myapp"}
+
+## 14:30:24.315 [safety.allowed]
+- **turnId**: turn-a8f3c
+- **tool**: shell_exec
+- **reason**: no danger_patterns matched
+
+## 14:30:25.102 [tool.completed]
+- **turnId**: turn-a8f3c
+- **taskId**: TASK-1747
+- **tool**: shell_exec
+- **duration**: 792ms
+- **exitCode**: 0
+
+## 14:30:25.108 [task.completed]
+- **turnId**: turn-a8f3c
+- **taskId**: TASK-1747
+- **steps**: 1
+- **totalDuration**: 792ms
+```
+
+## تتبع رسالة
+
+كل حدث يتضمن `turnId`. لمتابعة رسالة واحدة عبر خط الأنابيب بالكامل، ابحث عن معرف الدور:
+
+```bash
+grep -A 3 "turn-a8f3c" brain/corpus/2025-05-16.log.md
+```
+
+يُظهر لك هذا كل حدث مرتبط بذلك التفاعل بالترتيب الزمني.
+
+## سيناريوهات تصحيح شائعة
+
+<Tabs>
+  <Tab title="لماذا لم تُستدعَ الأداة؟">
+    ابحث في السجل عن معرف الدور وابحث عن:
+    1. `input.classified` — هل تم التعرف على النية كـ `tool_use`؟
+    2. `context.built` — هل تم تضمين مهارة القدرة؟
+    3. `llm.response` — هل أخرج النموذج عدد `toolCalls` أكبر من 0؟
+
+    إذا لم يُنتج النموذج استدعاء أداة، فالمشكلة في السياق (تحقق من لقطة التصحيح). إذا أنتج استدعاءً لكن لم يحدث شيء بعده، ابحث عن حدث `safety.blocked`.
+  </Tab>
+
+  <Tab title="لماذا تم الحظر؟">
+    ابحث عن أحداث `safety.blocked` بمعرف الدور المطابق:
+    ```bash
+    grep -B 1 -A 4 "safety.blocked" brain/corpus/2025-05-16.log.md
+    ```
+    حقل `reason` يخبرك أي تعبير نمطي من `danger_patterns` تطابق. إما عدّل النمط في SKILL.md أو أكّد العملية عند السؤال.
+  </Tab>
+
+  <Tab title="هل تم حفظ الذاكرة؟">
+    ابحث عن أحداث `memory.saved`:
+    ```bash
+    grep -A 3 "memory.saved" brain/corpus/2025-05-16.log.md
+    ```
+    إذا لم يكن هناك `memory.saved` لمحادثة ما، فإن LLM لم يُعلّم أي شيء كجدير بالتذكر، أو كانت المحادثة قصيرة جداً لتفعيل الحفظ الحلقي.
+  </Tab>
+</Tabs>
+
+## المراقبة المباشرة
+
+شاهد السجل في الوقت الفعلي أثناء التطوير:
+
+```bash
+tail -f ~/.wolffish/workspace/brain/corpus/$(date +%Y-%m-%d).log.md
+```
+
+<Tip>
+ادمج مع `grep --line-buffered` لتصفية أنواع أحداث محددة في الوقت الفعلي:
+
+```bash
+tail -f brain/corpus/$(date +%Y-%m-%d).log.md | grep --line-buffered "safety\|tool\."
+```
+</Tip>

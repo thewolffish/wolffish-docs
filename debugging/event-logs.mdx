@@ -1,0 +1,167 @@
+---
+title: "Event Logs"
+description: "The corpus event bus logs every event to daily markdown files"
+---
+
+# Event Logs
+
+Every event that fires in Wolffish is logged to a daily markdown file. This gives you a complete chronological record of everything that happened — inputs, classifications, LLM calls, tool executions, safety decisions, memory operations, and more.
+
+## Location
+
+```
+brain/corpus/YYYY-MM-DD.log.md
+```
+
+One file per day. Today's log is always at:
+```bash
+brain/corpus/$(date +%Y-%m-%d).log.md
+```
+
+## How It Works
+
+The `corpus` event bus wraps every `emit()` call with logging. Events are buffered for 2 seconds before flushing to disk — not quite real-time, but close enough for debugging.
+
+<Info>
+Event logs are auto-cleaned after 7 days. If you need to preserve logs for longer, copy them out of the `corpus/` directory or adjust the retention in `config.json`.
+</Info>
+
+## Event Types
+
+The system emits 30+ event types. Here are the most useful for debugging:
+
+| Event | When It Fires |
+|---|---|
+| `input.received` | User sends a message |
+| `input.classified` | Message intent is determined |
+| `context.built` | Prefrontal finishes assembling context |
+| `llm.request` | Request sent to LLM provider |
+| `llm.response` | LLM returns a response |
+| `llm.stream.start` | Streaming begins |
+| `llm.stream.end` | Streaming completes |
+| `tool.called` | LLM requests a tool call |
+| `tool.completed` | Tool execution succeeds |
+| `tool.failed` | Tool execution fails |
+| `safety.allowed` | Amygdala allows an operation |
+| `safety.blocked` | Amygdala blocks an operation |
+| `safety.approved` | User approves a blocked operation |
+| `safety.denied` | User denies a blocked operation |
+| `task.created` | Motor begins a new task |
+| `task.step` | A task step completes |
+| `task.completed` | Task finishes successfully |
+| `task.failed` | Task fails after retries |
+| `memory.saved` | Hippocampus saves an episode |
+| `memory.retrieved` | Hippocampus retrieves fragments |
+| `capability.loaded` | Cerebellum loads a capability |
+| `capability.error` | Capability fails to load |
+| `health.warning` | Hypothalamus detects an issue |
+| `health.critical` | System health is degraded |
+
+## Log Format
+
+Each entry looks like this:
+
+```markdown
+## 14:30:22.847 [input.received]
+- **turnId**: turn-a8f3c
+- **channel**: desktop
+- **content**: Can you check if the server is running?
+
+## 14:30:22.901 [input.classified]
+- **turnId**: turn-a8f3c
+- **intent**: tool_use
+- **confidence**: 0.94
+
+## 14:30:23.156 [context.built]
+- **turnId**: turn-a8f3c
+- **tokens**: 8420
+- **skills**: shell, filesystem
+- **memoryFragments**: 2
+
+## 14:30:24.302 [llm.response]
+- **turnId**: turn-a8f3c
+- **provider**: openai
+- **model**: gpt-4o
+- **toolCalls**: 1
+- **inputTokens**: 8420
+- **outputTokens**: 89
+
+## 14:30:24.310 [tool.called]
+- **turnId**: turn-a8f3c
+- **taskId**: TASK-1747
+- **tool**: shell_exec
+- **args**: {"command": "systemctl status myapp"}
+
+## 14:30:24.315 [safety.allowed]
+- **turnId**: turn-a8f3c
+- **tool**: shell_exec
+- **reason**: no danger_patterns matched
+
+## 14:30:25.102 [tool.completed]
+- **turnId**: turn-a8f3c
+- **taskId**: TASK-1747
+- **tool**: shell_exec
+- **duration**: 792ms
+- **exitCode**: 0
+
+## 14:30:25.108 [task.completed]
+- **turnId**: turn-a8f3c
+- **taskId**: TASK-1747
+- **steps**: 1
+- **totalDuration**: 792ms
+```
+
+## Tracing a Message
+
+Every event includes a `turnId`. To follow one message through the entire pipeline, grep for its turn ID:
+
+```bash
+grep -A 3 "turn-a8f3c" brain/corpus/2025-05-16.log.md
+```
+
+This shows you every event related to that interaction in chronological order.
+
+## Common Debugging Scenarios
+
+<Tabs>
+  <Tab title="Why wasn't the tool called?">
+    Search the log for the turn ID and look for:
+    1. `input.classified` — was the intent recognized as `tool_use`?
+    2. `context.built` — was the capability's skill included?
+    3. `llm.response` — did the model output a `toolCalls` count > 0?
+
+    If the model didn't produce a tool call, the issue is in the context (check the debug snapshot). If it did but nothing happened next, check for a `safety.blocked` event.
+  </Tab>
+
+  <Tab title="Why was it blocked?">
+    Search for `safety.blocked` events with the matching turn ID:
+    ```bash
+    grep -B 1 -A 4 "safety.blocked" brain/corpus/2025-05-16.log.md
+    ```
+    The `reason` field tells you which `danger_patterns` regex matched. Either adjust the pattern in the SKILL.md or confirm the operation when prompted.
+  </Tab>
+
+  <Tab title="Did memory save?">
+    Search for `memory.saved` events:
+    ```bash
+    grep -A 3 "memory.saved" brain/corpus/2025-05-16.log.md
+    ```
+    If there's no `memory.saved` for a conversation, the LLM didn't mark anything as worth remembering, or the conversation was too short to trigger episodic saving.
+  </Tab>
+</Tabs>
+
+## Live Monitoring
+
+Watch the log in real time during development:
+
+```bash
+tail -f ~/.wolffish/workspace/brain/corpus/$(date +%Y-%m-%d).log.md
+```
+
+<Tip>
+Combine with `grep --line-buffered` to filter for specific event types in real time:
+
+```bash
+tail -f brain/corpus/$(date +%Y-%m-%d).log.md | grep --line-buffered "safety\|tool\."
+```
+</Tip>

@@ -1,0 +1,175 @@
+---
+title: "Google Workspace"
+description: "Gmail, Drive, Calendar, Contacts, Tasks, and Sheets integration"
+---
+
+# Google Workspace
+
+The Google Workspace integration connects Wolffish to Gmail, Google Drive, Calendar, Contacts, Tasks, and Sheets. It supports multiple Google accounts and uses OAuth 2.0 for authentication.
+
+## Setup
+
+<Steps>
+  <Step title="Open Settings">
+    Navigate to Settings > Integrations > Google.
+  </Step>
+  <Step title="Authorize">
+    Click "Authorize" to start the OAuth flow. Your default browser opens to Google's consent screen.
+  </Step>
+  <Step title="Grant Permissions">
+    Approve the requested scopes. Wolffish requests read/write access to Gmail, Drive, Calendar, Contacts, Tasks, and Sheets.
+  </Step>
+  <Step title="Complete">
+    The browser redirects back to a local callback URL. Your tokens are stored in `config.json` and the account appears in Settings.
+  </Step>
+</Steps>
+
+<Note>
+  The OAuth tokens are stored locally in `~/.wolffish/workspace/config.json`. Wolffish uses a refresh token to silently renew access tokens when they expire — no re-authorization needed.
+</Note>
+
+## Multi-Account Support
+
+You can authorize multiple Google accounts. The `google_accounts` tool lists all connected accounts, and every other Google tool requires an explicit `account` parameter to specify which account to use.
+
+```
+User: "Check my email"
+LLM calls: google_accounts() → returns [{email: "work@company.com"}, {email: "personal@gmail.com"}]
+LLM calls: gmail_search({account: "work@company.com", query: "is:unread"})
+```
+
+If you only have one account, Wolffish still requires the `account` parameter for consistency and to avoid ambiguity if you add more accounts later.
+
+## Available Tools
+
+### Gmail
+
+| Tool | Description |
+|---|---|
+| `gmail_search` | Search emails with Gmail query syntax |
+| `gmail_read` | Read a specific email by ID |
+| `gmail_send` | Compose and send a new email |
+| `gmail_reply` | Reply to an existing email thread |
+| `gmail_forward` | Forward an email to another recipient |
+| `gmail_archive` | Archive an email (remove from inbox) |
+| `gmail_trash` | Move an email to trash |
+| `gmail_mark_read` | Mark an email as read |
+| `gmail_save_draft` | Save a draft without sending |
+
+### Google Drive
+
+| Tool | Description |
+|---|---|
+| `drive_list` | List files and folders |
+| `drive_upload` | Upload a local file to Drive |
+| `drive_download` | Download a file from Drive to local disk |
+| `drive_create_folder` | Create a new folder |
+| `drive_search` | Search files by name or content |
+
+### Google Calendar
+
+| Tool | Description |
+|---|---|
+| `calendar_list_events` | List upcoming events (with date range filter) |
+| `calendar_create_event` | Create a new calendar event |
+| `calendar_update_event` | Update an existing event |
+| `calendar_delete_event` | Delete an event |
+| `calendar_reschedule` | Move an event to a new time |
+
+### Google Contacts
+
+| Tool | Description |
+|---|---|
+| `contacts_list` | List all contacts |
+| `contacts_create` | Create a new contact |
+| `contacts_search` | Search contacts by name, email, or phone |
+
+### Google Tasks
+
+| Tool | Description |
+|---|---|
+| `tasks_list_tasklists` | List all task lists |
+| `tasks_list` | List tasks in a specific task list |
+| `tasks_create` | Create a new task |
+| `tasks_complete` | Mark a task as completed |
+| `tasks_delete` | Delete a task |
+
+### Google Sheets
+
+| Tool | Description |
+|---|---|
+| `sheets_read` | Read data from a spreadsheet range |
+| `sheets_write` | Write data to a spreadsheet range |
+| `sheets_create` | Create a new spreadsheet |
+| `sheets_update_cells` | Update specific cells |
+
+## Triggers
+
+The Google capability activates when your message matches any of these patterns:
+
+```
+email, inbox, gmail, send email, compose email, draft,
+drive, upload file, download file, google drive,
+calendar, schedule, meeting, event, appointment,
+contacts, address book, phone number,
+tasks, todo, task list, to-do,
+sheets, spreadsheet, google sheets
+```
+
+## Example Workflows
+
+<AccordionGroup>
+  <Accordion title="Check unread emails">
+    ```
+    You: "Check my email"
+    Wolffish: Lists your 10 most recent unread emails with sender, subject, and snippet.
+    ```
+  </Accordion>
+  <Accordion title="Schedule a meeting">
+    ```
+    You: "Schedule a meeting with Ali tomorrow at 2pm for 30 minutes"
+    Wolffish: Creates a calendar event, confirms the time and date.
+    ```
+  </Accordion>
+  <Accordion title="Upload a file to Drive">
+    ```
+    You: "Upload ~/Documents/report.pdf to my Drive"
+    Wolffish: Uploads the file and returns the Drive link.
+    ```
+  </Accordion>
+  <Accordion title="Search emails by sender">
+    ```
+    You: "Find emails from sarah@example.com about the project proposal"
+    Wolffish: Searches Gmail with the query and returns matching threads.
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Configuration Reference
+
+The Google integration stores its data in `config.json`:
+
+```json
+{
+  "integrations": {
+    "google": {
+      "accounts": [
+        {
+          "email": "you@gmail.com",
+          "accessToken": "ya29.a0AfH6SM...",
+          "refreshToken": "1//0eXyz...",
+          "expiresAt": 1700000000000
+        }
+      ]
+    }
+  }
+}
+```
+
+<Warning>
+  Do not manually edit tokens in `config.json` unless you know what you're doing. Use the Settings UI to add or remove accounts. Malformed tokens will cause silent auth failures.
+</Warning>
+
+<Tip>
+  If Google API calls start failing with 401 errors, go to Settings > Google and click "Re-authorize" to refresh your tokens. This typically happens if you revoke access from your Google Account security settings.
+</Tip>

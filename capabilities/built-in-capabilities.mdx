@@ -1,52 +1,373 @@
 ---
 title: "Built-in Capabilities"
-description: "Capabilities that ship with Wolffish by default"
+description: "All 20+ capabilities that ship with Wolffish by default"
 ---
 
 # Built-in Capabilities
 
-These capabilities are included in the default workspace when Wolffish creates `~/.wolffish/workspace/` on first launch.
+These capabilities are included in the default workspace when Wolffish creates `~/.wolffish/workspace/` on first launch. Each lives in its own folder under `brain/cerebellum/`.
 
-## shell
+<Note>
+**No artificial guardrails.** Wolffish is built for smarter, more capable models. We've removed hard-coded timeouts, result caps, and arbitrary limits from all capability plugins. The LLM decides when to set a timeout and how many results to request. Commands run until they finish naturally. The only limits that remain are OOM-protection caps (100MB for documents, 500MB for audio, 100KB output buffer) — these protect memory, not restrict functionality.
+</Note>
 
-**Type:** Plugin
+## Core System
 
-Wraps Node.js `child_process` to execute shell commands. Provides the `shell_exec` tool with a `command` parameter (string) and an optional `background` parameter (boolean) for detached processes.
+<AccordionGroup>
+  <Accordion title="shell — Execute shell commands" defaultOpen>
+    **Type:** Plugin
 
-Danger patterns block destructive commands like `rm -rf /`, `sudo rm`, and `chmod 777`. Confirm patterns require approval for operations like `npm install`, `git push`, and `docker rm`.
+    **Triggers:** run, execute, command, terminal, shell, bash, npm, npx, git, pip, docker, curl
 
-## filesystem
+    Wraps Node.js `child_process` to execute shell commands. The workhorse tool that many other capabilities depend on.
 
-**Type:** Plugin
+    **Tools:**
+    - `shell_exec` — Run a command with optional cwd and timeout. Commands run until they exit naturally. Pass `timeout` only when you want fast failure (e.g. 5000ms for a quick `which` check). Omit for installs, builds, or anything with unpredictable duration.
 
-Wraps Node.js `fs` for file operations. Provides three tools:
+    **Safety:**
+    - **Block:** `mkfs`, `dd if=` (disk-level destruction)
+    - **Destructive:** `rm -rf`, `sudo` (requires approval)
+    - **Confirm:** package installs, docker operations
 
-- `file_read` — Read file contents
-- `file_write` — Write content to a file (creates or overwrites)
-- `file_patch` — Apply targeted edits to an existing file
+    Background mode (`background: true`) detaches the process and returns its PID immediately — use for dev servers, watchers, and long-running processes.
+  </Accordion>
 
-## git
+  <Accordion title="filesystem — Read, write, and edit files">
+    **Type:** Plugin
 
-**Type:** Pure Skill (no plugin)
+    **Triggers:** file, read, write, edit, create, save, open, patch, modify, folder, directory
 
-Provides git instructions to the LLM via SKILL.md. The LLM uses `shell_exec` to run git commands. Instructions include using conventional commit format, running `git status` first, and showing diffs before committing.
+    Wraps Node.js `fs` for precise file operations without needing shell access.
 
-## introspect
+    **Tools:**
+    - `file_read` — Read file contents with optional line range (startLine/endLine)
+    - `file_write` — Create or overwrite a file (supports append mode)
+    - `file_patch` — Find and replace a literal string in a file (all occurrences)
 
-**Type:** Plugin
+    Prefer these over `shell_exec` for file operations — they're faster, safer, and produce cleaner audit trails.
+  </Accordion>
 
-Self-awareness capability. Provides three tools:
+  <Accordion title="package-manager — Cross-platform package installation">
+    **Type:** Plugin
 
-- `wolffish_status` — Current task counts, uptime, active providers
-- `wolffish_performance` — Success rates from basalganglia feedback
-- `wolffish_memory` — Recent episode summaries and memory stats
+    **Triggers:** install, package, brew, winget, apt, dependency
 
-When you ask "how are you doing?" or "what have you been up to?", the LLM calls these tools to read its own state.
+    Detects and uses the system package manager: Homebrew (macOS), winget (Windows), apt (Debian/Ubuntu), dnf (Fedora/RHEL). Installs run until completion — no timeout.
 
-## Modifying Built-in Capabilities
+    **Tools:**
+    - `pkg_check` — Check which package manager is available
+    - `pkg_install_manager` — Install Homebrew on macOS if missing (no-op elsewhere)
+    - `pkg_install` — Install a package with platform-specific name resolution
 
-All built-in capabilities are just folders in your workspace. You can edit their SKILL.md files to change behavior, add new danger patterns, or modify tool instructions. Changes take effect on the next message — no restart needed.
+    Other capabilities declare their system dependencies via the `packages` field in SKILL.md — the package-manager resolves the correct name per platform.
+  </Accordion>
+
+  <Accordion title="node — Node.js runtime">
+    **Type:** Plugin
+
+    **Triggers:** node, npm, npx, nvm, javascript, js, typescript, ts
+
+    Checks for Node.js installation and installs it via package-manager if missing. Install runs until complete.
+
+    **Tools:**
+    - `node_check` — Verify Node.js is installed and get version
+    - `node_install` — Install Node.js via system package manager
+
+    Once installed, use `shell_exec` for `node`, `npm`, and `npx` commands.
+  </Accordion>
+</AccordionGroup>
+
+## Web & Search
+
+<AccordionGroup>
+  <Accordion title="web-search — Search the web and read pages">
+    **Type:** Plugin
+
+    **Triggers:** search, google, look up, find online, web, browse, latest, news, documentation
+
+    Provides web search and page fetching for current information.
+
+    **Tools:**
+    - `web_search` — Search the web, returns titles, snippets, and URLs. Defaults to 5 results, no upper limit enforced.
+    - `web_fetch` — Fetch full text content of a web page. No length floor — the LLM decides how much content to request.
+
+    Use `web_search` for discovery, then `web_fetch` to read specific results in detail. If a Brave API key is configured in Variables, the agent prefers the Brave search tool instead.
+  </Accordion>
+
+  <Accordion title="browser — Headless browser automation">
+    **Type:** Plugin
+
+    **Triggers:** browser, web, website, navigate, login, scrape, screenshot, form, click, automate
+
+    Launches a headless Chromium instance for interactive web tasks — filling forms, clicking buttons, navigating SPAs, and scraping JS-rendered content. Navigation uses Playwright's default timeout unless you explicitly pass `timeout_ms`.
+
+    **Tools:**
+    - `browser_launch` — Start a browser session (headed/headless, viewport size, locale)
+    - `browser_navigate` — Go to a URL
+    - `browser_click` — Click an element by CSS selector
+    - `browser_type` — Type text into an input
+    - `browser_screenshot` — Capture the current page
+    - `browser_evaluate` — Execute JavaScript in the page context
+    - `browser_close` — End the session
+
+    Use `web_fetch` for static pages — only use the browser when you need interaction.
+  </Accordion>
+</AccordionGroup>
+
+## Documents & Media
+
+<AccordionGroup>
+  <Accordion title="document — Word documents and rich text">
+    **Type:** Plugin
+
+    **Triggers:** document, word, docx, report, letter, memo, template, convert document
+
+    Read, create, modify, and convert documents (docx, html, markdown, plain text).
+
+    **Tools:**
+    - `document_read` — Extract content as text, HTML, or markdown from any document
+    - `document_create` — Create .docx with headings, paragraphs, tables, images, lists, headers/footers
+    - `document_modify` — Edit existing documents
+    - `document_convert` — Convert between formats
+    - `document_merge` — Combine multiple documents
+  </Accordion>
+
+  <Accordion title="pdf — PDF creation and manipulation">
+    **Type:** Plugin
+
+    **Triggers:** pdf, merge pdf, split pdf, watermark, form fill, encrypt pdf, compress pdf
+
+    Full PDF toolkit with RTL/Arabic support.
+
+    **Tools:**
+    - `pdf_read` — Extract text, metadata, and structure (with optional page range)
+    - `pdf_create` — Create PDFs with headings, paragraphs, images, tables (supports RTL with custom fonts)
+    - `pdf_merge` — Combine multiple PDFs
+    - `pdf_split` — Extract page ranges into separate files
+    - `pdf_secure` — Encrypt/decrypt with passwords
+    - `pdf_compress` — Reduce file size
+    - `pdf_watermark` — Add text watermarks
+  </Accordion>
+
+  <Accordion title="spreadsheet — Excel and CSV files">
+    **Type:** Plugin
+
+    **Triggers:** spreadsheet, excel, xlsx, csv, tsv, table, data, formula, chart
+
+    Read, create, modify, and analyze spreadsheet files.
+
+    **Tools:**
+    - `spreadsheet_read` — Read xlsx/csv/tsv with optional sheet selection and cell range
+    - `spreadsheet_create` — Create new spreadsheets with multiple sheets, columns, rows, and styles
+    - `spreadsheet_modify` — Edit existing files (add rows, update cells, add sheets)
+    - `spreadsheet_analyze` — Compute statistics, summaries, and derived columns
+  </Accordion>
+
+  <Accordion title="ffmpeg — Audio and video processing">
+    **Type:** Plugin
+
+    **Triggers:** ffmpeg, video, audio, convert, transcode, compress
+
+    Wraps the FFmpeg CLI for multimedia processing. Runs until completion — no timeout, regardless of file size or encoding complexity.
+
+    **Tools:**
+    - `ffmpeg_check` — Verify ffmpeg is installed
+    - `ffmpeg_install` — Install via package-manager
+    - `ffmpeg_run` — Run any ffmpeg command (pass args after `ffmpeg`)
+
+    The capability auto-checks for ffmpeg and offers to install it if missing.
+  </Accordion>
+</AccordionGroup>
+
+## Voice
+
+<AccordionGroup>
+  <Accordion title="speech-to-text — Transcribe audio with Whisper">
+    **Type:** Plugin
+
+    **Triggers:** transcribe, speech to text, stt, whisper, audio to text, dictation
+
+    Local speech-to-text using OpenAI Whisper. Supports 99+ languages with automatic detection. Runs entirely locally — no API keys, no cloud. Whisper runs until it finishes regardless of file size (up to 500MB OOM protection).
+
+    **Tools:**
+    - `stt_transcribe` — Transcribe an audio file at a given path
+    - `stt_transcribe_upload` — Transcribe a file uploaded in the current conversation
+
+    Models available: tiny, base (default), small, medium, large. Larger models are more accurate but slower.
+  </Accordion>
+
+  <Accordion title="text-to-speech — Generate voice memos">
+    **Type:** Plugin
+
+    **Triggers:** voice, speak, say, audio, read aloud, voice memo, tts
+
+    Neural text-to-speech for generating spoken responses and voice memos. Generation runs until complete — no timeout.
+
+    **Tools:**
+    - `voice_generate` — Convert text to MP3 (returns file path)
+    - `voice_respond` — Respond entirely as a voice memo (the audio IS the response)
+    - `voice_list` — List all voice memo files in the workspace
+
+    Voices include en-US-AriaNeural (female), en-US-GuyNeural (male), ar-SA-HamedNeural (Arabic male), ar-SA-ZariyahNeural (Arabic female). Uses edge-tts under the hood.
+  </Accordion>
+</AccordionGroup>
+
+## Version Control & Code
+
+<AccordionGroup>
+  <Accordion title="git — Git operations (pure skill)">
+    **Type:** Pure Skill (no plugin)
+
+    **Triggers:** git, commit, branch, merge, push, pull, PR, diff, stash, rebase
+
+    Teaches the LLM how to use `shell_exec` for Git with the user's conventions. Instructions include:
+
+    - Always run `git status` before making changes
+    - Use Conventional Commits format: `type(scope): subject`
+    - Show diffs and proposed commit messages before executing
+    - Branch naming: `feature/`, `fix/`, `chore/` prefixes with kebab-case
+
+    Since this is a pure skill, it has no plugin — it relies on the shell capability.
+  </Accordion>
+
+  <Accordion title="github — GitHub API integration">
+    **Type:** Plugin
+
+    **Triggers:** github, pull request, PR, issue, repo, CI, actions, workflow, release, gist
+
+    Full GitHub API access via Octokit. Requires a personal access token (Settings > GitHub).
+
+    **Tools:** list repos, create/read/update issues, create/list/merge PRs, list branches, trigger workflows, create releases, manage gists, manage labels/milestones, review PRs, list notifications, star/fork repos, compare branches.
+
+    **Pagination:** GitHub hard-caps `per_page` at 100. For larger result sets, page through with multiple calls.
+
+    See [GitHub Integration](/integrations/github) for full setup and usage.
+  </Accordion>
+</AccordionGroup>
+
+## External Services
+
+<AccordionGroup>
+  <Accordion title="google — Google Workspace">
+    **Type:** Plugin
+
+    **Triggers:** google, gmail, email, inbox, drive, calendar, events, contacts, tasks, sheets
+
+    Gmail, Drive, Calendar, Contacts, Tasks, and Sheets via OAuth. Multi-account support. All API calls run until completion — no artificial timeouts.
+
+    **Tools:** gmail search/read/send/reply/archive, drive list/upload/download, calendar events CRUD, contacts, tasks, sheets read/write.
+
+    See [Google Workspace Integration](/integrations/google-workspace) for full setup.
+  </Accordion>
+
+  <Accordion title="notion — Notion pages and databases">
+    **Type:** Plugin
+
+    **Triggers:** notion, workspace, wiki, knowledge base, database, page, kanban, board
+
+    Read, create, and manage Notion content via the Notion API.
+
+    **Tools:** search, read pages, read blocks, create pages, update pages, append blocks, create/query databases, add comments.
+
+    See [Notion Integration](/integrations/notion) for full setup.
+  </Accordion>
+
+  <Accordion title="cloudflared — Expose local services">
+    **Type:** Plugin
+
+    **Triggers:** cloudflare, tunnel, cloudflared, expose, public url
+
+    Create quick Cloudflare Tunnels to expose local ports to the internet. Install runs until complete.
+
+    **Tools:**
+    - `cloudflared_check` — Check if cloudflared is installed
+    - `cloudflared_install` — Install via package-manager
+    - `cloudflared_tunnel` — Create a tunnel for a local port (returns public URL)
+
+    Always requires user confirmation before exposing a local service.
+  </Accordion>
+</AccordionGroup>
+
+## Desktop Automation
+
+<AccordionGroup>
+  <Accordion title="computer-use — Screen interaction">
+    **Type:** Plugin
+
+    **Triggers:** screenshot, click, screen, desktop, mouse, keyboard, computer use, automate, UI
+
+    Desktop automation for visual tasks — screenshots, mouse clicks, keyboard typing, scrolling.
+
+    **Tools:**
+    - `computer_screenshot` — Capture the full screen (or specific display)
+    - `computer_mouse_move` — Move cursor to x,y coordinates
+    - `computer_mouse_click` — Click at position (left/right/double)
+    - `computer_keyboard_type` — Type text
+    - `computer_keyboard_press` — Press key combinations
+    - `computer_scroll` — Scroll at position
+
+    Must be enabled in Settings > Computer Use. The agent sees screenshots and can interact with any application on screen.
+  </Accordion>
+</AccordionGroup>
+
+## Fun
+
+<AccordionGroup>
+  <Accordion title="memes — Generate and find memes">
+    **Type:** Plugin
+
+    **Triggers:** meme, funny, gif, laugh, humor, joke, celebrate, lol
+
+    Create captioned memes from popular templates or search for reaction GIFs. No result caps — request as many GIFs as needed.
+
+    **Tools:**
+    - `meme_generate` — Create a meme from a template (drake, fry, buzz, distracted-boyfriend, this-is-fine, etc.)
+    - `meme_templates` — List available templates
+    - `gif_search` — Search for reaction GIFs
+    - `gif_trending` — Get trending GIFs
+    - `add_to_chat` — Insert the generated meme/GIF into the conversation
+
+    Uses memegen (zero-config) or imgflip (with credentials) as the backend.
+  </Accordion>
+
+  <Accordion title="introspect — Self-awareness">
+    **Type:** Plugin
+
+    **Triggers:** status, health, performance, how are you, what do you know, uptime, stats
+
+    Lets Wolffish answer questions about its own state by reading its workspace files.
+
+    **Tools:**
+    - `wolffish_status` — Uptime, active provider, loaded capabilities, system health
+    - `wolffish_performance` — Task success rates, most used tools, error rates
+    - `wolffish_memory` — Recent conversation topics and knowledge areas
+
+    Read-only — never modifies the workspace. Ask "how are you doing?" for real data, not pleasantries.
+  </Accordion>
+</AccordionGroup>
+
+## Task Execution (Motor Runtime)
+
+The motor cortex executes all tool calls with these defaults:
+
+- **Output buffer:** 100KB per tool result — the LLM sees substantial output without truncation
+- **Retries:** Up to 10 attempts for retryable errors (network, timeout). Non-retryable errors (permission, validation, not-found) bail immediately. Backoff scales up to 60s between attempts.
+- **No global timeout:** Tools run until they complete or the user stops them
+
+## Customizing Capabilities
+
+Built-in capabilities are managed and updated by Wolffish — don't edit them directly, as your changes will be overwritten on the next update. Instead:
+
+- **Disable** a built-in capability from Settings if you don't need it
+- **Fork** it — copy the folder to a new name, then edit the copy however you like
+- **Create your own** from scratch following the same structure
+
+Changes to custom capabilities take effect on the next message — no restart needed.
 
 <Warning>
-  If you delete a built-in capability, Wolffish won't recreate it automatically. Keep a backup or use git to version your workspace.
+  Custom capabilities are not backed up automatically. If you delete a capability you created, it's gone — Wolffish has no copy of it. Use git or keep a manual backup of your `brain/cerebellum/` folder. Built-in capabilities are always restored automatically on launch.
 </Warning>
+
+<Tip>
+  Start by reading the SKILL.md of any built-in capability to understand the pattern. Then create your own following the same structure. See [Creating Capabilities](/extending/creating-capabilities) for a step-by-step guide.
+</Tip>

@@ -5,6 +5,30 @@ description: "Detailed reference for all 15 runtime modules"
 
 # Brain Modules
 
+## How the Brain Works
+
+Wolffish models its runtime after the human brain — not as a metaphor, but as an architecture pattern. Each module handles exactly one cognitive function, and they communicate through a shared event bus (the corpus callosum) rather than calling each other directly.
+
+When a message arrives, it flows through the modules like a neural signal:
+
+1. **Input arrives** — the channel adapter (Desktop, Telegram, or WhatsApp) emits an `input.received` event on the corpus
+2. **Context is built** — the prefrontal cortex reads your identity files, queries the hippocampus for relevant memories, asks the cerebellum which capabilities are available, and passes everything through the RAS attention filter to fit within the token budget
+3. **The LLM thinks** — the thalamus routes the assembled prompt to the best available provider (Claude → OpenAI → Ollama), streaming the response back
+4. **Response is parsed** — Wernicke's area extracts tool calls and text from the stream, normalizing across all three provider formats
+5. **Safety is checked** — if tool calls are present, the amygdala checks them against danger patterns and either approves, requests confirmation, or blocks
+6. **Tools execute** — the motor cortex runs approved tools, logging every step to task files with retry logic
+7. **Response is delivered** — Broca's area streams the final text back to the user through the channel
+8. **Memory is saved** — the hippocampus appends the conversation to today's episode file
+9. **Learning happens** — the basal ganglia records whether tool calls succeeded or failed, building a feedback history
+
+All of this happens in a deterministic 17-step pipeline. The brainstem runs background processes (file watching, scheduled tasks, nightly memory consolidation), the hypothalamus monitors system health, and the insula provides self-awareness so the agent can report on its own state.
+
+The key insight: because every module communicates through events and writes its state to markdown files, the entire brain is observable and editable at every layer.
+
+---
+
+## Module Reference
+
 Wolffish has 15 runtime modules, each handling one specific function. They all live in `src/main/runtime/` and communicate exclusively via the event bus (`corpus`).
 
 ## corpus.ts — Event Bus

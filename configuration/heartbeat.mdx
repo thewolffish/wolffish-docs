@@ -1,0 +1,169 @@
+---
+title: "Heartbeat & Scheduling"
+description: "Configure autonomous scheduled tasks with the brainstem heartbeat"
+---
+
+# Heartbeat & Scheduling
+
+The heartbeat file defines scheduled jobs that Wolffish runs autonomously. Located at `brain/brainstem/heartbeat.md`, it's parsed by the brainstem module on startup and registered as recurring cron jobs.
+
+## How It Works
+
+Each `##` heading in `heartbeat.md` defines a job. The heading text is the job name, and the body text is the instruction sent to the agent as a user message at the scheduled time.
+
+```markdown
+## Morning Summary | Daily (08:00)
+
+Summarize my unread emails and calendar events for today.
+List any GitHub notifications. Keep it brief.
+
+## PR Monitor | Every (30m)
+
+Check my open pull requests on GitHub. If any have new
+reviews or comments, give me a one-line summary of each.
+```
+
+The brainstem parses the schedule from the heading (after the `|` separator) and registers the job. When the schedule fires, the body text is sent to the agent as if a user typed it.
+
+## Schedule Formats
+
+| Format | Meaning | Example |
+|---|---|---|
+| `Startup` | Runs once when brainstem initializes | `Startup` |
+| `Every (Nm)` | Repeating interval in minutes | `Every (5m)` |
+| `Every (Nh)` | Repeating interval in hours | `Every (2h)` |
+| `Hourly (MM)` | Once per hour at minute mark | `Hourly (30)` |
+| `Daily (HH:MM)` | Once per day | `Daily (09:00)` |
+| `Nightly (HH:MM)` | Once per day (alias for Daily) | `Nightly (23:00)` |
+| `Weekday (HH:MM)` | Monday through Friday only | `Weekday (08:30)` |
+| `Weekly (Day HH:MM)` | Once per week on named day | `Weekly (Monday 09:00)` |
+| `Monthly (DD HH:MM)` | Once per month on day number | `Monthly (01 10:00)` |
+| `Cron (expression)` | Raw 5-field cron syntax | `Cron (*/15 * * * *)` |
+
+<Info>
+  All times use your system's local timezone in 24-hour format. There's no UTC conversion — `Daily (09:00)` means 9 AM wherever you are.
+</Info>
+
+## Job Execution
+
+Heartbeat jobs run through the full agent pipeline — same brain, same capabilities, same memory. The only difference from a regular conversation:
+
+- **Auto-approval**: Tool calls bypass amygdala confirmation (no approval dialogs)
+- **Sealed conversation**: Each job run creates its own conversation, visible in history
+- **No streaming**: Responses are generated in the background without UI interruption
+
+<Warning>
+  Because heartbeat jobs auto-approve tool calls, be careful what instructions you give them. A job that says "delete old files" will execute without asking. Write defensive instructions: "list files older than 30 days and tell me what you'd delete" is safer than "delete files older than 30 days."
+</Warning>
+
+## Activating and Deactivating Jobs
+
+Jobs are active when their heading and body are uncommented. To deactivate a job, comment it out with HTML comments:
+
+```markdown
+## Morning Summary | Daily (08:00)
+
+Summarize my unread emails and calendar events for today.
+
+<!--
+## Old Job I Don't Need | Every (1h)
+
+This job is disabled and won't run.
+-->
+```
+
+<Tip>
+  The brainstem re-reads `heartbeat.md` on startup. After editing the file, restart Wolffish or wait for the next brainstem initialization cycle.
+</Tip>
+
+## Practical Examples
+
+### Morning Briefing
+
+```markdown
+## Morning Briefing | Weekday (07:45)
+
+Give me a morning briefing:
+1. Unread emails — summarize the important ones
+2. Today's calendar — list meetings with times
+3. GitHub — any PRs that need my review
+4. Weather — current conditions and forecast
+
+Keep each section to 2-3 lines max.
+```
+
+### Email Triage
+
+```markdown
+## Email Triage | Every (2h)
+
+Check my email for anything urgent or time-sensitive.
+If you find something that needs immediate attention,
+flag it and write a one-sentence summary.
+Ignore newsletters and marketing emails.
+```
+
+### PR Monitoring
+
+```markdown
+## PR Watch | Every (30m)
+
+Check my open pull requests on GitHub.
+Report only PRs with new activity since your last check:
+- New reviews or approvals
+- CI status changes (especially failures)
+- New comments or requested changes
+
+If nothing changed, respond with "No PR updates."
+```
+
+### End-of-Day Wrap-Up
+
+```markdown
+## Daily Wrap-Up | Nightly (18:00)
+
+Write a brief end-of-day summary:
+- What tasks were completed today (check conversation history)
+- Any pending items that need follow-up tomorrow
+- Save this as today's work log in knowledge
+
+Keep it concise — bullet points only.
+```
+
+## Memory Compaction
+
+Memory compaction (hippocampus consolidation) is a separate scheduled process configured in **Settings > Compaction**, not in `heartbeat.md`. The brainstem runs compaction on its own nightly schedule, using a cloud model for quality summarization.
+
+<Info>
+  Compaction consolidates daily episodes into weekly summaries and promotes important information to knowledge files. It runs independently of heartbeat jobs.
+</Info>
+
+## Full Example File
+
+```markdown
+# Heartbeat
+
+Scheduled jobs for autonomous operation.
+
+## System Check | Startup
+
+Run a quick health check. Verify that all configured
+providers are reachable and report any issues.
+
+## Morning Briefing | Weekday (07:45)
+
+Give me a morning briefing:
+1. Unread emails — summarize the important ones
+2. Today's calendar — list meetings with times
+3. GitHub — any PRs that need my review
+
+## PR Watch | Every (30m)
+
+Check my open pull requests on GitHub for new activity.
+Only report changes since last check.
+
+## Daily Wrap-Up | Nightly (18:00)
+
+Write a brief end-of-day summary of completed tasks
+and pending items for tomorrow.
+```

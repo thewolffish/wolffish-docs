@@ -1,0 +1,175 @@
+---
+title: "Google Workspace"
+description: "تكامل Gmail و Drive و Calendar و Contacts و Tasks و Sheets"
+---
+
+# Google Workspace
+
+يربط تكامل Google Workspace تطبيق Wolffish بـ Gmail و Google Drive و Calendar و Contacts و Tasks و Sheets. يدعم حسابات Google متعددة ويستخدم OAuth 2.0 للمصادقة.
+
+## الإعداد
+
+<Steps>
+  <Step title="فتح الإعدادات">
+    انتقل إلى الإعدادات > التكاملات > Google.
+  </Step>
+  <Step title="التفويض">
+    اضغط "تفويض" لبدء مسار OAuth. سيفتح متصفحك الافتراضي على شاشة موافقة Google.
+  </Step>
+  <Step title="منح الصلاحيات">
+    وافق على النطاقات المطلوبة. يطلب Wolffish صلاحيات قراءة/كتابة لـ Gmail و Drive و Calendar و Contacts و Tasks و Sheets.
+  </Step>
+  <Step title="الإكمال">
+    يعيد المتصفح التوجيه إلى عنوان استدعاء محلي. تُخزّن رموزك في `config.json` ويظهر الحساب في الإعدادات.
+  </Step>
+</Steps>
+
+<Note>
+  تُخزّن رموز OAuth محليًا في `~/.wolffish/workspace/config.json`. يستخدم Wolffish رمز التحديث لتجديد رموز الوصول بصمت عند انتهائها — لا حاجة لإعادة التفويض.
+</Note>
+
+## دعم الحسابات المتعددة
+
+يمكنك تفويض حسابات Google متعددة. أداة `google_accounts` تعرض جميع الحسابات المتصلة، وكل أداة Google أخرى تتطلب معامل `account` صريحًا لتحديد الحساب المراد استخدامه.
+
+```
+User: "Check my email"
+LLM calls: google_accounts() → returns [{email: "work@company.com"}, {email: "personal@gmail.com"}]
+LLM calls: gmail_search({account: "work@company.com", query: "is:unread"})
+```
+
+إذا كان لديك حساب واحد فقط، يظل Wolffish يتطلب معامل `account` للاتساق ولتجنب الالتباس إذا أضفت حسابات أخرى لاحقًا.
+
+## الأدوات المتاحة
+
+### Gmail
+
+| الأداة | الوصف |
+|---|---|
+| `gmail_search` | البحث في الرسائل بصيغة استعلام Gmail |
+| `gmail_read` | قراءة رسالة محددة بمعرّفها |
+| `gmail_send` | كتابة وإرسال رسالة جديدة |
+| `gmail_reply` | الرد على سلسلة رسائل موجودة |
+| `gmail_forward` | إعادة توجيه رسالة إلى مستلم آخر |
+| `gmail_archive` | أرشفة رسالة (إزالتها من البريد الوارد) |
+| `gmail_trash` | نقل رسالة إلى المهملات |
+| `gmail_mark_read` | تعليم رسالة كمقروءة |
+| `gmail_save_draft` | حفظ مسودة بدون إرسال |
+
+### Google Drive
+
+| الأداة | الوصف |
+|---|---|
+| `drive_list` | عرض الملفات والمجلدات |
+| `drive_upload` | رفع ملف محلي إلى Drive |
+| `drive_download` | تنزيل ملف من Drive إلى القرص المحلي |
+| `drive_create_folder` | إنشاء مجلد جديد |
+| `drive_search` | البحث في الملفات بالاسم أو المحتوى |
+
+### Google Calendar
+
+| الأداة | الوصف |
+|---|---|
+| `calendar_list_events` | عرض الأحداث القادمة (مع فلتر نطاق زمني) |
+| `calendar_create_event` | إنشاء حدث تقويم جديد |
+| `calendar_update_event` | تحديث حدث موجود |
+| `calendar_delete_event` | حذف حدث |
+| `calendar_reschedule` | نقل حدث إلى وقت جديد |
+
+### Google Contacts
+
+| الأداة | الوصف |
+|---|---|
+| `contacts_list` | عرض جميع جهات الاتصال |
+| `contacts_create` | إنشاء جهة اتصال جديدة |
+| `contacts_search` | البحث في جهات الاتصال بالاسم أو البريد الإلكتروني أو رقم الهاتف |
+
+### Google Tasks
+
+| الأداة | الوصف |
+|---|---|
+| `tasks_list_tasklists` | عرض جميع قوائم المهام |
+| `tasks_list` | عرض المهام في قائمة مهام محددة |
+| `tasks_create` | إنشاء مهمة جديدة |
+| `tasks_complete` | تعليم مهمة كمكتملة |
+| `tasks_delete` | حذف مهمة |
+
+### Google Sheets
+
+| الأداة | الوصف |
+|---|---|
+| `sheets_read` | قراءة بيانات من نطاق في جدول بيانات |
+| `sheets_write` | كتابة بيانات في نطاق بجدول بيانات |
+| `sheets_create` | إنشاء جدول بيانات جديد |
+| `sheets_update_cells` | تحديث خلايا محددة |
+
+## المحفّزات
+
+تُفعّل قدرة Google عندما تتطابق رسالتك مع أي من هذه الأنماط:
+
+```
+email, inbox, gmail, send email, compose email, draft,
+drive, upload file, download file, google drive,
+calendar, schedule, meeting, event, appointment,
+contacts, address book, phone number,
+tasks, todo, task list, to-do,
+sheets, spreadsheet, google sheets
+```
+
+## أمثلة على سير العمل
+
+<AccordionGroup>
+  <Accordion title="فحص الرسائل غير المقروءة">
+    ```
+    You: "Check my email"
+    Wolffish: Lists your 10 most recent unread emails with sender, subject, and snippet.
+    ```
+  </Accordion>
+  <Accordion title="جدولة اجتماع">
+    ```
+    You: "Schedule a meeting with Ali tomorrow at 2pm for 30 minutes"
+    Wolffish: Creates a calendar event, confirms the time and date.
+    ```
+  </Accordion>
+  <Accordion title="رفع ملف إلى Drive">
+    ```
+    You: "Upload ~/Documents/report.pdf to my Drive"
+    Wolffish: Uploads the file and returns the Drive link.
+    ```
+  </Accordion>
+  <Accordion title="البحث في الرسائل حسب المرسل">
+    ```
+    You: "Find emails from sarah@example.com about the project proposal"
+    Wolffish: Searches Gmail with the query and returns matching threads.
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## مرجع التهيئة
+
+يخزّن تكامل Google بياناته في `config.json`:
+
+```json
+{
+  "integrations": {
+    "google": {
+      "accounts": [
+        {
+          "email": "you@gmail.com",
+          "accessToken": "ya29.a0AfH6SM...",
+          "refreshToken": "1//0eXyz...",
+          "expiresAt": 1700000000000
+        }
+      ]
+    }
+  }
+}
+```
+
+<Warning>
+  لا تعدّل الرموز يدويًا في `config.json` إلا إذا كنت تعرف ما تفعله. استخدم واجهة الإعدادات لإضافة أو إزالة الحسابات. الرموز المشوّهة ستسبب أخطاء مصادقة صامتة.
+</Warning>
+
+<Tip>
+  إذا بدأت استدعاءات Google API بالفشل مع أخطاء 401، انتقل إلى الإعدادات > Google واضغط "إعادة التفويض" لتحديث رموزك. يحدث هذا عادةً إذا أزلت الوصول من إعدادات أمان حسابك في Google.
+</Tip>

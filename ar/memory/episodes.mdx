@@ -1,0 +1,99 @@
+---
+title: "الأحداث"
+description: "سجلات المحادثات اليومية — التدفق الخام لما حدث"
+---
+
+# الأحداث
+
+الأحداث هي التدفق الخام لكل ما حدث. كل دورة محادثة تحصل على ملخص من سطر واحد يُلحَق بملف أحداث اليوم. بدون تصفية، بدون تلخيص، بدون استدعاء LLM — مجرد طابع زمني منسّق ووصف.
+
+## الموقع
+
+```
+~/.wolffish/workspace/brain/hippocampus/episodes/
+├── 2026-05-14.md
+├── 2026-05-15.md
+└── 2026-05-16.md
+```
+
+كل ملف يُسمّى بالتاريخ: `YYYY-MM-DD.md`.
+
+## كيف تُكتب الأحداث
+
+بعد اكتمال كل دورة محادثة، تكتب `hippocampus.appendEpisode()` سطراً واحداً في ملف اليوم:
+
+```typescript
+// Simplified from src/main/runtime/hippocampus.ts
+async appendEpisode(summary: string): Promise<void> {
+  const today = format(new Date(), 'yyyy-MM-dd')
+  const file = join(this.episodesDir, `${today}.md`)
+  const line = `- ${format(new Date(), 'HH:mm')} — ${summary}\n`
+  await appendFile(file, line)
+  this.corpus.emit('memory.episode.appended', { file, summary })
+}
+```
+
+<Info>
+  لا يوجد استدعاء لـ LLM. الملخص يُستخرج مباشرة من دورة المحادثة — إنه استخراج حتمي لما حدث، وليس ملخصاً مُولَّداً. هذا يجعل تسجيل الأحداث فورياً ومجانياً.
+</Info>
+
+## مثال على ملف أحداث
+
+هكذا قد يبدو ملف `2026-05-16.md` بعد يوم من الاستخدام:
+
+```markdown
+# Episodes — 2026-05-16
+
+- 08:32 — Asked about React 19 Server Components, discussed streaming patterns
+- 08:45 — Generated a useServerAction hook with error boundaries
+- 09:10 — Reviewed PR #247, suggested simplifying the auth middleware
+- 11:30 — Searched for flights to Riyadh, compared prices on Google Flights
+- 14:15 — Explained the difference between consolidation and knowledge promotion
+- 16:02 — Created a new capability plugin for Notion integration
+- 17:40 — User said "remember I prefer pnpm over npm" → updated preferences.md
+```
+
+## كيف تُستخدم الأحداث
+
+### تجميع السياق
+
+وحدة prefrontal تحمّل أحدث 3 أيام من الأحداث افتراضياً أثناء تجميع السياق. هذه تمر عبر RAS لتقييم الصلة — فقط الإدخالات التي تتطابق مع موضوع المحادثة الحالي تصل إلى السياق النهائي.
+
+### مدخلات التجميع
+
+الأحداث هي المدخلات الخام للتجميع الليلي. مُجدوِل brainstem يقرأ ملفات الأحداث، ويرسلها إلى LLM للتلخيص، ويُنتج ملفاً أسبوعياً مضغوطاً. بعد التجميع، تبقى الأحداث على القرص (لا تُحذف تلقائياً أبداً).
+
+### بحث Cortex
+
+جميع ملفات الأحداث مُفهرَسة بواسطة cortex (باستخدام SQLite FTS5). عندما تسأل "ماذا ناقشنا عن المصادقة الأسبوع الماضي؟"، يبحث cortex في إدخالات الأحداث ويُرجع الأجزاء المتطابقة مع ترتيب صلة BM25.
+
+## التعديل اليدوي
+
+ملفات الأحداث هي Markdown عادي. يمكنك:
+
+- **حذف إدخالات** لا تريد أن تُتذكَّر
+- **إضافة إدخالات** لتغذية السياق (مثلاً: "- 09:00 — Started the new billing service project")
+- **تعديل إدخالات** لتصحيح الأخطاء
+
+التغييرات يلتقطها مراقب الملفات في brainstem ويُعاد فهرستها في cortex تلقائياً.
+
+<Warning>
+  إذا حذفت ملف أحداث بالكامل، فإن تاريخ ذلك اليوم يختفي من الذاكرة. سيُزيله cortex من فهرس البحث في دورة مراقبة الملفات التالية.
+</Warning>
+
+## الإعدادات
+
+الأحداث تُكتب دائماً — لا يوجد خيار لتعطيلها. إنها أساس نظام الذاكرة بالكامل. لكن يمكنك التحكم في عدد أيام الأحداث التي تُحمَّل في السياق:
+
+```json
+// config.json
+{
+  "memory": {
+    "episodeDaysInContext": 3
+  }
+}
+```
+
+<Tip>
+  زِد `episodeDaysInContext` إذا كانت لديك مشاريع طويلة المدى وتريد سياقاً تاريخياً أكثر. قلّلها إذا كانت محادثاتك مستقلة في الغالب وتريد توفير ميزانية التوكنات لمستويات الذاكرة الأخرى.
+</Tip>

@@ -1,0 +1,144 @@
+---
+title: "Debug Snapshots"
+description: "Inspect the exact context sent to the LLM on every turn"
+---
+
+# Debug Snapshots
+
+Debug snapshots are the single most useful debugging tool in Wolffish. They show you the **exact** system prompt assembled and sent to the LLM on every turn — no abstraction, no summarization, the literal text.
+
+## Location
+
+```
+brain/prefrontal/.debug/context-{timestamp}.md
+```
+
+A new snapshot is written by `prefrontal.buildContext()` on every turn. The timestamp format is `YYYYMMDD-HHmmss-SSS` (millisecond precision).
+
+<Note>
+Debug snapshots are ephemeral. Old snapshots are automatically cleaned up to prevent disk bloat. If you need to preserve one, copy it out of the `.debug/` directory.
+</Note>
+
+## What's Inside
+
+Each debug snapshot contains the complete system prompt assembled for that turn. This includes:
+
+- **Identity** — the soul.md personality and behavior instructions
+- **User profile** — the user.md context about who you are
+- **Agent instructions** — agents.md coordination rules
+- **Memory fragments** — episodes selected by RAS as relevant to this turn
+- **Skill instructions** — SKILL.md bodies for capabilities that matched
+- **Tool definitions** — JSON schemas for available tools
+- **Conversation history** — recent messages within the token budget
+- **Token budget allocation** — how many tokens each section consumed
+
+## Reading a Debug Snapshot
+
+The snapshot uses XML tags to delimit each section. Here is an annotated example:
+
+```markdown
+<!-- Debug Snapshot: 20250516-143022-847 -->
+<!-- Turn ID: turn-a8f3c -->
+<!-- Token budget: 32000 / 32768 used -->
+
+<identity>
+You are Wolffish, a personal AI assistant...
+[Contents of soul.md]
+</identity>
+
+<user>
+Name: Younes
+Preferences: ...
+[Contents of user.md]
+</user>
+
+<agents>
+[Contents of agents.md — multi-agent coordination rules]
+</agents>
+
+<memory>
+<!-- RAS selected 3 fragments (threshold: 0.4) -->
+<!-- Fragment 1: score 0.87, from episode-2025-05-14-meeting.md -->
+Yesterday's meeting discussed the API refactor timeline...
+
+<!-- Fragment 2: score 0.62, from episode-2025-05-15-preferences.md -->
+User prefers TypeScript over JavaScript...
+
+<!-- Fragment 3: score 0.41, from episode-2025-05-10-project.md -->
+The project uses PostgreSQL 16...
+</memory>
+
+<skills>
+<!-- cerebellum loaded 2 capabilities for this turn -->
+<!-- Skill: shell (score: 0.91) -->
+You have access to a shell_exec tool...
+[Body of shell/SKILL.md]
+
+<!-- Skill: filesystem (score: 0.78) -->
+You have access to file reading and writing tools...
+[Body of filesystem/SKILL.md]
+</skills>
+
+<tools>
+[
+  {
+    "name": "shell_exec",
+    "description": "Execute a shell command",
+    "parameters": { ... }
+  },
+  {
+    "name": "read_file",
+    "description": "Read a file from disk",
+    "parameters": { ... }
+  }
+]
+</tools>
+
+<history>
+[User]: Can you check if the server is running?
+[Assistant]: I'll check that for you...
+[User]: Also restart it if it's down
+</history>
+```
+
+## What to Look For
+
+<AccordionGroup>
+  <Accordion title="Missing capability?">
+    Check the `<skills>` section. If your capability isn't listed, the issue is in RAS scoring. Look at the `triggers` field in your SKILL.md frontmatter — the user's message didn't match any triggers above the relevance threshold.
+
+    The comment above each skill shows its relevance score. If your skill isn't present at all, its score was below the threshold (default 0.3).
+  </Accordion>
+
+  <Accordion title="Wrong or irrelevant memory?">
+    Check the `<memory>` section. Each fragment shows its relevance score and source episode file. If RAS included irrelevant fragments, either:
+    - The episode content has poor signal (edit the episode file directly)
+    - The RAS threshold is too low (increase it in config.json)
+    - The cortex index needs rebuilding (delete `cortex.db`, restart Wolffish)
+  </Accordion>
+
+  <Accordion title="Unexpected behavior?">
+    Read the `<identity>` and `<agents>` sections carefully. The LLM follows these instructions literally. If behavior is unexpected, the instructions might be ambiguous or contradictory. Edit `soul.md` or `agents.md` to clarify.
+  </Accordion>
+
+  <Accordion title="Missing context / truncated history?">
+    Check the token budget comment at the top of the snapshot. If you see something like `31500 / 32768 used`, the context is nearly full. The `<history>` section gets truncated first to stay within budget.
+
+    Solutions: reduce loaded skills, shorten soul.md, or increase the model's context window in provider settings.
+  </Accordion>
+
+  <Accordion title="Tool not available?">
+    Check the `<tools>` section. If a tool isn't listed, either:
+    - Its parent capability wasn't selected by RAS (check `<skills>`)
+    - The plugin failed to load (check the event log for `capability.error` events)
+    - The tool schema is malformed (check `plugin/index.mjs` exports)
+  </Accordion>
+</AccordionGroup>
+
+## The 90% Rule
+
+<Tip>
+If Wolffish did something wrong, 90% of the time the answer is in the debug snapshot. The model can only act on what it sees — if the right information wasn't in the context, the model couldn't have used it.
+</Tip>
+
+Start here. Always.

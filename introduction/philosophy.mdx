@@ -41,6 +41,8 @@ Hippocampus saves every conversation turn. Basalganglia records every tool outco
 
 The markdown instructions assume a smart model that follows instructions well. Don't add code workarounds for dumb model behavior — improve the markdown instead. When models get smarter, the markdown-first approach scales naturally.
 
+This extends to runtime behavior: no hard-coded timeouts, no artificial result caps, no arbitrary limits in capability plugins. Commands run until they finish. The LLM decides when to set a timeout and how many results to request. We trust the model to make good decisions — and when it doesn't, we improve the SKILL.md instructions rather than adding code guardrails. The only hard limits are OOM protection (memory safety), not functionality restrictions.
+
 ## One Folder Rules All
 
 Everything Wolffish touches lives in `~/.wolffish/`. Delete it, everything resets. No orphaned processes, no system-level changes, no scattered state.
