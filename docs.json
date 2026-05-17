@@ -38,8 +38,8 @@
           "anchor": "GitHub",
           "icon": "github",
           "color": {
-            "light": "#00d4ff",
-            "dark": "#00d4ff"
+            "light": "#1E40AF",
+            "dark": "#1E40AF"
           },
           "href": "https://github.com/thewolffish/wolffish-app"
         },
@@ -48,8 +48,8 @@
           "icon": "discord",
           "href": "https://discord.com/invite/F5Ue36PzQ",
           "color": {
-            "light": "#00d4ff",
-            "dark": "#00d4ff"
+            "light": "#1E40AF",
+            "dark": "#1E40AF"
           }
         }
       ]
