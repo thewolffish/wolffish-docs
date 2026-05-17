@@ -22,7 +22,7 @@
     "primary": {
       "type": "button",
       "label": "Download",
-      "href": "https://github.com/thewolffish/wolffish-app/releases"
+      "href": "https://www.wolffi.sh/"
     }
   },
   "footer": {
