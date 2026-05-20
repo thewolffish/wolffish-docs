@@ -1,0 +1,149 @@
+---
+title: "Setting Up for Success"
+description: "Permissions, prerequisites, and the mental model for reliable autonomous workflows"
+---
+
+# Setting Up for Success
+
+Wolffish is designed to figure things out. It can install missing tools, navigate unfamiliar UI, recover from errors, and adapt to whatever state it finds your machine in. On a normal device, it handles most setup automatically.
+
+But "can handle it" and "should handle it" are different things. Every extra step the agent takes costs tokens, burns time, and adds a point of failure. When a heartbeat fires at 9 AM and the agent spends 4 minutes installing Node.js, 5 minutes retrying screenshot permissions it doesn't have, and 2 minutes navigating to a page you could have left open — that's 11 minutes of wasted work before the actual task even starts.
+
+The mental model: **set the desk up before the agent sits down.** Pre-grant permissions. Pre-install tools. Leave the right apps open. The less the agent has to figure out, the faster, cheaper, and more deterministic the run.
+
+This page covers the general prerequisites and permissions. Each use case also lists its own specific setup — but what's here applies to all of them.
+
+---
+
+## macOS Permissions
+
+Wolffish runs as a macOS app. To control your desktop — take screenshots, move the mouse, type, send commands to other apps — it needs explicit permission from macOS. These are not Wolffish settings; they're OS-level gates in **System Settings > Privacy & Security**.
+
+If any are missing, the agent doesn't get a clear error. It gets silent failures, blank screenshots, and "not permitted" responses that it retries over and over, burning tokens and time.
+
+<Accordion title="Screen Recording">
+**What it does:** Lets Wolffish take screenshots of your desktop. Required by every capability that uses `computer-use`.
+
+**What happens without it:** `computer_screenshot` silently returns nothing — no error, just a blank result. The agent retries up to 10 times, burning ~300 seconds per attempt before giving up. It has no way to know the permission is missing.
+
+**How to grant it:**
+1. Open **System Settings > Privacy & Security > Screen Recording**
+2. Click the `+` button, find and add **Wolffish**
+3. **Restart Wolffish** — this permission requires an app restart to take effect
+</Accordion>
+
+<Accordion title="Accessibility">
+**What it does:** Lets Wolffish control the mouse and keyboard. Required by every capability that uses `computer-use`.
+
+**What happens without it:** `computer_mouse_click` and `computer_keyboard_type` fail immediately with "not permitted."
+
+**How to grant it:**
+1. Open **System Settings > Privacy & Security > Accessibility**
+2. Click the `+` button, find and add **Wolffish**
+3. Takes effect immediately — no restart needed
+</Accordion>
+
+<Accordion title="Automation">
+**What it does:** Lets Wolffish send commands to other apps (Chrome, Finder, Terminal, etc.) via AppleScript. Required by `computer-use` and any capability that drives another app.
+
+**What happens without it:** Any `osascript` call fails with "Not authorized to send Apple events." The agent retries — in one test run it burned ~264 seconds on 6 retries before the macOS prompt appeared.
+
+**How to grant it:**
+1. Open **System Settings > Privacy & Security > Automation**
+2. Find **Wolffish** in the list
+3. Toggle on each target app — at minimum, **Google Chrome** and **Finder**
+4. macOS may also prompt on first use — click "OK" when it does
+
+You can pre-grant these to avoid the prompt interrupting a heartbeat run mid-execution.
+</Accordion>
+
+<Warning>
+**Grant all three before your first autonomous run.** If any permission is missing, the heartbeat fires, the agent burns through its entire token budget retrying failed tool calls, and you get nothing done. Screen Recording is the worst — it fails silently, so the agent doesn't even know it can't see the screen.
+</Warning>
+
+---
+
+## What Each Capability Needs
+
+Not every use case needs every permission. Here's what to grant based on what your workflow uses:
+
+| Capability | macOS Permissions | System Tools | API Keys |
+|------------|-------------------|--------------|----------|
+| `computer-use` | Screen Recording + Accessibility + Automation | Chrome (or target browser) | Cloud provider (Anthropic or OpenAI) |
+| `web-search` | None | None | Cloud provider. [Brave Search API](https://brave.com/search/api/) _(optional — improves quality)_ |
+| `shell` | None (runs in Wolffish's own process) | Whatever CLI tools the task needs (git, ffmpeg, etc.) | None |
+| `browser` | None | Chromium for Playwright (~200MB, auto-downloaded on first use) | None |
+| `document`, `pdf`, `spreadsheet` | None | Node.js (for npm deps) | None |
+| `github` | None | Git, Node.js | GitHub personal access token |
+| `notion` | None | Node.js | Notion API key |
+| `google-workspace` | None | Node.js | Google OAuth (configured in Settings > Integrations) |
+
+**The pattern:** if a workflow uses `computer-use`, you need all three macOS permissions plus a cloud provider. If it only uses `web-search` and `shell`, you may need nothing beyond a cloud API key.
+
+---
+
+## System Tools
+
+Wolffish auto-installs most system tools when it needs them — Node.js, Homebrew, Chromium for Playwright, etc. On a normal device that isn't hardened or locked down, this works fine.
+
+But auto-installation is nondeterministic. It adds minutes to the first run, can trigger password prompts that stall a heartbeat, and occasionally picks the wrong install path. Pre-installing these tools makes the agent's environment predictable.
+
+### Node.js v18+
+
+Required by 8+ capabilities (browser, document, pdf, spreadsheet, web-search, github, notion, computer-use) to install their npm dependencies. npm is bundled with Node.js.
+
+Wolffish will attempt to install Node.js if it's missing. But if you use nvm, the Node.js binary may not be on the system PATH that Wolffish sees — the agent might try to install a second copy via Homebrew while a perfectly good one exists under nvm. Pre-verifying avoids this:
+
+```bash
+# Check if Node.js is visible on the system PATH
+node -v
+
+# If using nvm, make sure the default alias is set
+nvm alias default 18
+```
+
+### Homebrew (macOS)
+
+Auto-installed by Wolffish's package manager if missing, but the installation triggers a password prompt and takes several minutes. If you're on macOS, install it ahead of time:
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+### Chromium for Playwright
+
+The `browser` capability uses Playwright to drive a headless Chromium instance. The first run downloads ~200MB. Pre-install to skip the wait:
+
+```bash
+npx playwright install chromium
+```
+
+### Git
+
+Used by the `git` capability. Pre-installed on most macOS and Linux systems. Verify with `git --version`.
+
+---
+
+## Reducing Token Cost and Run Time
+
+Every optimization below saves tokens, reduces wall-clock time, and makes the run more reliable. They compound across daily heartbeat runs.
+
+### Leave the right apps open
+
+If a workflow uses Chrome, leave Chrome open on the target page. The agent skips browser launch, navigation, and page load — saving ~3 screenshots and ~800 tokens per run.
+
+### Keep sessions active
+
+If the workflow needs a logged-in state (LinkedIn, Gmail, GitHub in browser), make sure the session hasn't expired. A login wall mid-run adds 5+ tool calls the agent didn't budget for.
+
+### Use a cloud provider for judgment-heavy tasks
+
+Local models (Ollama) work for simple tool-calling workflows, but anything that requires curation, writing, or multi-step reasoning should use a cloud provider (Claude or OpenAI). The quality difference directly affects output quality and the number of retries.
+
+### Pre-grant Automation per target app
+
+Each new app Wolffish tries to control via AppleScript triggers a macOS prompt the first time. If you know the workflow drives Chrome, Finder, or Terminal — pre-grant those in System Settings > Privacy & Security > Automation before the first run.
+
+<Note>
+**This is about determinism, not capability.** Wolffish can install Node.js, download Chromium, handle permission prompts, and navigate to LinkedIn from a cold start. It's designed to. But a heartbeat that runs in 45 seconds with everything pre-set is better than one that runs in 12 minutes while the agent bootstraps its own environment. Set the desk up. Let the agent do the work.
+</Note>

@@ -9,21 +9,23 @@ description: "إعداد بيئة التطوير للمساهمة في Wolffish"
 
 ## المتطلبات الأساسية
 
-| الأداة | الإصدار | السبب |
-|------|---------|-----|
-| Node.js | +20 | بيئة التشغيل للعملية الرئيسية وأدوات البناء |
-| npm | +10 | إدارة الحزم |
-| Git | أي إصدار | التحكم بالمصادر |
-| Ollama | الأحدث | اختبار النماذج المحلية (اختياري لكن موصى به) |
+| الأداة  | الإصدار  | السبب                                        |
+| ------- | -------- | -------------------------------------------- |
+| Node.js | +20      | بيئة التشغيل للعملية الرئيسية وأدوات البناء  |
+| npm     | +10      | إدارة الحزم                                  |
+| Git     | أي إصدار | التحكم بالمصادر                              |
+| Ollama  | الأحدث   | اختبار النماذج المحلية (اختياري لكن موصى به) |
 
 <Note>
-  الوحدات الأصلية مثل `better-sqlite3` تُجمّع أثناء التثبيت عبر `electron-rebuild`. على macOS تحتاج أدوات سطر أوامر Xcode (`xcode-select --install`). على Linux تحتاج `build-essential` و `python3`.
+  الوحدات الأصلية مثل `better-sqlite3` تُجمّع أثناء التثبيت عبر
+  `electron-rebuild`. على macOS تحتاج أدوات سطر أوامر Xcode (`xcode-select
+  --install`). على Linux تحتاج `build-essential` و `python3`.
 </Note>
 
 ## الاستنساخ والتثبيت
 
 ```bash
-git clone https://github.com/thewolffish/wolffish-app.git
+git clone https://github.com/thewolffish.git
 cd wolffish-app
 npm install
 ```
@@ -38,11 +40,11 @@ npm run dev
 
 يُشغّل هذا `electron-vite` الذي يبدأ ثلاث عمليات:
 
-| العملية | الدور | إعادة التحميل |
-|---------|------|--------|
-| **main** | Node.js - معالجات IPC، بيئة التشغيل، الخدمات | إعادة تشغيل يدوية |
-| **preload** | contextBridge - IPC آمن الأنواع | إعادة تشغيل يدوية |
-| **renderer** | React - واجهة المستخدم | HMR (فوري) |
+| العملية      | الدور                                        | إعادة التحميل     |
+| ------------ | -------------------------------------------- | ----------------- |
+| **main**     | Node.js - معالجات IPC، بيئة التشغيل، الخدمات | إعادة تشغيل يدوية |
+| **preload**  | contextBridge - IPC آمن الأنواع              | إعادة تشغيل يدوية |
+| **renderer** | React - واجهة المستخدم                       | HMR (فوري)        |
 
 تنعكس تغييرات العارض (المكونات، الأنماط، الخطافات) فورًا عبر HMR. تغييرات العملية الرئيسية تتطلب إيقاف وإعادة تشغيل `npm run dev`.
 
@@ -59,7 +61,9 @@ npm run build:linux  # Linux .AppImage / .deb
 ```
 
 <Warning>
-  شغّل دائمًا `npm run typecheck` بعد التغييرات الهيكلية (ملفات جديدة، استيرادات منقولة، واجهات متغيرة). يمكن أن يخفي HMR في Vite أخطاء الأنواع - تطبيقك يعمل بشكل جيد حتى تحاول البناء.
+  شغّل دائمًا `npm run typecheck` بعد التغييرات الهيكلية (ملفات جديدة، استيرادات
+  منقولة، واجهات متغيرة). يمكن أن يخفي HMR في Vite أخطاء الأنواع - تطبيقك يعمل
+  بشكل جيد حتى تحاول البناء.
 </Warning>
 
 ## أسماء المسارات المستعارة
@@ -68,30 +72,31 @@ npm run build:linux  # Linux .AppImage / .deb
 
 ```typescript
 // Good
-import { Corpus } from '@main/runtime/corpus/corpus'
-import { useFlow } from '@providers/flow/useFlow'
-import { Button } from '@components/core/button/Button'
+import { Corpus } from "@main/runtime/corpus/corpus";
+import { useFlow } from "@providers/flow/useFlow";
+import { Button } from "@components/core/button/Button";
 
 // Bad — never cross folders with relative paths
-import { Corpus } from '../../../main/runtime/corpus/corpus'
+import { Corpus } from "../../../main/runtime/corpus/corpus";
 ```
 
 الأسماء المستعارة المتاحة:
 
-| الاسم المستعار | يُحلّ إلى |
-|-------|-------------|
-| `@main/*` | `src/main/*` |
-| `@preload/*` | `src/preload/*` |
-| `@renderer/*` | `src/renderer/src/*` |
+| الاسم المستعار  | يُحلّ إلى                       |
+| --------------- | ------------------------------- |
+| `@main/*`       | `src/main/*`                    |
+| `@preload/*`    | `src/preload/*`                 |
+| `@renderer/*`   | `src/renderer/src/*`            |
 | `@components/*` | `src/renderer/src/components/*` |
-| `@hooks/*` | `src/renderer/src/hooks/*` |
-| `@lib/*` | `src/renderer/src/lib/*` |
-| `@pages/*` | `src/renderer/src/pages/*` |
-| `@providers/*` | `src/renderer/src/providers/*` |
-| `@resources/*` | `resources/*` |
+| `@hooks/*`      | `src/renderer/src/hooks/*`      |
+| `@lib/*`        | `src/renderer/src/lib/*`        |
+| `@pages/*`      | `src/renderer/src/pages/*`      |
+| `@providers/*`  | `src/renderer/src/providers/*`  |
+| `@resources/*`  | `resources/*`                   |
 
 <Tip>
-  استخدم استيرادات `./` النسبية فقط داخل نفس المجلد. لأي شيء آخر، استخدم الاسم المستعار.
+  استخدم استيرادات `./` النسبية فقط داخل نفس المجلد. لأي شيء آخر، استخدم الاسم
+  المستعار.
 </Tip>
 
 الأسماء المستعارة مُعدّة في ثلاثة أماكن:
@@ -122,10 +127,18 @@ import { Corpus } from '../../../main/runtime/corpus/corpus'
 لا يستورد العارض أبدًا من `@main/*` مباشرة. جميع الاتصالات تمر عبر قنوات IPC المعرّفة في طبقة preload.
 
 <CardGroup cols={2}>
-  <Card title="هيكل المشروع" icon="folder-tree" href="/ar/development/project-structure">
+  <Card
+    title="هيكل المشروع"
+    icon="folder-tree"
+    href="/ar/development/project-structure"
+  >
     فهم كيفية تنظيم الكود.
   </Card>
-  <Card title="المساهمة" icon="code-pull-request" href="/ar/development/contributing">
+  <Card
+    title="المساهمة"
+    icon="code-pull-request"
+    href="/ar/development/contributing"
+  >
     مستعد لتقديم كود؟ اقرأ دليل المساهمة.
   </Card>
 </CardGroup>

@@ -1,0 +1,228 @@
+---
+title: "Limitations & Costs"
+description: "What autonomous automations cost, what constrains them, and how to keep spend under control"
+---
+
+# Limitations & Costs
+
+Every heartbeat job runs as an agentic loop — the model receives instructions, calls tools, reads results, calls more tools, and repeats until the task is complete. Each iteration is a full API round-trip that sends the entire accumulated context: system prompt, tool definitions, all previous messages, all tool results, and any images.
+
+This page explains how costs accumulate, what the hard limits are, and how to keep your automations efficient.
+
+---
+
+## How Costs Accumulate
+
+Two factors drive the cost of any run:
+
+**Iterations** — each loop cycle is one API call. A simple "search and summarize" task might take 5-10 iterations. A computer-use task (clicking through a UI) typically takes 30-60+ because every click-screenshot-analyze cycle is one iteration.
+
+**Context accumulation** — the message history grows with every iteration. Tool results (especially web page content and screenshots) stay in the context for all subsequent calls. A 60-iteration run where each iteration adds ~1K tokens means the final iteration sends ~60K tokens of accumulated history on top of the base system prompt.
+
+The cost formula per iteration is roughly:
+
+```
+cost = (system_prompt + tools + message_history) × input_rate
+     + model_output × output_rate
+```
+
+---
+
+## Why Computer-Use Dominates Cost
+
+Computer-use is the most expensive tool category by a wide margin. Here's why:
+
+- Each screenshot is ~85-100K tokens (base64-encoded JPEG)
+- Every click, type, and scroll action requires a screenshot to verify the result
+- Every subsequent iteration carries **all** previous screenshots in the message history
+- The model must "see" the screen state to decide its next action — there's no shortcut
+- Screenshots cannot be compressed further without impairing the model's ability to read text and identify UI elements
+
+A typical automation that mixes research and computer-use posting breaks down like this:
+
+| Phase | Iterations | Tools Used | Context Growth | Cost Share |
+|-------|-----------|------------|----------------|------------|
+| Research | 5-10 | `web_search`, `web_fetch` | High — each fetch adds 10-15K chars | ~25% |
+| Writing | 1-3 | `file_write` | Low — model generates text | ~5% |
+| Computer-use posting | 30-50+ | `screenshot`, `click`, `type`, `wait` | Very high — each screenshot is ~100K tokens | ~70% |
+
+Computer-use accounts for roughly 70% of the total cost of a mixed workflow.
+
+---
+
+## Model Selection
+
+Not every automation needs a frontier reasoning model. Choose based on the task's cognitive demand:
+
+### Claude Opus 4.x — 5 / 25 USD per MTok (input / output)
+
+Best for tasks requiring:
+- Complex multi-step reasoning or planning
+- Nuanced writing that must match a specific voice/tone
+- Handling ambiguous or novel situations
+- Tasks where a wrong decision has high cost (e.g., posting publicly)
+
+### Claude Sonnet 4.x — 3 / 15 USD per MTok (input / output)
+
+Best for tasks requiring:
+- Structured research and summarization
+- Template-based writing (fill-in-the-blank formats)
+- Computer-use UI automation (click targets are usually unambiguous)
+- Routine daily automations where the flow is well-defined
+
+**This is the recommended default for most heartbeat jobs.** It's 40% cheaper than Opus with comparable tool-use ability.
+
+### Claude Haiku 4.5 — 1 / 5 USD per MTok (input / output)
+
+Best for tasks requiring:
+- Simple data extraction or formatting
+- Single-tool operations (one search, one fetch, done)
+- High-volume, low-stakes tasks
+
+<Warning>
+**Not recommended for computer-use.** Haiku may struggle with complex UI navigation and multi-step visual reasoning. Stick to Sonnet or Opus for any workflow that drives a browser.
+</Warning>
+
+### OpenAI Models
+
+OpenAI models follow the same pattern — GPT-4o at 2.50/10 USD per MTok is comparable to Sonnet pricing, while o3/o4 models at 10-15/40-60 USD per MTok are premium reasoning models. OpenAI's automatic prefix caching provides a 50% discount on cached input tokens with no configuration needed.
+
+### Local Models (Ollama)
+
+Zero API cost but significantly slower, lack tool-use reliability, and cannot do computer-use. Suitable for offline summarization or draft generation — not for autonomous multi-tool workflows.
+
+---
+
+## Expected Costs by Automation Type
+
+These estimates assume **Claude Sonnet 4.x** with prompt caching active:
+
+| Automation Type | Iterations | Est. Cost | Notes |
+|-----------------|-----------|-----------|-------|
+| Single web search + summary | 3-5 | 0.01-0.05 USD | Minimal context, fast |
+| Multi-source research + report | 10-20 | 0.50-2.00 USD | Multiple fetches grow context |
+| Research + write + file save | 15-25 | 1.00-3.00 USD | Writing adds output tokens |
+| Research + write + post via API | 15-25 | 1.00-3.00 USD | Same cost if using a direct API |
+| Research + write + post via computer-use | 40-70 | 5.00-15.00 USD | Screenshots dominate cost |
+| Pure computer-use task (fill form, navigate UI) | 20-50 | 3.00-10.00 USD | Depends on UI complexity |
+| Simple file processing (read, transform, write) | 3-8 | 0.05-0.50 USD | Minimal context |
+| Git operations (commit, PR, branch) | 5-15 | 0.10-1.00 USD | Tool results are small |
+
+**Key takeaway:** computer-use multiplies cost by 5-10x compared to API-only automations doing the same logical task. If a direct API exists for the target service (LinkedIn API, Slack API, email API), using it instead of computer-use is the single most effective cost reduction.
+
+---
+
+## Prompt Caching
+
+Both Anthropic and OpenAI use prefix-based caching. The API caches the longest matching prefix of your request (system prompt, tools, early messages) and charges a reduced rate for the cached portion on subsequent calls. **Caching is the single most important cost lever** — a well-cached 60-iteration run costs 5-10x less than one where the cache breaks every iteration.
+
+### Anthropic
+
+| | Rate |
+|---|------|
+| Cache write | 1.25x base input rate (25% premium on first write) |
+| Cache read | 0.10x base input rate (90% discount on hits) |
+| TTL | 5 minutes minimum (auto-extended on use) |
+
+### OpenAI
+
+| | Rate |
+|---|------|
+| Cache write | 1.0x base input rate (no premium) |
+| Cache read | 0.50x base input rate (50% discount) |
+| | Fully automatic — no configuration needed |
+
+### What Breaks Caching
+
+- Any change in the system prompt before the cache breakpoint invalidates everything after it
+- Changing tool definitions between calls breaks the cache chain
+- Reordering messages breaks prefix matching
+
+Wolffish's system prompt places volatile content (iteration counter, tool count) at the very end, after all stable content. This ensures the identity, instructions, tools, memory, and skills sections remain cache-stable across iterations.
+
+---
+
+## Context Compaction
+
+Wolffish automatically compacts the message history between agent loop iterations to prevent unbounded context growth:
+
+- **Screenshot eviction:** keeps the 5 most recent screenshots. Older ones have their image data removed and a text marker added. The model's analysis of those screenshots (in adjacent assistant messages) is preserved.
+- **Tool result truncation:** tool results older than 6 assistant turns that exceed 2,000 characters are trimmed to a 500-character prefix. Error results are never truncated.
+
+These thresholds are conservative — short conversations (under 10 iterations) are unaffected. The compaction targets the long tail of 30-60+ iteration computer-use sessions where accumulated context would otherwise grow without bound.
+
+---
+
+## Hard Limitations
+
+<Warning>
+These are current constraints as of May 2025. Some are planned for improvement.
+</Warning>
+
+- **Context window is the hard ceiling.** A run that accumulates more tokens than the model's context window will fail. With compaction active this ceiling is much harder to hit, but extremely long sessions (100+ iterations) with many screenshots can approach it.
+- **No per-job model selection yet.** All heartbeat jobs currently use the model configured in Settings. A research-only job and a computer-use posting job pay the same per-token rate. Per-job model override is a planned feature.
+- **No per-job capability filtering.** All tool capabilities are loaded for every job. A job that only needs `web_search` and `file_write` still carries tool definitions for computer-use, git, notion, etc. The overhead is small (~7K tokens, cached) but non-zero.
+- **Caching is prefix-only.** If an early message changes (e.g., a tool result is modified), everything after it in the cache chain is invalidated. The compaction system is designed to only modify old messages that are deep in the prefix and unlikely to break the active cache boundary.
+- **Screenshots cannot be compressed.** The model receives screenshots as JPEG images at a fixed quality level. There is no way to reduce their token cost without reducing resolution, which would impair the model's ability to read text and identify UI elements.
+- **Cost estimation is approximate.** Real costs may vary by ±5% due to request-level rounding, cache tier promotion, and token counting differences between the streaming response and the billing system.
+
+---
+
+## Recommendations
+
+These apply to every automation type. The more of them you follow, the lower your per-run cost.
+
+### Use Sonnet for routine jobs
+
+Unless the task requires frontier reasoning, Sonnet 4.x delivers comparable tool-use performance at 40% lower cost than Opus. Save Opus for high-stakes tasks where judgment quality matters — public posts, complex curation, ambiguous situations.
+
+### Prefer API integrations over computer-use
+
+If the target service has an API (or an MCP server), use it. A LinkedIn API post costs under a dollar vs roughly 10 dollars via computer-use. The same logic applies to Slack, email, GitHub, Notion — anything with a direct integration.
+
+### Keep instructions precise
+
+Vague instructions ("make sure everything looks perfect") cause the model to over-verify with extra screenshots and scroll loops. Specific instructions ("take one screenshot to confirm, then post") reduce iterations.
+
+### Avoid unnecessary verification loops
+
+Tell the model to trust file-based content rather than scrolling through UI previews. The content is correct in the source — visual verification of every line is wasteful.
+
+### Batch research before computer-use
+
+Structure jobs so all web searches and fetches happen first (lightweight iterations), then writing, then the computer-use phase last. This minimizes how many expensive screenshot-laden iterations carry the research context.
+
+### Monitor the usage dashboard
+
+The Settings > Usage page shows per-model token breakdowns, cache hit rates, and cost per conversation. Use it to identify unexpectedly expensive runs and tune instructions accordingly.
+
+<Note>
+**The single most impactful thing you can do is avoid computer-use when a direct API exists.** Everything else is optimization at the margins. If you're posting to a service that has an API or MCP integration, that one change cuts your cost by 5-10x.
+</Note>
+
+---
+
+## The Future of Browser Automation
+
+Screenshot-based computer-use is the most expensive tool category in Wolffish, but it's also the most powerful and the most general-purpose. It works with any website, any UI, any workflow — because it drives the browser exactly like a human does. There's no API to configure, no OAuth to set up, no bot token to maintain. It types, clicks, scrolls, and reads the screen.
+
+That's also what makes it authentic. From the platform's perspective, there is no bot — there's a real browser, a real user session, real mouse movements, and real keystrokes. Screenshot-based automation bypasses bot detection, CAPTCHA challenges, and API rate limits because it doesn't use any of those surfaces. It's the same browser you use manually, doing the same actions you would do, just faster.
+
+**Use this at your own risk and understanding of the total costs.** Each screenshot is ~85-100K tokens. A 40-iteration posting session can cost 5-15 dollars depending on the model. Running it daily adds up. The power and authenticity come at a real price — both in API spend and in the fact that you're automating actions on platforms that may have terms of service governing automated posting.
+
+### What We're Working On
+
+Screenshot-based computer-use will remain a first-class option — it's the most reliable, most portable, and most "just works" approach. But we're actively researching cheaper alternatives that can handle common browser automation patterns without the per-screenshot token cost:
+
+- **Headless browser automation** — driving a headless Chromium instance via Playwright or Puppeteer. No screenshots needed for navigation, form filling, or clicking. The agent reads the DOM directly, which is orders of magnitude cheaper than encoding a screenshot. Trade-off: headless browsers are more easily detected by bot-protection systems, and the agent loses the ability to visually verify what it sees.
+- **JavaScript injection and DOM inspection** — instead of taking a screenshot to understand the page, inject JavaScript to read element positions, text content, and page state directly. The agent gets structured data instead of an image. Trade-off: fragile if the site's DOM structure changes, and doesn't work for visual verification tasks.
+- **Hybrid approaches** — use DOM inspection for navigation and data entry (cheap), but fall back to a single screenshot for visual verification before critical actions like clicking "Post" or "Submit" (expensive but safe). This could cut computer-use costs by 60-80% while keeping the final safety check.
+- **Browser extension integration** — a dedicated browser extension that exposes page state, form fields, and action targets to the agent without screenshots. Richer than headless, cheaper than computer-use, and potentially invisible to bot detection. Trade-off: requires extension installation and maintenance.
+- **Accessibility tree reading** — using the browser's accessibility API to get a structured representation of the page. Similar to how screen readers work. The agent gets element labels, roles, and states without any visual rendering. Trade-off: not all sites have good accessibility markup.
+- **MCP server bridges** — dedicated MCP servers for high-value targets (LinkedIn, Twitter/X, Slack, Gmail) that wrap their web UIs or APIs into clean tool interfaces. The agent calls `linkedin_post(content)` instead of navigating a browser. Trade-off: each target needs its own MCP server, and platform API changes can break them.
+
+These approaches will be added **alongside** screenshot-based computer-use, not as replacements. The right tool depends on the task — a headless browser is perfect for filling a form, but only a real screenshot can tell you whether a complex UI rendered correctly. Wolffish will offer all of them and let you choose based on your cost tolerance, reliability needs, and the specific platform you're targeting.
+
+<Warning>
+**No timeline on these yet.** Screenshot-based computer-use is the only browser automation method available today. The alternatives above are active research directions, not shipping features. We'll document each one as it becomes available.
+</Warning>

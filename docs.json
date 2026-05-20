@@ -16,7 +16,7 @@
     "links": [
       {
         "label": "GitHub",
-        "href": "https://github.com/thewolffish/wolffish-app"
+        "href": "https://github.com/thewolffish"
       }
     ],
     "primary": {
@@ -27,8 +27,8 @@
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/purecloud_sa",
-      "github": "https://github.com/younesalturkey"
+      "x": "https://x.com/the_wolffish",
+      "github": "https://github.com/thewolffish"
     }
   },
   "navigation": {
@@ -41,7 +41,7 @@
             "light": "#1E40AF",
             "dark": "#1E40AF"
           },
-          "href": "https://github.com/thewolffish/wolffish-app"
+          "href": "https://github.com/thewolffish"
         },
         {
           "anchor": "Community",
@@ -73,11 +73,21 @@
                 ]
               },
               {
+                "group": "Use Cases",
+                "pages": [
+                  "use-cases/overview",
+                  "use-cases/setting-up-for-success",
+                  "use-cases/limitations",
+                  "use-cases/ai-news-linkedin-post"
+                ]
+              },
+              {
                 "group": "Core Concepts",
                 "pages": [
                   "architecture/gods-creation",
                   "architecture/overview",
                   "architecture/pipeline",
+                  "architecture/stateless-model",
                   "architecture/brain-modules",
                   "architecture/workspace",
                   "architecture/event-bus"
@@ -178,6 +188,15 @@
                   "ar/getting-started/installation",
                   "ar/getting-started/first-launch",
                   "ar/getting-started/quickstart"
+                ]
+              },
+              {
+                "group": "حالات الاستخدام",
+                "pages": [
+                  "ar/use-cases/overview",
+                  "ar/use-cases/setting-up-for-success",
+                  "ar/use-cases/limitations",
+                  "ar/use-cases/ai-news-linkedin-post"
                 ]
               },
               {

@@ -33,6 +33,7 @@ Common problems and their solutions. Start with the issue that matches your symp
        tail -20 ~/.wolffish/workspace/brain/corpus/$(date +%Y-%m-%d).log.md
        ```
        If you see `input.received` but no `llm.response`, the provider call is hanging or failing.
+
   </Accordion>
 
   <Accordion title="The agent doesn't use my capability">
@@ -61,6 +62,7 @@ Common problems and their solutions. Start with the issue that matches your symp
        If you see `capability.error`, the SKILL.md has a parsing issue (bad frontmatter, missing required fields).
 
     4. **Lower the threshold** — If the skill scores close but not above the default threshold, either add more triggers or lower `ras.threshold` in `config.json`.
+
   </Accordion>
 
   <Accordion title="Tool calls always get blocked">
@@ -82,6 +84,7 @@ Common problems and their solutions. Start with the issue that matches your symp
     <Warning>
     Only disable safety in development. In normal use, the safety gate prevents destructive operations.
     </Warning>
+
   </Accordion>
 
   <Accordion title="Memory seems wrong or outdated">
@@ -101,6 +104,7 @@ Common problems and their solutions. Start with the issue that matches your symp
        rm brain/cortex/cortex.db
        ```
        On the next startup, cortex re-indexes all episode files from scratch.
+
   </Accordion>
 
   <Accordion title="Context is too large / responses are slow">
@@ -126,6 +130,7 @@ Common problems and their solutions. Start with the issue that matches your symp
        ```
 
     4. **Check debug snapshot size** — The token budget comment at the top of each debug snapshot shows usage. If `<memory>` or `<skills>` dominate, reduce those sections.
+
   </Accordion>
 
   <Accordion title="Telegram / WhatsApp not connecting">
@@ -147,6 +152,7 @@ Common problems and their solutions. Start with the issue that matches your symp
        ```bash
        grep "whatsapp\|wa-web" ~/.wolffish/logs/main.log
        ```
+
   </Accordion>
 
   <Accordion title="Plugin throws errors">
@@ -171,6 +177,7 @@ Common problems and their solutions. Start with the issue that matches your symp
        grep "capability.error" brain/corpus/$(date +%Y-%m-%d).log.md
        ```
        The error message usually points to the exact issue (missing export, syntax error, bad import).
+
   </Accordion>
 
   <Accordion title="cortex.db is corrupted">
@@ -186,6 +193,7 @@ Common problems and their solutions. Start with the issue that matches your symp
     <Info>
     The `cortex.db` is a derived artifact — it's always rebuildable from the markdown files. You never lose data by deleting it.
     </Info>
+
   </Accordion>
 
   <Accordion title="Wolffish uses too much disk space">
@@ -214,6 +222,7 @@ Common problems and their solutions. Start with the issue that matches your symp
        ```bash
        du -sh ~/.wolffish/workspace/brain/prefrontal/.debug/
        ```
+
   </Accordion>
 
   <Accordion title="How to reset everything (nuclear option)">
@@ -232,6 +241,7 @@ Common problems and their solutions. Start with the issue that matches your symp
     - `rm -rf ~/.wolffish/workspace/brain/hippocampus/episodes/` — clear all memories
     - `rm -rf ~/.wolffish/workspace/brain/corpus/` — clear event logs
     - `rm -rf ~/.wolffish/workspace/brain/prefrontal/.debug/` — clear debug snapshots
+
   </Accordion>
 </AccordionGroup>
 
@@ -240,18 +250,26 @@ Common problems and their solutions. Start with the issue that matches your symp
 If you've tried the steps above and the problem persists:
 
 <CardGroup cols={2}>
-  <Card title="GitHub Issues" icon="github" href="https://github.com/thewolffish/wolffish-app/issues">
-    Search existing issues or file a new one. Include the relevant event log and debug snapshot.
+  <Card
+    title="GitHub Issues"
+    icon="github"
+    href="https://github.com/thewolffish/issues"
+  >
+    Search existing issues or file a new one. Include the relevant event log and
+    debug snapshot.
   </Card>
-  <Card title="Discord Community" icon="discord" href="https://discord.com/invite/F5Ue36PzQ">
-    Ask in the support channel. Community members and maintainers are active here.
+  <Card
+    title="Discord Community"
+    icon="discord"
+    href="https://discord.com/invite/F5Ue36PzQ"
+  >
+    Ask in the support channel. Community members and maintainers are active
+    here.
   </Card>
 </CardGroup>
 
 <Tip>
-When filing a bug report, include:
-1. The debug snapshot from the failing turn
-2. The relevant section of the event log
-3. The task file (if a tool was involved)
-4. Your `config.json` (redact API keys)
+  When filing a bug report, include: 1. The debug snapshot from the failing turn
+  2. The relevant section of the event log 3. The task file (if a tool was
+  involved) 4. Your `config.json` (redact API keys)
 </Tip>

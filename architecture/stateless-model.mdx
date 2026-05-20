@@ -1,0 +1,89 @@
+---
+title: "Stateless by Design"
+description: "Why every LLM request carries the full conversation — no sessions, no threads, no server-side state"
+---
+
+# Stateless by Design
+
+Wolffish uses a stateless, full-history-per-request model with every cloud provider. There are no persistent sessions, no thread IDs, no server-side conversation state. Each API call is self-contained and independent.
+
+This isn't a limitation — it's the architecture's most important property.
+
+## How It Works
+
+Every turn, the agent assembles the complete message array from scratch:
+
+1. **Prefrontal** builds the system prompt (identity, agents, memories, device context, skills)
+2. **RAS** filters and budget-allocates tokens across context categories
+3. **The agent** loads the full conversation history and appends it to the request
+4. **Thalamus** routes to the active provider, which transforms messages to the provider's native format and sends a single HTTP request
+
+The provider receives everything it needs in one shot — system prompt, tools, and the entire conversation history. It has no memory of previous calls.
+
+## Within a Single Turn
+
+The agent runs a tool-use loop: call the model, execute tools, append results, call the model again. Each iteration sends the growing message array back to the provider:
+
+```
+Iteration 1:  [system] + [history] + [latest user message]
+Iteration 2:  [system] + [history] + [latest user message] + [tool call A] + [tool result A]
+Iteration 3:  [system] + [history] + [latest user message] + [call A] + [result A] + [call B] + [result B]
+```
+
+The provider sees more context each iteration, but never maintains state between them.
+
+## Provider-Specific Request Format
+
+Each provider receives the same logical content, transformed to its native API:
+
+| Provider | Endpoint | System Prompt | Tool Results |
+|---|---|---|---|
+| **Anthropic** | `/v1/messages` | Separate `system` field | Coalesced into user-role content blocks |
+| **OpenAI** | `/v1/chat/completions` | First message in the array | `role: "tool"` messages with `tool_call_id` |
+| **Ollama** | `/api/chat` | Flat message array | Documents converted to placeholder text |
+
+The transformation is invisible to the rest of the system. Thalamus takes one canonical format in and produces the provider-specific request out.
+
+## Prompt Caching
+
+Sending the full history every call sounds expensive. It isn't — because of prompt caching.
+
+### Anthropic
+
+The Anthropic provider uses prompt caching with three `cache_control` breakpoints:
+
+1. **System prompt** — The prefrontal context is large and nearly identical across turns
+2. **Tool definitions** — Stable within a conversation
+3. **Conversation history prefix** — The second-to-last user turn, marking the boundary between stable history and the latest exchange
+
+On the first call, Anthropic writes the prefix to a server-side cache (5-minute TTL, refreshed on each hit). Subsequent calls read from cache instead of reprocessing, reducing input token cost by ~90% and time-to-first-token by ~80% on the cached portion. The cache is ephemeral and anonymous — it contains no session identity and expires automatically if the conversation goes idle.
+
+### OpenAI
+
+OpenAI applies its own automatic prefix caching transparently (50% input discount on cache hits). No opt-in is needed.
+
+### Ollama
+
+Ollama runs locally and has no caching layer.
+
+## Why Stateless
+
+Three properties depend on the stateless design, and losing any of them would compromise the architecture.
+
+### Provider Cascade
+
+Thalamus falls back Anthropic to OpenAI to Ollama on failure. If turn 5 fails on Anthropic and routes to OpenAI, OpenAI needs the full history — which it has, because the app owns the message array. Thread-based APIs would make mid-conversation failover impossible.
+
+### Privacy
+
+No provider retains conversation state between calls. Each request is isolated. If a provider is swapped mid-conversation, the previous provider has nothing. Your conversation history lives on your machine, not on someone else's server.
+
+### Context Control
+
+Because the app rebuilds context each turn through prefrontal and RAS, it controls exactly what the model sees. Token budgets, relevance filtering, memory selection — all happen before the request leaves your machine. Thread-based APIs accumulate everything the model has ever seen, and that granularity is lost.
+
+## Persistence Is App-Side Only
+
+Conversations are persisted locally at `~/.wolffish/workspace/brain/conversations/` as JSON files containing the full message history, streaming segments, tool timings, and attachments. This is purely local — providers never see a conversation ID or resume from stored state.
+
+The app is the source of truth. The providers are stateless compute.

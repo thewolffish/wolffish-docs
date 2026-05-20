@@ -1,0 +1,386 @@
+---
+title: "AI News Daily LinkedIn Post"
+description: "Automated daily AI news curation and LinkedIn posting using web search and computer use"
+---
+
+# AI News Daily LinkedIn Post
+
+Wolffish searches for today's top AI news, curates the highlights, writes a LinkedIn post in your voice, opens your default Chrome profile (where you're already logged into LinkedIn), types and publishes the post, then shares the live post URL back to you. No LinkedIn API. No OAuth. No third-party code. Just web search + computer use.
+
+The workflow is split into two conversations — one to research and write the post, another to publish it. This lets you review the draft before it goes live, and keeps the expensive computer-use phase separate from the cheap research phase.
+
+## Video Walkthrough
+
+{/* TODO: Replace with YouTube embed/link once recorded */}
+_Video coming soon._
+
+## Capabilities Required
+
+- `web-search` — researches AI news via web search and reads article content
+- `computer-use` — controls Chrome to navigate LinkedIn, type the post, and click publish
+
+Both ship with Wolffish. No extra code or plugins required.
+
+## Setup
+
+This use case uses `web-search` and `computer-use` — both need a cloud LLM and macOS permissions to work. If any of these are missing, the agent will either fail silently (screenshots return nothing) or burn tokens retrying actions it can't perform. Read the general [Setting Up for Success](/use-cases/setting-up-for-success) guide for the full picture — what's below is specific to this workflow.
+
+### Recommended
+
+- **Claude Opus** — this workflow chains research, curation, writing, and multi-step computer-use into a single autonomous run. Opus handles the judgment calls (which stories matter, how to phrase them, when the UI looks right) significantly better than smaller models. Sonnet works but expect lower-quality curation and more formatting mistakes. Haiku and local models are not suitable for this use case.
+
+### Required
+
+- **Wolffish installed and running** — the desktop app with a configured brain workspace.
+- **Cloud API key** — Anthropic (Claude) or OpenAI, configured in Settings > Services. This workflow needs a cloud provider for curation, drafting, and computer-use judgment. Local models won't cut it.
+- **Chrome** — installed with a profile already logged into LinkedIn. The agent drives the browser directly via computer-use — no LinkedIn API, no OAuth tokens.
+- **macOS permissions for Wolffish** — Screen Recording, Accessibility, and Automation. Without these, computer-use is dead on arrival. See the quick guide below.
+
+### Optional
+
+- **[Brave Search API key](https://brave.com/search/api/)** — configured in Settings > Services > Brave Search. Improves search quality and reliability. Without it, Wolffish falls back to its default search, which works but may return noisier results.
+
+### macOS Permissions Quick Guide
+
+Computer-use needs three macOS permissions. All three are granted in **System Settings > Privacy & Security**.
+
+<Accordion title="Screen Recording">
+**What it does:** Lets Wolffish take screenshots of your desktop.
+
+**What happens without it:** `computer_screenshot` silently fails — the agent retries up to 10 times, burning ~300 seconds per attempt before giving up. No error message, just a blank result.
+
+**How to grant it:**
+1. Open **System Settings > Privacy & Security > Screen Recording**
+2. Click the `+` button, find and add **Wolffish**
+3. **Restart Wolffish** — this permission doesn't take effect until the app restarts
+</Accordion>
+
+<Accordion title="Accessibility">
+**What it does:** Lets Wolffish control the mouse and keyboard.
+
+**What happens without it:** `computer_mouse_click` and `computer_keyboard_type` fail immediately with "not permitted."
+
+**How to grant it:**
+1. Open **System Settings > Privacy & Security > Accessibility**
+2. Click the `+` button, find and add **Wolffish**
+3. Takes effect immediately — no restart needed
+</Accordion>
+
+<Accordion title="Automation">
+**What it does:** Lets Wolffish send commands to other apps (Chrome, Finder, etc.) via AppleScript.
+
+**What happens without it:** Any `osascript` call fails with "Not authorized to send Apple events." The agent retries — in one test run it burned ~264 seconds on 6 retries before succeeding after the prompt appeared.
+
+**How to grant it:**
+1. Open **System Settings > Privacy & Security > Automation**
+2. Find **Wolffish** in the list
+3. Toggle on each target app the agent needs — at minimum, **Google Chrome**
+4. macOS may also prompt you on first use — click "OK" when it does
+
+You can pre-grant these to avoid the popup interrupting a run.
+</Accordion>
+
+<Warning>
+**Grant all three before your first run.** If any permission is missing, the agent will burn through its token budget retrying failed tool calls, and you'll get nothing posted. Screen Recording is the worst offender — it fails silently with no error, so the agent doesn't even know it can't see the screen.
+</Warning>
+
+### Before You Start
+
+Leave Chrome open with your LinkedIn session active. That alone skips browser launch and login — saving ~3 screenshots and ~800 tokens when it's time to post.
+
+<Note>
+**This is one way to do it, not the only way.** The recipe uses web search + computer-use because they ship with Wolffish and need zero setup. But if you have other tools on your machine — a LinkedIn MCP server, a browser extension, a CLI tool, a Python script — Wolffish can use those too. Any capability you install in `brain/cerebellum/` becomes available. The workflow is yours to customize.
+
+That said, the more moving parts you add, the more things can break. The built-in path is the most tested and the most portable.
+</Note>
+
+## Post Style Guide
+
+- Under 3000 characters (LinkedIn's post limit)
+- Match the user's voice from soul.md — professional but human, not corporate
+- English by default (edit the research prompt for Arabic or bilingual)
+
+**Format matters.** LinkedIn is a feed — people scroll fast. A wall of text gets skipped. The post needs clear visual structure: a title line, numbered items each on its own line with a topic emoji, and a blank line between every item.
+
+- Title line: topic emoji + "AI News Roundup — N Things You Need to Know Today"
+- One blank line after the title
+- Each story is one numbered item: `N. [topic emoji] [One-sentence headline with enough context to stand alone]`
+- One blank line between every item — no exceptions
+- 5-10 stories depending on the day's news — cover breadth, not just the biggest headline
+- Pick a different topic emoji per story that matches its domain (🏦 finance, 🏥 health, 🔬 research, 💰 funding, 🛡️ policy, 🛒 retail, ☁️ cloud, 🔐 security, 🎵 consumer, etc.)
+- Footer line: `Generated with Wolffish 🐟`
+- No hashtags, no closing hot take, no "personal reflection" — the value is the curation itself
+
+**Template:**
+
+```
+🤖 AI News Roundup — N Things You Need to Know Today
+
+1. 🏦 [Finance/business story — one complete sentence]
+
+2. 🏥 [Health/medical story — one complete sentence]
+
+3. 💰 [Funding/valuation story — one complete sentence]
+
+4. 🔬 [Research/breakthrough story — one complete sentence]
+
+5. 🛡️ [Policy/governance story — one complete sentence]
+
+...
+
+Generated with Wolffish 🐟
+```
+
+Each item is self-contained — the reader should understand the story from that one line without clicking through. The blank lines between items are critical — without them LinkedIn renders it as a single dense paragraph.
+
+## News Sources
+
+The agent picks from whatever web search returns, but it must stick to **free, open sources** that `web_fetch` can actually read. Paywalled sites return HTTP 403/401 errors — the agent can't read them, and retrying wastes time and tokens.
+
+**Prioritize these (free, no paywall):**
+
+- The Verge, Ars Technica, TechCrunch (industry news — free to read)
+- arXiv, Papers With Code (research — fully open access)
+- Anthropic Blog, OpenAI Blog, Google AI Blog (first-party announcements — always free)
+- Hacker News, r/MachineLearning (community signal — open)
+- VentureBeat, The Register, CNBC Technology (business/funding — free tier)
+- MIT Technology Review (some free articles — check before fetching)
+
+**Avoid (paywalled or unreliable):**
+
+- Bloomberg, WSJ, NYT, Financial Times, The Information (hard paywalls — `web_fetch` gets 403)
+- SEO spam, listicles, AI-generated summaries of summaries
+- Aggregator sites that rewrite other outlets' reporting with no original content
+- Any URL that returns a login wall, cookie consent blocker, or paywall interstitial
+
+## The Prompts
+
+This workflow runs as two separate conversations. The first researches and writes the post. The second publishes it. Splitting them gives you a chance to review the draft, and keeps the expensive computer-use tokens out of the research context.
+
+### Conversation 1 — Research & Write
+
+Send this prompt to Wolffish. It uses `web-search` only — no computer-use, no screenshots, no browser. This is the cheap part.
+
+```
+Research today's top AI and tech news. Run multiple searches:
+"AI news today", "LLM breakthroughs this week", "artificial
+intelligence announcements", "AI funding rounds", "AI policy
+regulation". Read the full content of the top articles using
+web_fetch.
+
+ONLY use free, open sources that web_fetch can read without
+hitting a paywall. Good sources: The Verge, Ars Technica,
+TechCrunch, arXiv, Papers With Code, Anthropic Blog, OpenAI
+Blog, Google AI Blog, Hacker News, r/MachineLearning,
+VentureBeat, The Register, CNBC Technology.
+
+DO NOT fetch from paywalled sites — Bloomberg, WSJ, NYT,
+Financial Times, The Information. They return HTTP 403 and
+waste time. If a search result points to a paywalled domain,
+skip it and pick the next one. Also skip SEO spam, listicles,
+AI-generated summaries of summaries, and aggregator sites that
+rewrite other outlets with no original reporting.
+
+Write a LinkedIn post in my voice (match soul.md tone). Under
+3000 characters. Use this exact format — every line break matters:
+
+🤖 AI News Roundup — N Things You Need to Know Today
+(blank line)
+1. [topic emoji] [One-sentence headline with full context]
+(blank line)
+2. [topic emoji] [One-sentence headline with full context]
+(blank line)
+3. [topic emoji] [One-sentence headline with full context]
+(blank line)
+... continue for 5-10 stories ...
+(blank line)
+Generated with Wolffish 🐟
+
+Rules:
+- 5 to 10 stories depending on what's newsworthy today
+- Each story is exactly one numbered item with a topic emoji
+  that matches its domain: 🏦 finance, 🏥 health, 🔬 research,
+  💰 funding, 🛡️ policy, 🛒 retail, ☁️ cloud, 🔐 security,
+  🎵 consumer, etc.
+- Each item is one self-contained sentence — the reader must
+  understand the story without clicking through
+- One blank line between EVERY item — no exceptions — without
+  them LinkedIn renders it as a wall of text
+- No hashtags. No closing hot take. No personal reflection.
+  The value is the curation.
+- End with: Generated with Wolffish 🐟
+
+Give me the final post text and nothing else.
+```
+
+Wolffish will search, read articles, curate, and return the finished post text. Review it — edit anything you don't like, add a personal line if you want, or just approve it as-is.
+
+<Tip>
+**Honestly? Just copy-paste it yourself.** Conversation 1 costs roughly 50 cents to 2 dollars. Conversation 2 (the computer-use posting) costs 3 to 15 dollars. That's a 5-10x markup just to avoid a copy-paste. If you're doing this daily, that's 90-450 dollars per month on the posting step alone.
+
+The smartest setup is to let Wolffish do what it's good at — research, curate, write — and then post the result yourself in 10 seconds. Or better yet, pipe the output into a dedicated posting tool that doesn't need screenshots:
+
+- **Buffer, Hootsuite, or Typefully** — social media schedulers with LinkedIn support. Paste the text, schedule it, done. Most have free tiers.
+- **Zapier or Make** — automation platforms that can take text from a file or webhook and post it to LinkedIn via API. Zero screenshots, zero computer-use tokens.
+- **LinkedIn API** directly — if you're comfortable with API keys, a simple script can post text to LinkedIn for free.
+- **A simple shell script** — `curl` to the LinkedIn API with your post text. Wolffish can even write this script for you.
+
+Any of these let you run Conversation 1 daily on a heartbeat (under 2 dollars per day, roughly 15-60 dollars per month) and post automatically without Conversation 2 ever happening. That's the cost-effective daily automation.
+</Tip>
+
+If you still want full computer-use automation — because you don't want to set up another tool, or you want Wolffish to handle everything end to end — here's the posting prompt.
+
+### Conversation 2 — Post to LinkedIn (Optional)
+
+Once you're happy with the post text, start a **new conversation** and send this prompt. Replace the placeholder with the actual post content from Conversation 1.
+
+```
+Post the following text to LinkedIn using computer-use. Use
+the browser on display 0 (primary display). Chrome is already
+open and I'm logged into LinkedIn.
+
+Navigate to: https://www.linkedin.com/feed?shareActive=true
+This opens the post composer directly with the cursor ready.
+
+Paste this post content:
+
+---
+[PASTE YOUR POST TEXT HERE]
+---
+
+Take ONE screenshot of the composer to check the top of the
+post — if the title line and first item have correct emojis,
+numbering, and blank lines, trust that the rest is fine and
+post immediately. Do not scroll through the entire post to
+verify every item. Click the "Post" button. Wait for the post
+to appear in the feed, take a screenshot to confirm it's live,
+then give me the post URL.
+```
+
+This conversation uses `computer-use` only — no web search, no article fetching. It opens the composer, pastes, verifies once, and posts.
+
+<Tip>
+**Why two conversations?** Splitting saves money and gives you control. Conversation 1 runs 5-10 cheap iterations (research + writing). Conversation 2 runs 20-40 computer-use iterations — but it starts with a clean context that only contains the post text, not the entire research history. The research tokens don't get carried through every screenshot iteration. And you get to review the post before it goes public.
+</Tip>
+
+### Automating with Heartbeat
+
+Once you trust the output quality, you can automate both steps as a heartbeat. Add the Conversation 1 prompt to `brain/brainstem/heartbeat.md` under a schedule heading, and chain the posting step after it. See the [Heartbeat docs](/configuration/heartbeat) for schedule formats (`Daily`, `Weekday`, `Weekly`, `Cron`, etc.).
+
+## How It Works
+
+**Conversation 1 (Research & Write):**
+
+1. You send the research prompt.
+2. Prefrontal loads soul.md (tone) + web-search SKILL.md into context.
+3. The LLM calls `web_search` across multiple queries — news, breakthroughs, funding, policy.
+4. The LLM calls `web_fetch` on the top articles to read full content.
+5. The LLM curates 5-10 stories, writes one self-contained sentence per story, formats the numbered roundup.
+6. Wolffish returns the finished post text to you.
+
+**You review the post.** Edit, approve, or regenerate.
+
+**Conversation 2 (Post to LinkedIn):**
+
+7. You send the posting prompt with the final post text.
+8. Prefrontal loads computer-use SKILL.md into context.
+9. The LLM opens `linkedin.com/feed?shareActive=true` in Chrome — the composer opens directly with the cursor ready.
+10. The LLM pastes the post content into the composer.
+11. The LLM takes one screenshot to verify formatting — emojis, blank lines, structure intact.
+12. The LLM clicks the "Post" button.
+13. The LLM waits, takes a screenshot to confirm the post is live, and extracts the post URL.
+14. Wolffish returns the live post URL to you.
+15. Hippocampus logs the episode. Basalganglia records the outcome.
+
+## Limits
+
+- One post per day maximum — don't spam
+- First-time computer-use actions may trigger macOS Automation prompts per target app (Chrome, Finder, etc.) — pre-grant them in Setup to avoid interruptions
+- If LinkedIn's UI changes layout, the LLM adapts on the next screenshot — no hardcoded selectors
+
+## Cost & Model Guide
+
+This workflow spans two conversations — research/writing and computer-use posting. Together they make it one of the more expensive automation types — and the model you choose has a direct impact on both cost and quality.
+
+For the full picture on how automation costs work, caching, compaction, and general recommendations, see [Limitations & Costs](/use-cases/limitations).
+
+### Recommended Model
+
+**Claude Opus 4.x** is the recommended model for this use case. The workflow requires judgment calls at every stage — which stories matter, how to phrase them in your voice, when the UI looks right to click Post. Opus handles these significantly better than smaller models.
+
+**Claude Sonnet 4.x** works and costs ~40% less, but expect lower-quality curation and more formatting mistakes in the post. Sonnet is a reasonable choice if you're running this daily and want to keep costs down — just review the output quality for the first few runs.
+
+**Claude Haiku 4.5** and local models (Ollama) are **not suitable** for this use case. Haiku struggles with multi-step computer-use navigation, and local models lack the tool-use reliability needed for an autonomous end-to-end workflow.
+
+### Approximate Cost Per Run
+
+With two conversations, the total iteration count is the same (40-70) but the context is smaller because research tokens don't carry into the posting phase. Conversation 1 runs 5-10 iterations. Conversation 2 runs 20-40 iterations with a clean context.
+
+| Model | Est. Cost Per Run | Monthly (Daily) |
+|-------|-------------------|-----------------|
+| Claude Opus 4.x | ~13 USD | ~390 USD |
+| Claude Sonnet 4.x | ~8 USD | ~240 USD |
+| Claude Haiku 4.5 | ~3 USD | ~90 USD (not recommended) |
+
+These estimates assume prompt caching is active. Without caching, costs are 5-10x higher.
+
+<Note>
+**OpenAI models** follow a similar pattern — GPT-4o at 2.50/10 dollars per MTok is comparable to Sonnet pricing. OpenAI's automatic prefix caching provides a 50% discount on cached input tokens with no configuration needed.
+</Note>
+
+### Where the Money Goes
+
+| Conversation | Phase | Iterations | Est. Cost (Sonnet) | Why |
+|-------------|-------|-----------|-------------------|-----|
+| 1 | Research + write | 5-10 | 0.50-2.00 USD | Multiple fetches grow context, but no screenshots |
+| 2 | Computer-use posting | 20-40 | 3.00-8.00 USD | Each screenshot is ~100K tokens, carried forward |
+
+Conversation 2 accounts for roughly 70-80% of the total cost. Splitting the conversations helps because the research context (article text, search results) doesn't get carried through every screenshot iteration in Conversation 2.
+
+### Reducing Cost
+
+These optimizations compound across daily runs:
+
+- **The two-conversation split itself is a cost optimization** — research tokens don't inflate every screenshot iteration in the posting phase
+- **Leave Chrome open on `linkedin.com/feed`** — skips browser launch and navigation, saving ~3 screenshots and ~800 tokens
+- **The prompt uses `linkedin.com/feed?shareActive=true`** — opens the composer directly, cutting another 2-3 screenshots vs navigating to it manually
+- **Keep instructions precise** — the posting prompt tells the model to take ONE screenshot to verify, not scroll through the entire post. Vague instructions like "make sure it looks perfect" cause extra verification loops
+- **Use a LinkedIn API or MCP server instead of computer-use** — this is the single biggest cost reduction. A direct API post costs under a dollar vs 3-8 dollars via computer-use. The built-in computer-use path needs zero setup, but if you're running this daily and cost matters, an API integration pays for itself fast
+
+## A Note on Computer-Use and Cost
+
+Screenshot-based computer-use is expensive but it's also the most powerful browser automation available. It drives a real browser with real mouse and keyboard input — from LinkedIn's perspective, there is no bot. It bypasses bot detection, CAPTCHA challenges, and API restrictions because it uses the same browser session you use manually. **Use this at your own risk and understanding of the total costs** — both the API spend (3-15 dollars per posting session) and the fact that you're automating actions on a platform that has its own terms of service.
+
+We're actively researching cheaper alternatives — headless browser automation, JavaScript DOM inspection, hybrid approaches that only take a screenshot for final verification, and dedicated MCP server bridges for high-value platforms like LinkedIn. These will be added alongside computer-use as they mature, not as replacements. See [Limitations & Costs](/use-cases/limitations#the-future-of-browser-automation) for the full roadmap.
+
+## Expected Outcome
+
+After both conversations complete, you get a message like:
+
+> ✅ Posted to LinkedIn. Here's your post: https://www.linkedin.com/feed/update/urn:li:activity:7234567890123456789
+
+The post itself will look something like:
+
+> 🤖 AI News Roundup — 10 Things You Need to Know Today
+>
+> 1. 🏦 JPMorgan Chase reclassified AI as core infrastructure with a 19.8B USD tech budget, 2,000 AI staff, and projects 2.5B USD in annual value from AI efficiency gains.
+>
+> 2. 🏥 OpenAI's reasoning model outperformed experienced physicians at patient diagnosis in a Harvard/BIDMC study — tested across real ER electronic health records.
+>
+> 3. 💊 OpenAI launched ChatGPT for Clinicians — a free tool for verified medical professionals to assist with documentation and evidence-based clinical reasoning.
+>
+> 4. 🛡️ The US, UK, Australia, Canada & New Zealand jointly issued security guidance on agentic AI systems, identifying 5 risk categories for critical infrastructure deployments.
+>
+> 5. 🔬 UPenn researchers introduced "Mollifier Layers" — a neural network technique to solve inverse PDEs with improved stability, with applications in genomics and climate modeling.
+>
+> 6. 💰 China's Moonshot AI raised 2B USD at a 20B USD valuation as demand for open-source AI models skyrockets globally.
+>
+> 7. 🛒 McKinsey & ICSC report: AI agents could influence up to 1 trillion USD in US B2C retail revenue by 2030, reshaping how and where shopping decisions are made.
+>
+> 8. ☁️ AWS expanded Amazon Connect into 4 agentic AI solutions covering supply chain, hiring, customer service, and healthcare administration.
+>
+> 9. 🔐 Anthropic's Claude Mythos Preview model prompted Yale's CELI to publish a cross-industry agentic AI governance framework across banking, healthcare, retail & supply chain.
+>
+> 10. 🎵 Spotify is positioning itself as the home for AI-generated personal audio, while OpenAI launched new voice intelligence features in its API.
+>
+> Generated with Wolffish 🐟
