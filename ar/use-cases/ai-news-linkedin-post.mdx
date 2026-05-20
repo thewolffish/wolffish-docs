@@ -1,8 +1,387 @@
 ---
-title: "منشور أخبار الذكاء الاصطناعي على LinkedIn"
-description: "أتمتة تجميع أخبار الذكاء الاصطناعي ونشرها على LinkedIn باستخدام البحث والتحكم بالحاسوب"
+title: "منشور أخبار الذكاء الاصطناعي اليومي على LinkedIn"
+description: "أتمتة تنسيق أخبار الذكاء الاصطناعي اليومية ونشرها على LinkedIn باستخدام البحث على الويب والتحكم بالحاسوب"
 ---
 
-# منشور أخبار الذكاء الاصطناعي على LinkedIn
+# منشور أخبار الذكاء الاصطناعي اليومي على LinkedIn
 
-هذه الصفحة متوفرة باللغة الإنجليزية حاليا. يرجى الرجوع إلى [النسخة الإنجليزية](/use-cases/ai-news-linkedin-post) للاطلاع على المحتوى الكامل.
+يبحث Wolffish عن أبرز أخبار الذكاء الاصطناعي اليوم، وينسّق أهمها، ويكتب منشوراً على LinkedIn بأسلوبك الخاص، ثم يفتح ملف Chrome الافتراضي (حيث تكون مسجَّلاً في LinkedIn مسبقاً)، ويكتب المنشور وينشره، ثم يعيد إليك رابط المنشور المباشر. بدون واجهة LinkedIn API. بدون OAuth. بدون كود طرف ثالث. مجرد بحث على الويب + تحكم بالحاسوب.
+
+ينقسم سير العمل إلى محادثتين — واحدة للبحث وكتابة المنشور، وأخرى لنشره. هذا يتيح لك مراجعة المسودة قبل نشرها، ويُبقي مرحلة التحكم بالحاسوب باهظة الثمن منفصلة عن مرحلة البحث الرخيصة.
+
+## شرح بالفيديو
+
+{/* TODO: Replace with YouTube embed/link once recorded */}
+_الفيديو قادم قريباً._
+
+## القدرات المطلوبة
+
+- `web-search` — يبحث في أخبار الذكاء الاصطناعي عبر الويب ويقرأ محتوى المقالات
+- `computer-use` — يتحكم بـ Chrome للتنقل في LinkedIn وكتابة المنشور والنقر على نشر
+
+كلتاهما تأتيان مع Wolffish. لا حاجة لكود أو إضافات إضافية.
+
+## الإعداد
+
+تستخدم حالة الاستخدام هذه `web-search` و`computer-use` — وكلاهما يحتاج إلى نموذج LLM سحابي وأذونات macOS للعمل. إذا كان أي من هذه مفقوداً، فإن الوكيل إما سيفشل بصمت (تُعيد لقطات الشاشة فراغاً) أو يستهلك الرموز في إعادة محاولة إجراءات لا يستطيع تنفيذها. اقرأ الدليل العام [التهيئة للنجاح](/use-cases/setting-up-for-success) للصورة الكاملة — ما يلي خاص بسير العمل هذا.
+
+### موصى به
+
+- **Claude Opus** — يربط سير العمل هذا البحث والتنسيق والكتابة والتحكم بالحاسوب متعدد الخطوات في تشغيلة مستقلة واحدة. يتعامل Opus مع قرارات الحكم (أي القصص مهمة، وكيفية صياغتها، ومتى تبدو الواجهة جاهزة) بشكل أفضل بكثير من النماذج الأصغر. يعمل Sonnet ولكن توقع جودة تنسيق أدنى وأخطاء تنسيق أكثر. لا تناسب Haiku والنماذج المحلية حالة الاستخدام هذه.
+
+### مطلوب
+
+- **Wolffish مثبت ويعمل** — تطبيق سطح المكتب مع مساحة عمل brain مُهيأة.
+- **مفتاح API سحابي** — Anthropic (Claude) أو OpenAI، مُهيأ في الإعدادات > الخدمات. يحتاج سير العمل هذا إلى مزود سحابي للتنسيق والصياغة وحكم التحكم بالحاسوب. النماذج المحلية لن تكفي.
+- **Chrome** — مثبت مع ملف تعريف مسجَّل دخوله مسبقاً في LinkedIn. يقود الوكيل المتصفح مباشرة عبر computer-use — بدون LinkedIn API، بدون رموز OAuth.
+- **أذونات macOS لـ Wolffish** — تسجيل الشاشة وإمكانية الوصول والأتمتة. بدون هذه، سيموت computer-use عند الوصول. راجع الدليل السريع أدناه.
+
+### اختياري
+
+- **[مفتاح Brave Search API](https://brave.com/search/api/)** — مُهيأ في الإعدادات > الخدمات > Brave Search. يحسّن جودة البحث وموثوقيته. بدونه، يعتمد Wolffish على بحثه الافتراضي، الذي يعمل ولكن قد يُعيد نتائج أكثر ضوضاء.
+
+### دليل أذونات macOS السريع
+
+يحتاج computer-use إلى ثلاثة أذونات في macOS. تُمنح جميعها في **إعدادات النظام > الخصوصية والأمان**.
+
+<Accordion title="تسجيل الشاشة">
+**ما تفعله:** تتيح لـ Wolffish التقاط لقطات شاشة لسطح مكتبك.
+
+**ما يحدث بدونها:** يفشل `computer_screenshot` بصمت — يُعيد الوكيل المحاولة حتى 10 مرات، مستهلكاً ~300 ثانية لكل محاولة قبل الاستسلام. لا رسالة خطأ، فقط نتيجة فارغة.
+
+**كيفية منحها:**
+1. افتح **إعدادات النظام > الخصوصية والأمان > تسجيل الشاشة**
+2. انقر على زر `+`، ابحث عن **Wolffish** وأضفه
+3. **أعد تشغيل Wolffish** — لا يسري هذا الإذن إلا بعد إعادة تشغيل التطبيق
+</Accordion>
+
+<Accordion title="إمكانية الوصول">
+**ما تفعله:** تتيح لـ Wolffish التحكم بالفأرة ولوحة المفاتيح.
+
+**ما يحدث بدونها:** يفشل `computer_mouse_click` و`computer_keyboard_type` فوراً بـ "غير مسموح به".
+
+**كيفية منحها:**
+1. افتح **إعدادات النظام > الخصوصية والأمان > إمكانية الوصول**
+2. انقر على زر `+`، ابحث عن **Wolffish** وأضفه
+3. تسري فوراً — لا حاجة لإعادة التشغيل
+</Accordion>
+
+<Accordion title="الأتمتة">
+**ما تفعله:** تتيح لـ Wolffish إرسال أوامر إلى تطبيقات أخرى (Chrome وFinder وغيرها) عبر AppleScript.
+
+**ما يحدث بدونها:** يفشل أي استدعاء `osascript` بـ "غير مصرح بإرسال أحداث Apple". يُعيد الوكيل المحاولة — في إحدى تشغيلات الاختبار استهلك ~264 ثانية على 6 محاولات قبل النجاح بعد ظهور الموجه.
+
+**كيفية منحها:**
+1. افتح **إعدادات النظام > الخصوصية والأمان > الأتمتة**
+2. ابحث عن **Wolffish** في القائمة
+3. فعّل كل تطبيق هدف يحتاج الوكيل إليه — كحد أدنى، **Google Chrome**
+4. قد يطلب منك macOS أيضاً عند أول استخدام — انقر على "موافق" عند ظهور الطلب
+
+يمكنك منحها مسبقاً لتجنب مقاطعة نافذة منبثقة لتشغيلة جارية.
+</Accordion>
+
+<Warning>
+**امنح الأذونات الثلاثة قبل أول تشغيلة.** إذا كان أي إذن مفقوداً، سيستنزف الوكيل ميزانية الرموز الخاصة به في إعادة محاولة استدعاءات أدوات فاشلة، ولن يُنشر شيء. تسجيل الشاشة هو الأسوأ — يفشل بصمت بدون خطأ، فلا يعرف الوكيل حتى أنه لا يستطيع رؤية الشاشة.
+</Warning>
+
+### قبل أن تبدأ
+
+اترك Chrome مفتوحاً مع جلسة LinkedIn نشطة. هذا وحده يتخطى تشغيل المتصفح وتسجيل الدخول — موفراً ~3 لقطات شاشة و~800 رمز عند وقت النشر.
+
+<Note>
+**هذه طريقة واحدة، وليست الوحيدة.** تستخدم الوصفة web-search + computer-use لأنهما يأتيان مع Wolffish ولا يحتاجان إلى إعداد. ولكن إذا كانت لديك أدوات أخرى على جهازك — خادم LinkedIn MCP، أو إضافة متصفح، أو أداة CLI، أو سكربت Python — يستطيع Wolffish استخدامها أيضاً. أي قدرة تثبتها في `brain/cerebellum/` تصبح متاحة. سير العمل ملك لك لتخصيصه.
+
+مع ذلك، كلما أضفت قطعاً متحركة، زادت احتمالات الانكسار. المسار المضمَّن هو الأكثر اختباراً والأكثر قابلية للنقل.
+</Note>
+
+## دليل أسلوب المنشور
+
+- أقل من 3000 حرف (حد منشور LinkedIn)
+- يطابق صوت المستخدم من soul.md — مهني ولكن بشري، وليس مؤسسياً
+- إنجليزي افتراضياً (عدّل موجه البحث للعربية أو ثنائي اللغة)
+
+**التنسيق مهم.** LinkedIn عبارة عن خلاصة — يتصفح الناس بسرعة. تُتجاوز كتلة نص واحدة. يحتاج المنشور إلى بنية بصرية واضحة: سطر عنوان، وعناصر مرقمة كل منها في سطر خاص به مع رمز موضوع، وسطر فارغ بين كل عنصر.
+
+- سطر العنوان: رمز موضوع + "AI News Roundup — N Things You Need to Know Today"
+- سطر فارغ واحد بعد العنوان
+- كل قصة عبارة عن عنصر مرقم: `N. [رمز موضوع] [عنوان من جملة واحدة بسياق كافٍ ليكون قائماً بذاته]`
+- سطر فارغ واحد بين كل عنصر — بدون استثناءات
+- 5-10 قصص حسب أخبار اليوم — اشمل اتساعاً، وليس فقط أكبر عنوان
+- اختر رمز موضوع مختلف لكل قصة يطابق مجالها (🏦 المالية، 🏥 الصحة، 🔬 البحث، 💰 التمويل، 🛡️ السياسة، 🛒 التجزئة، ☁️ السحابة، 🔐 الأمن، 🎵 المستهلك، إلخ)
+- سطر التذييل: `Generated with Wolffish 🐟`
+- بدون هاشتاج، بدون رأي ختامي حار، بدون "تأملات شخصية" — القيمة هي التنسيق ذاته
+
+**القالب:**
+
+```
+🤖 AI News Roundup — N Things You Need to Know Today
+
+1. 🏦 [Finance/business story — one complete sentence]
+
+2. 🏥 [Health/medical story — one complete sentence]
+
+3. 💰 [Funding/valuation story — one complete sentence]
+
+4. 🔬 [Research/breakthrough story — one complete sentence]
+
+5. 🛡️ [Policy/governance story — one complete sentence]
+
+...
+
+Generated with Wolffish 🐟
+```
+
+كل عنصر قائم بذاته — يجب أن يفهم القارئ القصة من ذلك السطر الواحد دون النقر على الرابط. الأسطر الفارغة بين العناصر حاسمة — بدونها يُعرض في LinkedIn كفقرة كثيفة واحدة.
+
+## مصادر الأخبار
+
+يختار الوكيل من بين ما يُعيده البحث على الويب، ولكن يجب أن يلتزم بـ **مصادر مجانية ومفتوحة** يستطيع `web_fetch` قراءتها فعلياً. المواقع المدفوعة تُعيد أخطاء HTTP 403/401 — لا يستطيع الوكيل قراءتها، وإعادة المحاولة تضيع الوقت والرموز.
+
+**أعطِ الأولوية لهذه (مجانية، بدون اشتراك مدفوع):**
+
+- The Verge وArs Technica وTechCrunch (أخبار الصناعة — مجانية)
+- arXiv وPapers With Code (البحث — وصول مفتوح بالكامل)
+- مدونة Anthropic ومدونة OpenAI ومدونة Google AI (إعلانات الطرف الأول — دائماً مجانية)
+- Hacker News وr/MachineLearning (إشارة المجتمع — مفتوحة)
+- VentureBeat وThe Register وCNBC Technology (الأعمال/التمويل — طبقة مجانية)
+- MIT Technology Review (بعض المقالات المجانية — تحقق قبل الجلب)
+
+**تجنّب (مدفوعة أو غير موثوقة):**
+
+- Bloomberg وWSJ وNYT وFinancial Times وThe Information (جدران دفع صلبة — يحصل `web_fetch` على 403)
+- بريد عشوائي SEO وقوائم وملخصات مُولَّدة بالذكاء الاصطناعي لملخصات
+- مواقع تجميع تُعيد كتابة تقارير منافذ أخرى بدون محتوى أصلي
+- أي رابط يُعيد جدار تسجيل دخول أو حاجز موافقة على ملفات تعريف الارتباط أو جدار دفع وسيط
+
+## الموجِّهات
+
+يعمل سير العمل هذا كمحادثتين منفصلتين. الأولى تبحث وتكتب المنشور. الثانية تنشره. تقسيمهما يمنحك فرصة لمراجعة المسودة، ويُبقي رموز computer-use باهظة الثمن خارج سياق البحث.
+
+### المحادثة 1 — البحث والكتابة
+
+أرسل هذا الموجِّه إلى Wolffish. يستخدم `web-search` فقط — بدون computer-use، بدون لقطات شاشة، بدون متصفح. هذا هو الجزء الرخيص.
+
+```
+Research today's top AI and tech news. Run multiple searches:
+"AI news today", "LLM breakthroughs this week", "artificial
+intelligence announcements", "AI funding rounds", "AI policy
+regulation". Read the full content of the top articles using
+web_fetch.
+
+ONLY use free, open sources that web_fetch can read without
+hitting a paywall. Good sources: The Verge, Ars Technica,
+TechCrunch, arXiv, Papers With Code, Anthropic Blog, OpenAI
+Blog, Google AI Blog, Hacker News, r/MachineLearning,
+VentureBeat, The Register, CNBC Technology.
+
+DO NOT fetch from paywalled sites — Bloomberg, WSJ, NYT,
+Financial Times, The Information. They return HTTP 403 and
+waste time. If a search result points to a paywalled domain,
+skip it and pick the next one. Also skip SEO spam, listicles,
+AI-generated summaries of summaries, and aggregator sites that
+rewrite other outlets with no original reporting.
+
+Write a LinkedIn post in my voice (match soul.md tone). Under
+3000 characters. Use this exact format — every line break matters:
+
+🤖 AI News Roundup — N Things You Need to Know Today
+(blank line)
+1. [topic emoji] [One-sentence headline with full context]
+(blank line)
+2. [topic emoji] [One-sentence headline with full context]
+(blank line)
+3. [topic emoji] [One-sentence headline with full context]
+(blank line)
+... continue for 5-10 stories ...
+(blank line)
+Generated with Wolffish 🐟
+
+Rules:
+- 5 to 10 stories depending on what's newsworthy today
+- Each story is exactly one numbered item with a topic emoji
+  that matches its domain: 🏦 finance, 🏥 health, 🔬 research,
+  💰 funding, 🛡️ policy, 🛒 retail, ☁️ cloud, 🔐 security,
+  🎵 consumer, etc.
+- Each item is one self-contained sentence — the reader must
+  understand the story without clicking through
+- One blank line between EVERY item — no exceptions — without
+  them LinkedIn renders it as a wall of text
+- No hashtags. No closing hot take. No personal reflection.
+  The value is the curation.
+- End with: Generated with Wolffish 🐟
+
+Give me the final post text and nothing else.
+```
+
+سيبحث Wolffish ويقرأ المقالات وينسّق ويُعيد نص المنشور النهائي. راجعه — عدّل أي شيء لا يعجبك، أضف سطراً شخصياً إن أردت، أو وافق عليه كما هو.
+
+<Tip>
+**بصراحة؟ فقط انسخه والصقه بنفسك.** تكلفة المحادثة 1 تتراوح تقريباً بين 50 سنتاً ودولارين. المحادثة 2 (نشر computer-use) تكلف 3 إلى 15 دولاراً. هذا هامش 5-10 أضعاف فقط لتجنب نسخ ولصق. إذا كنت تفعل هذا يومياً، فهذا 90-450 دولاراً شهرياً على خطوة النشر وحدها.
+
+أذكى إعداد هو ترك Wolffish يفعل ما يجيده — البحث والتنسيق والكتابة — ثم انشر النتيجة بنفسك في 10 ثوانٍ. أو أفضل من ذلك، مرّر الإخراج إلى أداة نشر مخصصة لا تحتاج لقطات شاشة:
+
+- **Buffer أو Hootsuite أو Typefully** — جدولات وسائل التواصل الاجتماعي مع دعم LinkedIn. الصق النص، جدوله، انتهى. معظمها يحتوي على طبقة مجانية.
+- **Zapier أو Make** — منصات أتمتة يمكنها أخذ نص من ملف أو webhook ونشره على LinkedIn عبر API. صفر لقطات شاشة، صفر رموز computer-use.
+- **LinkedIn API** مباشرة — إذا كنت مرتاحاً مع مفاتيح API، يستطيع سكربت بسيط نشر نص إلى LinkedIn مجاناً.
+- **سكربت شل بسيط** — `curl` إلى LinkedIn API بنص منشورك. يستطيع Wolffish حتى كتابة هذا السكربت لك.
+
+أي من هذه يتيح لك تشغيل المحادثة 1 يومياً على heartbeat (أقل من دولارين يومياً، تقريباً 15-60 دولاراً شهرياً) والنشر تلقائياً دون أن تحدث المحادثة 2 أبداً. هذه هي الأتمتة اليومية الفعّالة من حيث التكلفة.
+</Tip>
+
+إذا كنت ما زلت تريد أتمتة computer-use كاملة — لأنك لا تريد إعداد أداة أخرى، أو تريد أن يتولى Wolffish كل شيء من البداية إلى النهاية — إليك موجِّه النشر.
+
+### المحادثة 2 — النشر على LinkedIn (اختياري)
+
+بمجرد أن تكون راضياً عن نص المنشور، ابدأ **محادثة جديدة** وأرسل هذا الموجِّه. استبدل المؤشر الموضعي بمحتوى المنشور الفعلي من المحادثة 1.
+
+```
+Post the following text to LinkedIn using computer-use. Use
+the browser on display 0 (primary display). Chrome is already
+open and I'm logged into LinkedIn.
+
+Navigate to: https://www.linkedin.com/feed?shareActive=true
+This opens the post composer directly with the cursor ready.
+
+Paste this post content:
+
+---
+[PASTE YOUR POST TEXT HERE]
+---
+
+After pasting, take ONE screenshot of the composer. Verify
+the emojis and formatting look correct — numbered items,
+topic emojis, blank lines between stories. If it looks right,
+click the "Post" button immediately. Do not scroll through
+the post. Do not take additional screenshots to verify. Do
+not try to get the post URL after posting.
+
+Three actions total: paste, verify, post. Done.
+```
+
+تستخدم هذه المحادثة `computer-use` فقط — بدون بحث على الويب، بدون جلب مقالات. ثلاثة إجراءات: لصق، تحقق، نشر. بدون تمرير، بدون استخراج رابط، بدون لقطات شاشة تأكيدية بعد النشر.
+
+<Tip>
+**لماذا محادثتان؟** يوفّر التقسيم المال ويمنحك التحكم. تشغّل المحادثة 1 من 5-10 تكرارات رخيصة (بحث + كتابة). تشغّل المحادثة 2 من 20-40 تكرار computer-use — ولكنها تبدأ بسياق نظيف يحتوي فقط على نص المنشور، وليس كامل تاريخ البحث. لا تُحمل رموز البحث عبر كل تكرار لقطة شاشة. وتحظى بمراجعة المنشور قبل نشره علناً.
+</Tip>
+
+### الأتمتة بـ Heartbeat
+
+بمجرد أن تثق في جودة الإخراج، يمكنك أتمتة كلتا الخطوتين كـ heartbeat. أضف موجِّه المحادثة 1 إلى `brain/brainstem/heartbeat.md` تحت عنوان جدولة، واربط خطوة النشر بعده. راجع [توثيق Heartbeat](/configuration/heartbeat) لتنسيقات الجدولة (`Daily`، `Weekday`، `Weekly`، `Cron`، إلخ).
+
+## كيف يعمل
+
+**المحادثة 1 (البحث والكتابة):**
+
+1. ترسل موجِّه البحث.
+2. يُحمّل Prefrontal soul.md (النبرة) + web-search SKILL.md في السياق.
+3. يستدعي LLM `web_search` عبر استعلامات متعددة — أخبار، اختراقات، تمويل، سياسة.
+4. يستدعي LLM `web_fetch` على المقالات الأهم لقراءة المحتوى الكامل.
+5. ينسّق LLM 5-10 قصص، يكتب جملة واحدة قائمة بذاتها لكل قصة، يُنسّق التجميع المرقم.
+6. يُعيد Wolffish نص المنشور النهائي إليك.
+
+**تراجع المنشور.** عدّل، وافق، أو أعد التوليد.
+
+**المحادثة 2 (النشر على LinkedIn):**
+
+7. ترسل موجِّه النشر مع نص المنشور النهائي.
+8. يُحمّل Prefrontal computer-use SKILL.md في السياق.
+9. يفتح LLM `linkedin.com/feed?shareActive=true` في Chrome — يفتح المؤلف مباشرة مع المؤشر جاهزاً.
+10. يلصق LLM محتوى المنشور في المؤلف.
+11. يأخذ LLM لقطة شاشة واحدة للتحقق من التنسيق — الرموز، الأسطر الفارغة، البنية سليمة.
+12. ينقر LLM على زر "Post".
+13. ينتظر LLM، ويأخذ لقطة شاشة لتأكيد أن المنشور حي، ويستخرج رابط المنشور.
+14. يُعيد Wolffish رابط المنشور المباشر إليك.
+15. يسجّل Hippocampus الحلقة. تسجّل Basalganglia النتيجة.
+
+## الحدود
+
+- منشور واحد يومياً كحد أقصى — لا تُغرق
+- قد تُطلق إجراءات computer-use لأول مرة موجِّهات أتمتة macOS لكل تطبيق هدف (Chrome وFinder وغيرها) — امنحها مسبقاً في الإعداد لتجنب المقاطعات
+- إذا غيّر LinkedIn تخطيط واجهته، يتكيّف LLM في لقطة الشاشة التالية — بدون محددات مُشفّرة
+
+## دليل التكلفة والنموذج
+
+يمتد سير العمل هذا عبر محادثتين — بحث/كتابة ونشر computer-use. معاً يجعلانه أحد أكثر أنواع الأتمتة تكلفة — والنموذج الذي تختاره له تأثير مباشر على كل من التكلفة والجودة.
+
+للصورة الكاملة عن كيفية عمل تكاليف الأتمتة والتخزين المؤقت والضغط والتوصيات العامة، راجع [القيود والتكاليف](/use-cases/limitations).
+
+### النموذج الموصى به
+
+**Claude Opus 4.x** هو النموذج الموصى به لهذه الحالة. يتطلب سير العمل قرارات حكم في كل مرحلة — أي القصص مهمة، وكيفية صياغتها بصوتك، ومتى تبدو الواجهة جاهزة للنقر على Post. يتعامل Opus مع هذه بشكل أفضل بكثير من النماذج الأصغر.
+
+**Claude Sonnet 4.x** يعمل ويكلف ~40% أقل، ولكن توقع جودة تنسيق أدنى وأخطاء تنسيق أكثر في المنشور. Sonnet خيار معقول إذا كنت تشغّل هذا يومياً وتريد إبقاء التكاليف منخفضة — فقط راجع جودة الإخراج للتشغيلات الأولى.
+
+**Claude Haiku 4.5** والنماذج المحلية (Ollama) **غير مناسبة** لهذه الحالة. يكافح Haiku مع التنقل متعدد الخطوات في computer-use، وتفتقر النماذج المحلية إلى موثوقية استخدام الأدوات اللازمة لسير عمل مستقل من البداية إلى النهاية.
+
+### التكلفة التقريبية لكل تشغيلة
+
+مع محادثتين، يكون عدد التكرار الإجمالي هو نفسه (40-70) ولكن السياق أصغر لأن رموز البحث لا تُحمل في مرحلة النشر. تشغّل المحادثة 1 من 5-10 تكرارات. تشغّل المحادثة 2 من 20-40 تكراراً بسياق نظيف.
+
+| النموذج | التكلفة المقدّرة لكل تشغيلة | شهرياً (يومياً) |
+|-------|-------------------|-----------------|
+| Claude Opus 4.x | ~13 USD | ~390 USD |
+| Claude Sonnet 4.x | ~8 USD | ~240 USD |
+| Claude Haiku 4.5 | ~3 USD | ~90 USD (غير موصى به) |
+
+تفترض هذه التقديرات أن التخزين المؤقت للموجِّه نشط. بدون التخزين المؤقت، التكاليف أعلى بـ 5-10 أضعاف.
+
+<Note>
+**نماذج OpenAI** تتبع نمطاً مشابهاً — GPT-4o بسعر 2.50/10 دولار لكل MTok مقارب لتسعير Sonnet. يوفّر التخزين المؤقت التلقائي للبادئة في OpenAI خصماً 50% على رموز الإدخال المخزّنة دون الحاجة إلى أي تكوين.
+</Note>
+
+### إلى أين تذهب الأموال
+
+| المحادثة | المرحلة | التكرارات | التكلفة المقدّرة (Sonnet) | لماذا |
+|-------------|-------|-----------|-------------------|-----|
+| 1 | البحث + الكتابة | 5-10 | 0.50-2.00 USD | عمليات جلب متعددة تُنمي السياق، ولكن بدون لقطات شاشة |
+| 2 | نشر computer-use | 20-40 | 3.00-8.00 USD | كل لقطة شاشة ~100K رمز، تُحمل للأمام |
+
+تستحوذ المحادثة 2 على تقريباً 70-80% من التكلفة الإجمالية. يساعد تقسيم المحادثات لأن سياق البحث (نص المقال، نتائج البحث) لا يُحمل عبر كل تكرار لقطة شاشة في المحادثة 2.
+
+### تخفيض التكلفة
+
+تتراكم هذه التحسينات عبر التشغيلات اليومية:
+
+- **تقسيم المحادثتين نفسه هو تحسين للتكلفة** — لا تُضخّم رموز البحث كل تكرار لقطة شاشة في مرحلة النشر
+- **اترك Chrome مفتوحاً على `linkedin.com/feed`** — يتخطى تشغيل المتصفح والتنقل، موفراً ~3 لقطات شاشة و~800 رمز
+- **يستخدم الموجِّه `linkedin.com/feed?shareActive=true`** — يفتح المؤلف مباشرة، يقطع 2-3 لقطات شاشة إضافية مقابل التنقل إليه يدوياً
+- **حافظ على التعليمات دقيقة** — يخبر موجِّه النشر النموذج بأخذ لقطة شاشة واحدة للتحقق، وليس التمرير عبر المنشور بأكمله. التعليمات الغامضة مثل "تأكد أنه يبدو مثالياً" تسبب حلقات تحقق إضافية
+- **استخدم LinkedIn API أو خادم MCP بدلاً من computer-use** — هذا هو أكبر تخفيض للتكلفة. يكلف نشر API مباشر أقل من دولار مقابل 3-8 دولارات عبر computer-use. لا يحتاج مسار computer-use المضمَّن إلى أي إعداد، ولكن إذا كنت تشغّل هذا يومياً والتكلفة تهم، فإن تكامل API يدفع لنفسه بسرعة
+
+## ملاحظة عن Computer-Use والتكلفة
+
+computer-use المعتمد على لقطات الشاشة باهظ الثمن ولكنه أيضاً أقوى أتمتة متصفح متاحة. يقود متصفحاً حقيقياً بإدخال فأرة ولوحة مفاتيح حقيقي — من منظور LinkedIn، لا يوجد بوت. يتجاوز كشف البوتات وتحديات CAPTCHA وقيود API لأنه يستخدم نفس جلسة المتصفح التي تستخدمها يدوياً. **استخدم هذا على مسؤوليتك وفهمك للتكاليف الإجمالية** — كل من إنفاق API (3-15 دولاراً لكل جلسة نشر) وحقيقة أنك تؤتمت إجراءات على منصة لها شروط خدمتها الخاصة.
+
+نحن نبحث بنشاط في بدائل أرخص — أتمتة متصفح بدون رأس، فحص JavaScript DOM، نهج هجين يأخذ لقطة شاشة فقط للتحقق النهائي، وجسور خوادم MCP مخصصة لمنصات عالية القيمة مثل LinkedIn. ستُضاف هذه إلى جانب computer-use كلما نضجت، وليس كبدائل. راجع [القيود والتكاليف](/use-cases/limitations#the-future-of-browser-automation) لخارطة الطريق الكاملة.
+
+## النتيجة المتوقعة
+
+بعد اكتمال كلتا المحادثتين، تحصل على رسالة مثل:
+
+> ✅ تم النشر على LinkedIn. هذا منشورك: https://www.linkedin.com/feed/update/urn:li:activity:7234567890123456789
+
+سيبدو المنشور نفسه شيئاً مثل:
+
+> 🤖 AI News Roundup — 10 Things You Need to Know Today
+>
+> 1. 🏦 JPMorgan Chase reclassified AI as core infrastructure with a 19.8B USD tech budget, 2,000 AI staff, and projects 2.5B USD in annual value from AI efficiency gains.
+>
+> 2. 🏥 OpenAI's reasoning model outperformed experienced physicians at patient diagnosis in a Harvard/BIDMC study — tested across real ER electronic health records.
+>
+> 3. 💊 OpenAI launched ChatGPT for Clinicians — a free tool for verified medical professionals to assist with documentation and evidence-based clinical reasoning.
+>
+> 4. 🛡️ The US, UK, Australia, Canada & New Zealand jointly issued security guidance on agentic AI systems, identifying 5 risk categories for critical infrastructure deployments.
+>
+> 5. 🔬 UPenn researchers introduced "Mollifier Layers" — a neural network technique to solve inverse PDEs with improved stability, with applications in genomics and climate modeling.
+>
+> 6. 💰 China's Moonshot AI raised 2B USD at a 20B USD valuation as demand for open-source AI models skyrockets globally.
+>
+> 7. 🛒 McKinsey & ICSC report: AI agents could influence up to 1 trillion USD in US B2C retail revenue by 2030, reshaping how and where shopping decisions are made.
+>
+> 8. ☁️ AWS expanded Amazon Connect into 4 agentic AI solutions covering supply chain, hiring, customer service, and healthcare administration.
+>
+> 9. 🔐 Anthropic's Claude Mythos Preview model prompted Yale's CELI to publish a cross-industry agentic AI governance framework across banking, healthcare, retail & supply chain.
+>
+> 10. 🎵 Spotify is positioning itself as the home for AI-generated personal audio, while OpenAI launched new voice intelligence features in its API.
+>
+> Generated with Wolffish 🐟
