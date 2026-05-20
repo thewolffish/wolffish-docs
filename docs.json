@@ -205,6 +205,7 @@
                   "ar/architecture/gods-creation",
                   "ar/architecture/overview",
                   "ar/architecture/pipeline",
+                  "ar/architecture/stateless-model",
                   "ar/architecture/brain-modules",
                   "ar/architecture/workspace",
                   "ar/architecture/event-bus"
