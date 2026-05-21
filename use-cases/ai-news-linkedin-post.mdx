@@ -239,14 +239,30 @@ Post the following text to LinkedIn using computer-use. Use
 the browser on display 0 (primary display). Chrome is already
 open and I'm logged into LinkedIn.
 
-Navigate to: https://www.linkedin.com/feed?shareActive=true
-This opens the post composer directly with the cursor ready.
+FIRST — save the post with correct encoding:
+Generate a timestamped filename using the current date and
+time: files/linkedin-post-YYYY-MM-DD-HHMMSS.txt (e.g.
+files/linkedin-post-2026-05-22-143052.txt). Write the post
+content below to that file so emojis are saved with proper
+UTF-8 encoding. Then copy it to the clipboard using this
+exact shell command (with your actual filename):
+LANG=en_US.UTF-8 pbcopy < files/linkedin-post-YYYY-MM-DD-HHMMSS.txt
+This forces pbcopy to read the file as UTF-8 regardless of
+the terminal's locale — it prevents emoji corruption (e.g.
+🤖 turning into ü§ñ) that happens with raw copy-paste.
 
-Paste this post content:
+Post content:
 
 ---
 [PASTE YOUR POST TEXT HERE]
 ---
+
+THEN — post it:
+Navigate to: https://www.linkedin.com/feed?shareActive=true
+This opens the post composer directly with the cursor ready.
+
+Click the composer text area and press Cmd+V to paste from
+the clipboard.
 
 After pasting, take ONE screenshot of the composer. Verify
 the emojis and formatting look correct — numbered items,
@@ -255,10 +271,11 @@ click the "Post" button immediately. Do not scroll through
 the post. Do not take additional screenshots to verify. Do
 not try to get the post URL after posting.
 
-Three actions total: paste, verify, post. Done.
+Four actions total: save file, clipboard-paste, verify, post.
+Done.
 ```
 
-This conversation uses `computer-use` only — no web search, no article fetching. Three actions: paste, verify, post. No scrolling, no URL extraction, no confirmation screenshots after posting.
+This conversation uses `computer-use` only — no web search, no article fetching. Four actions: save the post to a timestamped file with UTF-8 encoding, copy to clipboard via `pbcopy`, verify, post. Each run creates its own file so automated/scheduled runs never overwrite previous posts. No scrolling, no URL extraction, no confirmation screenshots after posting.
 
 <Tip>
 **Why two conversations?** Splitting saves money and gives you control. Conversation 1 runs 5-10 cheap iterations (research + writing). Conversation 2 runs 20-40 computer-use iterations — but it starts with a clean context that only contains the post text, not the entire research history. The research tokens don't get carried through every screenshot iteration. And you get to review the post before it goes public.
@@ -283,10 +300,10 @@ Once you trust the output quality, you can automate both steps as a heartbeat. A
 
 **Conversation 2 (Post to LinkedIn):**
 
-7. You send the posting prompt with the final post text.
+7. You send the posting prompt with the post text pasted in.
 8. Prefrontal loads computer-use SKILL.md into context.
-9. The LLM opens `linkedin.com/feed?shareActive=true` in Chrome — the composer opens directly with the cursor ready.
-10. The LLM pastes the post content into the composer.
+9. The LLM writes the post to a timestamped file (e.g. `files/linkedin-post-2026-05-22-143052.txt`) to preserve UTF-8 encoding, then copies it to the clipboard via `LANG=en_US.UTF-8 pbcopy` — this prevents emoji corruption that happens with raw copy-paste. The timestamp ensures automated/scheduled runs never overwrite previous posts.
+10. The LLM opens `linkedin.com/feed?shareActive=true` in Chrome and pastes with Cmd+V.
 11. The LLM takes one screenshot to verify formatting — emojis, blank lines, structure intact.
 12. The LLM clicks the "Post" button.
 13. The LLM waits, takes a screenshot to confirm the post is live, and extracts the post URL.
