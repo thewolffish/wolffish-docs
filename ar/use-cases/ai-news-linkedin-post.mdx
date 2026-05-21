@@ -239,14 +239,30 @@ Post the following text to LinkedIn using computer-use. Use
 the browser on display 0 (primary display). Chrome is already
 open and I'm logged into LinkedIn.
 
-Navigate to: https://www.linkedin.com/feed?shareActive=true
-This opens the post composer directly with the cursor ready.
+FIRST — save the post with correct encoding:
+Generate a timestamped filename using the current date and
+time: files/linkedin-post-YYYY-MM-DD-HHMMSS.txt (e.g.
+files/linkedin-post-2026-05-22-143052.txt). Write the post
+content below to that file so emojis are saved with proper
+UTF-8 encoding. Then copy it to the clipboard using this
+exact shell command (with your actual filename):
+LANG=en_US.UTF-8 pbcopy < files/linkedin-post-YYYY-MM-DD-HHMMSS.txt
+This forces pbcopy to read the file as UTF-8 regardless of
+the terminal's locale — it prevents emoji corruption (e.g.
+🤖 turning into ü§ñ) that happens with raw copy-paste.
 
-Paste this post content:
+Post content:
 
 ---
 [PASTE YOUR POST TEXT HERE]
 ---
+
+THEN — post it:
+Navigate to: https://www.linkedin.com/feed?shareActive=true
+This opens the post composer directly with the cursor ready.
+
+Click the composer text area and press Cmd+V to paste from
+the clipboard.
 
 After pasting, take ONE screenshot of the composer. Verify
 the emojis and formatting look correct — numbered items,
@@ -255,10 +271,11 @@ click the "Post" button immediately. Do not scroll through
 the post. Do not take additional screenshots to verify. Do
 not try to get the post URL after posting.
 
-Three actions total: paste, verify, post. Done.
+Four actions total: save file, clipboard-paste, verify, post.
+Done.
 ```
 
-تستخدم هذه المحادثة `computer-use` فقط — بدون بحث على الويب، بدون جلب مقالات. ثلاثة إجراءات: لصق، تحقق، نشر. بدون تمرير، بدون استخراج رابط، بدون لقطات شاشة تأكيدية بعد النشر.
+تستخدم هذه المحادثة `computer-use` فقط — بدون بحث على الويب، بدون جلب مقالات. أربعة إجراءات: حفظ المنشور في ملف بترميز UTF-8، النسخ إلى الحافظة عبر `pbcopy`، التحقق، النشر. كل تشغيل ينشئ ملفه الخاص حتى لا تُكتب التشغيلات الآلية/المجدولة فوق المنشورات السابقة. بدون تمرير، بدون استخراج رابط، بدون لقطات شاشة تأكيدية بعد النشر.
 
 <Tip>
 **لماذا محادثتان؟** يوفّر التقسيم المال ويمنحك التحكم. تشغّل المحادثة 1 من 5-10 تكرارات رخيصة (بحث + كتابة). تشغّل المحادثة 2 من 20-40 تكرار computer-use — ولكنها تبدأ بسياق نظيف يحتوي فقط على نص المنشور، وليس كامل تاريخ البحث. لا تُحمل رموز البحث عبر كل تكرار لقطة شاشة. وتحظى بمراجعة المنشور قبل نشره علناً.
