@@ -258,11 +258,12 @@ Post content:
 ---
 
 THEN — post it:
-Navigate to: https://www.linkedin.com/feed?shareActive=true
-This opens the post composer directly with the cursor ready.
-
-Click the composer text area and press Cmd+V to paste from
-the clipboard.
+Navigate to: https://www.linkedin.com/feed/?shareActive=true
+This opens the post composer directly AND the text area is
+already focused with the cursor blinking — ready for input
+immediately. Do NOT click the composer text area. Just run
+the paste command (Cmd+V) right away to paste from the
+clipboard.
 
 After pasting, take ONE screenshot of the composer. Verify
 the emojis and formatting look correct — numbered items,
@@ -303,7 +304,7 @@ Once you trust the output quality, you can automate both steps as a heartbeat. A
 7. You send the posting prompt with the post text pasted in.
 8. Prefrontal loads computer-use SKILL.md into context.
 9. The LLM writes the post to a timestamped file (e.g. `files/linkedin-post-2026-05-22-143052.txt`) to preserve UTF-8 encoding, then copies it to the clipboard via `LANG=en_US.UTF-8 pbcopy` — this prevents emoji corruption that happens with raw copy-paste. The timestamp ensures automated/scheduled runs never overwrite previous posts.
-10. The LLM opens `linkedin.com/feed?shareActive=true` in Chrome and pastes with Cmd+V.
+10. The LLM opens `linkedin.com/feed/?shareActive=true` in Chrome — the composer opens with the text area already focused — and immediately pastes with Cmd+V.
 11. The LLM takes one screenshot to verify formatting — emojis, blank lines, structure intact.
 12. The LLM clicks the "Post" button.
 13. The LLM waits, takes a screenshot to confirm the post is live, and extracts the post URL.
@@ -361,7 +362,7 @@ These optimizations compound across daily runs:
 
 - **The two-conversation split itself is a cost optimization** — research tokens don't inflate every screenshot iteration in the posting phase
 - **Leave Chrome open on `linkedin.com/feed`** — skips browser launch and navigation, saving ~3 screenshots and ~800 tokens
-- **The prompt uses `linkedin.com/feed?shareActive=true`** — opens the composer directly, cutting another 2-3 screenshots vs navigating to it manually
+- **The prompt uses `linkedin.com/feed/?shareActive=true`** — opens the composer directly with the text area already focused, so the model can paste immediately without clicking. Cuts 2-3 screenshots vs navigating to it manually
 - **Keep instructions precise** — the posting prompt tells the model to take ONE screenshot to verify, not scroll through the entire post. Vague instructions like "make sure it looks perfect" cause extra verification loops
 - **Use a LinkedIn API or MCP server instead of computer-use** — this is the single biggest cost reduction. A direct API post costs under a dollar vs 3-8 dollars via computer-use. The built-in computer-use path needs zero setup, but if you're running this daily and cost matters, an API integration pays for itself fast
 
