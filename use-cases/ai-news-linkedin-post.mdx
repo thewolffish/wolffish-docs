@@ -186,7 +186,104 @@ Done.
 
 ## Automating with Heartbeat
 
-Once you trust the output, add the prompt to `brain/brainstem/heartbeat.md` under a schedule heading. See the [Heartbeat docs](/configuration/heartbeat) for schedule formats (`Daily`, `Weekday`, `Weekly`, `Cron`).
+Once you trust the output, schedule it to run automatically. Open **Settings > Heartbeat** to launch the built-in heartbeat editor — paste the block below and save.
+
+See the [Heartbeat docs](/configuration/heartbeat) for all schedule formats (`Daily`, `Weekday`, `Weekly`, `Cron`).
+
+```markdown
+## AI News LinkedIn Post | Weekday (08:00)
+
+Research today's top AI and tech news. Run multiple searches:
+"AI news today", "LLM breakthroughs this week", "artificial
+intelligence announcements", "AI funding rounds", "AI policy
+regulation". Read the full content of the top articles using
+web_fetch.
+
+ONLY use free, open sources that web_fetch can read without
+hitting a paywall. Good sources: The Verge, Ars Technica,
+TechCrunch, arXiv, Papers With Code, Anthropic Blog, OpenAI
+Blog, Google AI Blog, Hacker News, r/MachineLearning,
+VentureBeat, The Register, CNBC Technology.
+
+DO NOT fetch from paywalled sites — Bloomberg, WSJ, NYT,
+Financial Times, The Information. They return HTTP 403 and
+waste time. If a search result points to a paywalled domain,
+skip it and pick the next one. Also skip SEO spam, listicles,
+AI-generated summaries of summaries, and aggregator sites that
+rewrite other outlets with no original reporting.
+
+Write a LinkedIn post in my voice (match soul.md tone). Under
+3000 characters. Use this exact format — every line break matters:
+
+🤖 AI News Roundup — N Things You Need to Know Today
+(blank line)
+1. [topic emoji] [One-sentence headline with full context]
+(blank line)
+2. [topic emoji] [One-sentence headline with full context]
+(blank line)
+3. [topic emoji] [One-sentence headline with full context]
+(blank line)
+... continue for 5-10 stories ...
+(blank line)
+Generated with Wolffish 🐟
+
+Rules:
+- 5 to 10 stories depending on what's newsworthy today
+- Each story is exactly one numbered item with a topic emoji
+  that matches its domain: 🏦 finance, 🏥 health, 🔬 research,
+  💰 funding, 🛡️ policy, 🛒 retail, ☁️ cloud, 🔐 security,
+  🎵 consumer, etc.
+- Each item is one self-contained sentence — the reader must
+  understand the story without clicking through
+- One blank line between EVERY item — no exceptions — without
+  them LinkedIn renders it as a wall of text
+- No hashtags. No closing hot take. No personal reflection.
+  The value is the curation.
+- End with: Generated with Wolffish 🐟
+
+After writing the post, publish it to LinkedIn using
+computer-use. My Chrome browser is already open on display 0
+(primary display) with my LinkedIn session logged in and ready
+to use. Do NOT spin up a new browser instance. Do NOT use a
+headless browser. Do NOT launch Playwright or any automation
+framework. Use my existing Chrome window — it's already there.
+
+Begin by taking a screenshot to see the current screen state.
+
+Then save the post with correct encoding:
+Generate a timestamped filename using the current date and
+time: files/linkedin-post-YYYY-MM-DD-HHMMSS.txt (e.g.
+files/linkedin-post-2026-05-22-143052.txt). Write the post
+content to that file so emojis are saved with proper UTF-8
+encoding. Then copy it to the clipboard using this exact
+shell command (with your actual filename):
+LANG=en_US.UTF-8 pbcopy < files/linkedin-post-YYYY-MM-DD-HHMMSS.txt
+This forces pbcopy to read the file as UTF-8 regardless of
+the terminal's locale — it prevents emoji corruption (e.g.
+🤖 turning into ü§ñ) that happens with raw copy-paste.
+
+Then post it:
+Navigate to: https://www.linkedin.com/feed/?shareActive=true
+This opens the post composer directly AND the text area is
+already focused with the cursor blinking — ready for input
+immediately. Do NOT click the composer text area. Just run
+the paste command (Cmd+V) right away to paste from the
+clipboard.
+
+After pasting, take ONE screenshot of the composer. Verify
+the emojis and formatting look correct — numbered items,
+topic emojis, blank lines between stories. If it looks right,
+click the "Post" button immediately. Do not scroll through
+the post. Do not take additional screenshots to verify. Do
+not try to get the post URL after posting.
+
+Four actions total: save file, clipboard-paste, verify, post.
+Done.
+```
+
+<Tip>
+  Change `Weekday (08:00)` to any schedule that fits your routine — `Daily (09:00)` for every day, `Weekly (Monday 08:00)` for once a week, or a raw cron expression like `Cron (0 8 * * 1,3,5)` for Monday/Wednesday/Friday.
+</Tip>
 
 ## Expected Outcome
 
