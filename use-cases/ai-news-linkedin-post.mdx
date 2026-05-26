@@ -5,9 +5,7 @@ description: "AI news curation and LinkedIn posting using web search and compute
 
 # AI News LinkedIn Post
 
-Wolffish searches for today's top AI news, curates the highlights, writes a LinkedIn post in your voice, opens your default Chrome profile (where you're already logged into LinkedIn), types and publishes the post, then shares the live post URL back to you. No LinkedIn API. No OAuth. No third-party code. Just web search + computer use.
-
-The workflow is split into two conversations — one to research and write the post, another to publish it. This lets you review the draft before it goes live, and keeps the expensive computer-use phase separate from the cheap research phase.
+Wolffish searches for today's top AI news, writes a LinkedIn post in your voice, and publishes it to LinkedIn using your existing Chrome session. No LinkedIn API. No OAuth. Just web search + computer use.
 
 ## Video Walkthrough
 
@@ -15,42 +13,21 @@ The workflow is split into two conversations — one to research and write the p
   width="100%"
   height="400"
   src="https://www.youtube.com/embed/BAEvQ3B_7k0"
-  title="AI News Daily LinkedIn Post — Wolffish Demo"
+  title="AI News LinkedIn Post — Wolffish Demo"
   frameBorder="0"
   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
   allowFullScreen
   style={{ borderRadius: '8px', marginTop: '1rem', marginBottom: '1rem' }}
 ></iframe>
 
-## Capabilities Required
-
-- `web-search` — researches AI news via web search and reads article content
-- `computer-use` — controls Chrome to navigate LinkedIn, type the post, and click publish
-
-Both ship with Wolffish. No extra code or plugins required.
-
 ## Setup
-
-This use case uses `web-search` and `computer-use` — both need a cloud LLM and macOS permissions to work. If any of these are missing, the agent will either fail silently (screenshots return nothing) or burn tokens retrying actions it can't perform. Read the general [Setting Up for Success](/use-cases/setting-up-for-success) guide for the full picture — what's below is specific to this workflow.
-
-### Recommended
-
-- **Claude Opus** — this workflow chains research, curation, writing, and multi-step computer-use into a single autonomous run. Opus handles the judgment calls (which stories matter, how to phrase them, when the UI looks right) significantly better than smaller models. Sonnet works but expect lower-quality curation and more formatting mistakes. Haiku and local models are not suitable for this use case.
 
 ### Required
 
-- **Wolffish installed and running** — the desktop app with a configured brain workspace.
-- **Cloud API key** — Anthropic (Claude) or OpenAI, configured in Settings > Services. This workflow needs a cloud provider for curation, drafting, and computer-use judgment. Local models won't cut it.
-- **Chrome** — installed with a profile already logged into LinkedIn. The agent drives the browser directly via computer-use — no LinkedIn API, no OAuth tokens.
-- **macOS permissions for Wolffish** — Screen Recording, Accessibility, and Automation. Without these, computer-use is dead on arrival. See the quick guide below.
-
-### Optional
-
-- **[Brave Search API key](https://brave.com/search/api/)** — configured in Settings > Services > Brave Search. Improves search quality and reliability. Without it, Wolffish falls back to its default search, which works but may return noisier results.
-
-### macOS Permissions Quick Guide
-
-Computer-use needs three macOS permissions. All three are granted in **System Settings > Privacy & Security**.
+- **Wolffish installed and running**
+- **Claude Opus API key** — configured in Settings > Models. This workflow chains research, curation, writing, and multi-step computer-use. Opus handles the judgment calls significantly better than smaller models. Sonnet works but expect lower-quality curation. Haiku and local models are not suitable.
+- **Chrome** — installed with a profile already logged into LinkedIn. The agent uses your existing browser session directly — no LinkedIn API, no OAuth tokens.
+- **macOS permissions** — Screen Recording, Accessibility, and Automation. All three in **System Settings > Privacy & Security**.
 
 <Accordion title="Screen Recording">
 **What it does:** Lets Wolffish take screenshots of your desktop.
@@ -84,90 +61,23 @@ Computer-use needs three macOS permissions. All three are granted in **System Se
 2. Find **Wolffish** in the list
 3. Toggle on each target app the agent needs — at minimum, **Google Chrome**
 4. macOS may also prompt you on first use — click "OK" when it does
-
-You can pre-grant these to avoid the popup interrupting a run.
 </Accordion>
 
 <Warning>
-**Grant all three before your first run.** If any permission is missing, the agent will burn through its token budget retrying failed tool calls, and you'll get nothing posted. Screen Recording is the worst offender — it fails silently with no error, so the agent doesn't even know it can't see the screen.
+**Grant all three before your first run.** If any permission is missing, the agent will burn through its token budget retrying failed tool calls. Screen Recording is the worst — it fails silently, so the agent doesn't even know it can't see the screen.
 </Warning>
+
+### Optional
+
+- **[Brave Search API key](https://brave.com/search/api/)** — configured in Settings > Services > Brave Search. Improves search quality.
 
 ### Before You Start
 
-Leave Chrome open with your LinkedIn session active. That alone skips browser launch and login — saving ~3 screenshots and ~800 tokens when it's time to post.
+Leave Chrome open with your LinkedIn session active. The agent uses your existing window — it does not spin up a new browser.
 
-<Note>
-**This is one way to do it, not the only way.** The recipe uses web search + computer-use because they ship with Wolffish and need zero setup. But if you have other tools on your machine — a LinkedIn MCP server, a browser extension, a CLI tool, a Python script — Wolffish can use those too. Any capability you install in `brain/cerebellum/` becomes available. The workflow is yours to customize.
+## The Prompt
 
-That said, the more moving parts you add, the more things can break. The built-in path is the most tested and the most portable.
-</Note>
-
-## Post Style Guide
-
-- Under 3000 characters (LinkedIn's post limit)
-- Match the user's voice from soul.md — professional but human, not corporate
-- English by default (edit the research prompt for Arabic or bilingual)
-
-**Format matters.** LinkedIn is a feed — people scroll fast. A wall of text gets skipped. The post needs clear visual structure: a title line, numbered items each on its own line with a topic emoji, and a blank line between every item.
-
-- Title line: topic emoji + "AI News Roundup — N Things You Need to Know Today"
-- One blank line after the title
-- Each story is one numbered item: `N. [topic emoji] [One-sentence headline with enough context to stand alone]`
-- One blank line between every item — no exceptions
-- 5-10 stories depending on the day's news — cover breadth, not just the biggest headline
-- Pick a different topic emoji per story that matches its domain (🏦 finance, 🏥 health, 🔬 research, 💰 funding, 🛡️ policy, 🛒 retail, ☁️ cloud, 🔐 security, 🎵 consumer, etc.)
-- Footer line: `Generated with Wolffish 🐟`
-- No hashtags, no closing hot take, no "personal reflection" — the value is the curation itself
-
-**Template:**
-
-```
-🤖 AI News Roundup — N Things You Need to Know Today
-
-1. 🏦 [Finance/business story — one complete sentence]
-
-2. 🏥 [Health/medical story — one complete sentence]
-
-3. 💰 [Funding/valuation story — one complete sentence]
-
-4. 🔬 [Research/breakthrough story — one complete sentence]
-
-5. 🛡️ [Policy/governance story — one complete sentence]
-
-...
-
-Generated with Wolffish 🐟
-```
-
-Each item is self-contained — the reader should understand the story from that one line without clicking through. The blank lines between items are critical — without them LinkedIn renders it as a single dense paragraph.
-
-## News Sources
-
-The agent picks from whatever web search returns, but it must stick to **free, open sources** that `web_fetch` can actually read. Paywalled sites return HTTP 403/401 errors — the agent can't read them, and retrying wastes time and tokens.
-
-**Prioritize these (free, no paywall):**
-
-- The Verge, Ars Technica, TechCrunch (industry news — free to read)
-- arXiv, Papers With Code (research — fully open access)
-- Anthropic Blog, OpenAI Blog, Google AI Blog (first-party announcements — always free)
-- Hacker News, r/MachineLearning (community signal — open)
-- VentureBeat, The Register, CNBC Technology (business/funding — free tier)
-- MIT Technology Review (some free articles — check before fetching)
-
-**Avoid (paywalled or unreliable):**
-
-- Bloomberg, WSJ, NYT, Financial Times, The Information (hard paywalls — `web_fetch` gets 403)
-- SEO spam, listicles, AI-generated summaries of summaries
-- Aggregator sites that rewrite other outlets' reporting with no original content
-- Any URL that returns a login wall, cookie consent blocker, or paywall interstitial
-
-## The Prompts
-
-This workflow runs as two separate conversations. The first researches and writes the post. The second publishes it. Splitting them gives you a chance to review the draft, and keeps the expensive computer-use tokens out of the research context.
-
-### Conversation 1 — Research & Write
-
-Send this prompt to Wolffish. It uses `web-search` only — no computer-use, no screenshots, no browser. This is the cheap part.
+Send this to Wolffish. It researches, writes, and posts — one conversation.
 
 ```
 Research today's top AI and tech news. Run multiple searches:
@@ -218,54 +128,28 @@ Rules:
   The value is the curation.
 - End with: Generated with Wolffish 🐟
 
-Give me the final post text and nothing else.
-```
+After writing the post, publish it to LinkedIn using
+computer-use. My Chrome browser is already open on display 0
+(primary display) with my LinkedIn session logged in and ready
+to use. Do NOT spin up a new browser instance. Do NOT use a
+headless browser. Do NOT launch Playwright or any automation
+framework. Use my existing Chrome window — it's already there.
 
-Wolffish will search, read articles, curate, and return the finished post text. Review it — edit anything you don't like, add a personal line if you want, or just approve it as-is.
+Begin by taking a screenshot to see the current screen state.
 
-<Tip>
-**Honestly? Just copy-paste it yourself.** Conversation 1 costs roughly 50 cents to 2 dollars. Conversation 2 (the computer-use posting) costs 3 to 15 dollars. That's a 5-10x markup just to avoid a copy-paste. If you're doing this daily, that's 90-450 dollars per month on the posting step alone.
-
-The smartest setup is to let Wolffish do what it's good at — research, curate, write — and then post the result yourself in 10 seconds. Or better yet, pipe the output into a dedicated posting tool that doesn't need screenshots:
-
-- **Buffer, Hootsuite, or Typefully** — social media schedulers with LinkedIn support. Paste the text, schedule it, done. Most have free tiers.
-- **Zapier or Make** — automation platforms that can take text from a file or webhook and post it to LinkedIn via API. Zero screenshots, zero computer-use tokens.
-- **LinkedIn API** directly — if you're comfortable with API keys, a simple script can post text to LinkedIn for free.
-- **A simple shell script** — `curl` to the LinkedIn API with your post text. Wolffish can even write this script for you.
-
-Any of these let you run Conversation 1 daily on a heartbeat (under 2 dollars per day, roughly 15-60 dollars per month) and post automatically without Conversation 2 ever happening. That's the cost-effective daily automation.
-</Tip>
-
-If you still want full computer-use automation — because you don't want to set up another tool, or you want Wolffish to handle everything end to end — here's the posting prompt.
-
-### Conversation 2 — Post to LinkedIn (Optional)
-
-Once you're happy with the post text, start a **new conversation** and send this prompt. Replace the placeholder with the actual post content from Conversation 1.
-
-```
-Post the following text to LinkedIn using computer-use. Use
-the browser on display 0 (primary display). Chrome is already
-open and I'm logged into LinkedIn.
-
-FIRST — save the post with correct encoding:
+Then save the post with correct encoding:
 Generate a timestamped filename using the current date and
 time: files/linkedin-post-YYYY-MM-DD-HHMMSS.txt (e.g.
 files/linkedin-post-2026-05-22-143052.txt). Write the post
-content below to that file so emojis are saved with proper
-UTF-8 encoding. Then copy it to the clipboard using this
-exact shell command (with your actual filename):
+content to that file so emojis are saved with proper UTF-8
+encoding. Then copy it to the clipboard using this exact
+shell command (with your actual filename):
 LANG=en_US.UTF-8 pbcopy < files/linkedin-post-YYYY-MM-DD-HHMMSS.txt
 This forces pbcopy to read the file as UTF-8 regardless of
 the terminal's locale — it prevents emoji corruption (e.g.
 🤖 turning into ü§ñ) that happens with raw copy-paste.
 
-Post content:
-
----
-[PASTE YOUR POST TEXT HERE]
----
-
-THEN — post it:
+Then post it:
 Navigate to: https://www.linkedin.com/feed/?shareActive=true
 This opens the post composer directly AND the text area is
 already focused with the cursor blinking — ready for input
@@ -284,109 +168,27 @@ Four actions total: save file, clipboard-paste, verify, post.
 Done.
 ```
 
-This conversation uses `computer-use` only — no web search, no article fetching. Four actions: save the post to a timestamped file with UTF-8 encoding, copy to clipboard via `pbcopy`, verify, post. Each run creates its own file so automated/scheduled runs never overwrite previous posts. No scrolling, no URL extraction, no confirmation screenshots after posting.
-
-<Tip>
-**Why two conversations?** Splitting saves money and gives you control. Conversation 1 runs 5-10 cheap iterations (research + writing). Conversation 2 runs 20-40 computer-use iterations — but it starts with a clean context that only contains the post text, not the entire research history. The research tokens don't get carried through every screenshot iteration. And you get to review the post before it goes public.
-</Tip>
-
-### Automating with Heartbeat
-
-Once you trust the output quality, you can automate both steps as a heartbeat. Add the Conversation 1 prompt to `brain/brainstem/heartbeat.md` under a schedule heading, and chain the posting step after it. See the [Heartbeat docs](/configuration/heartbeat) for schedule formats (`Daily`, `Weekday`, `Weekly`, `Cron`, etc.).
-
 ## How It Works
 
-**Conversation 1 (Research & Write):**
-
-1. You send the research prompt.
-2. Prefrontal loads soul.md (tone) + web-search SKILL.md into context.
-3. The LLM calls `web_search` across multiple queries — news, breakthroughs, funding, policy.
-4. The LLM calls `web_fetch` on the top articles to read full content.
-5. The LLM curates 5-10 stories, writes one self-contained sentence per story, formats the numbered roundup.
-6. Wolffish returns the finished post text to you.
-
-**You review the post.** Edit, approve, or regenerate.
-
-**Conversation 2 (Post to LinkedIn):**
-
-7. You send the posting prompt with the post text pasted in.
-8. Prefrontal loads computer-use SKILL.md into context.
-9. The LLM writes the post to a timestamped file (e.g. `files/linkedin-post-2026-05-22-143052.txt`) to preserve UTF-8 encoding, then copies it to the clipboard via `LANG=en_US.UTF-8 pbcopy` — this prevents emoji corruption that happens with raw copy-paste. The timestamp ensures automated/scheduled runs never overwrite previous posts.
-10. The LLM opens `linkedin.com/feed/?shareActive=true` in Chrome — the composer opens with the text area already focused — and immediately pastes with Cmd+V.
-11. The LLM takes one screenshot to verify formatting — emojis, blank lines, structure intact.
-12. The LLM clicks the "Post" button.
-13. The LLM waits, takes a screenshot to confirm the post is live, and extracts the post URL.
-14. Wolffish returns the live post URL to you.
-15. Hippocampus logs the episode. Basalganglia records the outcome.
+1. Prefrontal loads soul.md + web-search SKILL.md + computer-use SKILL.md into context.
+2. The LLM calls `web_search` across multiple queries — news, breakthroughs, funding, policy.
+3. The LLM calls `web_fetch` on the top articles to read full content.
+4. The LLM curates 5-10 stories and writes the formatted post.
+5. The LLM saves the post to a timestamped file and copies it to clipboard via `pbcopy`.
+6. The LLM takes a screenshot of the existing Chrome window to orient itself.
+7. The LLM opens `linkedin.com/feed/?shareActive=true` — composer opens focused — and pastes with Cmd+V.
+8. One screenshot to verify formatting, then clicks "Post".
 
 ## Limits
 
-- One post per day maximum — don't spam
-- First-time computer-use actions may trigger macOS Automation prompts per target app (Chrome, Finder, etc.) — pre-grant them in Setup to avoid interruptions
+- First-time computer-use may trigger macOS Automation prompts — pre-grant them in Setup
 - If LinkedIn's UI changes layout, the LLM adapts on the next screenshot — no hardcoded selectors
 
-## Cost & Model Guide
+## Automating with Heartbeat
 
-This workflow spans two conversations — research/writing and computer-use posting. Together they make it one of the more expensive automation types — and the model you choose has a direct impact on both cost and quality.
-
-For the full picture on how automation costs work, caching, compaction, and general recommendations, see [Limitations & Costs](/use-cases/limitations).
-
-### Recommended Model
-
-**Claude Opus 4.x** is the recommended model for this use case. The workflow requires judgment calls at every stage — which stories matter, how to phrase them in your voice, when the UI looks right to click Post. Opus handles these significantly better than smaller models.
-
-**Claude Sonnet 4.x** works and costs ~40% less, but expect lower-quality curation and more formatting mistakes in the post. Sonnet is a reasonable choice if you're running this daily and want to keep costs down — just review the output quality for the first few runs.
-
-**Claude Haiku 4.5** and local models (Ollama) are **not suitable** for this use case. Haiku struggles with multi-step computer-use navigation, and local models lack the tool-use reliability needed for an autonomous end-to-end workflow.
-
-### Approximate Cost Per Run
-
-With two conversations, the total iteration count is the same (40-70) but the context is smaller because research tokens don't carry into the posting phase. Conversation 1 runs 5-10 iterations. Conversation 2 runs 20-40 iterations with a clean context.
-
-| Model | Est. Cost Per Run | Monthly (Daily) |
-|-------|-------------------|-----------------|
-| Claude Opus 4.x | ~13 USD | ~390 USD |
-| Claude Sonnet 4.x | ~8 USD | ~240 USD |
-| Claude Haiku 4.5 | ~3 USD | ~90 USD (not recommended) |
-
-These estimates assume prompt caching is active. Without caching, costs are 5-10x higher.
-
-<Note>
-**OpenAI models** follow a similar pattern — GPT-4o at 2.50/10 dollars per MTok is comparable to Sonnet pricing. OpenAI's automatic prefix caching provides a 50% discount on cached input tokens with no configuration needed.
-</Note>
-
-### Where the Money Goes
-
-| Conversation | Phase | Iterations | Est. Cost (Sonnet) | Why |
-|-------------|-------|-----------|-------------------|-----|
-| 1 | Research + write | 5-10 | 0.50-2.00 USD | Multiple fetches grow context, but no screenshots |
-| 2 | Computer-use posting | 20-40 | 3.00-8.00 USD | Each screenshot is ~100K tokens, carried forward |
-
-Conversation 2 accounts for roughly 70-80% of the total cost. Splitting the conversations helps because the research context (article text, search results) doesn't get carried through every screenshot iteration in Conversation 2.
-
-### Reducing Cost
-
-These optimizations compound across daily runs:
-
-- **The two-conversation split itself is a cost optimization** — research tokens don't inflate every screenshot iteration in the posting phase
-- **Leave Chrome open on `linkedin.com/feed`** — skips browser launch and navigation, saving ~3 screenshots and ~800 tokens
-- **The prompt uses `linkedin.com/feed/?shareActive=true`** — opens the composer directly with the text area already focused, so the model can paste immediately without clicking. Cuts 2-3 screenshots vs navigating to it manually
-- **Keep instructions precise** — the posting prompt tells the model to take ONE screenshot to verify, not scroll through the entire post. Vague instructions like "make sure it looks perfect" cause extra verification loops
-- **Use a LinkedIn API or MCP server instead of computer-use** — this is the single biggest cost reduction. A direct API post costs under a dollar vs 3-8 dollars via computer-use. The built-in computer-use path needs zero setup, but if you're running this daily and cost matters, an API integration pays for itself fast
-
-## A Note on Computer-Use and Cost
-
-Screenshot-based computer-use is expensive but it's also the most powerful browser automation available. It drives a real browser with real mouse and keyboard input — from LinkedIn's perspective, there is no bot. It bypasses bot detection, CAPTCHA challenges, and API restrictions because it uses the same browser session you use manually. **Use this at your own risk and understanding of the total costs** — both the API spend (3-15 dollars per posting session) and the fact that you're automating actions on a platform that has its own terms of service.
-
-We're actively researching cheaper alternatives — headless browser automation, JavaScript DOM inspection, hybrid approaches that only take a screenshot for final verification, and dedicated MCP server bridges for high-value platforms like LinkedIn. These will be added alongside computer-use as they mature, not as replacements. See [Limitations & Costs](/use-cases/limitations#the-future-of-browser-automation) for the full roadmap.
+Once you trust the output, add the prompt to `brain/brainstem/heartbeat.md` under a schedule heading. See the [Heartbeat docs](/configuration/heartbeat) for schedule formats (`Daily`, `Weekday`, `Weekly`, `Cron`).
 
 ## Expected Outcome
-
-After both conversations complete, you get a message like:
-
-> ✅ Posted to LinkedIn. Here's your post: https://www.linkedin.com/feed/update/urn:li:activity:7234567890123456789
-
-The post itself will look something like:
 
 > 🤖 AI News Roundup — 10 Things You Need to Know Today
 >
