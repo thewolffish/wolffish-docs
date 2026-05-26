@@ -54,7 +54,7 @@ Computer-use accounts for roughly 70% of the total cost of a mixed workflow.
 
 Not every automation needs a frontier reasoning model. Choose based on the task's cognitive demand:
 
-### Claude Opus 4.x — 5 / 25 USD per MTok (input / output)
+### Claude Opus 4.7 — 5 / 25 USD per MTok (input / output)
 
 Best for tasks requiring:
 - Complex multi-step reasoning or planning
@@ -83,9 +83,15 @@ Best for tasks requiring:
 **Not recommended for computer-use.** Haiku may struggle with complex UI navigation and multi-step visual reasoning. Stick to Sonnet or Opus for any workflow that drives a browser.
 </Warning>
 
+### DeepSeek V4 Pro — 0.435 / 0.87 USD per MTok (input / output)
+
+**The recommended default for most Wolffish users.** Following the permanent 75% price cut (May 2026), DeepSeek V4 Pro delivers frontier-class agentic performance at 29–34× cheaper than Opus 4.7 or GPT-5.5 on output-heavy workloads, and ~11× cheaper on input. Cached tokens cost $0.003625/MTok — basically free. Tool-use reliability matches or exceeds competing models on multi-step chains. MIT-licensed, so you can self-host for $0 if you have the infra.
+
+Best for: Everything except computer-use. Research, tool calling, writing, multi-step automations — all at a fraction of the cost. The single most cost-effective way to run Wolffish for daily use.
+
 ### OpenAI Models
 
-OpenAI models follow the same pattern — GPT-4o at 2.50/10 USD per MTok is comparable to Sonnet pricing, while o3/o4 models at 10-15/40-60 USD per MTok are premium reasoning models. OpenAI's automatic prefix caching provides a 50% discount on cached input tokens with no configuration needed.
+OpenAI models follow the same pattern — GPT-5.5 at 5/30 USD per MTok is the latest flagship, GPT-4o at 2.50/10 USD per MTok is comparable to Sonnet pricing, while o3/o4 models at 10-15/40-60 USD per MTok are premium reasoning models. OpenAI's automatic prefix caching provides a 50% discount on cached input tokens with no configuration needed.
 
 ### Local Models (Ollama)
 
@@ -95,7 +101,7 @@ Zero API cost but significantly slower, lack tool-use reliability, and cannot do
 
 ## Expected Costs by Automation Type
 
-These estimates assume **Claude Sonnet 4.x** with prompt caching active:
+These estimates assume **Claude Sonnet 4.x** with prompt caching active. **With DeepSeek V4 Pro, divide these costs by ~29–34× on output-heavy workloads.**
 
 | Automation Type | Iterations | Est. Cost | Notes |
 |-----------------|-----------|-----------|-------|

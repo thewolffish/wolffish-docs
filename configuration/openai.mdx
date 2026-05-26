@@ -1,0 +1,31 @@
+---
+title: "OpenAI"
+description: "Set up OpenAI (GPT) — general-purpose tasks, broad knowledge, fast responses"
+---
+
+# OpenAI (GPT)
+
+```
+POST https://api.openai.com/v1/chat/completions
+```
+
+Uses SSE streaming. Tool calls arrive as `function_call` objects.
+
+Best for: General-purpose tasks, broad knowledge, fast responses.
+
+## Getting an API Key
+
+1. Go to [platform.openai.com](https://platform.openai.com)
+2. Sign up or log in
+3. Navigate to **API Keys** and create a new key
+4. Paste it into Wolffish → Settings → Models → OpenAI
+
+## Models
+
+| Model | Context | Input / Output (per MTok) | Notes |
+|-------|---------|--------------------------|-------|
+| gpt-5.5 | 200K | $5.00 / $30.00 | Latest flagship. Strong reasoning. |
+| **gpt-4o** | 128K | $2.50 / $10.00 | Recommended OpenAI model for agentic tasks. |
+| gpt-4o-mini | 128K | $0.15 / $0.60 | Fast and cheap. Limited tool-use reliability. |
+| o3 | 200K | $10.00 / $40.00 | Extended reasoning. High cost. |
+| o4-mini | 200K | $1.10 / $4.40 | Reasoning at lower cost. |

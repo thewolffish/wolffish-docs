@@ -12,10 +12,14 @@ description: "مرجع تكوين التطبيق"
 ```json
 {
   "mind": {
-    "provider": "ollama",
-    "model": "gemma3:4b"
+    "provider": "deepseek",
+    "model": "deepseek-v4-pro"
   },
   "providers": {
+    "deepseek": {
+      "apiKey": "",
+      "model": "deepseek-v4-pro"
+    },
     "anthropic": {
       "apiKey": "",
       "model": "claude-sonnet-4-20250514"
@@ -37,8 +41,9 @@ description: "مرجع تكوين التطبيق"
 
 | الحقل | الوصف |
 |---|---|
-| `mind.provider` | مزود نموذج اللغة النشط: `anthropic` أو `openai` أو `ollama` |
+| `mind.provider` | مزود نموذج اللغة النشط: `deepseek` أو `anthropic` أو `openai` أو `ollama` |
 | `mind.model` | اسم النموذج النشط |
+| `providers.deepseek.apiKey` | مفتاح API لـ DeepSeek |
 | `providers.anthropic.apiKey` | مفتاح API لـ Anthropic |
 | `providers.openai.apiKey` | مفتاح API لـ OpenAI |
 | `providers.ollama.host` | عنوان خادم Ollama (افتراضيًا: `http://localhost:11434`) |
@@ -49,10 +54,10 @@ description: "مرجع تكوين التطبيق"
 عندما يفشل المزود النشط، يتدرج Wolffish عبر البدائل:
 
 ```
-Claude → OpenAI → Ollama
+DeepSeek → Claude → OpenAI → Ollama
 ```
 
-تُتخطى المزودات التي لا تحتوي على مفاتيح API مُكوَّنة. Ollama متاح دائمًا كبديل أخير (بافتراض أنه يعمل).
+تُتخطى المزودات التي لا تحتوي على مفاتيح API مُكوَّنة. يُستخدم Ollama كبديل إن كان مثبتًا ويعمل. جميع المزودين اختياريون — تحتاج واحدًا مُعدًّا على الأقل.
 
 <Info>
   تُخزَّن مفاتيح API بنص صريح في config.json. هذا متعمَّد — Wolffish تطبيق يعمل محليًا أولًا ومساحة عملك ملكك. إذا كنت تستخدم git لإدارة إصدارات مساحة عملك، أضف `brain/config.json` إلى `.gitignore`.

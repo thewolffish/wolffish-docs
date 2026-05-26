@@ -12,10 +12,14 @@ Located at `brain/config.json`, this file stores application-level settings. It'
 ```json
 {
   "mind": {
-    "provider": "ollama",
-    "model": "gemma3:4b"
+    "provider": "deepseek",
+    "model": "deepseek-v4-pro"
   },
   "providers": {
+    "deepseek": {
+      "apiKey": "",
+      "model": "deepseek-v4-pro"
+    },
     "anthropic": {
       "apiKey": "",
       "model": "claude-sonnet-4-20250514"
@@ -37,8 +41,9 @@ Located at `brain/config.json`, this file stores application-level settings. It'
 
 | Field | Description |
 |---|---|
-| `mind.provider` | Active LLM provider: `anthropic`, `openai`, or `ollama` |
+| `mind.provider` | Active LLM provider: `deepseek`, `anthropic`, `openai`, or `ollama` |
 | `mind.model` | Active model name |
+| `providers.deepseek.apiKey` | DeepSeek API key |
 | `providers.anthropic.apiKey` | Anthropic API key |
 | `providers.openai.apiKey` | OpenAI API key |
 | `providers.ollama.host` | Ollama server URL (default: `http://localhost:11434`) |
@@ -49,10 +54,10 @@ Located at `brain/config.json`, this file stores application-level settings. It'
 When the active provider fails, Wolffish cascades through alternatives:
 
 ```
-Claude → OpenAI → Ollama
+DeepSeek → Claude → OpenAI → Ollama
 ```
 
-Providers without configured API keys are skipped. Ollama is always available as the final fallback (assuming it's running).
+Providers without configured API keys are skipped. Ollama is used as a fallback if it's installed and running. All providers are optional — you only need at least one configured.
 
 <Info>
   API keys are stored in plain text in config.json. This is by design — Wolffish is a local-first app and your workspace is your own. If you version-control your workspace with git, add `brain/config.json` to `.gitignore`.

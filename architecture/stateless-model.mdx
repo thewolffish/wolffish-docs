@@ -38,6 +38,7 @@ Each provider receives the same logical content, transformed to its native API:
 
 | Provider | Endpoint | System Prompt | Tool Results |
 |---|---|---|---|
+| **DeepSeek** | `/chat/completions` | First message in the array | OpenAI-compatible `role: "tool"` messages |
 | **Anthropic** | `/v1/messages` | Separate `system` field | Coalesced into user-role content blocks |
 | **OpenAI** | `/v1/chat/completions` | First message in the array | `role: "tool"` messages with `tool_call_id` |
 | **Ollama** | `/api/chat` | Flat message array | Documents converted to placeholder text |
@@ -62,6 +63,10 @@ On the first call, Anthropic writes the prefix to a server-side cache (5-minute 
 
 OpenAI applies its own automatic prefix caching transparently (50% input discount on cache hits). No opt-in is needed.
 
+### DeepSeek
+
+DeepSeek applies its own prefix caching with a 75% input discount on cache hits, making it the most cost-efficient provider for long conversations and multi-step agentic workflows.
+
 ### Ollama
 
 Ollama runs locally and has no caching layer.
@@ -72,7 +77,7 @@ Three properties depend on the stateless design, and losing any of them would co
 
 ### Provider Cascade
 
-Thalamus falls back Anthropic to OpenAI to Ollama on failure. If turn 5 fails on Anthropic and routes to OpenAI, OpenAI needs the full history — which it has, because the app owns the message array. Thread-based APIs would make mid-conversation failover impossible.
+Thalamus falls back DeepSeek to Anthropic to OpenAI to Ollama on failure. If turn 5 fails on DeepSeek and routes to Anthropic, Anthropic needs the full history — which it has, because the app owns the message array. Thread-based APIs would make mid-conversation failover impossible.
 
 ### Privacy
 

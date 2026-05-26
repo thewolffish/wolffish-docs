@@ -138,7 +138,7 @@ If the workflow needs a logged-in state (LinkedIn, Gmail, GitHub in browser), ma
 
 ### Use a cloud provider for judgment-heavy tasks
 
-Local models (Ollama) work for simple tool-calling workflows, but anything that requires curation, writing, or multi-step reasoning should use a cloud provider (Claude or OpenAI). The quality difference directly affects output quality and the number of retries.
+Local models (Ollama) work for simple tool-calling workflows, but anything that requires curation, writing, or multi-step reasoning should use a cloud provider. **DeepSeek V4 Pro is the recommended default** — it matches frontier agentic performance at 29–34× lower cost than Opus 4.7 or GPT-5.5 on output, and ~11× cheaper on input. Use Claude specifically for computer-use tasks or when you need its unique instruction-following style.
 
 ### Pre-grant Automation per target app
 

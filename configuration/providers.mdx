@@ -1,11 +1,44 @@
 ---
 title: "Providers"
-description: "Configure LLM providers: Anthropic, OpenAI, and Ollama"
+description: "Configure LLM providers: DeepSeek, Anthropic, OpenAI, and Ollama"
 ---
 
 # Providers
 
-Wolffish communicates with LLMs via three providers using pure `fetch()` — no SDKs. Each provider has its own streaming format and tool-calling convention, which `wernicke.ts` normalizes into a single interface.
+Wolffish communicates with LLMs via four providers using pure `fetch()` — no SDKs. Each provider has its own streaming format and tool-calling convention, which `wernicke.ts` normalizes into a single interface.
+
+## DeepSeek (Recommended)
+
+```
+POST https://api.deepseek.com/chat/completions
+```
+
+Uses SSE streaming with OpenAI-compatible tool-calling format.
+
+**DeepSeek V4 Pro is Wolffish's recommended default for agentic tasks.** Following the [permanent 75% price cut](https://deepseek.ai/blog/deepseek-v4-pro-api-price-cut-permanent) (May 2026), it delivers frontier-class reasoning and tool-use reliability at 29–34× less than competing frontier models on output-heavy workloads — while matching or exceeding their agentic performance on multi-step tool chains. It's also MIT-licensed, so you can self-host for $0 in API fees if you have the infra.
+
+Best for: Agentic multi-step workflows, tool calling, research chains, cost-efficient daily automations.
+
+<Tip>
+  If you're setting up Wolffish for the first time and want one provider that does it all — reliable tool use, strong reasoning, fast responses, minimal cost — start with DeepSeek V4 Pro. You can always add Anthropic or OpenAI later for specific use cases.
+</Tip>
+
+### Getting an API Key
+
+1. Go to [platform.deepseek.com](https://platform.deepseek.com)
+2. Sign up or log in
+3. Navigate to **API Keys** and create a new key
+4. Paste it into Wolffish → Settings → Models → DeepSeek
+
+### Models
+
+| Model | Context | Input / Output (per MTok) | Notes |
+|-------|---------|--------------------------|-------|
+| **deepseek-v4-pro** | 128K | $0.435 / $0.87 | Recommended default. Frontier agentic performance. Cached: $0.003625/MTok. |
+| deepseek-v4 | 128K | $0.22 / $0.44 | Lighter variant, good for simple tasks. |
+| deepseek-reasoner | 64K | $0.87 / $1.74 | Extended chain-of-thought reasoning. |
+
+---
 
 ## Anthropic (Claude)
 
@@ -13,9 +46,30 @@ Wolffish communicates with LLMs via three providers using pure `fetch()` — no 
 POST https://api.anthropic.com/v1/messages
 ```
 
-Uses SSE streaming. Tool calls arrive as `tool_use` content blocks. Configure your API key in Settings or directly in `config.json`.
+Uses SSE streaming. Tool calls arrive as `tool_use` content blocks.
 
-Best for: Complex reasoning, detailed instructions following, nuanced tool use.
+Best for: Complex reasoning, detailed instruction following, nuanced tool use, computer-use (screen interaction).
+
+### Getting an API Key
+
+1. Go to [console.anthropic.com](https://console.anthropic.com)
+2. Sign up or log in
+3. Navigate to **API Keys** and create a new key
+4. Paste it into Wolffish → Settings → Models → Anthropic
+
+### Models
+
+| Model | Context | Input / Output (per MTok) | Notes |
+|-------|---------|--------------------------|-------|
+| claude-opus-4.7 | 200K | $5.00 / $25.00 | Latest. Most capable reasoning and writing. |
+| **claude-sonnet-4** | 200K | $3.00 / $15.00 | Best balance of quality and cost. |
+| claude-haiku-4 | 200K | $0.80 / $4.00 | Fast and cheap. Not recommended for agentic tasks. |
+
+<Note>
+  Anthropic is the only provider that supports **computer-use** (screen interaction). If you need Wolffish to drive a browser or desktop UI, you need an Anthropic key.
+</Note>
+
+---
 
 ## OpenAI (GPT)
 
@@ -23,9 +77,28 @@ Best for: Complex reasoning, detailed instructions following, nuanced tool use.
 POST https://api.openai.com/v1/chat/completions
 ```
 
-Uses SSE streaming. Tool calls arrive as `function_call` objects. Configure your API key in Settings or directly in `config.json`.
+Uses SSE streaming. Tool calls arrive as `function_call` objects.
 
 Best for: General-purpose tasks, broad knowledge, fast responses.
+
+### Getting an API Key
+
+1. Go to [platform.openai.com](https://platform.openai.com)
+2. Sign up or log in
+3. Navigate to **API Keys** and create a new key
+4. Paste it into Wolffish → Settings → Models → OpenAI
+
+### Models
+
+| Model | Context | Input / Output (per MTok) | Notes |
+|-------|---------|--------------------------|-------|
+| gpt-5.5 | 200K | $5.00 / $30.00 | Latest flagship. Strong reasoning. |
+| **gpt-4o** | 128K | $2.50 / $10.00 | Recommended OpenAI model for agentic tasks. |
+| gpt-4o-mini | 128K | $0.15 / $0.60 | Fast and cheap. Limited tool-use reliability. |
+| o3 | 200K | $10.00 / $40.00 | Extended reasoning. High cost. |
+| o4-mini | 200K | $1.10 / $4.40 | Reasoning at lower cost. |
+
+---
 
 ## Ollama (Local)
 
@@ -33,7 +106,7 @@ Best for: General-purpose tasks, broad knowledge, fast responses.
 POST http://localhost:11434/api/chat
 ```
 
-Uses NDJSON streaming. Tool calls arrive as structured JSON in the response. No API key needed — runs entirely on your machine.
+Uses NDJSON streaming. Tool calls arrive as structured JSON in the response. No API key needed — runs entirely on your machine. See the [Ollama integration guide](/configuration/ollama) for model requirements and hardware recommendations.
 
 Best for: Privacy, offline use, zero-cost experimentation, always-available fallback.
 
@@ -49,8 +122,10 @@ When a provider fails, it enters a cooldown period before being retried. The cas
 
 ## Choosing a Primary Provider
 
-Set your primary provider in Settings or `config.json`. The cascade always falls back in order: Claude → OpenAI → Ollama. Your primary provider is tried first, then the cascade takes over on failure.
+Set your primary provider in Settings or `config.json`. The cascade falls back in order: DeepSeek → Claude → OpenAI → Ollama (skipping any that aren't configured). Your primary provider is tried first, then the cascade takes over on failure.
+
+All four providers are optional — you only need at least one configured. If you use only cloud providers, the cascade skips Ollama. If you use only Ollama, it's the sole provider.
 
 <Tip>
-  For the best experience, keep Ollama running with a pulled model as your safety net. Even if you primarily use Claude, having a local fallback means you're never stuck without a response.
+  For the best experience, keep Ollama running with a pulled model as your safety net. Even if you primarily use Claude, having a local fallback means you're never stuck without a response when offline.
 </Tip>

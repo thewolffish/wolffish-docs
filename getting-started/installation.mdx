@@ -10,22 +10,25 @@ Wolffish is a self-contained Electron app. No Node.js, no Python, no Docker. Jus
 ## Prerequisites
 
 <AccordionGroup>
-  <Accordion title="Ollama (Required)" defaultOpen>
-    Wolffish requires Ollama for local LLM inference. Without it, the agent has no way to think or respond. Install it from [ollama.com](https://ollama.com), then come back to Wolffish.
+  <Accordion title="LLM Provider (at least one required)" defaultOpen>
+    Wolffish needs at least one LLM provider to think and respond. You can use **cloud providers**, **local models via Ollama**, or both:
 
-    That's it — Wolffish integrates directly with Ollama and will help you choose and download a model on first launch. No terminal commands needed.
+    - **DeepSeek (V4 Pro)** ⭐ Recommended — Get an API key at [platform.deepseek.com](https://platform.deepseek.com)
+    - **Anthropic (Claude)**: Get an API key at [console.anthropic.com](https://console.anthropic.com)
+    - **OpenAI (GPT)**: Get an API key at [platform.openai.com](https://platform.openai.com)
+    - **Ollama (Local)**: Install from [ollama.com](https://ollama.com) for local model inference
+
+    You'll configure these in Wolffish's settings after installation. The LLM cascade tries cloud providers first, then falls back to Ollama if it's running. You can skip Ollama entirely and use only cloud providers, or skip cloud providers and run fully local.
 
   </Accordion>
 
-  <Accordion title="Cloud Providers (Recommended for full experience)">
-    For complex agentic tasks and higher quality responses, configure API keys for one or both:
-    - **Anthropic (Claude)**: Get an API key at [console.anthropic.com](https://console.anthropic.com)
-    - **OpenAI (GPT)**: Get an API key at [platform.openai.com](https://platform.openai.com)
+  <Accordion title="Ollama (Optional — powers local models)">
+    Ollama lets you run open-source models entirely on your machine with zero internet dependency. Wolffish integrates directly with it and will help you choose and download a model. No terminal commands needed.
 
-    You'll configure these in Wolffish's settings after installation. The LLM cascade tries cloud providers first, then falls back to Ollama. For simple tasks Ollama alone works fine, but cloud providers are needed for the full experience and complex multi-step tasks.
+    Ollama is **not required** — you can use Wolffish with only cloud providers (DeepSeek, Claude, OpenAI). But if you want offline capability or prefer to keep all inference local, install Ollama.
 
     <Note>
-      Wolffish can run fully local with no cloud providers — but agentic tasks require large, highly capable models (70B+ parameters) like Llama 3 70B, Qwen 2.5 72B, or DeepSeek-V2. Running these requires 48GB+ RAM or a high-end GPU, which most people don't have. Supported but not recommended for most setups.
+      Reliable agentic tasks (multi-step tool use) require large models — 70B+ parameters (Llama 3 70B, Qwen 2.5 72B, DeepSeek-V2). Running these needs 48GB+ RAM or a high-end GPU. Smaller models (7B–14B) work for simple conversations but struggle with complex tool-calling workflows. See the [Ollama integration guide](/configuration/ollama) for details.
     </Note>
 
   </Accordion>
@@ -93,7 +96,7 @@ You don't need to install anything else. Electron bundles Node.js and Chromium i
 | **Install method**  | `.dmg` → drag to Applications    | NSIS installer (`.exe`) | AppImage (mark executable, run) |
 | **Node.js needed?** | No                               | No                      | No                              |
 | **Runtime deps**    | None                             | None                    | None                            |
-| **For local AI**    | Ollama (required)                | Ollama (required)       | Ollama (required)               |
+| **For local AI**    | Ollama (optional)                | Ollama (optional)       | Ollama (optional)               |
 | **For cloud AI**    | API key (Anthropic or OpenAI)    | API key                 | API key                         |
 | **Permissions**     | Accessibility + Screen Recording | Auto-granted            | X11 required                    |
 
@@ -125,7 +128,7 @@ To verify everything is working:
 2. Send a test message like "Hello, what can you do?"
 3. You should see a streaming response
 
-If Ollama is not detected, Wolffish will guide you through installing it.
+If Ollama is not detected, Wolffish will offer to guide you through installing it — or you can skip and use cloud providers instead.
 
 ## Uninstall
 

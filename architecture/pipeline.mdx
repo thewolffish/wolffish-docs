@@ -46,7 +46,7 @@ This is the most important step. The prefrontal cortex:
 The assembled context goes to `thalamus.stream()`, which:
 
 1. Checks `net.isOnline()` for instant offline detection
-2. Tries the primary provider (Claude, OpenAI, or Ollama based on config)
+2. Tries the primary provider (DeepSeek, Claude, OpenAI, or Ollama based on config)
 3. If the primary fails, cascades to the next healthy provider
 4. Returns a unified `StreamChunk` async generator
 
@@ -57,11 +57,12 @@ The assembled context goes to `thalamus.stream()`, which:
 ### 5. Response Parsing (wernicke)
 
 `wernicke` parses the streamed response, normalizing across provider formats:
+- **DeepSeek**: OpenAI-compatible `function_call` objects
 - **Anthropic**: `tool_use` content blocks
 - **OpenAI**: `function_call` objects
 - **Ollama**: structured JSON in response
 
-All three are normalized into a single `ToolCall` type: `{ name, args, id }`.
+All four are normalized into a single `ToolCall` type: `{ name, args, id }`.
 
 ### 6. Tool Execution Loop (if tool calls detected)
 

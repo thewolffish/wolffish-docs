@@ -81,15 +81,15 @@ Fully bilingual (English + Arabic). Covers everything from first launch to writi
 
 ### Configuration
 
-| Page                                         | What You'll Learn                               |
-| -------------------------------------------- | ----------------------------------------------- |
-| [soul.md](configuration/soul-md.mdx)         | Agent personality — tone, verbosity, guidelines |
-| [user.md](configuration/user-md.mdx)         | Your profile — name, role, stack, preferences   |
-| [agents.md](configuration/agents-md.mdx)     | Operational procedures and tool rules           |
-| [config.json](configuration/config-json.mdx) | App settings and provider configuration         |
-| [Providers](configuration/providers.mdx)     | Claude, OpenAI, Ollama setup and cascade        |
-| [Variables](configuration/variables.mdx)     | Secrets and environment-style values            |
-| [Heartbeat](configuration/heartbeat.mdx)     | Cron-like scheduling for autonomous jobs        |
+| Page                                         | What You'll Learn                                  |
+| -------------------------------------------- | -------------------------------------------------- |
+| [soul.md](configuration/soul-md.mdx)         | Agent personality — tone, verbosity, guidelines    |
+| [user.md](configuration/user-md.mdx)         | Your profile — name, role, stack, preferences      |
+| [agents.md](configuration/agents-md.mdx)     | Operational procedures and tool rules              |
+| [config.json](configuration/config-json.mdx) | App settings and provider configuration            |
+| [Providers](configuration/providers.mdx)     | DeepSeek, Claude, OpenAI, Ollama setup and cascade |
+| [Variables](configuration/variables.mdx)     | Secrets and environment-style values               |
+| [Heartbeat](configuration/heartbeat.mdx)     | Cron-like scheduling for autonomous jobs           |
 
 ### Debugging
 
@@ -146,7 +146,7 @@ The amygdala module gates every tool call against patterns defined in SKILL.md f
 
 ### Local-First, Cloud-Enhanced
 
-Works 100% offline with Ollama. Cloud providers (Claude, OpenAI) are optional quality enhancers with automatic fallback. Provider cascade: Claude → OpenAI → Ollama.
+Can work 100% offline with Ollama, or cloud-only with no local models — your choice. All providers (DeepSeek, Claude, OpenAI, Ollama) are optional; configure any combination. Provider cascade: DeepSeek → Claude → OpenAI → Ollama (skipping unconfigured providers). DeepSeek V4 Pro is the recommended default — frontier performance at ~6× lower cost than alternatives.
 
 ---
 

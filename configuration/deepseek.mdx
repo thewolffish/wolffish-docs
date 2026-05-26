@@ -1,0 +1,53 @@
+---
+title: "DeepSeek"
+description: "Set up DeepSeek — Wolffish's recommended default provider for agentic tasks"
+---
+
+# DeepSeek (Recommended)
+
+```
+POST https://api.deepseek.com/chat/completions
+```
+
+Uses SSE streaming with OpenAI-compatible tool-calling format.
+
+**DeepSeek V4 Pro is Wolffish's recommended default for agentic tasks.** Following the [permanent 75% price cut](https://deepseek.ai/blog/deepseek-v4-pro-api-price-cut-permanent) (May 2026), it delivers frontier-class reasoning and tool-use reliability at 29–34× less than competing frontier models on output-heavy workloads — while matching or exceeding their agentic performance on multi-step tool chains. It's also MIT-licensed, so you can self-host for $0 in API fees if you have the infra.
+
+Best for: Agentic multi-step workflows, tool calling, research chains, cost-efficient daily automations.
+
+<Tip>
+  If you're setting up Wolffish for the first time and want one provider that does it all — reliable tool use, strong reasoning, fast responses, minimal cost — start with DeepSeek V4 Pro. You can always add Anthropic or OpenAI later for specific use cases.
+</Tip>
+
+## Getting an API Key
+
+1. Go to [platform.deepseek.com](https://platform.deepseek.com)
+2. Sign up or log in
+3. Navigate to **API Keys** and create a new key
+4. Paste it into Wolffish → Settings → Models → DeepSeek
+
+## Models
+
+| Model | Context | Input / Output (per MTok) | Notes |
+|-------|---------|--------------------------|-------|
+| **deepseek-v4-pro** | 128K | $0.435 / $0.87 | Recommended default. Frontier agentic performance. Cached: $0.003625/MTok. |
+| deepseek-v4 | 128K | $0.22 / $0.44 | Lighter variant, good for simple tasks. |
+| deepseek-reasoner | 64K | $0.87 / $1.74 | Extended chain-of-thought reasoning. |
+
+---
+
+## Provider Cascade & Health
+
+Wolffish communicates with LLMs via four providers using pure `fetch()` — no SDKs. Each provider has its own streaming format and tool-calling convention, which `wernicke.ts` normalizes into a single interface.
+
+Set your primary provider in Settings or `config.json`. The cascade falls back in order: **DeepSeek → Claude → OpenAI → Ollama** (skipping any that aren't configured). Your primary provider is tried first, then the cascade takes over on failure.
+
+All four providers are optional — you only need at least one configured.
+
+The `thalamus` tracks each provider's health independently:
+
+- **Failure count** — Incremented on each failed request
+- **Backoff cooldown** — Exponential backoff after failures
+- **Online check** — `net.isOnline()` for instant offline detection
+
+When a provider fails, it enters a cooldown period before being retried. The cascade skips unhealthy providers and goes directly to the next available one.

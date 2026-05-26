@@ -1,0 +1,219 @@
+---
+title: "Security Audit"
+description: "On-demand security audit — checks open ports, firewall, services, SSH, disk encryption, and outdated software with known CVEs on macOS, Linux, or Windows"
+---
+
+# Security Audit
+
+Wolffish runs a comprehensive security audit of your machine — checks open ports and what's listening on them, firewall status and configuration, running services, SSH setup, disk encryption, OS-level protections, and scans for outdated software with known CVEs. It compiles everything into a structured report ranked by severity with exact remediation steps.
+
+Works on macOS, Linux, and Windows. The agent detects your OS and runs the appropriate commands — no manual configuration needed.
+
+No third-party vulnerability scanners. No cloud dashboards. No agents phoning home. Just shell commands + web search for CVE lookups, running locally on your machine.
+
+## Capabilities Required
+
+- `shell` — runs system commands to audit local machine state (OS-specific: `lsof`/`ss`/`netstat`, firewall tools, package managers, etc.)
+- `web-search` — looks up CVEs for outdated packages found during the audit
+
+Both ship with Wolffish. No extra code or plugins required.
+
+## Setup
+
+This use case uses `shell` and `web-search` — both need a cloud LLM to work. Read the general [Setting Up for Success](/use-cases/setting-up-for-success) guide for the full picture — what's below is specific to this workflow.
+
+### Recommended
+
+- **Claude Sonnet** — this workflow is primarily shell commands and structured reporting. Sonnet handles it well and keeps costs low. Opus works but is overkill for the judgment required here.
+
+### Required
+
+- **Wolffish installed and running** — the desktop app with a configured brain workspace.
+- **Cloud API key** — Anthropic (Claude) or OpenAI, configured in Settings > Models. Needed for CVE lookups via web search and for generating the structured report.
+- **A package manager** — the outdated-package scan relies on your system's package manager. Homebrew on macOS, apt/dnf/pacman on Linux, or winget/choco on Windows.
+
+### Optional
+
+- **Elevated privileges** — some commands need `sudo` (Linux/macOS) or Administrator (Windows) to see all listeners, system services, and firewall rules. Without elevation, the audit still runs but may miss some system-level services. Wolffish will prompt you (via the Amygdala) before running any privileged command.
+
+## Schedule
+
+```
+6:00 AM every Sunday
+```
+
+Weekly is enough for a personal machine. For servers or machines exposed to the internet, consider daily. Adjust the heartbeat schedule to match your risk tolerance.
+
+## The Prompt
+
+Send this to Wolffish on-demand, or add it to your heartbeat for automated weekly runs. When sent directly, the message goes straight to the LLM with your available capabilities — no brainstem or heartbeat involved.
+
+```
+Run a full security check on this machine. Detect my OS and run
+the appropriate commands. Check open ports and what's listening on
+them, firewall status, running services and daemons, SSH config,
+disk encryption status, OS-level security features, and any
+outdated software with known CVEs. Flag anything concerning with
+risk level and tell me exactly how to fix it.
+```
+
+That's it. The agent detects the OS, figures out which commands to run, interprets the output, looks up CVEs for outdated packages, and compiles the report.
+
+## How It Works
+
+**On-demand:** You send the prompt directly. Prefrontal loads the relevant capabilities (shell + web-search) into context and the LLM executes the audit.
+
+**Automated:** Brainstem fires the heartbeat on schedule, which triggers the same flow without manual input.
+
+In both cases, the LLM detects the OS and runs the appropriate shell commands:
+
+| Check | macOS | Linux | Windows |
+|-------|-------|-------|---------|
+| Open ports | `lsof -iTCP -sTCP:LISTEN` | `ss -tlnp` | `netstat -ano \| findstr LISTENING` |
+| Firewall | `socketfilterfw --getglobalstate` | `ufw status` / `iptables -L` | `netsh advfirewall show allprofiles` |
+| Services | `launchctl list` | `systemctl list-units` | `Get-Service` |
+| Disk encryption | `fdesetup status` | `cryptsetup status` / `lsblk` | `manage-bde -status` |
+| OS protections | `csrutil status`, `spctl --status` | AppArmor/SELinux status | Windows Defender, Secure Boot |
+| SSH config | `cat /etc/ssh/sshd_config` | `cat /etc/ssh/sshd_config` | `Get-Service sshd` + config |
+| Package updates | `brew outdated` | `apt list --upgradable` / `dnf check-update` | `winget upgrade` / `choco outdated` |
+| Background processes | `~/Library/LaunchAgents` | `systemctl list-unit-files` | Startup apps + scheduled tasks |
+
+4. For each installed package with a version number, the LLM uses `web_search` to check for known CVEs.
+5. The LLM compiles findings into a structured report: critical > warning > info.
+7. Each finding includes: what it found, why it matters, and how to fix it.
+8. Hippocampus logs the report as an episode for historical tracking.
+9. Basalganglia records the outcome.
+
+## Limits
+
+- Some commands need elevated privileges (`sudo` on Linux/macOS, Administrator on Windows) — Amygdala will prompt you
+- CVE lookups via web search are best-effort, not a substitute for a dedicated vulnerability scanner
+- Local scans only see what the OS exposes — can't detect rootkits or kernel-level compromises
+- System-managed packages (e.g. Apple's `/usr/bin/ruby`, Windows inbox components) can't be upgraded directly — the agent will note this and recommend alternatives
+
+## Cost & Model Guide
+
+This is one of the cheapest use cases. No computer-use, no screenshots — just shell commands and text processing.
+
+### Recommended Model
+
+**Claude Sonnet 4.x** is the recommended model. The workflow is straightforward: run commands, parse output, look up CVEs, write a report. Sonnet handles this well and keeps the cost under a dollar per run.
+
+**Claude Opus 4.x** works too and produces slightly better risk assessments, but the extra cost isn't justified for most users.
+
+**Claude Haiku 4.5** may miss subtle security implications or produce less actionable remediation steps. Use it if you're on a tight budget and comfortable interpreting results yourself.
+
+### Approximate Cost Per Run
+
+| Model | Est. Cost Per Run | Monthly (Weekly) |
+|-------|-------------------|-----------------|
+| Claude Sonnet 4.x | ~0.30-0.80 USD | ~1.20-3.20 USD |
+| Claude Opus 4.x | ~1.00-2.50 USD | ~4.00-10.00 USD |
+| Claude Haiku 4.5 | ~0.10-0.25 USD | ~0.40-1.00 USD |
+
+### Token Budget
+
+~8,000 tokens per run: ~700 for the heartbeat prompt, ~1,500 for shell command outputs, ~2,500 for CVE web search results, ~800 for soul.md, ~2,500 for the structured report. Approximately 8-12 LLM calls (multiple shell commands + web searches + report generation).
+
+## Example Run
+
+Here's what a real audit looks like on macOS. The agent ran shell commands, looked up CVEs, and produced this report:
+
+<Accordion title="Full Example Report (macOS)">
+
+**Security Audit — May 25, 2026**
+
+**GOOD NEWS**
+
+| Check | Status |
+|-------|--------|
+| FileVault (disk encryption) | ON — disk is encrypted |
+| SIP (System Integrity Protection) | Enabled |
+| Gatekeeper | Enabled |
+| XProtect | Up to date |
+| Firewall | Enabled |
+| Open listening ports | None — clean |
+| SSH authorized_keys | Empty — no remote keys authorized |
+| SSH private key permissions | All 600 — correct |
+| Remote Login (SSH server) | Off |
+| Screen Sharing / File Sharing | Off |
+
+**CRITICAL (1)**
+
+- **Firewall Stealth Mode is OFF** — your machine responds to network probe/ping requests. Stealth mode makes it invisible to port scanners. Fix: `sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setstealthmode on`
+
+**WARNING (5)**
+
+- **Firewall has 25 apps whitelisted** — including python3, ruby, adb, and multiple Node.js binaries. Any Python/Ruby script that opens a socket bypasses firewall prompts. Fix: System Settings > Network > Firewall > Options — remove anything you don't actively use for local servers.
+- **telnet is installed** — transmits everything in plaintext including passwords. Fix: `brew uninstall telnet`
+- **git is outdated (2.47.1)** — has CVE-2024-32002 (symlink/submodule clone vulnerability, remote code execution on case-insensitive filesystems). Fix: `brew upgrade git`
+- **gnupg / libgcrypt are outdated** — stale crypto libraries are a known attack surface. Fix: `brew upgrade gnupg gnutls libgcrypt`
+- **Splashtop daemon running as root** — remote desktop software running as a persistent root daemon. If unused, uninstall it.
+
+**INFO (4)**
+
+- FileVault is enabled.
+- SIP is enabled.
+- Gatekeeper is enabled.
+- Firewall is enabled.
+
+**Priority fix list:**
+
+```bash
+# 1. Enable stealth mode
+sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setstealthmode on
+
+# 2. Remove telnet
+brew uninstall telnet
+
+# 3. Upgrade security-critical packages
+brew upgrade git gnupg gnutls libgcrypt libgpg-error libksba nettle p11-kit pinentry ca-certificates
+
+# 4. Upgrade everything else
+brew upgrade
+```
+
+**Score: 7/10** — no open ports, no remote access enabled, disk encryption and OS protections all on. Main exposure is outdated packages and a permissive firewall whitelist. Run `brew upgrade` and prune the firewall list — 20 minutes of work gets you to a 9/10.
+
+</Accordion>
+
+## Expected Outcome
+
+After the audit completes, Wolffish responds with a structured report like:
+
+> **Security Audit — [Date]**
+>
+> **CRITICAL (1)**
+> - Port 5900 (Screen Sharing) is open and accessible on all interfaces. Fix: disable the sharing service or restrict it to specific IPs.
+>
+> **WARNING (3)**
+> - SSH allows password authentication. Fix: edit `/etc/ssh/sshd_config`, set `PasswordAuthentication no`, restart sshd.
+> - Node.js v18.17.0 has CVE-2024-22019 (HTTP request smuggling). Fix: upgrade via your package manager.
+> - SSL cert for api.yourdomain.com expires in 12 days. Renew it.
+>
+> **INFO (4)**
+> - Disk encryption is enabled.
+> - OS-level protections are active.
+> - Firewall is enabled in stealth mode.
+> - No unauthorized services running.
+>
+> 3 items need attention. Want me to fix any of them?
+
+The agent can also apply fixes directly if you approve — running package upgrades, toggling firewall settings, or editing SSH configs. Each destructive action goes through the Amygdala for confirmation.
+
+## Automating with Heartbeat
+
+Add the prompt to `brain/brainstem/heartbeat.md` under a weekly schedule:
+
+```markdown
+## Weekly — Sunday 6:00 AM
+
+Run a full security check on this machine. Detect my OS and run
+the appropriate commands. Check open ports and what's listening on
+them, firewall status, running services and daemons, SSH config,
+disk encryption status, OS-level security features, and any
+outdated software with known CVEs. Flag anything concerning with
+risk level and tell me exactly how to fix it.
+```
+
+The audit runs every Sunday morning. Historical reports accumulate in Hippocampus, so you can track how your security posture changes over time — did you actually fix last week's warnings? Are new packages introducing new CVEs?

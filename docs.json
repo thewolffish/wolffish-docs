@@ -78,7 +78,13 @@
                   "use-cases/overview",
                   "use-cases/setting-up-for-success",
                   "use-cases/limitations",
-                  "use-cases/ai-news-linkedin-post"
+                  {
+                    "group": "Examples",
+                    "pages": [
+                      "use-cases/ai-news-linkedin-post",
+                      "use-cases/mac-security-audit"
+                    ]
+                  }
                 ]
               },
               {
@@ -111,6 +117,15 @@
                 ]
               },
               {
+                "group": "Models",
+                "pages": [
+                  "configuration/deepseek",
+                  "configuration/anthropic",
+                  "configuration/openai",
+                  "configuration/ollama"
+                ]
+              },
+              {
                 "group": "Integrations",
                 "pages": [
                   "integrations/overview",
@@ -136,7 +151,6 @@
                   "configuration/user-md",
                   "configuration/agents-md",
                   "configuration/config-json",
-                  "configuration/providers",
                   "configuration/variables",
                   "configuration/heartbeat"
                 ]
@@ -196,7 +210,12 @@
                   "ar/use-cases/overview",
                   "ar/use-cases/setting-up-for-success",
                   "ar/use-cases/limitations",
-                  "ar/use-cases/ai-news-linkedin-post"
+                  {
+                    "group": "أمثلة",
+                    "pages": [
+                      "ar/use-cases/ai-news-linkedin-post"
+                    ]
+                  }
                 ]
               },
               {
@@ -229,6 +248,15 @@
                 ]
               },
               {
+                "group": "النماذج",
+                "pages": [
+                  "ar/configuration/deepseek",
+                  "ar/configuration/anthropic",
+                  "ar/configuration/openai",
+                  "ar/configuration/ollama"
+                ]
+              },
+              {
                 "group": "التكاملات",
                 "pages": [
                   "ar/integrations/overview",
@@ -254,7 +282,6 @@
                   "ar/configuration/user-md",
                   "ar/configuration/agents-md",
                   "ar/configuration/config-json",
-                  "ar/configuration/providers",
                   "ar/configuration/variables",
                   "ar/configuration/heartbeat"
                 ]

@@ -15,7 +15,7 @@ Wolffish is a local-first, markdown-powered personal AI desktop app built with E
 
 <CardGroup cols={2}>
   <Card title="Local-First" icon="house">
-    Works 100% offline with local Ollama models. Cloud providers enhance quality but are never required.
+    Can work 100% offline with local Ollama models. Cloud providers and Ollama are both optional — use whichever fits your setup.
   </Card>
 
   <Card title="Markdown-Powered" icon="file-lines">
@@ -33,7 +33,7 @@ Wolffish is a local-first, markdown-powered personal AI desktop app built with E
 
 ## How It Works
 
-Wolffish talks to LLMs via three providers: Anthropic (Claude), OpenAI (GPT), and Ollama (local models like Gemma 4 and Qwen 3.5). It cascades through them with automatic fallback — cloud first for quality, local as a reliable fallback that works offline.
+Wolffish talks to LLMs via four providers: DeepSeek (V4 Pro — the recommended default), Anthropic (Claude), OpenAI (GPT), and Ollama (local models like Gemma 4 and Qwen 3.5). All four are optional — configure any combination that suits you. When multiple are available, it cascades through them with automatic fallback — cloud first for quality, local as a reliable fallback that works offline.
 
 Everything lives in one folder: `~/.wolffish/`. Delete it and you're back to factory defaults. No system-level daemons, no crontabs, no registry entries, no scattered config files.
 

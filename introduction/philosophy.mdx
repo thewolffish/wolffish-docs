@@ -27,7 +27,7 @@ The same input follows the same path through the same gates every time. The thal
 
 ## Local-First, Cloud-Enhanced
 
-The core experience works 100% offline with a local Ollama model. Cloud providers (Claude, OpenAI) enhance quality but are never required. Memory, skills, feedback — all local. The only cloud dependency is the LLM API calls, and those cascade to local on failure.
+Wolffish can work 100% offline with a local Ollama model — no cloud dependency at all. Cloud providers (DeepSeek, Claude, OpenAI) and Ollama are both optional; you choose what fits your setup. Memory, skills, feedback — all stored locally regardless of which LLM provider you use. The cascade falls back gracefully: cloud to local on failure, or local-only if that's all you've configured.
 
 ## Capabilities are Self-Contained
 
