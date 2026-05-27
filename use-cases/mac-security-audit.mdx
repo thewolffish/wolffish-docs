@@ -11,6 +11,19 @@ Works on macOS, Linux, and Windows. The agent detects your OS and runs the appro
 
 No third-party vulnerability scanners. No cloud dashboards. No agents phoning home. Just shell commands + web search for CVE lookups, running locally on your machine.
 
+## Video Walkthrough
+
+<iframe
+  width="100%"
+  height="400"
+  src="https://www.youtube.com/embed/3Ch2Y5BFSaI"
+  title="Security Audit — Wolffish Demo"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+  style={{ borderRadius: '8px', marginTop: '1rem', marginBottom: '1rem' }}
+></iframe>
+
 ## Capabilities Required
 
 - `shell` — runs system commands to audit local machine state (OS-specific: `lsof`/`ss`/`netstat`, firewall tools, package managers, etc.)
@@ -24,12 +37,12 @@ This use case uses `shell` and `web-search` — both need a cloud LLM to work. R
 
 ### Recommended
 
-- **Claude Sonnet** — this workflow is primarily shell commands and structured reporting. Sonnet handles it well and keeps costs low. Opus works but is overkill for the judgment required here.
+- **DeepSeek v4 Pro** — this workflow is primarily shell commands and structured reporting. DeepSeek v4 Pro handles it well and keeps costs low.
 
 ### Required
 
 - **Wolffish installed and running** — the desktop app with a configured brain workspace.
-- **Cloud API key** — Anthropic (Claude) or OpenAI, configured in Settings > Models. Needed for CVE lookups via web search and for generating the structured report.
+- **Cloud API key** — DeepSeek, Anthropic (Claude), or OpenAI, configured in Settings > Models. Needed for CVE lookups via web search and for generating the structured report.
 - **A package manager** — the outdated-package scan relies on your system's package manager. Homebrew on macOS, apt/dnf/pacman on Linux, or winget/choco on Windows.
 
 ### Optional
@@ -42,22 +55,24 @@ This use case uses `shell` and `web-search` — both need a cloud LLM to work. R
 6:00 AM every Sunday
 ```
 
-Weekly is enough for a personal machine. For servers or machines exposed to the internet, consider daily. Adjust the heartbeat schedule to match your risk tolerance.
+Weekly is enough for most people. Adjust the heartbeat schedule to match your risk tolerance.
 
 ## The Prompt
 
 Send this to Wolffish on-demand, or add it to your heartbeat for automated weekly runs. When sent directly, the message goes straight to the LLM with your available capabilities — no brainstem or heartbeat involved.
 
 ```
-Run a full security check on this machine. Detect my OS and run
-the appropriate commands. Check open ports and what's listening on
-them, firewall status, running services and daemons, SSH config,
-disk encryption status, OS-level security features, and any
-outdated software with known CVEs. Flag anything concerning with
+Start by searching the web for known recent CVEs and security
+advisories relevant to my OS and common software. Then detect my
+OS and run the appropriate commands. Check open ports and what's
+listening on them, firewall status, running services and daemons,
+SSH config, disk encryption status, OS-level security features,
+and any outdated software. Cross-reference what you find locally
+against the CVEs from your search. Flag anything concerning with
 risk level and tell me exactly how to fix it.
 ```
 
-That's it. The agent detects the OS, figures out which commands to run, interprets the output, looks up CVEs for outdated packages, and compiles the report.
+That's it. The agent starts by searching the web for recent CVEs, then detects the OS, runs the appropriate commands, cross-references local findings against known vulnerabilities, and compiles the report.
 
 ## How It Works
 
@@ -97,9 +112,9 @@ This is one of the cheapest use cases. No computer-use, no screenshots — just 
 
 ### Recommended Model
 
-**Claude Sonnet 4.x** is the recommended model. The workflow is straightforward: run commands, parse output, look up CVEs, write a report. Sonnet handles this well and keeps the cost under a dollar per run.
+**DeepSeek v4 Pro** is the recommended model. The workflow is straightforward: run commands, parse output, look up CVEs, write a report. DeepSeek v4 Pro handles this well and keeps the cost low.
 
-**Claude Opus 4.x** works too and produces slightly better risk assessments, but the extra cost isn't justified for most users.
+**Claude Sonnet 4.x** works well too — a solid alternative if you're already on Anthropic's API.
 
 **Claude Haiku 4.5** may miss subtle security implications or produce less actionable remediation steps. Use it if you're on a tight budget and comfortable interpreting results yourself.
 
@@ -107,97 +122,144 @@ This is one of the cheapest use cases. No computer-use, no screenshots — just 
 
 | Model | Est. Cost Per Run | Monthly (Weekly) |
 |-------|-------------------|-----------------|
+| DeepSeek v4 Pro | ~0.15-0.40 USD | ~0.60-1.60 USD |
 | Claude Sonnet 4.x | ~0.30-0.80 USD | ~1.20-3.20 USD |
-| Claude Opus 4.x | ~1.00-2.50 USD | ~4.00-10.00 USD |
 | Claude Haiku 4.5 | ~0.10-0.25 USD | ~0.40-1.00 USD |
 
 ### Token Budget
 
-~8,000 tokens per run: ~700 for the heartbeat prompt, ~1,500 for shell command outputs, ~2,500 for CVE web search results, ~800 for soul.md, ~2,500 for the structured report. Approximately 8-12 LLM calls (multiple shell commands + web searches + report generation).
+~200,000 tokens per run with an 80,000 context window. The bulk comes from CVE web search results and cross-referencing. Approximately 15-25 LLM calls (web searches for CVE landscape + shell commands + Apple advisory lookups + cross-referencing + report generation).
 
 ## Example Run
 
-Here's what a real audit looks like on macOS. The agent ran shell commands, looked up CVEs, and produced this report:
+Here's what a real audit looks like on macOS. The agent searched the web for recent CVEs, ran local shell commands, cross-referenced the findings, and produced this report:
 
 <Accordion title="Full Example Report (macOS)">
 
-**Security Audit — May 25, 2026**
+Good, I have the CVE landscape. Now let me run local checks and cross-reference with those findings. Let me fetch the detailed Apple advisories and run local checks in parallel. All data collected. Let me now cross-reference everything and give you the full picture.
 
-**GOOD NEWS**
+---
+
+**Security Audit — yana-macbook-pro**
+
+**OS:** macOS Tahoe 26.5 (Build 25F71) — Apple Silicon<br/>
+**Date:** 2026-05-27<br/>
+**Assessment:** Mostly clean with a few things worth attention
+
+---
+
+**Core OS Defenses (All Good)**
 
 | Check | Status |
 |-------|--------|
-| FileVault (disk encryption) | ON — disk is encrypted |
-| SIP (System Integrity Protection) | Enabled |
+| macOS version | 26.5 — latest release, includes May 2026 patch batch (79 CVEs) |
+| FileVault | On |
+| SIP | Enabled |
 | Gatekeeper | Enabled |
-| XProtect | Up to date |
-| Firewall | Enabled |
-| Open listening ports | None — clean |
-| SSH authorized_keys | Empty — no remote keys authorized |
-| SSH private key permissions | All 600 — correct |
-| Remote Login (SSH server) | Off |
-| Screen Sharing / File Sharing | Off |
+| SSH daemon | Not running |
+| Chrome | 148.0.7778.179 — latest |
+| No authorized_keys | Nobody can SSH in |
 
-**CRITICAL (1)**
+---
 
-- **Firewall Stealth Mode is OFF** — your machine responds to network probe/ping requests. Stealth mode makes it invisible to port scanners. Fix: `sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setstealthmode on`
+**Items Needing Attention**
 
-**WARNING (5)**
+**1. Node.js on port 3000 — exposed to all interfaces (MEDIUM)**
 
-- **Firewall has 25 apps whitelisted** — including python3, ruby, adb, and multiple Node.js binaries. Any Python/Ruby script that opens a socket bypasses firewall prompts. Fix: System Settings > Network > Firewall > Options — remove anything you don't actively use for local servers.
-- **telnet is installed** — transmits everything in plaintext including passwords. Fix: `brew uninstall telnet`
-- **git is outdated (2.47.1)** — has CVE-2024-32002 (symlink/submodule clone vulnerability, remote code execution on case-insensitive filesystems). Fix: `brew upgrade git`
-- **gnupg / libgcrypt are outdated** — stale crypto libraries are a known attack surface. Fix: `brew upgrade gnupg gnutls libgcrypt`
-- **Splashtop daemon running as root** — remote desktop software running as a persistent root daemon. If unused, uninstall it.
-
-**INFO (4)**
-
-- FileVault is enabled.
-- SIP is enabled.
-- Gatekeeper is enabled.
-- Firewall is enabled.
-
-**Priority fix list:**
-
-```bash
-# 1. Enable stealth mode
-sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setstealthmode on
-
-# 2. Remove telnet
-brew uninstall telnet
-
-# 3. Upgrade security-critical packages
-brew upgrade git gnupg gnutls libgcrypt libgpg-error libksba nettle p11-kit pinentry ca-certificates
-
-# 4. Upgrade everything else
-brew upgrade
+```
+node  51566 younes  19u  IPv6  TCP *:3000 (LISTEN)
 ```
 
-**Score: 7/10** — no open ports, no remote access enabled, disk encryption and OS protections all on. Main exposure is outdated packages and a permissive firewall whitelist. Run `brew upgrade` and prune the firewall list — 20 minutes of work gets you to a 9/10.
+A Node.js dev server or Wolffish backend is listening on all network interfaces, not just localhost. Anyone on your network (coffee shop, coworking space) can hit it.
+
+Fix: Bind it to localhost only, e.g. `--host 127.0.0.1` or `.listen(3000, '127.0.0.1')`.
+
+---
+
+**2. Chrome DevTools debugging port open (LOW)**
+
+```
+Google  36826 younes  98u  TCP 127.0.0.1:9222 (LISTEN)
+```
+
+Port 9222 is Chrome's remote debugging protocol. Bound to localhost so exposure is minimal, but if you didn't intentionally enable this (`--remote-debugging-port=9222`), something spawned Chrome with it on.
+
+Fix: Find what's launching Chrome with that flag. Common culprits: Puppeteer, Playwright, Selenium, or an automation script. If you don't need it, kill the flag.
+
+---
+
+**3. 31 outdated Homebrew packages (33 with casks) (MEDIUM)**
+
+```
+git (2.47.1)         — security fixes since
+ca-certificates       — TLS trust store
+gnupg, libgcrypt      — crypto libs
+sqlite                — DB engine with patches
+go                    — compiler with security fixes
+python@3.13, python@3.14 — runtime patches
+gh, cloudflared       — tools
+```
+
+Fix: `brew upgrade && brew upgrade --cask --greedy`. That's one command. 33 packages, shouldn't take more than a few minutes.
+
+---
+
+**4. SSH config: root access to remote server (INFO)**
+
+```
+Host yat-server
+  HostName 138.68.90.57
+  User root
+  IdentityFile ~/.ssh/id_younes
+```
+
+You're SSHing as root to a DigitalOcean droplet. Not a vulnerability per se, but root-over-SSH is the thing security people write stern blog posts about.
+
+Fix (optional): Create a non-root user with sudo on that server and disable root SSH login in `/etc/ssh/sshd_config` (`PermitRootLogin no`).
+
+---
+
+**5. Firewall — enabled but no stealth mode (LOW)**
+
+Firewall is on but stealth mode is off — the machine responds to pings and probe packets. On trusted home Wi-Fi this is fine, but on public networks it makes you slightly more discoverable.
+
+Fix: `sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setstealthmode on`
+
+---
+
+**CVE Cross-Reference**
+
+| Software | Your Version | Relevant CVEs | Status |
+|----------|-------------|---------------|--------|
+| macOS Tahoe | 26.5 | 79 CVEs in May 2026 batch (all patched in 26.5) | Patched |
+| Chrome | 148.0.7778.179 | CVE-2026-5281 (UAF, exploited), CVE-2026-3913 (heap overflow), CVE-2026-2441 (zero-day) | Patched |
+| Node.js | v24.15.0 | CVE-2026-21636 (medium), March 2026 TLS CVEs | Likely patched in 24.15 |
+| Git | 2.47.1 | Multiple since | Update |
+| OpenSSH | 10.2p1 (Apple) | CVE-2025-26465/26466 (from Sequoia 15.5) | Apple's bundled, patched via OS |
+| OpenSSL | 3.6.2 | — | Current |
+
+The big macOS CVEs to be aware of that you're protected from:
+- **CVE-2026-28819** (Wi-Fi) — arbitrary code execution with kernel privs
+- **CVE-2026-43668** (mDNSResponder) — remote kernel memory corruption
+- **CVE-2026-28972** (Kernel) — out-of-bounds write into kernel memory
+
+All three were fixed in Tahoe 26.5, which you're running.
+
+---
+
+**Action Items (Priority Order)**
+
+1. **Bind node port 3000 to localhost** — 30 seconds, closes your biggest exposure
+2. **`brew upgrade && brew upgrade --cask --greedy`** — 5 minutes, clears 33 outdated packages
+3. **Enable stealth mode** — 10 seconds
+4. **Check what's spawning Chrome with `--remote-debugging-port`** — detective work
+5. **Audit that DO droplet's root SSH access** — whenever you're feeling responsible
+
+---
+
+Bottom line: your machine is in good shape. macOS defenses are fully engaged, you're on the latest OS with the May patch batch, and your browser/runtime versions are current. The main gap is the 31-33 outdated brew packages and that exposed Node port. Neither is an emergency, but both are worth fixing this week.
 
 </Accordion>
-
-## Expected Outcome
-
-After the audit completes, Wolffish responds with a structured report like:
-
-> **Security Audit — [Date]**
->
-> **CRITICAL (1)**
-> - Port 5900 (Screen Sharing) is open and accessible on all interfaces. Fix: disable the sharing service or restrict it to specific IPs.
->
-> **WARNING (3)**
-> - SSH allows password authentication. Fix: edit `/etc/ssh/sshd_config`, set `PasswordAuthentication no`, restart sshd.
-> - Node.js v18.17.0 has CVE-2024-22019 (HTTP request smuggling). Fix: upgrade via your package manager.
-> - SSL cert for api.yourdomain.com expires in 12 days. Renew it.
->
-> **INFO (4)**
-> - Disk encryption is enabled.
-> - OS-level protections are active.
-> - Firewall is enabled in stealth mode.
-> - No unauthorized services running.
->
-> 3 items need attention. Want me to fix any of them?
 
 The agent can also apply fixes directly if you approve — running package upgrades, toggling firewall settings, or editing SSH configs. Each destructive action goes through the Amygdala for confirmation.
 
@@ -208,11 +270,13 @@ Add the prompt to `brain/brainstem/heartbeat.md` under a weekly schedule:
 ```markdown
 ## Weekly — Sunday 6:00 AM
 
-Run a full security check on this machine. Detect my OS and run
-the appropriate commands. Check open ports and what's listening on
-them, firewall status, running services and daemons, SSH config,
-disk encryption status, OS-level security features, and any
-outdated software with known CVEs. Flag anything concerning with
+Start by searching the web for known recent CVEs and security
+advisories relevant to my OS and common software. Then detect my
+OS and run the appropriate commands. Check open ports and what's
+listening on them, firewall status, running services and daemons,
+SSH config, disk encryption status, OS-level security features,
+and any outdated software. Cross-reference what you find locally
+against the CVEs from your search. Flag anything concerning with
 risk level and tell me exactly how to fix it.
 ```
 
