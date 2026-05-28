@@ -1,0 +1,153 @@
+---
+title: "تفصيل السيرة الذاتية"
+description: "إنشاء سيرة ذاتية مخصصة لأي وظيفة بإرفاق سيرتك الذاتية الحالية والوصف الوظيفي"
+---
+
+## شرح بالفيديو
+
+<iframe
+  width="100%"
+  height="400"
+  src="https://www.youtube.com/embed/D_2pbRFdZKs"
+  title="تفصيل السيرة الذاتية — عرض Wolffish"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+  style={{ borderRadius: '8px', marginTop: '1rem', marginBottom: '1rem' }}
+></iframe>
+
+### ما يفعله
+
+يأخذ CV Tailor سيرتك الذاتية الحالية والوصف الوظيفي، ثم ينشئ نسخة جديدة من سيرتك الذاتية مخصصة تحديداً لتلك الوظيفة. يبرز الخبرات والمهارات واللغة الأكثر أهمية للمنصب — حتى لا تضطر لإعادة كتابة سيرتك الذاتية من الصفر في كل مرة تتقدم فيها لوظيفة جديدة.
+
+### النموذج الموصى به
+
+Claude Sonnet 4.6. يربط سير العمل هذا بين البحث على الويب واستراتيجية المحتوى والكتابة وإنشاء HTML/PDF. يتعامل Sonnet معه بشكل جيد — مطابقة نبرة الشركة وتحديد ما يجب حذفه وإنتاج HTML منسق ونظيف — بجزء بسيط من تكلفة النماذج الأكبر.
+
+### المتطلبات
+
+- Wolffish مثبت ويعمل.
+- مفتاح Claude API متصل في الإعدادات > النماذج. اختر Claude Sonnet 4.6 أو أي نموذج قادر.
+- سيرتك الذاتية الحالية محفوظة كملف PDF على جهازك.
+- الوصف الوظيفي للدور المستهدف — إما النص الكامل منسوخاً من الإعلان، أو رابط عام لصفحة الوظيفة.
+
+### كيفية التنفيذ
+
+1. افتح Wolffish.
+2. انقر على أيقونة المرفقات في حقل المحادثة واختر ملف PDF لسيرتك الذاتية.
+3. في مربع الرسالة، الصق نص الوصف الوظيفي كاملاً. إذا كان لديك رابط لإعلان الوظيفة، الصق ذلك الرابط بدلاً من ذلك.
+4. أضف تعليمات واضحة مثل "خصص سيرتي الذاتية لهذا الدور" ليعرف Wolffish ما تريد.
+5. أرسل الرسالة.
+6. انتظر حتى يعالج Wolffish سيرتك الذاتية والوصف الوظيفي. يستغرق هذا عادةً أقل من دقيقة.
+7. عند الانتهاء، سترى النتيجة في المحادثة. حمّل السيرة الذاتية المخصصة من مجلد مساحة العمل.
+
+### ما ستحصل عليه
+
+سينشئ Wolffish مستند سيرة ذاتية جديد مخصص للوظيفة التي قدمتها. مع الملف، ستحصل على ملخص قصير يشرح ما تم تغييره ولماذا — أي المهارات تم إبرازها، وما تم إعادة ترتيبه، وكيف تم تعديل اللغة لتتناسب مع الدور. يساعدك هذا الملخص على مراجعة التغييرات قبل إرسال السيرة الذاتية لأي شخص.
+
+### نصائح لأفضل النتائج
+
+ابدأ بسيرة ذاتية أساسية كاملة ومحدثة. كلما كان لدى Wolffish مادة أكثر للعمل عليها، كانت النسخة المخصصة أفضل. إذا كانت سيرتك الذاتية الأساسية تفتقر لوظائف أو مهارات حديثة، ستكون النتيجة كذلك.
+
+الصق الوصف الوظيفي كاملاً، وليس فقط المسمى الوظيفي. التفاصيل مهمة — المتطلبات المحددة والمؤهلات المفضلة وحتى نبرة الإعلان كلها تساعد Wolffish على إجراء تعديلات أذكى.
+
+اقرأ دائماً ملخص التغييرات قبل استخدام السيرة الذاتية المخصصة. يقوم Wolffish بعمل جيد، لكنك تعرف مسيرتك المهنية أفضل من أي شخص. مراجعة سريعة تضمن أن كل شيء دقيق ويُقرأ بالطريقة التي تريدها.
+
+احتفظ بنسخة من سيرتك الذاتية الأصلية. ينشئ Wolffish ملفاً جديداً ولن يحل محل الأصلي، لكن من الجيد الاحتفاظ بنسخة احتياطية من سيرتك الذاتية الأساسية وإبقائها في متناول اليد للمرة القادمة.
+
+### البرومبت
+
+<Note>أرفق سيرتك الذاتية كملف PDF في المحادثة قبل إرسال هذا البرومبت.</Note>
+
+```
+I've attached my CV. Here's the job description for a role I'm
+applying to:
+
+[paste the full job description here]
+
+Before you touch my CV, do research first:
+
+1. Search the web for the company behind this job posting.
+   Understand what they do, their mission, their culture, the
+   language they use on their website and public comms, and any
+   recent news (funding rounds, product launches, leadership
+   changes). This context should inform how you position my
+   experience.
+
+2. Search the web for the job title and role type. Look for
+   what hiring managers and recruiters in this field currently
+   value — key skills, certifications, tooling, frameworks,
+   and terminology that come up repeatedly in similar postings.
+
+3. Search the web for current CV best practices and trends.
+   Check what's working right now — formatting conventions,
+   length recommendations, whether summaries or objectives are
+   preferred, how ATS systems parse CVs today, and any recent
+   shifts in what recruiters respond to.
+
+Now tailor my CV using everything you've gathered:
+
+- Rewrite my professional summary to speak directly to this
+  role and this company. Use language that resonates with their
+  culture and values — not generic filler.
+- Reframe my prior experience so each role emphasises the
+  skills and achievements most relevant to this position. Use
+  the terminology and keywords from the job description and
+  from your research on similar roles. Don't invent experience
+  I don't have — reposition what's already there.
+- Reorder sections and bullet points so the most relevant
+  content appears first. Lead with what matters to this
+  employer.
+- Match the tone of the company. If they're formal and
+  corporate, reflect that. If they're casual and
+  mission-driven, reflect that instead.
+- Incorporate any in-demand skills, tools, or frameworks from
+  your research that I genuinely have but may not have
+  highlighted enough.
+- Remove or de-emphasise anything that adds noise — outdated
+  skills, irrelevant roles, generic bullet points that don't
+  serve this application. Compress older or less relevant roles
+  into single-line entries with an inline description instead
+  of full bullet sections. Keep full bullet treatment only for
+  the most recent and relevant positions.
+
+Design and formatting rules — the output must be a single-page
+PDF rendered from styled HTML through a headless browser:
+
+- Single page, A4. Everything must fit on one page. Be
+  aggressive about trimming content to make it fit — cut
+  generic bullets, merge short roles, compress certifications
+  into a single inline row.
+- Clean, single-column layout. No icons, no graphics, no
+  multi-column body sections.
+- Use a subtle accent color (e.g. #2563eb blue) that threads
+  through the entire document for personality: section header
+  text and bottom borders, company names in role titles, bullet
+  markers, certification separators, and a bold underline on
+  the name. Keep it subtle and professional — not flashy.
+- Add a short tagline under the name in the accent color that
+  immediately signals what the candidate is (e.g. "Senior
+  Software Engineer · AI Agent Builder").
+- Section headers in uppercase with letterspacing and a light
+  accent-colored bottom border.
+- Skills in a compact two-column grid with bold dark labels
+  and regular-weight values.
+- Bullet points under each major role — start each with a
+  strong action verb and include a measurable result where
+  possible. Three to four bullets per role maximum.
+- Certifications on a single line, separated by accent-colored
+  dividers.
+- Use a clean sans-serif font (Helvetica Neue or similar),
+  tight but readable sizing (8.5–9pt body, 20pt name), and
+  generous letterspacing on headers.
+- Build the CV as a styled HTML file first, then launch a
+  headless browser, load the HTML, and print to PDF. This
+  gives pixel-perfect control over typography and layout.
+
+Save the PDF to the workspace folder. Then give me a short
+summary of what you changed and why — what research informed
+your decisions, which sections were rewritten, what was
+reordered, and what was removed.
+```
+
+افتح Wolffish، أرفق سيرتك الذاتية، وجرّبها.
