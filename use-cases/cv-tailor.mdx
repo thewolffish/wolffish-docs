@@ -1,0 +1,140 @@
+---
+title: "CV Tailor"
+description: "Generate a tailored CV for any job by attaching your existing CV and a job description"
+---
+
+### What it does
+
+CV Tailor takes your existing CV and a job description, then generates a new version of your CV that's tailored specifically to that role. It highlights the experience, skills, and language that matter most for the position — so you don't have to rewrite your CV from scratch every time you apply somewhere new.
+
+### Recommended model
+
+Claude Sonnet 4.6. This workflow chains web research, content strategy, writing, and HTML/PDF generation. Sonnet handles it well — matching company tone, deciding what to cut, and producing clean styled HTML — at a fraction of the cost of larger models.
+
+### Required
+
+- Wolffish installed and running.
+- A Claude API key connected in Settings > Models. Select Claude Sonnet 4.6 or any capable model.
+- Your current CV saved as a PDF file on your computer.
+- The job description for the role you're targeting — either the full text copied from the posting, or a public URL to the job listing.
+
+### How to do it
+
+1. Open Wolffish.
+2. Click the attachment icon in the chat input and select your CV PDF from your files.
+3. In the message box, paste the full job description text. If you have a link to the job posting instead, paste that URL.
+4. Add a clear instruction like "Tailor my CV for this role" so Wolffish knows what you want.
+5. Send the message.
+6. Wait for Wolffish to process your CV and the job description. This usually takes under a minute.
+7. Once it's done, you'll see the output in the chat. Download the tailored CV from the workspace folder.
+
+### What you'll get
+
+Wolffish will generate a new CV document tailored to the job you provided. Along with the file, you'll get a short summary explaining what was changed and why — which skills were emphasized, what was reordered, and how the language was adjusted to match the role. This summary helps you review the changes before sending the CV to anyone.
+
+### Tips for best results
+
+Start with a complete, up-to-date base CV. The more Wolffish has to work with, the better the tailored version will be. If your base CV is missing recent roles or skills, the output will be too.
+
+Paste the full job description, not just the job title. The details matter — specific requirements, preferred qualifications, and even the tone of the posting all help Wolffish make smarter adjustments.
+
+Always read the change summary before using the tailored CV. Wolffish does a good job, but you know your career better than anyone. A quick review ensures everything is accurate and reads the way you want.
+
+Keep a copy of your original CV. Wolffish creates a new file and won't overwrite your original, but it's good practice to have your base CV backed up and easy to find for next time.
+
+### The Prompt
+
+<Note>Attach your CV as a PDF to the chat before sending this prompt.</Note>
+
+```
+I've attached my CV. Here's the job description for a role I'm
+applying to:
+
+[paste the full job description here]
+
+Before you touch my CV, do research first:
+
+1. Search the web for the company behind this job posting.
+   Understand what they do, their mission, their culture, the
+   language they use on their website and public comms, and any
+   recent news (funding rounds, product launches, leadership
+   changes). This context should inform how you position my
+   experience.
+
+2. Search the web for the job title and role type. Look for
+   what hiring managers and recruiters in this field currently
+   value — key skills, certifications, tooling, frameworks,
+   and terminology that come up repeatedly in similar postings.
+
+3. Search the web for current CV best practices and trends.
+   Check what's working right now — formatting conventions,
+   length recommendations, whether summaries or objectives are
+   preferred, how ATS systems parse CVs today, and any recent
+   shifts in what recruiters respond to.
+
+Now tailor my CV using everything you've gathered:
+
+- Rewrite my professional summary to speak directly to this
+  role and this company. Use language that resonates with their
+  culture and values — not generic filler.
+- Reframe my prior experience so each role emphasises the
+  skills and achievements most relevant to this position. Use
+  the terminology and keywords from the job description and
+  from your research on similar roles. Don't invent experience
+  I don't have — reposition what's already there.
+- Reorder sections and bullet points so the most relevant
+  content appears first. Lead with what matters to this
+  employer.
+- Match the tone of the company. If they're formal and
+  corporate, reflect that. If they're casual and
+  mission-driven, reflect that instead.
+- Incorporate any in-demand skills, tools, or frameworks from
+  your research that I genuinely have but may not have
+  highlighted enough.
+- Remove or de-emphasise anything that adds noise — outdated
+  skills, irrelevant roles, generic bullet points that don't
+  serve this application. Compress older or less relevant roles
+  into single-line entries with an inline description instead
+  of full bullet sections. Keep full bullet treatment only for
+  the most recent and relevant positions.
+
+Design and formatting rules — the output must be a single-page
+PDF rendered from styled HTML through a headless browser:
+
+- Single page, A4. Everything must fit on one page. Be
+  aggressive about trimming content to make it fit — cut
+  generic bullets, merge short roles, compress certifications
+  into a single inline row.
+- Clean, single-column layout. No icons, no graphics, no
+  multi-column body sections.
+- Use a subtle accent color (e.g. #2563eb blue) that threads
+  through the entire document for personality: section header
+  text and bottom borders, company names in role titles, bullet
+  markers, certification separators, and a bold underline on
+  the name. Keep it subtle and professional — not flashy.
+- Add a short tagline under the name in the accent color that
+  immediately signals what the candidate is (e.g. "Senior
+  Software Engineer · AI Agent Builder").
+- Section headers in uppercase with letterspacing and a light
+  accent-colored bottom border.
+- Skills in a compact two-column grid with bold dark labels
+  and regular-weight values.
+- Bullet points under each major role — start each with a
+  strong action verb and include a measurable result where
+  possible. Three to four bullets per role maximum.
+- Certifications on a single line, separated by accent-colored
+  dividers.
+- Use a clean sans-serif font (Helvetica Neue or similar),
+  tight but readable sizing (8.5–9pt body, 20pt name), and
+  generous letterspacing on headers.
+- Build the CV as a styled HTML file first, then launch a
+  headless browser, load the HTML, and print to PDF. This
+  gives pixel-perfect control over typography and layout.
+
+Save the PDF to the workspace folder. Then give me a short
+summary of what you changed and why — what research informed
+your decisions, which sections were rewritten, what was
+reordered, and what was removed.
+```
+
+Open Wolffish, attach your CV, and give it a try.
