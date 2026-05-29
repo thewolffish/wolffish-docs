@@ -1,0 +1,34 @@
+---
+title: "Changelog"
+description: "Product updates and improvements to Wolffish"
+---
+
+<Update label="May 29, 2026" description="v1.0.76 – v1.0.102">
+
+## New features
+
+- **DeepSeek provider support.** You can now run Wolffish on [DeepSeek](/configuration/deepseek), the recommended default for agentic workloads. Bring your own API key and start chatting in seconds.
+- **Ollama is now optional.** You no longer need a local Ollama install to use Wolffish — pick any combination of [cloud providers](/configuration/anthropic) or [local models](/configuration/ollama) that fits your setup.
+- **Microphone and audio permissions.** Wolffish now requests mic and audio access on first launch, paving the way for voice-driven workflows.
+- **Instant conversation titles.** New chats get a title the moment you send your first message, so your sidebar stays organized without waiting on the model.
+
+## Updates
+
+- **Smarter chat rendering.** Cards, code blocks, and tool outputs now render more reliably in long conversations.
+- **Refined sidebar and chat navigation.** Cleaner layout, better keyboard navigation, and quicker access to past conversations.
+- **Tray menu improvements.** The system tray menu is more responsive and reflects the current app state correctly.
+- **Better token display.** Token usage indicators are now accurate and easier to read at a glance.
+- **Windows performance.** Shell execution and app startup have been optimized for Windows users, including a cleaner installer name.
+
+## Bug fixes
+
+- Fixed [web fetch](/capabilities/built-in-capabilities) failing on certain URLs.
+- Fixed [channel](/channels/overview) connection errors and intermittent API failures.
+- Fixed a JSON parsing crash that could interrupt long agent runs.
+- Fixed microphone access on macOS.
+- Fixed DeepSeek streaming and tool-call edge cases.
+- Fixed [docs handling](/capabilities/built-in-capabilities) so attached files render correctly in chat.
+- Fixed bypass mode not engaging in some sessions.
+- Fixed blank request timeouts that could stall the agent.
+
+</Update>
