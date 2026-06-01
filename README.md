@@ -146,7 +146,7 @@ The amygdala module gates every tool call against patterns defined in SKILL.md f
 
 ### Local-First, Cloud-Enhanced
 
-Can work 100% offline with Ollama, or cloud-only with no local models — your choice. All providers (DeepSeek, Claude, OpenAI, Ollama) are optional; configure any combination. Provider cascade: DeepSeek → Claude → OpenAI → Ollama (skipping unconfigured providers). DeepSeek V4 Pro is the recommended default — frontier performance at ~6× lower cost than alternatives.
+Can work 100% offline with Ollama, or cloud-only with no local models — your choice. All providers (DeepSeek, Xiaomi MiMo, Kimi, Anthropic, OpenAI, Ollama) are optional; configure any combination. Provider cascade: DeepSeek → MiMo → Kimi → Claude → OpenAI → Ollama (skipping unconfigured providers). We recommend starting with DeepSeek or MiMo — they handle complex agentic tasks well at a fraction of the cost. Upgrade to Anthropic or OpenAI only if execution isn't reliable enough for a specific workflow.
 
 ---
 

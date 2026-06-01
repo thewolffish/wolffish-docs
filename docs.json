@@ -120,7 +120,10 @@
               {
                 "group": "Models",
                 "pages": [
+                  "configuration/providers",
                   "configuration/deepseek",
+                  "configuration/mimo",
+                  "configuration/kimi",
                   "configuration/anthropic",
                   "configuration/openai",
                   "configuration/ollama"
@@ -259,7 +262,10 @@
               {
                 "group": "النماذج",
                 "pages": [
+                  "ar/configuration/providers",
                   "ar/configuration/deepseek",
+                  "ar/configuration/mimo",
+                  "ar/configuration/kimi",
                   "ar/configuration/anthropic",
                   "ar/configuration/openai",
                   "ar/configuration/ollama"

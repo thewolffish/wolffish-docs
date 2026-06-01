@@ -37,11 +37,11 @@ Best for: Agentic multi-step workflows, tool calling, research chains, cost-effi
 
 ## Provider Cascade & Health
 
-Wolffish communicates with LLMs via four providers using pure `fetch()` — no SDKs. Each provider has its own streaming format and tool-calling convention, which `wernicke.ts` normalizes into a single interface.
+Wolffish communicates with LLMs via six cloud providers plus a local option, all using pure `fetch()` — no SDKs. Each provider has its own streaming format and tool-calling convention, which `wernicke.ts` normalizes into a single interface.
 
-Set your primary provider in Settings or `config.json`. The cascade falls back in order: **DeepSeek → Claude → OpenAI → Ollama** (skipping any that aren't configured). Your primary provider is tried first, then the cascade takes over on failure.
+Set your primary provider in Settings or `config.json`. The cascade falls back in order: **DeepSeek → MiMo → Kimi → Claude → OpenAI → Ollama** (skipping any that aren't configured). Your primary provider is tried first, then the cascade takes over on failure.
 
-All four providers are optional — you only need at least one configured.
+All providers are optional — you only need at least one configured.
 
 The `thalamus` tracks each provider's health independently:
 
