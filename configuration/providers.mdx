@@ -1,17 +1,17 @@
 ---
 title: "Choosing a Provider"
-description: "Configure LLM providers: DeepSeek, Xiaomi MiMo, Kimi, Anthropic, OpenAI, and Ollama"
+description: "Configure LLM providers: DeepSeek, Xiaomi MiMo, Kimi, MiniMax, Anthropic, OpenAI, and Ollama"
 ---
 
 # Providers
 
-Wolffish communicates with LLMs via six cloud providers plus a local option, all using pure `fetch()` — no SDKs. Each provider has its own streaming format and tool-calling convention, which `wernicke.ts` normalizes into a single interface.
+Wolffish communicates with LLMs via seven cloud providers plus a local option, all using pure `fetch()` — no SDKs. Each provider has its own streaming format and tool-calling convention, which `wernicke.ts` normalizes into a single interface.
 
 ## Choosing a Provider
 
 All supported cloud providers can handle agentic tasks — including complex multi-step tool chains. The difference is cost vs. ceiling.
 
-**Cost-efficient tier — DeepSeek, MiMo, and Kimi** handle complex agentic tasks well — including long multi-step tool chains, research workflows, code generation, and autonomous automations. They should be your default. At 5–25× cheaper than the premium tier, the savings compound fast. Start here and only upgrade if you find execution isn't reliable enough for a specific workflow.
+**Cost-efficient tier — DeepSeek, MiMo, Kimi, and MiniMax** handle complex agentic tasks well — including long multi-step tool chains, research workflows, code generation, and autonomous automations. They should be your default. At 5–25× cheaper than the premium tier, the savings compound fast. Start here and only upgrade if you find execution isn't reliable enough for a specific workflow.
 
 **Premium tier — Anthropic and OpenAI** deliver the strongest raw model capability. Claude Opus 4.7 and GPT-5.5 excel where the cost-efficient tier falls short — particularly **computer-use** (screen interaction), which only Anthropic supports, and edge cases where execution reliability on the cheaper models isn't sufficient.
 
@@ -20,6 +20,7 @@ All supported cloud providers can handle agentic tasks — including complex mul
 | Cost-efficient | **DeepSeek** | deepseek-v4-pro | $0.435 / $0.87 | Default for most agentic tasks |
 | Cost-efficient | **MiMo** | mimo-v2.5-pro | $0.20 / $2.00 | Cheapest option, multilingual |
 | Cost-efficient | **Kimi** | kimi-k2.6 | $0.95 / $4.00 | Strong reasoning, long context |
+| Cost-efficient | **MiniMax** | MiniMax-M3 | $0.30 / $1.20 | Reasoning and code |
 | Premium | **Anthropic** | claude-opus-4.7 | $5.00 / $25.00 | Hardest tasks, computer-use |
 | Premium | **OpenAI** | gpt-5.5 | $5.00 / $30.00 | Hardest tasks, broad knowledge |
 | Local | **Ollama** | varies | Free | Privacy, offline fallback |
@@ -125,6 +126,33 @@ Best for: Agentic workflows, long-context tasks, reasoning-heavy workloads.
 
 ---
 
+## MiniMax
+
+```
+POST https://api.minimaxi.chat/v1/chat/completions
+```
+
+Uses SSE streaming with OpenAI-compatible tool-calling format. Supports reasoning content.
+
+Best for: Reasoning-heavy workloads, code generation, agentic workflows. DeepSeek and MiMo remain cheaper and more capable for most workloads.
+
+### Getting an API Key
+
+1. Go to [platform.minimaxi.chat](https://platform.minimaxi.chat)
+2. Sign up or log in
+3. Navigate to **API Keys** and create a new key
+4. Paste it into Wolffish → Settings → Models → MiniMax
+
+### Models
+
+| Model | Context | Max Output | Input / Output (per MTok) | Notes |
+|-------|---------|------------|--------------------------|-------|
+| **MiniMax-M3** | 1M | 64K | $0.30 / $1.20 | Latest flagship. Strong reasoning. |
+| MiniMax-M2.7 | 200K | 32K | $0.30 / $1.20 | Previous gen. |
+| MiniMax-M2.5 | 200K | 32K | $0.30 / $1.20 | Balanced quality and cost. |
+
+---
+
 ## Anthropic (Claude)
 
 ```
@@ -207,9 +235,9 @@ When a provider fails, it enters a cooldown period before being retried. The cas
 
 ## Choosing a Primary Provider
 
-Set your primary provider in Settings or `config.json`. The cascade falls back in order: **DeepSeek → MiMo → Kimi → Claude → OpenAI → Ollama** (skipping any that aren't configured). Your primary provider is tried first, then the cascade takes over on failure.
+Set your primary provider in Settings or `config.json`. The cascade falls back in order: **DeepSeek → MiMo → Kimi → MiniMax → Claude → OpenAI → Ollama** (skipping any that aren't configured). Your primary provider is tried first, then the cascade takes over on failure.
 
-All six cloud providers and Ollama are optional — you only need at least one configured. If you use only cloud providers, the cascade skips Ollama. If you use only Ollama, it's the sole provider.
+All seven cloud providers and Ollama are optional — you only need at least one configured. If you use only cloud providers, the cascade skips Ollama. If you use only Ollama, it's the sole provider.
 
 <Tip>
   For the best experience, keep Ollama running with a pulled model as your safety net. Even if you primarily use Claude, having a local fallback means you're never stuck without a response when offline.

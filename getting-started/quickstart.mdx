@@ -48,7 +48,7 @@ Use Wolffish's built-in file viewer to open `brain/identity/soul.md` and edit it
 In Settings, add API keys for cloud providers. The cascade order is:
 
 ```
-DeepSeek → MiMo → Kimi → Claude → OpenAI → Ollama (local)
+DeepSeek → MiMo → Kimi → MiniMax → Claude → OpenAI → Ollama (local)
 ```
 
 If the primary provider fails, Wolffish automatically falls back to the next one (skipping any that aren't configured). If you're offline and Ollama is set up, it goes straight to local inference.

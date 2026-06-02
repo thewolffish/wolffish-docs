@@ -54,7 +54,7 @@ Located at `brain/config.json`, this file stores application-level settings. It'
 When the active provider fails, Wolffish cascades through alternatives:
 
 ```
-DeepSeek → MiMo → Kimi → Claude → OpenAI → Ollama
+DeepSeek → MiMo → Kimi → MiniMax → Claude → OpenAI → Ollama
 ```
 
 Providers without configured API keys are skipped. Ollama is used as a fallback if it's installed and running. All providers are optional — you only need at least one configured.

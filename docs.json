@@ -124,6 +124,7 @@
                   "configuration/deepseek",
                   "configuration/mimo",
                   "configuration/kimi",
+                  "configuration/minimax",
                   "configuration/anthropic",
                   "configuration/openai",
                   "configuration/ollama"
@@ -266,6 +267,7 @@
                   "ar/configuration/deepseek",
                   "ar/configuration/mimo",
                   "ar/configuration/kimi",
+                  "ar/configuration/minimax",
                   "ar/configuration/anthropic",
                   "ar/configuration/openai",
                   "ar/configuration/ollama"
