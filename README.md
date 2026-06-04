@@ -64,8 +64,9 @@ Fully bilingual (English + Arabic). Covers everything from first launch to writi
 
 | Page                                                  | What You'll Learn                           |
 | ----------------------------------------------------- | ------------------------------------------- |
-| [Overview](integrations/overview.mdx)                 | Stateless architecture, credential handling |
-| [Google Workspace](integrations/google-workspace.mdx) | Gmail, Drive, Calendar, Sheets (OAuth)      |
+| [Overview](integrations/overview.mdx)                           | Stateless architecture, credential handling            |
+| [Browser Extension](integrations/browser-extension.mdx)         | Control Chrome/Brave with 44 tools via WebSocket       |
+| [Google Workspace](integrations/google-workspace.mdx)           | Gmail, Drive, Calendar, Sheets (OAuth)                 |
 | [GitHub](integrations/github.mdx)                     | Repos, issues, PRs, workflows (PAT)         |
 | [Notion](integrations/notion.mdx)                     | Pages, databases, search (API token)        |
 

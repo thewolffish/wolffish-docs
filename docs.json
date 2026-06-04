@@ -134,6 +134,7 @@
                 "group": "Integrations",
                 "pages": [
                   "integrations/overview",
+                  "integrations/browser-extension",
                   "integrations/google-workspace",
                   "integrations/github",
                   "integrations/notion"
@@ -277,6 +278,7 @@
                 "group": "التكاملات",
                 "pages": [
                   "ar/integrations/overview",
+                  "ar/integrations/browser-extension",
                   "ar/integrations/google-workspace",
                   "ar/integrations/github",
                   "ar/integrations/notion"

@@ -1,0 +1,193 @@
+---
+title: "Browser Extension"
+description: "Control the user's real Chrome or Brave browser with 44 tools — navigate, click, read, screenshot, and more"
+---
+
+# Browser Extension
+
+The Wolffish browser extension gives the agent direct control of your real browser. Unlike the Playwright-based browser capability (which runs an isolated headless session), the extension operates in your actual browser — your cookies, logins, extensions, and open tabs are all available.
+
+<Info>
+  The agent automatically prefers `ext_*` tools over Playwright `browser_*` tools when the extension is connected. No configuration needed.
+</Info>
+
+## Why This Exists
+
+Computer use — where an AI takes screenshots of your screen, moves your mouse, and types keystrokes — works, but it's slow, expensive, and fragile. Every action requires a full-screen screenshot sent to a vision model, the model guesses where to click based on pixel coordinates, and failures cascade because there's no DOM awareness. A single browsing session can burn through hundreds of screenshots at vision-model pricing.
+
+The extension replaces all of that with direct browser control. No screenshots needed for navigation. No pixel guessing. The agent sends `ext_click('.submit-btn')` and the extension clicks the actual DOM element. It sends `ext_read_page({ format: 'text' })` and gets clean text back — not a 2MB screenshot for the model to squint at.
+
+The real unlock is **session reuse**. Your browser is already logged into everything — Gmail, LinkedIn, Reddit, GitHub, Notion, your company's internal tools. The extension gives the agent access to all of that without storing credentials, managing OAuth flows, or launching throwaway browser instances. The agent operates as you, in your browser, with your context.
+
+### What This Actually Looks Like
+
+- **"Summarize my Reddit front page"** — the agent opens your Reddit feed (you're already logged in), reads the visible posts, scrolls to load more, and gives you a summary. No Reddit API key, no OAuth, no rate limits.
+- **"Search Reddit for reviews of the M4 MacBook Air"** — navigates to Reddit search, reads the top results, clicks into threads, extracts the useful comments. All through your logged-in session where you see upvoted content, not the stripped-down anonymous view.
+- **"Clean up my LinkedIn — delete conversations I haven't replied to in 6 months"** — opens LinkedIn messaging, reads conversation previews, identifies stale ones, deletes them. Requires your authenticated session, which the extension already has.
+- **"Accept all pending LinkedIn connection requests from people in my industry"** — opens the invitations page, reads each request, checks the person's headline, accepts the relevant ones. No LinkedIn API (which doesn't even expose this).
+- **"Check my GitHub notifications and close any resolved issues"** — opens your GitHub notifications (logged in), reads each one, follows the link, checks if the issue was resolved, closes it. Faster than the GitHub API for this kind of triage because the UI state is already loaded.
+- **"Go to Hacker News, find today's top AI papers, and save the links to a markdown file"** — no API exists for this. The extension just reads the page like you would.
+- **"Fill out this job application form with my details"** — reads the form fields, fills them from your profile, handles dropdowns and multi-step flows. In your actual browser where you're already logged into the job portal.
+
+These aren't hypothetical — they're the workflows the extension was built for. Anything you do in Chrome by clicking and reading, the agent can do through the extension.
+
+## Cost: Why Model Choice Matters
+
+Browser automation generates large contexts fast. Every `ext_read_page` returns the full visible text. Every `ext_screenshot` adds an image to the context. A typical browsing session with 20–30 tool calls can push the context to 100K+ tokens.
+
+On premium models, this gets expensive quickly:
+
+| Model | ~30 tool calls | ~50 tool calls |
+| --- | --- | --- |
+| Claude Opus 4.6 | ~$25 | ~$40+ |
+| GPT-4o | ~$8 | ~$15 |
+| DeepSeek V3 | ~$1.30 | ~$2.50 |
+| MiniMax-M1 | ~$1.50 | ~$3 |
+
+<Warning>
+  A single browsing session that looks routine to you — "check 5 job listings and compare them to my profile" — can involve 30+ tool calls, 10+ page reads, and 2+ screenshots. On Opus this is a $25 turn. On DeepSeek it's $1.30 for the same result.
+</Warning>
+
+We recommend **DeepSeek**, **MiniMax**, or **Kimi** for browser-heavy workflows. They handle complex multi-step browsing reliably at a fraction of the cost. The quality difference for "navigate, read, extract, summarize" tasks is negligible — these models are excellent at structured data extraction and following multi-step instructions. Reserve premium models for tasks that genuinely need stronger reasoning, not for reading web pages.
+
+<Tip>
+  You can set different models per conversation in Wolffish. Use DeepSeek for browsing sessions and Claude for complex reasoning tasks — you don't have to choose one model for everything.
+</Tip>
+
+## Architecture
+
+The extension connects to the Wolffish app over a local WebSocket.
+
+```
+Agent → Plugin (ext_* tools) → WebSocket (localhost:23151) → Extension Service Worker → Chrome APIs / Content Script → Result
+```
+
+| Component | Location | Role |
+| --- | --- | --- |
+| **WebSocket Server** | `channels/extension/server.ts` (core) | Connection management, heartbeat, command routing |
+| **Event Logger** | `channels/extension/log.ts` (core) | Per-conversation event logging |
+| **Plugin** | `cerebellum/browser-extension/` (editable) | Tool definitions, execute logic, screenshot processing |
+| **Extension** | `~/.wolffish/workspace/extension/` | Chrome extension loaded in the browser |
+
+## Setup
+
+1. Open **Settings → Services → Browser Extension**
+2. Click **Reveal in Finder** to find the extension folder
+3. Open Chrome or Brave → `chrome://extensions`
+4. Enable **Developer Mode** → **Load Unpacked** → select the extension folder
+5. The extension connects automatically — the status dot turns green
+
+<Tip>
+  The extension auto-reconnects when the app restarts. You only need to load it once.
+</Tip>
+
+## Auto-Updates
+
+The extension updates itself automatically when Wolffish updates — no manual steps required.
+
+1. Each Wolffish release ships with the latest extension files bundled inside the app binary
+2. On every app launch, the bundled files are copied to `~/.wolffish/workspace/extension/`, overwriting the previous version
+3. When the extension connects, the server compares its self-reported version against the version on disk
+4. If they differ, the server sends a reload command — the extension calls `chrome.runtime.reload()` on itself, picks up the new code, and reconnects automatically
+
+The entire process is seamless. You'll see a brief disconnect in the side panel (< 1 second) while the extension restarts, then it reconnects with the new version. You can also trigger a manual reload from **Settings → Services → Browser Extension → Reload Extension**.
+
+## 44 Tools
+
+The agent sees these as `ext_*` tools. The plugin translates them to `browser_*` commands over the wire.
+
+### Navigation
+`ext_navigate` · `ext_back` · `ext_forward` · `ext_reload`
+
+### Page Interaction
+`ext_click` · `ext_type` · `ext_select` · `ext_hover` · `ext_scroll` · `ext_focus` · `ext_keypress` · `ext_drag_drop` · `ext_file_upload`
+
+### Page Reading
+`ext_read_page` · `ext_query_selector` · `ext_get_attribute` · `ext_get_value` · `ext_get_url` · `ext_get_page_info`
+
+### Tab & Window Management
+`ext_tabs_list` · `ext_tab_open` · `ext_tab_close` · `ext_tab_switch` · `ext_tab_duplicate` · `ext_tab_move` · `ext_windows_list` · `ext_window_open` · `ext_window_close` · `ext_window_resize`
+
+### Capture
+`ext_screenshot` · `ext_pdf` · `ext_download`
+
+### Data & Storage
+`ext_cookies_get` · `ext_cookies_set` · `ext_cookies_remove` · `ext_storage_get` · `ext_storage_set` · `ext_clipboard_read` · `ext_clipboard_write`
+
+### Advanced
+`ext_execute_js` · `ext_wait_for` · `ext_wait_for_navigation` · `ext_wait_for_network_idle` · `ext_notify`
+
+## Screenshots
+
+Screenshots are processed through **sharp** before being sent to the LLM:
+
+1. Extension captures the visible tab via `chrome.tabs.captureVisibleTab()`
+2. Plugin strips the data URL prefix, decodes to buffer
+3. Sharp resizes to the configured max width (default 1280px)
+4. Converts to the configured format (default JPEG, quality 80)
+5. Returns clean base64 inline — displayed automatically in chat
+
+Configure resolution and format in **Settings → Services → Browser Extension**.
+
+## Side Panel
+
+The extension includes a side panel that shows:
+
+- **Connection status** — connected, waiting, or disconnected
+- **Live event feed** — every tool call appears in real-time as the agent browses
+- **Conversation history** — browse events from past conversations
+
+Events are logged per-conversation to `~/.wolffish/workspace/logs/extension/{conversationId}.jsonl`.
+
+## Customization
+
+### Editing Agent Instructions
+
+Edit `~/.wolffish/workspace/brain/cerebellum/.browser-extension/SKILL.md`:
+
+- Change tool descriptions to guide the agent differently
+- Add or modify trigger keywords
+- Add safety patterns (`danger_patterns`, `confirm_patterns`)
+- Edit the body text for custom browsing procedures
+
+### Editing the Plugin
+
+Edit `~/.wolffish/workspace/brain/cerebellum/.browser-extension/plugin/index.mjs`:
+
+- Add pre/post processing to tool calls
+- Compose multiple commands into higher-level tools
+- Customize screenshot processing
+- Add new tools that combine existing commands
+
+### Building a Custom Extension
+
+The WebSocket server is command-agnostic — it pipes any `{ id, type, params }` to the extension and resolves when a matching response arrives. You can fork the extension, add new commands, and update the plugin to match.
+
+See the [extension repository](https://github.com/thewolffish/wolffish-extension) for the full source.
+
+## Supported Browsers
+
+| Browser | Status |
+| --- | --- |
+| Chromium | Supported |
+| Chrome | Supported |
+| Brave | Supported |
+| Edge | Supported |
+| Safari | Not supported |
+| Firefox | Not supported |
+
+<Warning>
+  The extension uses Manifest V3 APIs. Safari and Firefox are not supported because the extension relies on Chrome-specific APIs (`chrome.tabs.captureVisibleTab`, `chrome.debugger` for PDF, direct WebSocket in the service worker).
+</Warning>
+
+## Safety
+
+The extension inherits the standard capability safety system:
+
+- `ext_execute_js` with `document.cookie` or `navigator.sendBeacon` → **blocked**
+- `ext_execute_js` (any) → **requires approval**
+- `ext_download` → **requires approval**
+- `ext_cookies_set` → **requires approval**
+- Navigation to financial sites → **requires approval**
+
+These patterns are defined in the SKILL.md frontmatter and enforced by the amygdala module. You can customize them.
