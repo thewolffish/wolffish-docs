@@ -28,18 +28,22 @@ Best for: Agentic multi-step workflows, tool calling, research chains, cost-effi
 
 ## Models
 
-| Model | Context | Max Output | Input / Output (per MTok) | Notes |
-|-------|---------|------------|--------------------------|-------|
-| **deepseek-v4-pro** | 1M | 384K | $0.435 / $0.87 | Recommended default. Frontier agentic performance. Cached: $0.003625/MTok. |
-| deepseek-v4-flash | 1M | 384K | $0.14 / $0.28 | Fast and cheap. Cached: $0.0028/MTok. |
+| Model | Context | Max Output | Modes | Input / Output (per MTok) | Notes |
+|-------|---------|------------|-------|--------------------------|-------|
+| **deepseek-v4-pro** | 1M | 384K | None, High, Max | $0.44 / $0.87 | Recommended default. Frontier agentic performance. Cached: $0.01/MTok. |
+| deepseek-v4-flash | 1M | 384K | None, High, Max | $0.14 / $0.28 | Fast and cheap. Cached: $0.003/MTok. |
+
+<Note>
+  **Modes** control reasoning depth. *None* disables thinking for fast responses. *High* enables standard reasoning. *Max* enables deep reasoning for complex tasks. All models support tool calling with no hard tool-count limit.
+</Note>
 
 ---
 
 ## Provider Cascade & Health
 
-Wolffish communicates with LLMs via seven cloud providers plus a local option, all using pure `fetch()` — no SDKs. Each provider has its own streaming format and tool-calling convention, which `wernicke.ts` normalizes into a single interface.
+Wolffish communicates with LLMs via nine cloud providers plus a local option, all using pure `fetch()` — no SDKs. Each provider has its own streaming format and tool-calling convention, which `wernicke.ts` normalizes into a single interface.
 
-Set your primary provider in Settings or `config.json`. The cascade falls back in order: **DeepSeek → MiMo → Kimi → MiniMax → Claude → OpenAI → Ollama** (skipping any that aren't configured). Your primary provider is tried first, then the cascade takes over on failure.
+Set your primary provider in Settings or `config.json`. The cascade falls back in order: **DeepSeek → MiMo → Kimi → MiniMax → xAI → Qwen → Stepfun → Claude → OpenAI → Ollama** (skipping any that aren't configured). Your primary provider is tried first, then the cascade takes over on failure.
 
 All providers are optional — you only need at least one configured.
 

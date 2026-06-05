@@ -1,0 +1,41 @@
+---
+title: "xAI"
+description: "Set up xAI (Grok) — strong reasoning and vision with competitive pricing"
+---
+
+# xAI (Grok)
+
+```
+POST https://api.x.ai/v1/chat/completions
+```
+
+Uses SSE streaming with OpenAI-compatible tool-calling format. Supports vision (base64 images) and reasoning content.
+
+**xAI offers Grok models with strong reasoning capabilities and competitive pricing.** Grok 4.3 is the flagship with 1M context, vision support, and three reasoning modes — sitting between the budget Chinese providers and the premium Western tier on price. The newer Grok Build model is purpose-built for code generation at an attractive price point.
+
+Best for: Reasoning-heavy workflows, code generation, vision tasks, and agentic automations where you want a balance of capability and cost.
+
+## Getting an API Key
+
+1. Go to [console.x.ai](https://console.x.ai)
+2. Sign up or log in
+3. Navigate to **API Keys** and create a new key
+4. Paste it into Wolffish → Settings → Models → xAI
+
+## Models
+
+| Model | Context | Max Output | Modes | Input / Output (per MTok) | Notes |
+|-------|---------|------------|-------|--------------------------|-------|
+| **grok-4.3** | 1M | 131K | None, High, Max | $1.25 / $2.50 | Flagship. Vision + reasoning. |
+| grok-build-0.1 | 256K | 131K | None, High, Max | $1.00 / $2.00 | Purpose-built for code. |
+| grok-4 | 256K | 131K | None, High | $3.00 / $15.00 | Previous gen flagship. |
+| grok-3 | 131K | 131K | None, High | $2.00 / $10.00 | Strong reasoning. |
+| grok-3-mini | 131K | 131K | None, High | $0.30 / $0.50 | Fast and cheap reasoning. |
+
+<Note>
+  **Modes** control reasoning depth. *None* disables thinking for fast responses. *High* enables standard reasoning. *Max* enables deep reasoning for complex tasks. All Grok models support tool calling with no hard tool-count limit.
+</Note>
+
+<Tip>
+  Grok 4.3 is competitively priced against Anthropic and OpenAI while offering 1M context and vision. If you need a mid-tier provider with strong reasoning that's cheaper than Claude or GPT, xAI is a solid choice.
+</Tip>

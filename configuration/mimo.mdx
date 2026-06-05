@@ -28,16 +28,16 @@ Best for: Cost-sensitive agentic workflows, multilingual tasks, multi-step tool 
 
 ## Models
 
-| Model | Context | Max Output | Input / Output (per MTok) | Notes |
-|-------|---------|------------|--------------------------|-------|
-| **mimo-v2.5-pro** | 1M | 64K | $0.20 / $2.00 | Best MiMo model. Strong reasoning and multilingual. |
-| mimo-v2.5 | 1M | 32K | $0.08 / $0.80 | Good balance of quality and cost. |
-| mimo-v2-pro | 256K | 16K | $0.20 / $2.00 | Previous generation pro model. |
-| mimo-v2-omni | 256K | 16K | $0.08 / $0.80 | Multimodal. Vision and document input. |
-| mimo-v2-flash | 256K | 16K | $0.01 / $0.30 | Ultra-cheap. Best for high-volume, low-complexity tasks. |
+| Model | Context | Max Output | Modes | Input / Output (per MTok) | Notes |
+|-------|---------|------------|-------|--------------------------|-------|
+| **mimo-v2.5-pro** | 1M | 64K | None, High | $0.20 / $2.00 | Best MiMo model. Strong reasoning and multilingual. |
+| mimo-v2.5 | 1M | 32K | None, High | $0.08 / $0.80 | Good balance of quality and cost. |
+| mimo-v2-pro | 256K | 16K | None, High | $0.20 / $2.00 | Previous generation pro model. |
+| mimo-v2-omni | 256K | 16K | None, High | $0.08 / $0.80 | Multimodal. Vision and document input. |
+| mimo-v2-flash | 256K | 16K | None, High | $0.01 / $0.30 | Ultra-cheap. Best for high-volume, low-complexity tasks. |
 
 <Note>
-  Cache write is currently free (promotional period). MiMo V2.5 Pro offers a 1M token context window — matching DeepSeek V4 Pro — at comparable input pricing.
+  **Modes** control reasoning depth. *None* disables thinking for fast responses. *High* enables standard reasoning. MiMo models don't support a *Max* mode. Cache write is currently free (promotional period). All models support tool calling with no hard tool-count limit.
 </Note>
 
 ## Cost Comparison

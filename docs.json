@@ -123,8 +123,11 @@
                   "configuration/providers",
                   "configuration/deepseek",
                   "configuration/mimo",
+                  "configuration/qwen",
                   "configuration/kimi",
                   "configuration/minimax",
+                  "configuration/xai",
+                  "configuration/stepfun",
                   "configuration/anthropic",
                   "configuration/openai",
                   "configuration/ollama"
@@ -267,8 +270,11 @@
                   "ar/configuration/providers",
                   "ar/configuration/deepseek",
                   "ar/configuration/mimo",
+                  "ar/configuration/qwen",
                   "ar/configuration/kimi",
                   "ar/configuration/minimax",
+                  "ar/configuration/xai",
+                  "ar/configuration/stepfun",
                   "ar/configuration/anthropic",
                   "ar/configuration/openai",
                   "ar/configuration/ollama"

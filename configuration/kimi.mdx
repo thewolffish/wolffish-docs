@@ -22,13 +22,21 @@ Best for: Agentic workflows, long-context tasks, reasoning-heavy workloads, and 
 
 ## Models
 
-| Model | Context | Max Output | Input / Output (per MTok) | Notes |
-|-------|---------|------------|--------------------------|-------|
-| **kimi-k2.6** | 256K | 64K | $0.95 / $4.00 | Latest flagship. Strong reasoning. |
-| kimi-k2.5 | 256K | 64K | $0.60 / $3.00 | Previous gen. Good balance of cost and quality. |
-| moonshot-v1-128k | 128K | 16K | $2.00 / $5.00 | Long-context. |
-| moonshot-v1-32k | 32K | 16K | $1.00 / $3.00 | Mid-context. |
-| moonshot-v1-8k | 8K | 8K | $0.20 / $2.00 | Short-context, cheapest. |
+| Model | Context | Max Output | Modes | Input / Output (per MTok) | Notes |
+|-------|---------|------------|-------|--------------------------|-------|
+| **kimi-k2.6** | 256K | 64K | None, High | $0.95 / $4.00 | Latest flagship. Vision + reasoning. Cached: $0.16/MTok. |
+| kimi-k2.5 | 256K | 64K | None, High | $0.60 / $3.00 | Vision + reasoning. Cached: $0.10/MTok. |
+| moonshot-v1-auto | 128K | 16K | — | $1.00 / $3.00 | Auto-selects context tier. |
+| moonshot-v1-128k-vision | 128K | 16K | — | $2.00 / $5.00 | Long-context with vision. |
+| moonshot-v1-128k | 128K | 16K | — | $2.00 / $5.00 | Long-context. |
+| moonshot-v1-32k-vision | 32K | 16K | — | $1.00 / $3.00 | Mid-context with vision. |
+| moonshot-v1-32k | 32K | 16K | — | $1.00 / $3.00 | Mid-context. |
+| moonshot-v1-8k-vision | 8K | 8K | — | $0.20 / $2.00 | Short-context with vision. |
+| moonshot-v1-8k | 8K | 8K | — | $0.20 / $2.00 | Short-context, cheapest. |
+
+<Note>
+  **Modes** control reasoning depth. *None* disables thinking for fast responses. *High* enables standard reasoning. Only K2 models support reasoning modes — Moonshot V1 models run in standard chat mode only. All models support tool calling with no hard tool-count limit.
+</Note>
 
 <Note>
   Kimi K2.6 sits between the budget Chinese providers (DeepSeek, MiMo) and the premium Western providers (Anthropic, OpenAI) on price — offering strong reasoning at a mid-range cost. See [Choosing a Provider](/configuration/providers#choosing-a-provider) for guidance on when to use which tier.

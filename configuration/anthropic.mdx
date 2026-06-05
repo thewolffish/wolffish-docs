@@ -26,8 +26,17 @@ Best for: Complex reasoning, detailed instruction following, nuanced tool use, c
 
 ## Models
 
-| Model | Context | Input / Output (per MTok) | Notes |
-|-------|---------|--------------------------|-------|
-| claude-opus-4.7 | 200K | $5.00 / $25.00 | Latest. Most capable reasoning and writing. |
-| **claude-sonnet-4** | 200K | $3.00 / $15.00 | Best balance of quality and cost. |
-| claude-haiku-4 | 200K | $0.80 / $4.00 | Fast and cheap. Not recommended for agentic tasks. |
+| Model | Context | Max Output | Modes | Input / Output (per MTok) | Notes |
+|-------|---------|------------|-------|--------------------------|-------|
+| claude-opus-4-8 | 1M | 32K | None, High, Max | $5.00 / $25.00 | Latest. Frontier reasoning. Cached: $0.50/MTok. |
+| claude-opus-4-7 | 1M | 32K | None, High, Max | $5.00 / $25.00 | Strong reasoning. Cached: $0.50/MTok. |
+| **claude-sonnet-4-6** | 1M | 64K | None, High, Max | $3.00 / $15.00 | Best balance of quality and cost. Cached: $0.30/MTok. |
+| claude-opus-4-6 | 1M | 32K | None, High, Max | $5.00 / $25.00 | Reasoning. Cached: $0.50/MTok. |
+| claude-opus-4-5 | 200K | 16K | None, High | $5.00 / $25.00 | Previous gen. Cached: $0.50/MTok. |
+| claude-sonnet-4-5 | 200K | 16K | None, High | $3.00 / $15.00 | Previous gen. Cached: $0.30/MTok. |
+| claude-haiku-4-5 | 200K | 8K | None, High | $1.00 / $5.00 | Fast and cheap. Not recommended for agentic tasks. Cached: $0.10/MTok. |
+| claude-opus-4-1 | 200K | 16K | None, High | $15.00 / $75.00 | Legacy. Cached: $1.50/MTok. |
+
+<Note>
+  **Modes** control reasoning depth. *None* disables thinking for fast responses. *High* enables standard reasoning. *Max* enables deep, adaptive reasoning where the model decides the thinking depth. All models support tool calling with no hard tool-count limit. Anthropic uses ephemeral prefix caching for cost savings on repeated context.
+</Note>

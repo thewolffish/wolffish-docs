@@ -5,23 +5,28 @@ description: "Configure LLM providers: DeepSeek, Xiaomi MiMo, Kimi, MiniMax, Ant
 
 # Providers
 
-Wolffish communicates with LLMs via seven cloud providers plus a local option, all using pure `fetch()` — no SDKs. Each provider has its own streaming format and tool-calling convention, which `wernicke.ts` normalizes into a single interface.
+Wolffish communicates with LLMs via nine cloud providers plus a local option, all using pure `fetch()` — no SDKs. Each provider has its own streaming format and tool-calling convention, which `wernicke.ts` normalizes into a single interface. All cloud providers support tool calling with no hard tool-count limit.
 
 ## Choosing a Provider
 
 All supported cloud providers can handle agentic tasks — including complex multi-step tool chains. The difference is cost vs. ceiling.
 
-**Cost-efficient tier — DeepSeek, MiMo, Kimi, and MiniMax** handle complex agentic tasks well — including long multi-step tool chains, research workflows, code generation, and autonomous automations. They should be your default. At 5–25× cheaper than the premium tier, the savings compound fast. Start here and only upgrade if you find execution isn't reliable enough for a specific workflow.
+**Cost-efficient tier — DeepSeek, MiMo, Qwen, Kimi, MiniMax, and Stepfun** handle complex agentic tasks well — including long multi-step tool chains, research workflows, code generation, and autonomous automations. They should be your default. At 5–25× cheaper than the premium tier, the savings compound fast. Start here and only upgrade if you find execution isn't reliable enough for a specific workflow.
 
-**Premium tier — Anthropic and OpenAI** deliver the strongest raw model capability. Claude Opus 4.7 and GPT-5.5 excel where the cost-efficient tier falls short — particularly **computer-use** (screen interaction), which only Anthropic supports, and edge cases where execution reliability on the cheaper models isn't sufficient.
+**Mid-range tier — xAI** sits between budget and premium, offering Grok models with strong reasoning, vision, and code generation at moderate pricing.
+
+**Premium tier — Anthropic and OpenAI** deliver the strongest raw model capability. Claude Opus 4.8 and GPT-5.5 excel where the cost-efficient tier falls short — particularly **computer-use** (screen interaction), which only Anthropic supports, and edge cases where execution reliability on the cheaper models isn't sufficient.
 
 | Tier | Provider | Flagship Model | Input / Output (per MTok) | Best For |
 |------|----------|---------------|--------------------------|----------|
-| Cost-efficient | **DeepSeek** | deepseek-v4-pro | $0.435 / $0.87 | Default for most agentic tasks |
+| Cost-efficient | **DeepSeek** | deepseek-v4-pro | $0.44 / $0.87 | Default for most agentic tasks |
 | Cost-efficient | **MiMo** | mimo-v2.5-pro | $0.20 / $2.00 | Cheapest option, multilingual |
+| Cost-efficient | **Qwen** | qwen3.7-max | $2.50 / $7.50 | Wide model range, ultra-cheap flash |
 | Cost-efficient | **Kimi** | kimi-k2.6 | $0.95 / $4.00 | Strong reasoning, long context |
 | Cost-efficient | **MiniMax** | MiniMax-M3 | $0.30 / $1.20 | Reasoning and code |
-| Premium | **Anthropic** | claude-opus-4.7 | $5.00 / $25.00 | Hardest tasks, computer-use |
+| Cost-efficient | **Stepfun** | step-3.7-flash | $0.83 / $6.94 | Always-on reasoning |
+| Mid-range | **xAI** | grok-4.3 | $1.25 / $2.50 | Reasoning, vision, code |
+| Premium | **Anthropic** | claude-opus-4-8 | $5.00 / $25.00 | Hardest tasks, computer-use |
 | Premium | **OpenAI** | gpt-5.5 | $5.00 / $30.00 | Hardest tasks, broad knowledge |
 | Local | **Ollama** | varies | Free | Privacy, offline fallback |
 
@@ -153,6 +158,60 @@ Best for: Reasoning-heavy workloads, code generation, agentic workflows. DeepSee
 
 ---
 
+## Qwen (Alibaba Cloud)
+
+```
+POST https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions
+```
+
+Uses SSE streaming with OpenAI-compatible tool-calling format. Supports vision and reasoning content.
+
+Best for: Cost-efficient agentic workflows, code generation, multilingual tasks.
+
+### Getting an API Key
+
+1. Go to [qwencloud.com](https://www.qwencloud.com)
+2. Sign up or log in
+3. Navigate to **API Keys** and create a new key
+4. Paste it into Wolffish → Settings → Models → Qwen
+
+### Models
+
+| Model | Context | Max Output | Modes | Input / Output (per MTok) | Notes |
+|-------|---------|------------|-------|--------------------------|-------|
+| **qwen3.7-max** | 1M | 131K | None, High, Max | $2.50 / $7.50 | Flagship. Frontier reasoning. |
+| qwen3.7-plus | 1M | 131K | None, High, Max | $0.40 / $1.60 | Strong reasoning, mid-range price. |
+| qwen3.5-flash | 1M | 131K | None, High, Max | $0.06 / $0.24 | Ultra-cheap reasoning. |
+| qwen3-coder-plus | 131K | 131K | None, High, Max | $0.40 / $1.60 | Code-optimized. |
+
+---
+
+## Stepfun
+
+```
+POST https://api.stepfun.ai/v1/chat/completions
+```
+
+Uses SSE streaming with OpenAI-compatible tool-calling format. Supports vision and reasoning content.
+
+Best for: Reasoning-heavy tasks where you always want the model to think.
+
+### Getting an API Key
+
+1. Go to [platform.stepfun.ai](https://platform.stepfun.ai)
+2. Sign up or log in
+3. Navigate to **API Keys** and create a new key
+4. Paste it into Wolffish → Settings → Models → Stepfun
+
+### Models
+
+| Model | Context | Max Output | Modes | Input / Output (per MTok) | Notes |
+|-------|---------|------------|-------|--------------------------|-------|
+| **step-3.7-flash** | 128K | 65K | Always-on | $0.83 / $6.94 | Latest. Frontier reasoning. |
+| step-3.5-flash | 128K | 65K | Always-on | $0.83 / $6.94 | Fast reasoning. |
+
+---
+
 ## Anthropic (Claude)
 
 ```
@@ -172,15 +231,42 @@ Best for: Complex reasoning, detailed instruction following, nuanced tool use, c
 
 ### Models
 
-| Model | Context | Input / Output (per MTok) | Notes |
-|-------|---------|--------------------------|-------|
-| claude-opus-4.7 | 200K | $5.00 / $25.00 | Latest. Most capable reasoning and writing. |
-| **claude-sonnet-4** | 200K | $3.00 / $15.00 | Best balance of quality and cost. |
-| claude-haiku-4 | 200K | $0.80 / $4.00 | Fast and cheap. Not recommended for agentic tasks. |
+| Model | Context | Max Output | Modes | Input / Output (per MTok) | Notes |
+|-------|---------|------------|-------|--------------------------|-------|
+| claude-opus-4-8 | 1M | 32K | None, High, Max | $5.00 / $25.00 | Latest. Frontier reasoning. |
+| **claude-sonnet-4-6** | 1M | 64K | None, High, Max | $3.00 / $15.00 | Best balance of quality and cost. |
+| claude-haiku-4-5 | 200K | 8K | None, High | $1.00 / $5.00 | Fast and cheap. Not recommended for agentic tasks. |
 
 <Note>
   Anthropic is the only provider that supports **computer-use** (screen interaction). If you need Wolffish to drive a browser or desktop UI, you need an Anthropic key.
 </Note>
+
+---
+
+## xAI (Grok)
+
+```
+POST https://api.x.ai/v1/chat/completions
+```
+
+Uses SSE streaming with OpenAI-compatible tool-calling format. Supports vision and reasoning content.
+
+Best for: Reasoning-heavy workflows, code generation, vision tasks.
+
+### Getting an API Key
+
+1. Go to [console.x.ai](https://console.x.ai)
+2. Sign up or log in
+3. Navigate to **API Keys** and create a new key
+4. Paste it into Wolffish → Settings → Models → xAI
+
+### Models
+
+| Model | Context | Max Output | Modes | Input / Output (per MTok) | Notes |
+|-------|---------|------------|-------|--------------------------|-------|
+| **grok-4.3** | 1M | 131K | None, High, Max | $1.25 / $2.50 | Flagship. Vision + reasoning. |
+| grok-build-0.1 | 256K | 131K | None, High, Max | $1.00 / $2.00 | Code-optimized. |
+| grok-3-mini | 131K | 131K | None, High | $0.30 / $0.50 | Fast and cheap. |
 
 ---
 
@@ -203,13 +289,11 @@ Best for: General-purpose tasks, broad knowledge, fast responses.
 
 ### Models
 
-| Model | Context | Input / Output (per MTok) | Notes |
-|-------|---------|--------------------------|-------|
-| gpt-5.5 | 200K | $5.00 / $30.00 | Latest flagship. Strong reasoning. |
-| **gpt-4o** | 128K | $2.50 / $10.00 | Recommended OpenAI model for agentic tasks. |
-| gpt-4o-mini | 128K | $0.15 / $0.60 | Fast and cheap. Limited tool-use reliability. |
-| o3 | 200K | $10.00 / $40.00 | Extended reasoning. High cost. |
-| o4-mini | 200K | $1.10 / $4.40 | Reasoning at lower cost. |
+| Model | Context | Max Output | Modes | Input / Output (per MTok) | Notes |
+|-------|---------|------------|-------|--------------------------|-------|
+| **gpt-5.5** | 1M | 100K | None, High, Max | $5.00 / $30.00 | Flagship. Strong reasoning. |
+| gpt-5.4-mini | 1M | 100K | None, High, Max | $0.75 / $4.50 | Fast reasoning. |
+| gpt-5.4-nano | 1M | 100K | None, High, Max | $0.20 / $1.25 | Ultra-cheap reasoning. |
 
 ---
 
@@ -235,9 +319,9 @@ When a provider fails, it enters a cooldown period before being retried. The cas
 
 ## Choosing a Primary Provider
 
-Set your primary provider in Settings or `config.json`. The cascade falls back in order: **DeepSeek → MiMo → Kimi → MiniMax → Claude → OpenAI → Ollama** (skipping any that aren't configured). Your primary provider is tried first, then the cascade takes over on failure.
+Set your primary provider in Settings or `config.json`. The cascade falls back in order: **DeepSeek → MiMo → Kimi → MiniMax → xAI → Qwen → Stepfun → Claude → OpenAI → Ollama** (skipping any that aren't configured). Your primary provider is tried first, then the cascade takes over on failure.
 
-All seven cloud providers and Ollama are optional — you only need at least one configured. If you use only cloud providers, the cascade skips Ollama. If you use only Ollama, it's the sole provider.
+All nine cloud providers and Ollama are optional — you only need at least one configured. If you use only cloud providers, the cascade skips Ollama. If you use only Ollama, it's the sole provider.
 
 <Tip>
   For the best experience, keep Ollama running with a pulled model as your safety net. Even if you primarily use Claude, having a local fallback means you're never stuck without a response when offline.

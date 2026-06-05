@@ -1,0 +1,38 @@
+---
+title: "Stepfun"
+description: "Set up Stepfun — always-on reasoning models with vision support"
+---
+
+# Stepfun
+
+```
+POST https://api.stepfun.ai/v1/chat/completions
+```
+
+Uses SSE streaming with OpenAI-compatible tool-calling format. Supports vision (base64 images) and reasoning content.
+
+**Stepfun's Step-3 models reason on every request** — there's no toggle to disable thinking. Reasoning tokens count toward the completion budget, so the model balances thinking depth against output length automatically. This makes Stepfun a straightforward choice when you always want reasoning without managing mode settings.
+
+Best for: Reasoning-heavy tasks, workloads where you always want the model to think, and vision-capable workflows.
+
+## Getting an API Key
+
+1. Go to [platform.stepfun.ai](https://platform.stepfun.ai)
+2. Sign up or log in
+3. Navigate to **API Keys** and create a new key
+4. Paste it into Wolffish → Settings → Models → Stepfun
+
+## Models
+
+| Model | Context | Max Output | Modes | Input / Output (per MTok) | Notes |
+|-------|---------|------------|-------|--------------------------|-------|
+| **step-3.7-flash** | 128K | 65K | Always-on | $0.83 / $6.94 | Latest. Frontier reasoning. |
+| step-3.5-flash | 128K | 65K | Always-on | $0.83 / $6.94 | Previous gen. Fast reasoning. |
+
+<Note>
+  Step-3 models **always reason** — the `enable_thinking` parameter is accepted but ignored. Reasoning tokens count toward the completion token budget. All models support tool calling with no hard tool-count limit.
+</Note>
+
+<Note>
+  Stepfun's context window is 128K — smaller than the 1M offered by DeepSeek, Qwen, or xAI. If your workflows regularly exceed 128K tokens of context, consider a provider with a larger window.
+</Note>

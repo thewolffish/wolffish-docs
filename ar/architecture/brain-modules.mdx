@@ -39,9 +39,9 @@ description: "مرجع تفصيلي لجميع وحدات وقت التشغيل 
 
 ## thalamus.ts — تدرج المزودين
 
-يقابل **المهاد** (بوابة الحس). يدير سبعة مزودي نماذج لغة سحابيين بالإضافة إلى Ollama عبر `fetch()` خالص.
+يقابل **المهاد** (بوابة الحس). يدير تسعة مزودي نماذج لغة سحابيين بالإضافة إلى Ollama عبر `fetch()` خالص.
 
-ينفّذ تتبع الصحة مع تراجع أسّي. يستخدم `net.isOnline()` للكشف الفوري عن وضع عدم الاتصال. يكشف عن مولّد موحَّد `async *stream()` يُرجع أنواع `StreamChunk`. ترتيب التدرج: DeepSeek → MiMo → Kimi → MiniMax → Claude → OpenAI → Ollama.
+ينفّذ تتبع الصحة مع تراجع أسّي. يستخدم `net.isOnline()` للكشف الفوري عن وضع عدم الاتصال. يكشف عن مولّد موحَّد `async *stream()` يُرجع أنواع `StreamChunk`. ترتيب التدرج: DeepSeek → MiMo → Kimi → MiniMax → xAI → Qwen → Stepfun → Claude → OpenAI → Ollama.
 
 ## prefrontal.ts — بنّاء السياق
 

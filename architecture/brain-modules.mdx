@@ -13,8 +13,8 @@ When a message arrives, it flows through the modules like a neural signal:
 
 1. **Input arrives** — the channel adapter (Desktop, Telegram, or WhatsApp) emits an `input.received` event on the corpus
 2. **Context is built** — the prefrontal cortex reads your identity files, queries the hippocampus for relevant memories, asks the cerebellum which capabilities are available, and passes everything through the RAS attention filter to fit within the token budget
-3. **The LLM thinks** — the thalamus routes the assembled prompt to the best available provider (DeepSeek → MiMo → Kimi → MiniMax → Claude → OpenAI → Ollama), streaming the response back
-4. **Response is parsed** — Wernicke's area extracts tool calls and text from the stream, normalizing across all seven cloud provider formats
+3. **The LLM thinks** — the thalamus routes the assembled prompt to the best available provider (DeepSeek → MiMo → Kimi → MiniMax → xAI → Qwen → Stepfun → Claude → OpenAI → Ollama), streaming the response back
+4. **Response is parsed** — Wernicke's area extracts tool calls and text from the stream, normalizing across all nine cloud provider formats
 5. **Safety is checked** — if tool calls are present, the amygdala checks them against danger patterns and either approves, requests confirmation, or blocks
 6. **Tools execute** — the motor cortex runs approved tools, logging every step to task files with retry logic
 7. **Response is delivered** — Broca's area streams the final text back to the user through the channel
@@ -39,9 +39,9 @@ Built on `mitt` with 30+ typed events. A wildcard handler logs every event to da
 
 ## thalamus.ts — Provider Cascade
 
-Maps to the **thalamus** (sensory gateway). Manages seven cloud LLM providers plus Ollama via pure `fetch()`.
+Maps to the **thalamus** (sensory gateway). Manages nine cloud LLM providers plus Ollama via pure `fetch()`.
 
-Implements health tracking with exponential backoff. Uses `net.isOnline()` for instant offline detection. Exposes a unified `async *stream()` generator yielding `StreamChunk` types. Cascade order: DeepSeek → MiMo → Kimi → MiniMax → Claude → OpenAI → Ollama.
+Implements health tracking with exponential backoff. Uses `net.isOnline()` for instant offline detection. Exposes a unified `async *stream()` generator yielding `StreamChunk` types. Cascade order: DeepSeek → MiMo → Kimi → MiniMax → xAI → Qwen → Stepfun → Claude → OpenAI → Ollama.
 
 ## prefrontal.ts — Context Builder
 

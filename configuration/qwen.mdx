@@ -1,0 +1,61 @@
+---
+title: "Qwen"
+description: "Set up Qwen (Alibaba Cloud) — wide model range from budget flash to frontier reasoning"
+---
+
+# Qwen (Alibaba Cloud)
+
+```
+POST https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions
+```
+
+Uses SSE streaming with OpenAI-compatible tool-calling format. Supports vision (base64 images) and reasoning content.
+
+**Qwen offers one of the widest model ranges of any provider** — from the ultra-cheap Qwen 3.5 Flash at $0.06/$0.24 per MTok to the frontier Qwen 3.7 Max. All Qwen3+ models support three reasoning modes (None, High, Max) and up to 1M context. The dedicated Qwen3 Coder Plus model is tuned for code generation tasks.
+
+Best for: Cost-efficient agentic workflows, code generation, multilingual tasks, and workloads that benefit from a wide selection of price/performance tiers.
+
+<Note>
+  Qwen 3.5 Flash is one of the cheapest reasoning-capable models available — at $0.06/$0.24 per MTok with 1M context, it's significantly cheaper than DeepSeek V4 Flash while still supporting full reasoning modes. Great for high-volume tasks where cost matters.
+</Note>
+
+## Getting an API Key
+
+1. Go to [qwencloud.com](https://www.qwencloud.com)
+2. Sign up or log in
+3. Navigate to **API Keys** and create a new key
+4. Paste it into Wolffish → Settings → Models → Qwen
+
+## Models
+
+| Model | Context | Max Output | Modes | Input / Output (per MTok) | Notes |
+|-------|---------|------------|-------|--------------------------|-------|
+| **qwen3.7-max** | 1M | 131K | None, High, Max | $2.50 / $7.50 | Flagship. Frontier reasoning. Cached: $0.25/MTok. |
+| qwen3.7-plus | 1M | 131K | None, High, Max | $0.40 / $1.60 | Strong reasoning at mid-range price. Cached: $0.064/MTok. |
+| qwen3.6-plus | 1M | 131K | None, High, Max | $0.40 / $1.60 | Previous gen plus. Cached: $0.04/MTok. |
+| qwen3.6-flash | 1M | 131K | None, High, Max | $0.25 / $1.50 | Fast reasoning. Cached: $0.025/MTok. |
+| qwen3.5-plus | 1M | 131K | None, High, Max | $0.40 / $1.60 | Balanced quality and cost. Cached: $0.04/MTok. |
+| qwen3.5-flash | 1M | 131K | None, High, Max | $0.06 / $0.24 | Ultra-cheap reasoning. Cached: $0.006/MTok. |
+| qwen3-max | 131K | 131K | None, High, Max | $1.60 / $6.40 | Strong reasoning, smaller context. Cached: $0.40/MTok. |
+| qwen3-coder-plus | 131K | 131K | None, High, Max | $0.40 / $1.60 | Code-optimized. Cached: $0.04/MTok. |
+| qwen-max | 131K | 8K | — | $1.60 / $6.40 | Legacy. No reasoning modes. Cached: $0.16/MTok. |
+| qwen-plus | 131K | 32K | — | $0.40 / $1.60 | Legacy. Fast, no reasoning. Cached: $0.04/MTok. |
+
+<Note>
+  **Modes** control reasoning depth. *None* disables thinking for fast responses. *High* enables standard reasoning. *Max* enables deep reasoning for complex tasks. Legacy models (qwen-max, qwen-plus) don't support reasoning modes. All models support tool calling with no hard tool-count limit.
+</Note>
+
+## Cost Comparison
+
+Qwen spans a wide price range, competing at every tier:
+
+| Tier | Model | Input / Output (per MTok) | Comparable To |
+|------|-------|--------------------------|---------------|
+| Ultra-cheap | qwen3.5-flash | $0.06 / $0.24 | Cheaper than DeepSeek V4 Flash |
+| Budget | qwen3.7-plus | $0.40 / $1.60 | MiMo V2.5 Pro range |
+| Mid-range | qwen3.7-max | $2.50 / $7.50 | Between Kimi K2.6 and Anthropic |
+| Legacy | qwen-max | $1.60 / $6.40 | MiniMax M3 range |
+
+<Tip>
+  Start with Qwen 3.5 Flash for high-volume tasks, Qwen 3.7 Plus for general agentic work, or Qwen 3.7 Max when you need frontier reasoning. The dedicated Qwen3 Coder Plus model is a good pick for code-heavy workflows at a budget price.
+</Tip>

@@ -22,10 +22,14 @@ Best for: General-purpose tasks, broad knowledge, fast responses.
 
 ## Models
 
-| Model | Context | Input / Output (per MTok) | Notes |
-|-------|---------|--------------------------|-------|
-| gpt-5.5 | 200K | $5.00 / $30.00 | Latest flagship. Strong reasoning. |
-| **gpt-4o** | 128K | $2.50 / $10.00 | Recommended OpenAI model for agentic tasks. |
-| gpt-4o-mini | 128K | $0.15 / $0.60 | Fast and cheap. Limited tool-use reliability. |
-| o3 | 200K | $10.00 / $40.00 | Extended reasoning. High cost. |
-| o4-mini | 200K | $1.10 / $4.40 | Reasoning at lower cost. |
+| Model | Context | Max Output | Modes | Input / Output (per MTok) | Notes |
+|-------|---------|------------|-------|--------------------------|-------|
+| gpt-5.5-pro | 1M | 100K | None, High, Max | $30.00 / $180.00 | Most capable. Frontier reasoning. |
+| **gpt-5.5** | 1M | 100K | None, High, Max | $5.00 / $30.00 | Flagship. Strong reasoning. Cached: $0.50/MTok. |
+| gpt-5.4 | 1M | 100K | None, High, Max | $2.50 / $15.00 | Previous gen. Cached: $0.25/MTok. |
+| gpt-5.4-mini | 1M | 100K | None, High, Max | $0.75 / $4.50 | Fast reasoning. Cached: $0.08/MTok. |
+| gpt-5.4-nano | 1M | 100K | None, High, Max | $0.20 / $1.25 | Ultra-cheap reasoning. Cached: $0.02/MTok. |
+
+<Note>
+  **Modes** control reasoning depth via `reasoning_effort`. *None* disables reasoning for fast responses. *High* enables standard reasoning. *Max* enables deep reasoning. All models support tool calling with no hard tool-count limit. Note: reasoning is stripped when tools are present on older o-series models.
+</Note>
