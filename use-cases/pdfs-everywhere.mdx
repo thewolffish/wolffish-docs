@@ -1,0 +1,541 @@
+---
+title: "PDFs Everywhere"
+description: "Generate professional, research-backed PDFs on demand — news digests, competitor reports, travel guides, and anything else you can describe"
+---
+
+# PDFs Everywhere
+
+Wolffish can generate any PDF you can describe. Give it a topic, point it at the web, and it comes back with a professionally designed, print-ready document — styled HTML rendered through a headless browser, not a flat text dump.
+
+This page includes three ready-to-use prompts that show the range: a morning news digest, a competitive intelligence report, and a travel cheat sheet. Each one starts with live web research and ends with a polished PDF in your workspace folder. Copy them as-is or tweak any detail — topics, colors, layout, language — to make them yours.
+
+## What Makes This Different
+
+These aren't templates. Every PDF is generated from scratch based on live data. The agent:
+
+1. **Researches** — runs multiple web searches and reads full articles
+2. **Synthesizes** — filters, ranks, and structures the information
+3. **Designs** — builds styled HTML with custom typography, colors, and layout
+4. **Renders** — launches a headless browser and prints to pixel-perfect PDF
+
+No LaTeX. No Word. No third-party PDF APIs. Just HTML + CSS + a headless browser — the same pipeline that powers the [CV Tailor](/use-cases/cv-tailor).
+
+## Setup
+
+### Required
+
+- **Wolffish installed and running**
+- **DeepSeek V4 Pro API key** — configured in Settings > Models. DeepSeek V4 Pro is the recommended model for these prompts — excellent at chaining web research, content synthesis, and HTML/CSS generation in a single run. It produces clean, well-structured output at a fraction of the cost of comparable models.
+- **No permissions needed** — these prompts use web search and file generation only. No computer-use, no browser control, no screen recording.
+
+### Optional
+
+- **[Brave Search API key](https://brave.com/search/api/)** — configured in Settings > Services > Brave Search. Improves search result quality and avoids rate limits.
+
+---
+
+## Prompt 1: Morning News Digest
+
+A daily briefing PDF that looks like a real newsletter — not a wall of bullet points. Wolffish searches for today's news across five topic areas, reads the actual articles, and generates a multi-section PDF with headlines, summaries, and source attribution.
+
+### Customize It
+
+Change any of these to make it yours:
+
+| What | Where in the Prompt | Ideas |
+|------|-------------------|-------|
+| **Topics covered** | The 5 search queries at the top | Swap `"cybersecurity news"` for `"startup funding rounds"` or `"climate policy updates"` |
+| **Trusted sources** | The approved sources list | Add `MIT Technology Review`, remove `TechCrunch`, add `Al Jazeera English` |
+| **Story count** | `"8 to 12 most important stories"` | Change to `"5 to 7"` for a shorter digest or `"12 to 15"` for comprehensive |
+| **Accent color** | `#1E40AF` (blue) | `#059669` green, `#DC2626` red, `#7C3AED` purple, `#B45309` amber |
+| **Language** | Add a line at the end | Add `"Write everything in Arabic"` or `"Headlines in English, summaries in French"` |
+| **Paper size** | `"A4 page"` | Change to `"US Letter"` for North American standard |
+
+### The Prompt
+
+```
+Research today's top news across these topics. Run a separate
+web search for each:
+
+- "AI news today"
+- "tech industry news today"
+- "global economy news today"
+- "science breakthroughs this week"
+- "cybersecurity news today"
+
+For each search, open and read the top 3-4 results using
+web_fetch. ONLY use free, publicly accessible sources. Good
+sources: The Verge, Ars Technica, TechCrunch, Reuters, AP News,
+BBC News, NPR, Hacker News, CNBC, The Guardian, Nature News,
+Science Daily, Wired, MIT Technology Review.
+
+DO NOT fetch from paywalled sites — Bloomberg, WSJ, NYT,
+Financial Times, The Information, The Athletic. They return
+403 errors and waste time. Skip them and pick the next result.
+
+From everything you've read, curate the 8 to 12 most important
+stories. For each story, write:
+- A clear, informative headline (not clickbait)
+- A 2-3 sentence summary that gives the reader the full picture
+  without needing to click through
+- The source name and a working URL
+
+Group the stories by topic section: AI & Tech, Business &
+Economy, Science, Cybersecurity (or whatever sections emerge
+naturally from today's news — don't force empty sections).
+
+Now generate a PDF. Build it as styled HTML first, then render
+to PDF using a headless browser.
+
+Design rules:
+- A4 page, multi-page is fine — as many pages as needed
+- Clean sans-serif font (Inter, Helvetica Neue, or system sans)
+- Accent color: #1E40AF (use for section headers, divider lines,
+  and the masthead)
+- Top of page 1: large masthead with "DAILY BRIEFING" in the
+  accent color, today's date below it in gray, and a thin
+  accent-colored divider line
+- Each section: uppercase section header with letterspacing and
+  an accent-colored left border (4px solid)
+- Each story: bold headline (14pt), summary paragraph (10pt),
+  source attribution in small gray italic text with the URL
+- Stories separated by a light gray hairline
+- Page numbers in the footer: "Page X of Y" right-aligned
+- Bottom of last page: "Generated by Wolffish" in small gray text
+
+Save the PDF to the workspace folder with the filename:
+daily-briefing-YYYY-MM-DD.pdf (use today's date).
+
+After saving, tell me: how many stories you included, which
+topics are covered, and which stories you consider the most
+significant today.
+```
+
+<Tip>
+Swap the topic search queries to match your industry. A venture capitalist might use `"Series A funding today"`, `"IPO news"`, `"fintech announcements"`. A healthcare professional might use `"FDA approvals this week"`, `"clinical trial results"`, `"health policy news"`.
+</Tip>
+
+### Expected Outcome
+
+A multi-page PDF that reads like a professional morning newsletter. Each page has a consistent layout with the blue masthead on page 1, clearly separated sections, and every story attributed to its source with a working link.
+
+> **DAILY BRIEFING** — June 7, 2026
+>
+> **AI & TECH**
+>
+> **Anthropic Releases Claude Opus 4.8 with Extended Thinking**
+> Anthropic announced the latest iteration of its flagship model with improved reasoning capabilities and a new extended thinking mode that lets the model work through complex problems step by step before responding. Early benchmarks show significant gains on math and coding tasks...
+> *Source: The Verge — https://theverge.com/...*
+>
+> **Google DeepMind Achieves New Breakthrough in Protein Folding**
+> A new AlphaFold iteration can now predict protein interactions with small molecules at near-experimental accuracy, potentially accelerating drug discovery timelines by years...
+> *Source: Nature News — https://nature.com/...*
+>
+> ...8-12 stories across 3-5 sections...
+>
+> *Generated by Wolffish*
+
+---
+
+## Prompt 2: Competitive Intelligence Report
+
+A professional competitor analysis PDF. Wolffish researches the AI code editor market around Cursor, compares features, pricing, and positioning, and delivers a structured report with comparison tables and strategic takeaways. The kind of document that takes an analyst a full day — done in under two minutes.
+
+### Customize It
+
+This prompt analyzes Cursor in the AI code editor space. Swap the company and industry to analyze anything:
+
+| What | Where in the Prompt | Ideas |
+|------|-------------------|-------|
+| **Target company** | Every mention of `Cursor` | `Notion`, `Stripe`, `Figma`, `Linear`, `Vercel` |
+| **Industry** | Every mention of `AI-powered code editor` | `project management software`, `payment processing`, `design tools` |
+| **Competitor count** | `"top 5 competitors"` | `"top 3"` for focused, `"top 8"` for comprehensive |
+| **Comparison dimensions** | The feature matrix list | Add `"enterprise compliance"`, `"plugin ecosystem"`, remove `"mobile support"` |
+| **Accent color** | `#0F766E` (teal) | `#1E40AF` blue, `#B91C1C` corporate red, `#4338CA` indigo |
+| **Audience** | Add a context line before Step 1 | `"This report is for the board — keep it strategic, not tactical"` |
+
+### The Prompt
+
+```
+I need a competitive intelligence report for Cursor in the
+AI-powered code editor space.
+
+Step 1 — Research the landscape:
+Search the web for:
+- "Cursor AI code editor competitors 2026"
+- "AI code editor market landscape 2026"
+- "Cursor vs" (to find head-to-head comparisons)
+- "best AI code editors 2026"
+- "AI code editor market share developer tools"
+
+Read the top results using web_fetch. Focus on recent articles
+(2025-2026), analyst reports, G2/Capterra comparisons, developer
+surveys, and product review sites. Skip SEO spam and affiliate
+listicles that just list tools with no real analysis.
+
+Step 2 — Deep-dive each competitor:
+Identify the top 5 competitors to Cursor. For each one, search
+for and read:
+- Their official website — features page, pricing page, and any
+  "why us" or comparison pages
+- Recent news — funding rounds, major releases, acquisitions,
+  pivots, partnerships
+- User reviews on G2, Capterra, Reddit, or Hacker News threads
+
+Step 3 — Generate the report as a PDF:
+Build styled HTML, then render to PDF via headless browser.
+
+Report structure:
+1. Executive Summary (half page) — the AI code editor landscape
+   in 3-4 paragraphs. Who dominates, who's growing fastest,
+   where the market is heading, and where the gaps are.
+2. Competitor Profiles (1 page each) — for each of the 5
+   competitors: company name, founded year, HQ location, total
+   funding or revenue (if publicly available), target developer
+   audience, key differentiator vs Cursor, and their most
+   significant recent moves (last 6 months).
+3. Feature Comparison Matrix — a full-width table comparing
+   Cursor against all 5 competitors across these dimensions:
+   AI code completion, AI chat/inline editing, multi-file context,
+   supported languages, base editor (VS Code fork / standalone /
+   plugin), pricing model, free tier limits, team/enterprise
+   features, privacy and code data policies, local model support,
+   plugin/extension ecosystem, mobile or tablet support, API
+   access for custom integrations.
+   Use check marks, X marks, and brief notes in cells.
+4. Pricing Comparison — a table with each competitor's pricing
+   tiers (free, pro, team, enterprise) with monthly/annual prices
+   and what's included at each tier.
+5. Strategic Takeaways — 5-7 bullet points covering: biggest
+   competitive threats to Cursor, areas where Cursor has the
+   strongest moat, underserved segments or missing features
+   across the market, and the one positioning move you'd
+   recommend Cursor prioritize based on this research.
+6. Sources — numbered list of every URL referenced in the report.
+
+Design rules:
+- A4, multi-page, portrait orientation
+- Accent color: #0F766E (teal)
+- Cover page: report title "Competitive Intelligence Report"
+  centered vertically in large text, "Cursor — AI Code Editors"
+  below it, today's date, and "Confidential" as a diagonal
+  watermark in light gray text across the page
+- Professional serif font for body text (Georgia or Times New
+  Roman), clean sans-serif for headers and table content
+  (Helvetica Neue or Inter)
+- Tables: alternating row shading (white and very light gray),
+  accent-colored header row with white text, 9pt font for dense
+  data, horizontal scroll or wrap for wide tables
+- Each major section starts on a new page
+- Page numbers in the footer right-aligned: "Page X of Y"
+- "Confidential" in small gray text in the footer left side
+- Section headers: accent-colored text with a thin bottom border
+
+Save to workspace as:
+competitive-report-cursor-YYYY-MM-DD.pdf (use today's date).
+
+After saving, give me a brief summary: who are Cursor's biggest
+threats right now, where is Cursor strongest compared to the
+field, and what's the single most important move they should
+make based on what you found.
+```
+
+<Warning>
+This prompt researches publicly available information only. Pricing data may be outdated if companies don't list prices publicly. Always verify critical business decisions with primary sources.
+</Warning>
+
+### Expected Outcome
+
+A 6-10 page professional report with a cover page, individual competitor profiles, a dense feature comparison matrix, pricing table, and strategic recommendations — all sourced from live web research.
+
+> **Competitive Intelligence Report**
+> *Cursor — AI-Powered Code Editors*
+> *June 7, 2026 | Confidential*
+>
+> **EXECUTIVE SUMMARY**
+>
+> The AI-powered code editor market has consolidated rapidly
+> since 2024, with Cursor emerging as the category leader among
+> individual developers but facing increasing pressure from
+> GitHub Copilot's deep VS Code integration and Windsurf's
+> aggressive enterprise play...
+>
+> **FEATURE COMPARISON MATRIX**
+>
+> | Feature | Cursor | GitHub Copilot | Windsurf | Zed | Void |
+> |---------|--------|---------------|----------|-----|------|
+> | AI completion | Yes | Yes | Yes | Yes | Yes |
+> | Multi-file context | Full repo | Limited | Full repo | File-level | Full repo |
+> | Base editor | VS Code fork | VS Code plugin | VS Code fork | Custom (Rust) | VS Code fork |
+> | Local models | Yes | No | Yes | Community | Yes |
+> | Free tier | 2 weeks | Limited | Yes | Yes | Open source |
+>
+> ...full report continues across 6-10 pages...
+
+---
+
+## Prompt 3: Travel Cheat Sheet
+
+A pocket-sized, print-friendly travel reference card. Wolffish researches Istanbul — visa rules, currency, weather, emergency numbers, essential Turkish phrases, cultural tips, transportation — and packs it all into a dense, beautifully designed 2-page PDF you can print and fold into your passport.
+
+### Customize It
+
+This prompt generates a cheat sheet for Istanbul. Swap the details to plan any trip:
+
+| What | Where in the Prompt | Ideas |
+|------|-------------------|-------|
+| **Destination** | Every mention of `Istanbul` / `Turkey` | `Tokyo, Japan`, `Marrakech, Morocco`, `Reykjavik, Iceland`, `Buenos Aires, Argentina` |
+| **Nationality** | `"Saudi passport holder"` | `"US citizen"`, `"UK national"`, `"Indian passport holder"` |
+| **Travel dates** | `"August 10-22, 2026"` | `"December 2026"`, `"March 15-20, 2027"` |
+| **Interests** | `"architecture, street food, and history"` | `"hiking and nature"`, `"nightlife and music"`, `"family-friendly activities"` |
+| **Accent color** | `#B45309` (warm amber) | `#0369A1` ocean blue, `#4338CA` royal indigo, `#DC2626` red |
+| **Language** | Add a line at the end | `"Write the entire guide in Arabic"` or `"Include Arabic transliterations next to Turkish phrases"` |
+
+### The Prompt
+
+```
+I'm traveling to Istanbul, Turkey as a Saudi passport holder
+on August 10-22, 2026. My interests: architecture, street food,
+and history.
+
+Research everything I need to know. Run these searches and read
+the top results for each:
+
+1. "Turkey visa requirements for Saudi citizens 2026"
+2. "Turkish lira exchange rate Saudi riyal today"
+3. "Istanbul weather August temperature humidity"
+4. "Turkey emergency numbers police ambulance fire"
+5. "essential Turkish phrases for tourists pronunciation"
+6. "Istanbul public transportation guide metro bus ferry
+   Istanbulkart"
+7. "Istanbul cultural etiquette tips for Arab tourists"
+8. "Istanbul safety tips tourists 2026"
+9. "Istanbul best historic architecture must visit Byzantine
+   Ottoman"
+10. "Istanbul best street food where to eat local dishes"
+11. "Turkey tourist SIM card mobile data best option 2026"
+12. "Istanbul tipping culture restaurants cafes taxis"
+
+Read the full content of the top 2-3 results for each search
+using web_fetch. Skip paywalled sites and SEO listicles — only
+use sources with real, specific information.
+
+Now generate a 2-page travel cheat sheet PDF. Build as styled
+HTML first, then render to PDF via headless browser.
+
+Page 1 — Essential Info (dense reference card):
+- Header: "ISTANBUL, TURKEY" in large 28pt bold text with the
+  Turkish flag emoji, and "August 10-22, 2026" in accent color
+  below it
+- Quick-reference grid (2 columns, compact boxes):
+  - Visa: requirement for Saudi citizens, duration, cost, e-visa
+    link if applicable
+  - Currency: Turkish Lira (TRY), symbol, current rate to SAR
+    and USD
+  - Language: Turkish — note if English is widely spoken in
+    tourist areas
+  - Emergency: police, ambulance, fire numbers
+  - Time zone: UTC+3, note if same as Saudi Arabia
+  - Power: plug type and voltage
+  - SIM/Data: best tourist SIM options (Turkcell, Vodafone,
+    Turk Telekom) with approximate cost for 2 weeks of data
+  - Tipping: local norms for restaurants, cafes, taxis, hotels,
+    hammams
+- Weather box: expected temperature range for August, humidity
+  level, what to pack (light clothing, sun protection, walking
+  shoes, layers for mosque visits)
+- Getting around: Istanbulkart info (how to get one, where it
+  works), metro lines, ferry routes between European and Asian
+  sides, taxi/Uber availability, approximate costs for common
+  routes (airport to Sultanahmet, Taksim to Kadikoy, etc.)
+- Essential phrases table (3 columns, 15 phrases): Turkish text
+  on the left, phonetic pronunciation in italic in the middle,
+  English meaning on the right. Include: hello (merhaba), thank
+  you (tesekkur ederim), excuse me (bakar misiniz), how much
+  (ne kadar), where is (nerede), yes (evet), no (hayir), please
+  (lutfen), the check please (hesap lutfen), water (su),
+  delicious (cok guzel), good morning (gunaydin), goodbye
+  (hoşçakal), help (yardim), I don't understand (anlamiyorum)
+
+Page 2 — Cultural Guide & Recommendations:
+- Cultural etiquette: 6-7 do's and don'ts specific to Istanbul —
+  dress code for mosque visits (covered shoulders, headscarves
+  available), shoe removal etiquette, Ramadan awareness, haggling
+  norms at bazaars, tea culture (never refuse tea from a
+  shopkeeper), photography etiquette at religious sites, dining
+  customs
+- Safety tips: 5 key awareness points — common tourist scams in
+  Sultanahmet/Taksim, taxi meter tricks, safe neighborhoods vs
+  areas to avoid at night, earthquake preparedness awareness,
+  drinking water safety
+- Top 5 must-visit places for architecture and history: name +
+  one-line description + neighborhood. Include mix of Byzantine
+  (Hagia Sophia, Basilica Cistern), Ottoman (Blue Mosque, Topkapi
+  Palace), and hidden gems the typical guide skips.
+- Top 5 street food experiences: specific dish or food spot +
+  why it's worth it + approximate price range in TRY. Include
+  classics (simit, balik ekmek, lahmacun, kunefe, dondurma) with
+  specific neighborhoods or streets known for them.
+- Useful apps: 4 apps locals actually use — transit (Moovit or
+  Trafi), ride-hailing (BiTaksi), food delivery (Yemeksepeti or
+  Getir), translation
+- One "local secret" — something most tourist guides don't
+  mention that a local would tell you
+
+Design rules:
+- A4, exactly 2 pages — designed to be printed double-sided and
+  folded
+- Accent color: #B45309 (warm amber — matches Istanbul's golden
+  mosque domes)
+- Very compact layout: 8-9pt body text, dense grid sections,
+  minimal whitespace — every square centimeter carries useful
+  information, this is a reference card not a magazine
+- Header on page 1: "ISTANBUL, TURKEY" in 28pt bold, Turkish
+  flag emoji, dates in accent color
+- Section headers: small uppercase with letterspacing, accent-
+  colored left border (3px solid)
+- Quick-reference grid: 2-column layout with light gray
+  background boxes, no outer borders, bold labels
+- Tables and grids: no outer borders, light inner dividers,
+  alternating subtle row shading
+- Phrases table: Turkish text in the local Latin script on the
+  left, phonetic pronunciation in italic, English meaning on
+  the right — all in a compact monospaced-ish layout
+- Recommendations: numbered lists with bold names and inline
+  descriptions, no wasted space
+- Sans-serif font throughout (Inter, Helvetica Neue, or system)
+- Footer: "Generated by Wolffish — verify all visa and safety
+  info with official sources before travel"
+
+Save to workspace as:
+travel-cheatsheet-istanbul-YYYY-MM-DD.pdf (use today's date).
+
+After saving, highlight anything that surprised you in the
+research — things I might not expect about Istanbul, recent
+changes, or tips that most travel guides get wrong.
+```
+
+<Tip>
+Print this double-sided on a single sheet and fold it in half — it fits perfectly inside a passport or travel wallet. The dense layout is intentional: every square centimeter carries useful information.
+</Tip>
+
+### Expected Outcome
+
+A tight, beautifully designed 2-page reference card packed with everything you need for Istanbul — all sourced from live web data, not stale guidebook content.
+
+> **ISTANBUL, TURKEY** &#127481;&#127479; — August 10-22, 2026
+>
+> | Visa | E-visa required for Saudi citizens — $50, 30 days |
+> | Currency | TRY (Turkish Lira) — 1 SAR = ~8.6 TRY |
+> | Emergency | Police: 155 | Ambulance: 112 | Fire: 110 |
+> | Power | Type F, 230V |
+> | SIM | Turkcell Tourist — ~300 TRY/20GB/2 weeks |
+>
+> **ESSENTIAL PHRASES**
+>
+> | Turkish | Pronunciation | English |
+> |---------|--------------|---------|
+> | Merhaba | mer-ha-ba | Hello |
+> | Tesekkur ederim | te-shek-kur e-de-rim | Thank you |
+> | Bakar misiniz | ba-kar muh-suh-nuz | Excuse me |
+> | Ne kadar? | neh ka-dar | How much? |
+> | Hesap lutfen | heh-sap lut-fen | Check, please |
+>
+> **CULTURAL ETIQUETTE**
+> - Cover shoulders and knees at mosques — headscarves provided at entrance
+> - Never refuse tea from a shopkeeper — it's hospitality, not a sales trap
+> - Remove shoes at mosque entrances and some traditional restaurants
+> - Haggle at the Grand Bazaar (expect 30-50% off asking) but never at restaurants
+> - Friday midday prayer — plan around mosque closures
+>
+> **TOP STREET FOOD**
+> 1. Balik ekmek (fish sandwich) — Eminonu waterfront, 80-100 TRY
+> 2. Simit — ubiquitous carts, 15-20 TRY, best fresh in the morning
+> 3. Lahmacun — Halil Lahmacun in Fatih, 60-80 TRY
+> 4. Kunefe — Kadikoy market side, 100-120 TRY, order with kaymak
+> 5. Islak burger (wet burger) — Taksim Square, 50-70 TRY, late-night classic
+>
+> ...continues with architecture picks, safety, apps, local secret...
+
+---
+
+## Limits
+
+- **PDF rendering depends on headless browser availability.** Wolffish uses Playwright or Puppeteer to convert HTML to PDF. If neither is installed, the agent will attempt to install one — this usually works but may need `npm` or `npx` available in your PATH.
+- **Web search results vary.** The quality of research depends on what's publicly available and accessible. Paywalled content is skipped. Some searches may return thin results for niche topics.
+- **Exchange rates and visa info can change.** The travel cheat sheet uses live web data, but always verify visa requirements and exchange rates with official government sources before traveling.
+- **Large reports take longer.** The competitive intelligence report involves 15+ web searches and reads. Expect 1-2 minutes of processing. Simpler prompts (news digest, travel sheet) typically finish in under a minute.
+
+## Cost & Model Guide
+
+| Model | News Digest | Competitor Report | Travel Cheat Sheet |
+|-------|------------|-------------------|-------------------|
+| **DeepSeek V4 Pro** | ~$0.01 | ~$0.03 | ~$0.01 |
+| **Qwen 3.7 Max** | ~$0.02 | ~$0.06 | ~$0.02 |
+| **Claude Sonnet** | ~$0.04 | ~$0.10 | ~$0.03 |
+| **Claude Opus** | ~$0.15 | ~$0.35 | ~$0.12 |
+
+<Note>
+DeepSeek V4 Pro is the recommended model for all three prompts. It handles multi-step web research, content synthesis, and HTML/CSS generation reliably — and it's the cheapest option by a wide margin. Claude Sonnet and Opus produce slightly more polished prose but at 4-10x the price, which rarely justifies the difference for PDF generation workflows.
+</Note>
+
+## Automating with Heartbeat
+
+The news digest is a natural candidate for daily automation. Open **Settings > Heartbeat**, paste the block below, and Wolffish will generate your briefing every morning before you open your laptop.
+
+```markdown
+## Morning News Digest | Weekday (07:00)
+
+Research today's top news across these topics. Run a separate
+web search for each:
+
+- "AI news today"
+- "tech industry news today"
+- "global economy news today"
+- "science breakthroughs this week"
+- "cybersecurity news today"
+
+For each search, open and read the top 3-4 results using
+web_fetch. ONLY use free, publicly accessible sources. Good
+sources: The Verge, Ars Technica, TechCrunch, Reuters, AP News,
+BBC News, NPR, Hacker News, CNBC, The Guardian, Nature News,
+Science Daily, Wired, MIT Technology Review.
+
+DO NOT fetch from paywalled sites — Bloomberg, WSJ, NYT,
+Financial Times, The Information. Skip them and pick the next.
+
+From everything you've read, curate 8 to 12 stories. For each:
+- A clear headline (not clickbait)
+- A 2-3 sentence summary
+- Source name and URL
+
+Group by topic section. Generate a PDF with these design rules:
+A4, clean sans-serif font, accent color #1E40AF, masthead with
+"DAILY BRIEFING" and today's date, section headers with accent
+left border, stories with bold headlines and gray source
+attribution, page numbers in footer. Save as:
+daily-briefing-YYYY-MM-DD.pdf
+```
+
+<Tip>
+Change `Weekday (07:00)` to `Daily (06:30)` for every day, or `Cron (0 7 * * 1)` for Monday-only weekly digests.
+</Tip>
+
+## Make Your Own
+
+These three prompts are starting points. The pattern is always the same:
+
+1. **Define what you want** — what's the document about?
+2. **Tell it where to look** — which searches to run, which sources to trust
+3. **Describe the design** — layout, colors, typography, page structure
+4. **Specify the output** — filename, format, what to include
+
+Some ideas to try:
+
+- **Weekly meeting prep** — search for updates on your clients/projects, generate a 1-page briefing per meeting
+- **Research literature review** — search arXiv and PubMed for recent papers on a topic, generate an annotated bibliography PDF
+- **Product changelog** — search your GitHub releases and generate a customer-facing changelog PDF
+- **Market sizing report** — research TAM/SAM/SOM for a new product idea
+- **Recipe collection** — search for recipes matching dietary requirements, generate a printable cookbook page
+
+The agent doesn't care what the PDF is about. If you can describe it, Wolffish can build it.

@@ -83,7 +83,8 @@
                     "pages": [
                       "use-cases/ai-news-linkedin-post",
                       "use-cases/mac-security-audit",
-                      "use-cases/cv-tailor"
+                      "use-cases/cv-tailor",
+                      "use-cases/pdfs-everywhere"
                     ]
                   }
                 ]
