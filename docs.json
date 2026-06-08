@@ -132,6 +132,7 @@
                   "configuration/stepfun",
                   "configuration/anthropic",
                   "configuration/openai",
+                  "configuration/openrouter",
                   "configuration/ollama"
                 ]
               },
@@ -279,6 +280,7 @@
                   "ar/configuration/stepfun",
                   "ar/configuration/anthropic",
                   "ar/configuration/openai",
+                  "ar/configuration/openrouter",
                   "ar/configuration/ollama"
                 ]
               },

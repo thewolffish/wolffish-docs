@@ -1,0 +1,94 @@
+---
+title: "OpenRouter"
+description: "Set up OpenRouter — a model aggregator for accessing any provider through a single API key"
+---
+
+# OpenRouter (Aggregator)
+
+```
+POST https://openrouter.ai/api/v1/chat/completions
+```
+
+Uses SSE streaming with OpenAI-compatible tool-calling format. Routes requests to any model from any provider through a single API key.
+
+**OpenRouter is a model aggregator** — a single API endpoint that proxies requests to Anthropic, OpenAI, DeepSeek, Qwen, xAI, Meta, Mistral, Google, and dozens more. One key, one billing account, access to everything.
+
+Best for: Experimenting with models you haven't set up directly, unified billing, accessing niche models not yet natively supported by Wolffish.
+
+<Warning>
+  **We recommend configuring providers directly whenever possible.** Direct integration gives you lower latency (no proxy hop), accurate cost tracking, provider-specific features (Anthropic's ephemeral caching, DeepSeek's FIM), and no middleman markup. OpenRouter adds a routing layer that can introduce latency and occasionally inconsistent behavior across providers.
+
+  Use OpenRouter when you want to experiment with models you haven't set up directly, or as a convenient fallback for providers where you don't want to manage a separate API key.
+</Warning>
+
+## Getting an API Key
+
+1. Go to [openrouter.ai](https://openrouter.ai)
+2. Sign up or log in
+3. Navigate to **Keys** and create a new key
+4. Paste it into Wolffish → Settings → Models → OpenRouter
+
+## Supported Models
+
+OpenRouter supports hundreds of models. Wolffish normalizes output caps to match each provider's native limits to prevent context overflow errors:
+
+| Model (via OpenRouter) | Max Output | Notes |
+|------------------------|-----------|-------|
+| anthropic/claude-opus-*, anthropic/claude-sonnet-* | 32K | Matches native Anthropic caps. |
+| openai/gpt-5* | 64K | Matches native OpenAI caps. |
+| openai/gpt-4.1* | 32K | Previous gen OpenAI. |
+| openai/gpt-4o* | 16K | Chat-optimized. |
+| openai/o3*, openai/o4* | 64K | Reasoning models. |
+| deepseek/* | 32K | Matches native DeepSeek caps. |
+| x-ai/grok-* | 32K | Matches native xAI caps. |
+| google/gemini-* | 64K | Google Gemini models. |
+| meta-llama/* | 16K | Meta Llama models. |
+| qwen/* | 32K | Matches native Qwen caps. |
+| mistralai/* | 32K | Mistral models. |
+
+<Note>
+  Output caps are set conservatively to ensure the model always has sufficient context budget for input tokens. These match the caps used by the corresponding native provider integrations — you get the same behavior whether you access a model directly or through OpenRouter.
+</Note>
+
+## Direct Integration vs. OpenRouter
+
+| | Direct Provider | OpenRouter |
+|--|----------------|------------|
+| **Latency** | Lowest — direct API call | Higher — extra proxy hop |
+| **Cost** | Provider pricing only | Provider pricing + OpenRouter margin |
+| **Features** | Full provider-specific features | Normalized subset |
+| **Billing** | Separate per provider | Single unified bill |
+| **Model access** | Only configured providers | Hundreds of models, one key |
+| **Caching** | Provider-native (Anthropic ephemeral, DeepSeek, etc.) | Varies by underlying provider |
+
+### When to Use OpenRouter
+
+**Good fit:**
+- Trying models from providers you haven't configured yet
+- Quick A/B testing across different model families
+- Unified billing when you only want one API bill
+- Accessing niche or newer models not yet natively supported
+
+**Use direct integration instead when:**
+- The provider is already natively supported (DeepSeek, Anthropic, OpenAI, etc.)
+- You need the lowest possible latency
+- You want provider-specific features (caching, prompt prefixes, etc.)
+- You're running high-volume production workloads where the proxy hop adds up
+
+<Tip>
+  If you're already using DeepSeek, Anthropic, or any other natively supported provider, keep that direct connection. Add OpenRouter only for models you can't access directly. Wolffish's cascade handles fallback automatically — direct providers are tried first, OpenRouter comes after.
+</Tip>
+
+## Reasoning Models via OpenRouter
+
+OpenRouter supports reasoning models from multiple providers. Wolffish automatically detects reasoning models and sends the appropriate parameters:
+
+- **OpenAI o-series and GPT-5**: `reasoning_effort` parameter
+- **Anthropic Claude Opus**: `reasoning` object with effort level
+- **DeepSeek R-series**: `reasoning_effort` parameter
+
+The reasoning mode (None, High, Max) you set in Wolffish's UI is translated to the correct format for each provider automatically.
+
+## Provider Cascade
+
+OpenRouter sits near the end of Wolffish's cascade: **DeepSeek → MiMo → Kimi → MiniMax → xAI → Qwen → Stepfun → Claude → OpenAI → OpenRouter → Ollama**. This means direct provider connections are always tried first. OpenRouter acts as a broad fallback — if your primary and secondary providers are down, OpenRouter can route to an alternative model automatically.
