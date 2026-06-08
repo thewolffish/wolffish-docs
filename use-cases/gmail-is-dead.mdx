@@ -108,9 +108,9 @@ You need a free Google Cloud project to generate OAuth credentials. This is a on
 That's it for setup. Go back to the Wolffish chat and send this:
 
 ```
-Check all my email accounts for unread messages. For each
-account, search for unread emails in the inbox. Read the full
-content of each unread email.
+Check all my email accounts for unread messages in the inbox.
+Do not cap the results — fetch every unread email, however
+many there are. Read the full content of each one.
 
 Then give me a structured briefing:
 
@@ -122,20 +122,15 @@ Then give me a structured briefing:
      (newsletter/promo/notification)
 3. At the end, list any emails that need a reply with a
    suggested one-liner I can approve or edit
-
-Mark all the low-priority emails as read after summarizing
-them. Leave urgent and normal ones unread so they stay
-visible in my inbox.
 ```
 
 ## How It Works
 
 1. Wolffish loads the Google Workspace capability and calls `google_accounts` to discover your authorized accounts.
-2. For each account, it calls `google_gmail_search` with `is:unread in:inbox` — one call per account, in parallel.
+2. For each account, it calls `google_gmail_search` with `is:unread in:inbox` — one call per account, in parallel — fetching every unread message.
 3. For each unread thread, it calls `google_gmail_read` to get the full email content.
 4. The LLM reads every email and produces the structured briefing — sender, summary, priority.
-5. It calls `google_gmail_mark_read` on the low-priority emails to clear the noise.
-6. It suggests reply drafts for anything that needs a response.
+5. It suggests reply drafts for anything that needs a response.
 
 No browser. No screenshots. No mouse clicks. Direct API calls to Gmail's backend.
 
@@ -195,7 +190,8 @@ See the [Heartbeat docs](/configuration/heartbeat) for all schedule formats.
 ## Gmail Briefing | Weekday (07:30)
 
 Check all my email accounts for unread messages in the inbox.
-Read the full content of each unread email.
+Do not cap the results — fetch every unread email, however
+many there are. Read the full content of each one.
 
 Give me a structured briefing:
 
@@ -205,9 +201,6 @@ Give me a structured briefing:
    - One-line summary of what they want or what it's about
    - Priority: urgent, normal, or low (newsletter/promo)
 3. Emails that need a reply with a suggested one-liner
-
-Mark all low-priority emails as read. Leave urgent and normal
-ones unread.
 ```
 
 <Tip>

@@ -97,6 +97,7 @@
                   "architecture/overview",
                   "architecture/pipeline",
                   "architecture/stateless-model",
+                  "architecture/context-compaction",
                   "architecture/brain-modules",
                   "architecture/workspace",
                   "architecture/event-bus"
@@ -245,6 +246,7 @@
                   "ar/architecture/overview",
                   "ar/architecture/pipeline",
                   "ar/architecture/stateless-model",
+                  "ar/architecture/context-compaction",
                   "ar/architecture/brain-modules",
                   "ar/architecture/workspace",
                   "ar/architecture/event-bus"
