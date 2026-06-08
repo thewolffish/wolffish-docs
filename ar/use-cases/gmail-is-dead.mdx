@@ -225,20 +225,41 @@ BRIEFING FORMAT (only after ALL emails are read):
 ## Gmail Briefing | Weekday (07:30)
 
 Check all my email accounts for unread messages in the inbox.
-Do not cap the results — fetch every single unread email,
-however many there are. No pagination limits, no early stops.
-Read the full content of each one.
 
-Do NOT mark any email as read. Just read and ingest.
+RULES — READ CAREFULLY:
+- Fetch EVERY single unread email, however many there are.
+  No caps, no pagination limits, no early stops.
+- You MUST call google_gmail_read for EACH email individually.
+  Reading the subject line or metadata from google_gmail_search
+  is NOT enough — you need the full body content of every email.
+- Do NOT skip emails because you think you already know what
+  they're about from the search results. Search results give
+  you metadata only. You MUST read the actual content.
+- If there are 43 unread emails, I expect to see 43
+  google_gmail_read calls. If there are 200, I expect 200.
+  No exceptions.
+- Work in batches of 10-15 reads per response. After each
+  batch, continue with the remaining emails in your next
+  response. Do NOT produce any summary, briefing, or final
+  output until EVERY email has been read via google_gmail_read.
+- Do NOT mark any email as read. Do NOT archive, label, move,
+  or modify anything.
 
-Give me a structured briefing:
+COMPLETION CHECK:
+Before producing your final briefing, count how many
+google_gmail_read calls you made. If that number is less than
+the total unread count from google_gmail_search, you are NOT
+done — go back and read the ones you missed.
 
+BRIEFING FORMAT (only after ALL emails are read):
 1. Total unread count per account
 2. For each email:
    - Who it's from and when
    - One-line summary of what they want or what it's about
-   - Priority: urgent, normal, or low (newsletter/promo)
-3. Emails that need a reply with a suggested one-liner
+   - Priority: urgent (needs action today), normal, or low
+     (newsletter/promo/notification)
+3. At the end, list any emails that need a reply with a
+   suggested one-liner I can approve or edit
 ```
 
 <Tip>
