@@ -79,7 +79,8 @@
                   "use-cases/setting-up-for-success",
                   "use-cases/limitations",
                   {
-                    "group": "Examples",
+                    "group": "Use Cases",
+                    "defaultOpen": true,
                     "pages": [
                       "use-cases/gmail-is-dead",
                       "use-cases/pdfs-everywhere",
@@ -230,7 +231,8 @@
                   "ar/use-cases/setting-up-for-success",
                   "ar/use-cases/limitations",
                   {
-                    "group": "أمثلة",
+                    "group": "حالات الاستخدام",
+                    "defaultOpen": true,
                     "pages": [
                       "ar/use-cases/gmail-is-dead",
                       "ar/use-cases/pdfs-everywhere",
