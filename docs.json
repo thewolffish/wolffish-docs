@@ -64,6 +64,7 @@
             "groups": [
               {
                 "group": "Get Started",
+                "expanded": true,
                 "pages": [
                   "introduction/overview",
                   "introduction/philosophy",
@@ -74,6 +75,7 @@
               },
               {
                 "group": "Use Cases",
+                "expanded": true,
                 "pages": [
                   "use-cases/overview",
                   "use-cases/setting-up-for-success",
@@ -93,6 +95,7 @@
               },
               {
                 "group": "Core Concepts",
+                "expanded": true,
                 "pages": [
                   "architecture/gods-creation",
                   "architecture/overview",
@@ -106,6 +109,7 @@
               },
               {
                 "group": "Capabilities",
+                "expanded": true,
                 "pages": [
                   "capabilities/overview",
                   "capabilities/skill-md-reference",
@@ -115,6 +119,7 @@
               },
               {
                 "group": "Channels",
+                "expanded": true,
                 "pages": [
                   "channels/overview",
                   "channels/telegram",
@@ -123,6 +128,7 @@
               },
               {
                 "group": "Models",
+                "expanded": true,
                 "pages": [
                   "configuration/providers",
                   "configuration/deepseek",
@@ -140,6 +146,7 @@
               },
               {
                 "group": "Integrations",
+                "expanded": true,
                 "pages": [
                   "integrations/overview",
                   "integrations/browser-extension",
@@ -150,6 +157,7 @@
               },
               {
                 "group": "Memory & Learning",
+                "expanded": true,
                 "pages": [
                   "memory/overview",
                   "memory/episodes",
@@ -160,6 +168,7 @@
               },
               {
                 "group": "Configuration",
+                "expanded": true,
                 "pages": [
                   "configuration/soul-md",
                   "configuration/user-md",
@@ -171,6 +180,7 @@
               },
               {
                 "group": "Debugging",
+                "expanded": true,
                 "pages": [
                   "debugging/overview",
                   "debugging/debug-snapshots",
@@ -181,6 +191,7 @@
               },
               {
                 "group": "Extending Wolffish",
+                "expanded": true,
                 "pages": [
                   "extending/creating-capabilities",
                   "extending/advanced-plugins",
@@ -191,6 +202,7 @@
               },
               {
                 "group": "Development",
+                "expanded": true,
                 "pages": [
                   "development/setup",
                   "development/project-structure",
@@ -216,6 +228,7 @@
             "groups": [
               {
                 "group": "ابدأ هنا",
+                "expanded": true,
                 "pages": [
                   "ar/introduction/overview",
                   "ar/introduction/philosophy",
@@ -226,6 +239,7 @@
               },
               {
                 "group": "حالات الاستخدام",
+                "expanded": true,
                 "pages": [
                   "ar/use-cases/overview",
                   "ar/use-cases/setting-up-for-success",
@@ -245,6 +259,7 @@
               },
               {
                 "group": "المفاهيم الأساسية",
+                "expanded": true,
                 "pages": [
                   "ar/architecture/gods-creation",
                   "ar/architecture/overview",
@@ -258,6 +273,7 @@
               },
               {
                 "group": "القدرات",
+                "expanded": true,
                 "pages": [
                   "ar/capabilities/overview",
                   "ar/capabilities/skill-md-reference",
@@ -267,6 +283,7 @@
               },
               {
                 "group": "القنوات",
+                "expanded": true,
                 "pages": [
                   "ar/channels/overview",
                   "ar/channels/telegram",
@@ -275,6 +292,7 @@
               },
               {
                 "group": "النماذج",
+                "expanded": true,
                 "pages": [
                   "ar/configuration/providers",
                   "ar/configuration/deepseek",
@@ -292,6 +310,7 @@
               },
               {
                 "group": "التكاملات",
+                "expanded": true,
                 "pages": [
                   "ar/integrations/overview",
                   "ar/integrations/browser-extension",
@@ -302,6 +321,7 @@
               },
               {
                 "group": "الذاكرة والتعلم",
+                "expanded": true,
                 "pages": [
                   "ar/memory/overview",
                   "ar/memory/episodes",
@@ -312,6 +332,7 @@
               },
               {
                 "group": "التكوين",
+                "expanded": true,
                 "pages": [
                   "ar/configuration/soul-md",
                   "ar/configuration/user-md",
@@ -323,6 +344,7 @@
               },
               {
                 "group": "التشخيص",
+                "expanded": true,
                 "pages": [
                   "ar/debugging/overview",
                   "ar/debugging/debug-snapshots",
@@ -333,6 +355,7 @@
               },
               {
                 "group": "توسيع وولف فيش",
+                "expanded": true,
                 "pages": [
                   "ar/extending/creating-capabilities",
                   "ar/extending/advanced-plugins",
@@ -343,6 +366,7 @@
               },
               {
                 "group": "التطوير",
+                "expanded": true,
                 "pages": [
                   "ar/development/setup",
                   "ar/development/project-structure",
