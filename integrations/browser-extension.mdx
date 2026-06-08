@@ -1,6 +1,6 @@
 ---
 title: "Browser Extension"
-description: "Control the user's real Chrome or Brave browser with 44 tools — navigate, click, read, screenshot, and more"
+description: "Control the user's real Chrome or Brave browser with 49 tools — navigate, click, read, screenshot, debugger mode, humanize, and more"
 ---
 
 # Browser Extension
@@ -92,7 +92,7 @@ The extension updates itself automatically when Wolffish updates — no manual s
 
 The entire process is seamless. You'll see a brief disconnect in the side panel (< 1 second) while the extension restarts, then it reconnects with the new version. You can also trigger a manual reload from **Settings → Services → Browser Extension → Reload Extension**.
 
-## 44 Tools
+## 49 Tools
 
 The agent sees these as `ext_*` tools. The plugin translates them to `browser_*` commands over the wire.
 
@@ -116,6 +116,81 @@ The agent sees these as `ext_*` tools. The plugin translates them to `browser_*`
 
 ### Advanced
 `ext_execute_js` · `ext_wait_for` · `ext_wait_for_navigation` · `ext_wait_for_network_idle` · `ext_notify`
+
+### Debugger Mode
+`ext_debugger_attach` · `ext_debugger_detach` · `ext_debugger_status`
+
+### Mouse & Humanize
+`ext_mouse_move` · `ext_humanize`
+
+## Debugger Mode
+
+Debugger mode attaches Chrome DevTools Protocol (CDP) to a tab and replaces content-script-based interactions with low-level input events. When the debugger is attached, clicks, typing, scrolling, hovering, and keypresses are dispatched through CDP's `Input.dispatch*` methods instead of DOM APIs.
+
+### Why It Exists
+
+Content script interactions (`element.click()`, `element.value = '...'`) are detectable. Sites can distinguish programmatic DOM events from real user input by checking event properties like `isTrusted`, monitoring event ordering, or using bot-detection libraries. CDP events bypass all of this — they enter the browser's input pipeline at the same level as physical keyboard and mouse events.
+
+### How It Works
+
+1. The agent calls `ext_debugger_attach` with a tab ID
+2. Chrome attaches the debugger protocol to that tab (you'll see a "... is debugging this tab" banner)
+3. All subsequent `ext_click`, `ext_type`, `ext_scroll`, `ext_hover`, and `ext_keypress` calls on that tab are automatically routed through CDP instead of the content script
+4. Mouse movements follow Bezier curves with Gaussian-distributed timing — not straight lines with fixed delays
+5. Typing dispatches individual `keyDown`/`char`/`keyUp` sequences per character with variable inter-key delays
+6. When done, call `ext_debugger_detach` to release the debugger
+
+```
+Agent calls ext_click('.btn')
+  ↓
+Extension checks: debugger attached?
+  ├─ Yes → resolves element coordinates → Bezier mouse path → CDP mousePressed/mouseReleased
+  └─ No  → content script → element.click()
+```
+
+The routing is automatic. The agent doesn't need to change how it calls tools — it just attaches the debugger first and everything switches.
+
+### Limitations
+
+- Only one tab can have the debugger attached at a time — attaching to a new tab detaches from the previous one
+- Chrome shows a yellow "debugging" banner at the top of the page (cannot be hidden)
+- `chrome://` and `chrome-extension://` pages cannot be debugged
+- If DevTools is already open on the tab, the debugger cannot attach
+
+## Humanize
+
+The humanize tool (`ext_humanize`) injects human-like micro-behaviors between agent actions. Instead of the agent clicking, typing, and navigating with machine precision and zero idle time, humanize adds the pauses, small scrolls, cursor drifts, and reading delays that real users naturally produce.
+
+<Warning>
+  **Use responsibly.** Humanize is designed for testing, research, and personal automation. Some platforms actively detect automated behavior and may penalize, restrict, or ban accounts that violate their terms of service. Using humanize to circumvent bot detection on platforms that prohibit automation is done at your own risk. We do not encourage or endorse violating any platform's terms of service.
+</Warning>
+
+### Intensity Levels
+
+| Level | Micro-Actions | Use Case |
+| --- | --- | --- |
+| `light` | Random pauses, micro-scrolls | Minimal footprint — adds basic timing variation |
+| `moderate` | Pauses, micro-scrolls, cursor moves, hover on inert elements, variable scrolls | Balanced — looks like a distracted human |
+| `heavy` | All of the above + scroll bounces, idle drift, long pauses | Full simulation — reading pauses, scroll-then-scroll-back, cursor wander |
+
+### Micro-Actions
+
+Each `ext_humanize` call picks one random action from the intensity pool and executes it:
+
+- **Random pause** — waits 0.8–2s (simulates thinking or reading)
+- **Micro-scroll** — scrolls a tiny amount up or down, sometimes scrolls back
+- **Cursor move** — moves the cursor to a random non-interactive element via Bezier path
+- **Hover inert** — moves to a non-interactive element and hovers briefly
+- **Variable scroll** — 2–4 small scroll steps in sequence with variable timing
+- **Scroll bounce** — scrolls down then back up (like overshooting while reading)
+- **Idle drift** — tiny random cursor movements around the current position
+- **Long pause** — waits 2–5s (simulates reading a paragraph)
+
+All timing uses Gaussian distributions — no fixed delays. Mouse movements follow cubic Bezier curves with randomized control points.
+
+### With Debugger Mode
+
+Humanize works with or without the debugger attached. When the debugger is active, scroll and cursor actions use CDP events. When it's not, they fall back to content script execution. The agent doesn't need to coordinate — humanize checks the debugger state automatically.
 
 ## Screenshots
 
@@ -177,7 +252,7 @@ See the [extension repository](https://github.com/thewolffish/wolffish-extension
 | Firefox | Not supported |
 
 <Warning>
-  The extension uses Manifest V3 APIs. Safari and Firefox are not supported because the extension relies on Chrome-specific APIs (`chrome.tabs.captureVisibleTab`, `chrome.debugger` for PDF, direct WebSocket in the service worker).
+  The extension uses Manifest V3 APIs. Safari and Firefox are not supported because the extension relies on Chrome-specific APIs (`chrome.tabs.captureVisibleTab`, `chrome.debugger` for CDP input and PDF, `chrome.sidePanel`, direct WebSocket in the service worker).
 </Warning>
 
 ## Safety
@@ -191,3 +266,7 @@ The extension inherits the standard capability safety system:
 - Navigation to financial sites → **requires approval**
 
 These patterns are defined in the SKILL.md frontmatter and enforced by the amygdala module. You can customize them.
+
+<Warning>
+  **Debugger mode and humanize carry additional risk.** These features make automated browsing less distinguishable from human browsing. While useful for testing and personal automation, using them to bypass bot detection or CAPTCHA systems on platforms that prohibit automation may result in account suspension or permanent bans. The responsibility lies with the user. Use these tools ethically and in compliance with each platform's terms of service.
+</Warning>
