@@ -81,10 +81,11 @@
                   {
                     "group": "Examples",
                     "pages": [
-                      "use-cases/ai-news-linkedin-post",
-                      "use-cases/mac-security-audit",
+                      "use-cases/gmail-is-dead",
+                      "use-cases/pdfs-everywhere",
                       "use-cases/cv-tailor",
-                      "use-cases/pdfs-everywhere"
+                      "use-cases/mac-security-audit",
+                      "use-cases/ai-news-linkedin-post"
                     ]
                   }
                 ]

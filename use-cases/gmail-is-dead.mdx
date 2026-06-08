@@ -1,0 +1,222 @@
+---
+title: "Gmail Is Dead"
+description: "Connect your Gmail to Wolffish and let it read, summarize, and manage your inbox end to end"
+---
+
+Your inbox is a full-time job you never applied for. Wolffish connects to your Gmail via Google's OAuth, reads your unread emails, summarizes what matters, and can reply, archive, label, and draft on your behalf. No browser automation. No screen scraping. Direct API access to your mailbox.
+
+One prompt. Every morning. Inbox zero.
+
+## What You Need
+
+- **Wolffish installed and running**
+- **An LLM API key** configured in Settings > Models. DeepSeek V4 Flash recommended — fast, cheap, and more than capable for email summarization. Any other provider works too.
+- **A Google account** — any free Gmail works. No Google Workspace subscription required.
+
+## Part 1: Create a Google Cloud Project
+
+You need a free Google Cloud project to generate OAuth credentials. This is a one-time setup that takes about 5 minutes.
+
+<Steps>
+  <Step title="Create a Google Cloud project">
+    Go to [Google Cloud Console](https://console.cloud.google.com/projectcreate) and create a new project. Name it anything — "Wolffish" works.
+
+    You'll see the project dashboard with your project name in the top bar when it's ready.
+  </Step>
+
+  <Step title="Enable the Gmail API">
+    Go to **APIs & Services > Library** in the left sidebar. Search for **Gmail API** and click **Enable**.
+
+    While you're here, enable these too so the full Google Workspace integration works:
+
+    - Gmail API
+    - Google Drive API
+    - Google Calendar API
+    - Google Sheets API
+    - Google Docs API
+    - Google Slides API
+    - Tasks API
+    - People API
+
+    Each enabled API appears in the **Enabled APIs & services** dashboard. You can always come back and enable more later.
+  </Step>
+
+  <Step title="Configure the OAuth consent screen">
+    Go to **OAuth consent screen** in the left sidebar.
+
+    - Set User type to **External**
+    - Fill in the required fields — app name (anything), your email for support contact
+    - Skip scopes — Wolffish requests what it needs at authorization time
+    - Under **Test users**, add your own Gmail address
+    - Click **Save**
+
+    You'll see the consent screen summary with status **Testing**. Leave it in Testing — only test users (you) can authorize, which is exactly what you want for personal use.
+  </Step>
+
+  <Step title="Create OAuth credentials">
+    Go to **Credentials** in the left sidebar.
+
+    - Click **Create Credentials > OAuth client ID**
+    - Choose application type: **Desktop app**
+    - Name it anything — "Wolffish" works
+    - Click **Create**
+
+    The new client appears in the **OAuth 2.0 Client IDs** list.
+  </Step>
+
+  <Step title="Download the JSON file">
+    Click the download icon (arrow down) next to your new client to get the JSON file.
+
+    A file starting with `client_secret_` downloads. This is your OAuth credentials file — keep it safe. You'll drop it into Wolffish next.
+  </Step>
+</Steps>
+
+<Tip>
+  This entire setup is free. Google Cloud gives every account a generous free tier that covers personal API usage with plenty of headroom. You will not be charged.
+</Tip>
+
+## Part 2: Connect Wolffish to Google
+
+<Steps>
+  <Step title="Install the Google integration">
+    Open Wolffish. Go to **Settings > Services > Google Workspace**.
+
+    Click **Install**. This downloads the `gog` CLI binary (~50 MB) that Wolffish uses under the hood for all Google API calls. A progress bar shows the download.
+  </Step>
+
+  <Step title="Upload your OAuth credentials">
+    In the same settings panel, find the **OAuth Credentials** section.
+
+    Drag and drop the `client_secret_*.json` file you downloaded from Google Cloud Console. Wolffish validates it and shows your project ID and client ID.
+  </Step>
+
+  <Step title="Authorize your Gmail account">
+    In the **Accounts** section, type your Gmail address and click **Authorize**.
+
+    Your default browser opens to Google's consent screen. Sign in, review the permissions, and click **Allow**. The browser redirects back and Wolffish confirms the account is connected.
+
+    Your OAuth tokens are stored securely in your OS keyring (macOS Keychain, Windows Credential Manager, or Linux Secret Service) — not in any config file.
+  </Step>
+</Steps>
+
+<Note>
+  You can authorize multiple Google accounts. Wolffish fans out across all of them when you ask something generic like "check my email" — no need to specify which account each time.
+</Note>
+
+## Part 3: The Prompt
+
+That's it for setup. Go back to the Wolffish chat and send this:
+
+```
+Check all my email accounts for unread messages. For each
+account, search for unread emails in the inbox. Read the full
+content of each unread email.
+
+Then give me a structured briefing:
+
+1. Total unread count per account
+2. For each email:
+   - Who it's from and when
+   - One-line summary of what they want or what it's about
+   - Priority: urgent (needs action today), normal, or low
+     (newsletter/promo/notification)
+3. At the end, list any emails that need a reply with a
+   suggested one-liner I can approve or edit
+
+Mark all the low-priority emails as read after summarizing
+them. Leave urgent and normal ones unread so they stay
+visible in my inbox.
+```
+
+## How It Works
+
+1. Wolffish loads the Google Workspace capability and calls `google_accounts` to discover your authorized accounts.
+2. For each account, it calls `google_gmail_search` with `is:unread in:inbox` — one call per account, in parallel.
+3. For each unread thread, it calls `google_gmail_read` to get the full email content.
+4. The LLM reads every email and produces the structured briefing — sender, summary, priority.
+5. It calls `google_gmail_mark_read` on the low-priority emails to clear the noise.
+6. It suggests reply drafts for anything that needs a response.
+
+No browser. No screenshots. No mouse clicks. Direct API calls to Gmail's backend.
+
+## Going Further
+
+The prompt above is a starting point. Here are variations you can try:
+
+<AccordionGroup>
+  <Accordion title="Auto-draft replies">
+    ```
+    Check my unread emails. For any email that's clearly
+    expecting a reply (a question, a request, an invitation),
+    draft a reply using google_gmail_draft_create. Match my
+    tone from soul.md. Don't send anything — just save drafts
+    for me to review.
+    ```
+  </Accordion>
+
+  <Accordion title="Daily digest to a file">
+    ```
+    Check all my email accounts for unread messages from the
+    last 24 hours. Write a markdown digest to
+    files/email-digest-today.md with sections: Action Required,
+    FYI, and Newsletters. Include sender, subject, and a
+    one-sentence summary for each. Mark newsletters as read.
+    ```
+  </Accordion>
+
+  <Accordion title="Find and summarize a specific thread">
+    ```
+    Search my email for the most recent thread from
+    sarah@example.com about the Q3 budget. Read the full
+    thread and summarize the current state — what was agreed,
+    what's still open, and what I need to do next.
+    ```
+  </Accordion>
+
+  <Accordion title="Cross-service morning briefing">
+    ```
+    Give me a morning briefing:
+    1. Unread emails — summarize by priority
+    2. Today's calendar — list all events with times
+    3. Overdue tasks — anything past due in Google Tasks
+
+    Present it as one unified briefing, grouped by section.
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Automating with Heartbeat
+
+Once you trust the output, schedule it to run every morning. Open **Settings > Heartbeat** to launch the built-in heartbeat editor — paste the block below and save.
+
+See the [Heartbeat docs](/configuration/heartbeat) for all schedule formats.
+
+```markdown
+## Gmail Briefing | Weekday (07:30)
+
+Check all my email accounts for unread messages in the inbox.
+Read the full content of each unread email.
+
+Give me a structured briefing:
+
+1. Total unread count per account
+2. For each email:
+   - Who it's from and when
+   - One-line summary of what they want or what it's about
+   - Priority: urgent, normal, or low (newsletter/promo)
+3. Emails that need a reply with a suggested one-liner
+
+Mark all low-priority emails as read. Leave urgent and normal
+ones unread.
+```
+
+<Tip>
+  Change `Weekday (07:30)` to match your schedule — `Daily (08:00)` for every day, `Cron (0 7 * * 1-5)` for weekdays only, or `Weekly (Monday 07:00)` for a weekly digest.
+</Tip>
+
+## Limits
+
+- **OAuth "Testing" status** — Your consent screen stays in "Testing" mode, which limits authorization to the test users you added (yourself). This is fine for personal use. If you want others to use it, you'd need to publish the app through Google's verification process.
+- **Token refresh** — Tokens refresh automatically. If you revoke access from your Google Account security settings, re-authorize in Wolffish Settings.
+- **Rate limits** — Google's Gmail API has generous free quotas (250 quota units per user per second). Normal personal usage won't come close.
+- **No attachment content** — Wolffish can see attachment metadata (name, type, size) but doesn't download or read attachment contents by default. You can ask it to download specific attachments via Google Drive.
