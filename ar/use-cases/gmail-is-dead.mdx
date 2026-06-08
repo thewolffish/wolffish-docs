@@ -1,0 +1,228 @@
+---
+title: "Gmail انتهى"
+description: "اربط Gmail بـ Wolffish ودعه يقرأ ويلخّص ويدير صندوق الوارد بالكامل"
+---
+
+صندوق الوارد وظيفة بدوام كامل لم تتقدم لها. يتصل Wolffish بـ Gmail عبر OAuth من Google، يقرأ رسائلك غير المقروءة، يلخّص ما يهم، ويمكنه الرد والأرشفة والتصنيف والمسودة نيابة عنك. بدون أتمتة متصفح. بدون كشط شاشة. وصول مباشر عبر API إلى صندوق بريدك.
+
+أمر واحد. كل صباح. صندوق وارد فارغ.
+
+## شرح بالفيديو
+
+<iframe
+  width="100%"
+  height="400"
+  src="https://www.youtube.com/embed/Z0RqcI_B5oY"
+  title="Gmail انتهى — عرض Wolffish"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+  style={{ borderRadius: '8px', marginTop: '1rem', marginBottom: '1rem' }}
+></iframe>
+
+## ما تحتاجه
+
+- **Wolffish مثبت ويعمل**
+- **مفتاح API لنموذج لغة** مُهيأ في الإعدادات > النماذج. يُنصح بـ DeepSeek V4 Flash — سريع ورخيص وأكثر من كافٍ لتلخيص البريد الإلكتروني. أي مزود آخر يعمل أيضاً.
+- **حساب Google** — أي Gmail مجاني يعمل. لا حاجة لاشتراك Google Workspace.
+
+## الجزء الأول: إنشاء مشروع Google Cloud
+
+تحتاج مشروع Google Cloud مجاني لإنشاء بيانات اعتماد OAuth. هذا إعداد لمرة واحدة يستغرق حوالي 5 دقائق.
+
+<Steps>
+  <Step title="أنشئ مشروع Google Cloud">
+    اذهب إلى [Google Cloud Console](https://console.cloud.google.com/projectcreate) وأنشئ مشروعاً جديداً. سمّه أي شيء — "Wolffish" يعمل.
+
+    سترى لوحة تحكم المشروع مع اسم مشروعك في الشريط العلوي عندما يكون جاهزاً.
+  </Step>
+
+  <Step title="فعّل Gmail API">
+    اذهب إلى **APIs & Services > Library** في الشريط الجانبي الأيسر. ابحث عن **Gmail API** وانقر على **Enable**.
+
+    أثناء وجودك هنا، فعّل هذه أيضاً ليعمل تكامل Google Workspace الكامل:
+
+    - Gmail API
+    - Google Drive API
+    - Google Calendar API
+    - Google Sheets API
+    - Google Docs API
+    - Google Slides API
+    - Tasks API
+    - People API
+
+    كل API مُفعَّل يظهر في لوحة **Enabled APIs & services**. يمكنك دائماً العودة وتفعيل المزيد لاحقاً.
+  </Step>
+
+  <Step title="هيّئ شاشة موافقة OAuth">
+    اذهب إلى **OAuth consent screen** في الشريط الجانبي الأيسر.
+
+    - اضبط نوع المستخدم على **External**
+    - املأ الحقول المطلوبة — اسم التطبيق (أي شيء)، بريدك الإلكتروني لجهة اتصال الدعم
+    - تخطَّ النطاقات — Wolffish يطلب ما يحتاجه وقت التفويض
+    - تحت **Test users**، أضف عنوان Gmail الخاص بك
+    - انقر على **Save**
+
+    سترى ملخص شاشة الموافقة بحالة **Testing**. اتركها في Testing — فقط مستخدمو الاختبار (أنت) يمكنهم التفويض، وهذا بالضبط ما تريده للاستخدام الشخصي.
+  </Step>
+
+  <Step title="أنشئ بيانات اعتماد OAuth">
+    اذهب إلى **Credentials** في الشريط الجانبي الأيسر.
+
+    - انقر على **Create Credentials > OAuth client ID**
+    - اختر نوع التطبيق: **Desktop app**
+    - سمّه أي شيء — "Wolffish" يعمل
+    - انقر على **Create**
+
+    يظهر العميل الجديد في قائمة **OAuth 2.0 Client IDs**.
+  </Step>
+
+  <Step title="حمّل ملف JSON">
+    انقر على أيقونة التحميل (سهم لأسفل) بجانب عميلك الجديد للحصول على ملف JSON.
+
+    يُحمَّل ملف يبدأ بـ `client_secret_`. هذا ملف بيانات اعتماد OAuth — احتفظ به بأمان. ستضعه في Wolffish بعد قليل.
+  </Step>
+</Steps>
+
+<Tip>
+  هذا الإعداد بالكامل مجاني. تمنح Google Cloud كل حساب طبقة مجانية سخية تغطي الاستخدام الشخصي لـ API بهامش كبير. لن تُحاسَب.
+</Tip>
+
+## الجزء الثاني: ربط Wolffish بـ Google
+
+<Steps>
+  <Step title="ثبّت تكامل Google">
+    افتح Wolffish. اذهب إلى **الإعدادات > الخدمات > Google Workspace**.
+
+    انقر على **Install**. يُحمّل هذا ملف `gog` الثنائي (~50 ميغابايت) الذي يستخدمه Wolffish داخلياً لجميع استدعاءات Google API. يظهر شريط تقدم أثناء التحميل.
+  </Step>
+
+  <Step title="ارفع بيانات اعتماد OAuth">
+    في نفس لوحة الإعدادات، ابحث عن قسم **OAuth Credentials**.
+
+    اسحب وأفلت ملف `client_secret_*.json` الذي حمّلته من Google Cloud Console. يتحقق Wolffish منه ويعرض معرف المشروع ومعرف العميل.
+  </Step>
+
+  <Step title="فوّض حساب Gmail الخاص بك">
+    في قسم **Accounts**، اكتب عنوان Gmail الخاص بك وانقر على **Authorize**.
+
+    يفتح متصفحك الافتراضي على شاشة موافقة Google. سجّل الدخول، راجع الأذونات، وانقر على **Allow**. يُعيد المتصفح التوجيه ويؤكد Wolffish أن الحساب متصل.
+
+    تُخزَّن رموز OAuth بأمان في حلقة مفاتيح نظام التشغيل (macOS Keychain أو Windows Credential Manager أو Linux Secret Service) — وليس في أي ملف إعدادات.
+  </Step>
+</Steps>
+
+<Note>
+  يمكنك تفويض عدة حسابات Google. يعمل Wolffish عبرها جميعاً عندما تطلب شيئاً عاماً مثل "تفقد بريدي" — لا حاجة لتحديد أي حساب في كل مرة.
+</Note>
+
+## الجزء الثالث: الأمر
+
+هذا كل ما في الإعداد. عد إلى محادثة Wolffish وأرسل هذا:
+
+```
+Check all my email accounts for unread messages in the inbox.
+Do not cap the results — fetch every unread email, however
+many there are. Read the full content of each one.
+
+Then give me a structured briefing:
+
+1. Total unread count per account
+2. For each email:
+   - Who it's from and when
+   - One-line summary of what they want or what it's about
+   - Priority: urgent (needs action today), normal, or low
+     (newsletter/promo/notification)
+3. At the end, list any emails that need a reply with a
+   suggested one-liner I can approve or edit
+```
+
+## كيف يعمل
+
+1. يحمّل Wolffish قدرة Google Workspace ويستدعي `google_accounts` لاكتشاف حساباتك المفوَّضة.
+2. لكل حساب، يستدعي `google_gmail_search` بـ `is:unread in:inbox` — استدعاء واحد لكل حساب، بالتوازي — يجلب كل رسالة غير مقروءة.
+3. لكل سلسلة رسائل غير مقروءة، يستدعي `google_gmail_read` للحصول على محتوى البريد الكامل.
+4. يقرأ نموذج اللغة كل بريد وينتج الملخص المهيكَل — المرسِل، الملخص، الأولوية.
+5. يقترح مسودات ردود لأي شيء يحتاج رداً.
+
+بدون متصفح. بدون لقطات شاشة. بدون نقرات فأرة. استدعاءات API مباشرة لخادم Gmail.
+
+## المزيد
+
+الأمر أعلاه نقطة بداية. إليك تنويعات يمكنك تجربتها:
+
+<AccordionGroup>
+  <Accordion title="مسودات ردود تلقائية">
+    ```
+    Check my unread emails. For any email that's clearly
+    expecting a reply (a question, a request, an invitation),
+    draft a reply using google_gmail_draft_create. Match my
+    tone from soul.md. Don't send anything — just save drafts
+    for me to review.
+    ```
+  </Accordion>
+
+  <Accordion title="ملخص يومي في ملف">
+    ```
+    Check all my email accounts for unread messages from the
+    last 24 hours. Write a markdown digest to
+    files/email-digest-today.md with sections: Action Required,
+    FYI, and Newsletters. Include sender, subject, and a
+    one-sentence summary for each. Mark newsletters as read.
+    ```
+  </Accordion>
+
+  <Accordion title="البحث عن سلسلة رسائل وتلخيصها">
+    ```
+    Search my email for the most recent thread from
+    sarah@example.com about the Q3 budget. Read the full
+    thread and summarize the current state — what was agreed,
+    what's still open, and what I need to do next.
+    ```
+  </Accordion>
+
+  <Accordion title="ملخص صباحي عبر الخدمات">
+    ```
+    Give me a morning briefing:
+    1. Unread emails — summarize by priority
+    2. Today's calendar — list all events with times
+    3. Overdue tasks — anything past due in Google Tasks
+
+    Present it as one unified briefing, grouped by section.
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## الأتمتة بـ Heartbeat
+
+بمجرد أن تثق في الإخراج، جدوِله ليعمل كل صباح. افتح **الإعدادات > Heartbeat** لتشغيل محرر Heartbeat المدمج — الصق الكتلة أدناه واحفظ.
+
+راجع [توثيق Heartbeat](/ar/configuration/heartbeat) لجميع تنسيقات الجدولة.
+
+```markdown
+## Gmail Briefing | Weekday (07:30)
+
+Check all my email accounts for unread messages in the inbox.
+Do not cap the results — fetch every unread email, however
+many there are. Read the full content of each one.
+
+Give me a structured briefing:
+
+1. Total unread count per account
+2. For each email:
+   - Who it's from and when
+   - One-line summary of what they want or what it's about
+   - Priority: urgent, normal, or low (newsletter/promo)
+3. Emails that need a reply with a suggested one-liner
+```
+
+<Tip>
+  غيّر `Weekday (07:30)` ليتناسب مع جدولك — `Daily (08:00)` لكل يوم، `Cron (0 7 * * 1-5)` لأيام العمل فقط، أو `Weekly (Monday 07:00)` لملخص أسبوعي.
+</Tip>
+
+## الحدود
+
+- **حالة OAuth "Testing"** — تبقى شاشة الموافقة في وضع "Testing"، مما يقصر التفويض على مستخدمي الاختبار الذين أضفتهم (أنت). هذا مناسب للاستخدام الشخصي. إذا أردت أن يستخدمها آخرون، ستحتاج لنشر التطبيق عبر عملية التحقق من Google.
+- **تحديث الرموز** — تُحدَّث الرموز تلقائياً. إذا ألغيت الوصول من إعدادات أمان حساب Google، أعد التفويض في إعدادات Wolffish.
+- **حدود المعدل** — تملك Gmail API من Google حصصاً مجانية سخية (250 وحدة حصة لكل مستخدم في الثانية). الاستخدام الشخصي العادي لن يقترب منها.
+- **بدون محتوى المرفقات** — يمكن لـ Wolffish رؤية بيانات المرفقات الوصفية (الاسم، النوع، الحجم) لكنه لا يحمّل أو يقرأ محتوى المرفقات افتراضياً. يمكنك طلب تحميل مرفقات معينة عبر Google Drive.

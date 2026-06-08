@@ -232,9 +232,11 @@
                   {
                     "group": "أمثلة",
                     "pages": [
-                      "ar/use-cases/ai-news-linkedin-post",
+                      "ar/use-cases/gmail-is-dead",
+                      "ar/use-cases/pdfs-everywhere",
+                      "ar/use-cases/cv-tailor",
                       "ar/use-cases/mac-security-audit",
-                      "ar/use-cases/cv-tailor"
+                      "ar/use-cases/ai-news-linkedin-post"
                     ]
                   }
                 ]
