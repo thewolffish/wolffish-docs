@@ -80,7 +80,7 @@
                   "use-cases/limitations",
                   {
                     "group": "Use Cases",
-                    "defaultOpen": true,
+                    "expanded": true,
                     "pages": [
                       "use-cases/gmail-is-dead",
                       "use-cases/pdfs-everywhere",
@@ -232,7 +232,7 @@
                   "ar/use-cases/limitations",
                   {
                     "group": "حالات الاستخدام",
-                    "defaultOpen": true,
+                    "expanded": true,
                     "pages": [
                       "ar/use-cases/gmail-is-dead",
                       "ar/use-cases/pdfs-everywhere",
@@ -332,7 +332,7 @@
                 ]
               },
               {
-                "group": "توسيع Wolffish",
+                "group": "توسيع وولف فيش",
                 "pages": [
                   "ar/extending/creating-capabilities",
                   "ar/extending/advanced-plugins",

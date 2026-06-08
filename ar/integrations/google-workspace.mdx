@@ -5,7 +5,7 @@ description: "تكامل Gmail و Drive و Calendar و Contacts و Tasks و Shee
 
 # Google Workspace
 
-يربط تكامل Google Workspace تطبيق Wolffish بـ Gmail و Google Drive و Calendar و Contacts و Tasks و Sheets. يدعم حسابات Google متعددة ويستخدم OAuth 2.0 للمصادقة.
+يربط تكامل Google Workspace تطبيق وولف فيش بـ Gmail و Google Drive و Calendar و Contacts و Tasks و Sheets. يدعم حسابات Google متعددة ويستخدم OAuth 2.0 للمصادقة.
 
 ## الإعداد
 
@@ -17,7 +17,7 @@ description: "تكامل Gmail و Drive و Calendar و Contacts و Tasks و Shee
     اضغط "تفويض" لبدء مسار OAuth. سيفتح متصفحك الافتراضي على شاشة موافقة Google.
   </Step>
   <Step title="منح الصلاحيات">
-    وافق على النطاقات المطلوبة. يطلب Wolffish صلاحيات قراءة/كتابة لـ Gmail و Drive و Calendar و Contacts و Tasks و Sheets.
+    وافق على النطاقات المطلوبة. يطلب وولف فيش صلاحيات قراءة/كتابة لـ Gmail و Drive و Calendar و Contacts و Tasks و Sheets.
   </Step>
   <Step title="الإكمال">
     يعيد المتصفح التوجيه إلى عنوان استدعاء محلي. تُخزّن رموزك في `config.json` ويظهر الحساب في الإعدادات.
@@ -25,7 +25,7 @@ description: "تكامل Gmail و Drive و Calendar و Contacts و Tasks و Shee
 </Steps>
 
 <Note>
-  تُخزّن رموز OAuth محليًا في `~/.wolffish/workspace/config.json`. يستخدم Wolffish رمز التحديث لتجديد رموز الوصول بصمت عند انتهائها — لا حاجة لإعادة التفويض.
+  تُخزّن رموز OAuth محليًا في `~/.wolffish/workspace/config.json`. يستخدم وولف فيش رمز التحديث لتجديد رموز الوصول بصمت عند انتهائها — لا حاجة لإعادة التفويض.
 </Note>
 
 ## دعم الحسابات المتعددة
@@ -38,7 +38,7 @@ LLM calls: google_accounts() → returns [{email: "work@company.com"}, {email: "
 LLM calls: gmail_search({account: "work@company.com", query: "is:unread"})
 ```
 
-إذا كان لديك حساب واحد فقط، يظل Wolffish يتطلب معامل `account` للاتساق ولتجنب الالتباس إذا أضفت حسابات أخرى لاحقًا.
+إذا كان لديك حساب واحد فقط، يظل وولف فيش يتطلب معامل `account` للاتساق ولتجنب الالتباس إذا أضفت حسابات أخرى لاحقًا.
 
 ## الأدوات المتاحة
 
