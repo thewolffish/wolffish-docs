@@ -50,11 +50,26 @@ requires:
 | `name` | Yes | Unique identifier for the capability |
 | `version` | No | Semantic version for update logic |
 | `description` | Yes | Short description shown in tool definitions |
-| `triggers` | Yes | Keywords for RAS relevance matching |
+| `triggers` | Yes | Keywords for relevance matching. Use `"*"` for always-on (see below) |
 | `tools` | No | JSON Schema tool definitions for the LLM API |
 | `danger_patterns` | No | Regex patterns that amygdala will **block** |
 | `confirm_patterns` | No | Regex patterns that amygdala will **require approval** for |
 | `requires` | No | Other capabilities this one depends on |
+
+### Always-On Triggers
+
+Use the wildcard `"*"` as a trigger to make a skill inject on **every message**, regardless of what the user says:
+
+```yaml
+triggers:
+  - "*"
+```
+
+Always-on skills don't count against the trigger-match limit — they're injected first, then up to 3 keyword-matched skills are added on top. This is ideal for pure skills that define agent-wide behaviour (planning discipline, output formatting, safety rules) rather than responding to specific topics.
+
+<Info>
+  Always-on triggers only affect pure skills (no `tools` defined). Plugin capabilities with tools are always visible in the `<tools>` section regardless of triggers.
+</Info>
 
 ## Tools Schema
 
@@ -89,6 +104,34 @@ These are regex patterns matched against `toolName + " " + JSON.stringify(args)`
 - **confirm_patterns**: Matched calls trigger an **approval dialog** in the UI. The user must approve before execution.
 
 Calls that match neither pattern are classified as **safe** and execute immediately.
+
+## Pure Skills (No Plugin)
+
+A capability with `tools: []` (or no `tools` field) is a **pure skill**. It has no plugin code and no callable tools — only the markdown body, which is injected into a `<skills>` section in the system prompt when the skill's triggers match.
+
+Pure skills guide the LLM's behaviour without adding new tools. Use them for:
+
+- **Planning discipline** — force the agent to plan before executing multi-step tasks
+- **Output formatting** — enforce structured responses, language preferences, or tone
+- **Procedure guides** — teach the agent how to use existing tools for specific workflows (e.g. git operations via `shell_exec`)
+- **Safety rules** — add constraints that apply across all tool usage
+
+```yaml
+---
+name: planning
+description: Think before acting. Plan multi-step tasks before executing.
+triggers:
+  - "*"
+tools: []
+---
+
+# Planning
+
+Before executing any task that involves 2 or more tool calls, state your
+plan first. Each phase is one line: what you'll do → how you'll verify.
+```
+
+Plugin capabilities (with tools) appear in the `<tools>` section automatically. Pure skills appear in the `<skills>` section only when triggered. The two sections are independent — a message can activate both.
 
 ## Markdown Body
 

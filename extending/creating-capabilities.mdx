@@ -96,13 +96,33 @@ Send a message that matches your triggers. Check:
 
 ## Pure Skill vs Plugin: When to Use Which
 
-Use a **pure skill** when your capability can be accomplished with existing tools (like `shell_exec` or `file_read`). The SKILL.md instructions teach the LLM how to combine existing tools for the task.
+Use a **pure skill** when your capability can be accomplished with existing tools (like `shell_exec` or `file_read`), or when you want to shape agent behaviour without adding new tools. The SKILL.md instructions are injected into a `<skills>` section in the prompt when triggered.
 
 Use a **plugin** when you need custom logic that can't be expressed as shell commands or file operations — API calls, data processing, custom protocols, etc.
 
 <Tip>
   Start with a pure skill. If you find the LLM struggles with complex tool chains, upgrade to a plugin. Pure skills are simpler to write, debug, and share.
 </Tip>
+
+### Always-On Pure Skills
+
+Some pure skills should apply to every message — planning discipline, output formatting, safety constraints. Use the wildcard trigger `"*"`:
+
+```yaml
+---
+name: planning
+description: Think before acting.
+triggers:
+  - "*"
+tools: []
+---
+
+# Planning
+
+Before executing any multi-step task, state your plan first...
+```
+
+Always-on skills are injected before keyword-matched skills and **don't count against the top-3 limit**. A message can activate up to 3 keyword-matched skills on top of any number of always-on skills.
 
 ## Capability Checklist
 

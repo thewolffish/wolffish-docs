@@ -1,0 +1,99 @@
+---
+title: "Media Conversion"
+description: "Convert video files to MP3 audio using the built-in ffmpeg capability"
+---
+
+# Media Conversion
+
+Wolffish can convert any video file to MP3 audio in a single prompt. Drop in a video, tell it what you want, and the built-in ffmpeg capability handles the rest — no manual command-line work, no external tools.
+
+## Setup
+
+### Required
+
+- **Wolffish installed and running**
+- **DeepSeek V4 Pro API key** — configured in Settings > Models. This workflow is simple enough that any model works, but DeepSeek V4 Pro is recommended — it handles the ffmpeg flag translation reliably at the lowest cost.
+- **FFmpeg** — the agent checks for it automatically via `ffmpeg_check` and offers to install it via `ffmpeg_install` if it's missing. If you want to pre-install it yourself: `brew install ffmpeg` (macOS), `sudo apt install ffmpeg` (Linux), or `choco install ffmpeg` (Windows).
+
+### No Permissions Needed
+
+This workflow uses shell execution and the ffmpeg capability only. No computer-use, no browser, no screen recording, no macOS permissions.
+
+## The Prompt
+
+Attach your video file to the conversation, then send:
+
+```
+Convert this video to MP3 audio. Use high quality (192kbps).
+Save it to the workspace folder with the same filename but
+.mp3 extension.
+```
+
+That's it. The agent handles the rest.
+
+### Variations
+
+Adjust the prompt to get exactly what you need:
+
+| What You Want | Prompt |
+|---------------|--------|
+| **Lower file size** | `Convert this video to MP3 at 128kbps` |
+| **Highest quality** | `Convert this video to MP3 at 320kbps` |
+| **Just a clip** | `Extract audio from 1:30 to 3:45 as MP3` |
+| **Custom filename** | `Convert to MP3 and save as podcast-episode-12.mp3` |
+| **Different format** | `Convert this video to WAV` or `Convert to FLAC` |
+| **Batch convert** | `Convert all .mp4 files in the workspace folder to MP3` |
+
+## How It Works
+
+1. The agent receives the attached video file.
+2. It calls `ffmpeg_check` to verify ffmpeg is installed.
+3. If missing, it calls `ffmpeg_install` to install it via your system's package manager.
+4. It calls `ffmpeg_run` with the appropriate arguments — something like:
+   ```
+   -i input-video.mp4 -vn -acodec libmp3lame -ab 192k output-audio.mp3
+   ```
+5. The converted MP3 appears in your workspace folder.
+
+<Note>
+The `-vn` flag strips the video stream. The agent figures out the right codec and bitrate flags from your prompt — you don't need to know ffmpeg syntax.
+</Note>
+
+## Limits
+
+- **File size** — ffmpeg processes files on disk, so the practical limit is your available storage. The 500MB OOM-protection cap applies to audio buffers held in memory, not to file-based conversion.
+- **Codec support** — ffmpeg supports virtually every audio and video format. If a codec is missing, the agent will attempt to install the required library.
+- **Processing time** — proportional to file length and output quality. A 10-minute video converts in seconds. A 2-hour lecture takes a minute or two. No timeout is applied — the command runs until it finishes.
+
+## Cost & Model Guide
+
+This is one of the cheapest workflows in Wolffish. The prompt is short, there's no web research, and the heavy lifting happens in ffmpeg — not the LLM.
+
+| Model | Approximate Cost |
+|-------|-----------------|
+| **DeepSeek V4 Pro** | < $0.001 |
+| **Claude Haiku** | < $0.001 |
+| **Claude Sonnet** | ~$0.002 |
+| **Claude Opus** | ~$0.01 |
+
+<Tip>
+Use your cheapest available model. The LLM's only job here is to translate your request into the right ffmpeg flags — any model handles that reliably.
+</Tip>
+
+## Automating with Heartbeat
+
+If you regularly receive video files that need audio extraction — say, meeting recordings or lecture captures — you can automate it. Open **Settings > Heartbeat** and add:
+
+```markdown
+## Convert New Videos | Daily (09:00)
+
+Check the workspace/recordings folder for any .mp4, .mov,
+.webm, or .mkv files that don't already have a matching .mp3.
+Convert each one to MP3 at 192kbps and save the .mp3 next to
+the original video file. After converting, list what was
+processed.
+```
+
+<Tip>
+Change the folder path and schedule to match your workflow. `Cron (*/30 * * * *)` runs every 30 minutes for near-real-time conversion.
+</Tip>

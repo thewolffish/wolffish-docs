@@ -84,6 +84,7 @@
                     "group": "Use Cases",
                     "expanded": true,
                     "pages": [
+                      "use-cases/media-conversion",
                       "use-cases/gmail-is-dead",
                       "use-cases/pdfs-everywhere",
                       "use-cases/cv-tailor",
@@ -248,6 +249,7 @@
                     "group": "حالات الاستخدام",
                     "expanded": true,
                     "pages": [
+                      "ar/use-cases/media-conversion",
                       "ar/use-cases/gmail-is-dead",
                       "ar/use-cases/pdfs-everywhere",
                       "ar/use-cases/cv-tailor",

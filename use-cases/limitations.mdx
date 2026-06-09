@@ -150,12 +150,17 @@ Wolffish's system prompt places volatile content (iteration counter, tool count)
 
 ## Context Compaction
 
-Wolffish automatically compacts the message history between agent loop iterations to prevent unbounded context growth:
+Wolffish automatically compacts the message history to prevent context overflow. The system uses a three-layer defense:
 
-- **Screenshot eviction:** keeps the 5 most recent screenshots. Older ones have their image data removed and a text marker added. The model's analysis of those screenshots (in adjacent assistant messages) is preserved.
-- **Tool result truncation:** tool results older than 6 assistant turns that exceed 2,000 characters are trimmed to a 500-character prefix. Error results are never truncated.
+1. **Conservative token estimation** (1.5 chars/token) catches most overflows before they happen
+2. **Calibration via actual token counts** from the previous LLM response catches cases where the estimate is too optimistic
+3. **Context-overflow 400 retry** forces compaction and retries if both layers underestimate
 
-These thresholds are conservative — short conversations (under 10 iterations) are unaffected. The compaction targets the long tail of 30-60+ iteration computer-use sessions where accumulated context would otherwise grow without bound.
+Compaction runs once before each LLM iteration — when context exceeds the budget, stale messages are LLM-summarized in parallel batches of 7. A forced compaction also runs as a recovery path if the LLM returns a context-overflow 400 error.
+
+Compaction is load-bearing for heavy tasks — a 41-email reading task uses ~541K tokens after 15 reads, and would overflow the 967K budget without compaction. The trade-off is wall-clock time: compaction adds 3-9 minutes per pass because each message is LLM-summarized. On a 41-email task, compaction accounts for ~83% of the total 15-minute runtime but enables 100% task completion.
+
+For full details, see [Context Compaction](/architecture/context-compaction).
 
 ---
 
@@ -165,7 +170,7 @@ These thresholds are conservative — short conversations (under 10 iterations) 
 These are current constraints as of May 2025. Some are planned for improvement.
 </Warning>
 
-- **Context window is the hard ceiling.** A run that accumulates more tokens than the model's context window will fail. With compaction active this ceiling is much harder to hit, but extremely long sessions (100+ iterations) with many screenshots can approach it.
+- **Context window is the hard ceiling.** A run that accumulates more tokens than the model's context window will trigger compaction. The three-layer defense handles most cases, but extremely long sessions with many large tool results will spend significant wall-clock time on compaction passes. Each compaction pass requires LLM calls to summarize messages, which adds 1-9 minutes depending on content size and provider speed.
 - **No per-job model selection yet.** All heartbeat jobs currently use the model configured in Settings. A research-only job and a computer-use posting job pay the same per-token rate. Per-job model override is a planned feature.
 - **No per-job capability filtering.** All tool capabilities are loaded for every job. A job that only needs `web_search` and `file_write` still carries tool definitions for computer-use, git, notion, etc. The overhead is small (~7K tokens, cached) but non-zero.
 - **Caching is prefix-only.** If an early message changes (e.g., a tool result is modified), everything after it in the cache chain is invalidated. The compaction system is designed to only modify old messages that are deep in the prefix and unlikely to break the active cache boundary.

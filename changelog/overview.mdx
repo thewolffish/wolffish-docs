@@ -3,6 +3,24 @@ title: "Changelog"
 description: "Product updates and improvements to Wolffish"
 ---
 
+<Update label="June 9, 2026" description="v1.0.126 – v1.0.129">
+
+## New features
+
+- **Context compaction redesign.** The compaction system has been rebuilt to use instant proportional truncation plus a single LLM summary call, replacing the previous per-message approach that required N separate API calls. Compaction that took 6 minutes now completes in under 30 seconds, and a structured continuation nudge ensures the model finishes multi-step tasks after compaction instead of treating shorter context as "done."
+- **Planning skill.** A built-in skill that injects planning discipline into every turn — the agent must state its understanding, lay out phases with verification criteria, and confirm each definition of done after execution.
+- **Conversation timeline.** Conversations now track a timeline of key events (tool calls, results, compaction, model switches) that persists across sessions.
+- **Multi-turn tool history.** Channel conversations (Telegram, WhatsApp) now reconstruct full tool-call history from stored segments, so the model can see its prior tool interactions across turns.
+
+## Updates
+
+- **Batch completion enforcement.** New runtime instruction ensures the agent completes every item in batch operations (e.g. reading all emails, not just a subset).
+- **Structured provider error cards.** Error details now always show provider name, HTTP status, error reason, retry count, and duration — even when the API returns no error body.
+- **Provider failure tracking.** Per-provider failure details are now surfaced when a stream errors mid-response, not just when all providers are exhausted.
+- **Tool transcript detail logs.** A separate detail log captures full raw tool output alongside the truncated transcript preview.
+
+</Update>
+
 <Update label="May 29, 2026" description="v1.0.76 – v1.0.102">
 
 ## New features

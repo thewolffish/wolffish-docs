@@ -5,9 +5,9 @@ description: "How Wolffish keeps long conversations within the model's context w
 
 # Context Compaction
 
-Wolffish is stateless — every LLM call carries the full conversation history. As a turn accumulates tool results (email bodies, web pages, shell output, screenshots), the message array can grow past the model's context window. Context compaction solves this by trimming stale content in-place, keeping the conversation running without losing anything the model needs.
+Wolffish is stateless — every LLM call carries the full conversation history. As a turn accumulates tool results (email bodies, web pages, shell output, screenshots), the message array can grow past the model's context window. Context compaction solves this by truncating stale content and producing a structured summary, keeping the conversation running without losing anything the model needs.
 
-Compaction operates in two tiers: a cheap pass that runs every iteration (zero LLM cost), and an expensive overflow pass that uses LLM-generated summaries as a safety net. Both tiers emit compaction cards in the chat UI so you always see when and how context was reduced.
+Compaction triggers proactively at 75% of the context budget — well before an overflow would crash the turn. Each target is proportionally truncated (instant, no LLM call), then a single LLM call summarizes the original content into a structured conversation state. Both the truncated messages and the summary are injected into context so the model can continue exactly where it left off.
 
 ## How Context Is Built
 
@@ -20,8 +20,9 @@ System prompt (~13K tokens)
   <variables>     — user-defined config variables
   <prefrontal>    — agents.core.md + agents.md
   <tools>         — all loaded capability tool definitions
+  <skills>        — skill definitions (e.g. planning)
   <memory>        — relevant episodes + knowledge (RAS-scored)
-  <runtime>       — iteration counter, provider status
+  <runtime>       — iteration counter, tool count, batching instruction
 
 + Conversation messages (grows with each iteration)
   [user message]
@@ -32,126 +33,264 @@ System prompt (~13K tokens)
   ...
 ```
 
-The system prompt is budget-allocated across categories by the RAS module:
-
-| Category | Budget Share | Contents |
-|---|---|---|
-| Identity | 15% | `soul.md`, `user.md` |
-| Prefrontal | 10% | `agents.core.md`, `agents.md` |
-| Memory | 30% | Episodes, knowledge files (relevance-scored) |
-| Skills | 20% | Tool definitions from capabilities |
-| History | 25% | Recent episode summaries |
-
-The system prompt stays relatively stable across iterations (~13K tokens). What grows is the conversation messages — each tool result can add thousands of tokens, and a turn that reads 23 emails can accumulate 800K+ tokens of tool results alone.
+The system prompt stays relatively stable across iterations (~13K tokens). What grows is the conversation messages — each tool result can add thousands of tokens, and a turn that reads 41 emails can accumulate 500K+ tokens of tool results alone.
 
 ## The Problem
 
-Consider a typical email briefing: the model searches for unread emails, then reads each one individually. After reading 23 emails, the message array holds:
+Consider a typical email briefing: the model searches for unread emails, then reads each one individually. After reading 30+ emails, the message array holds:
 
 ```
-Iteration 1:   38K tokens  (system + user message + search results)
-Iteration 2:   40K tokens  (+ email search results)
-Iteration 3:  839K tokens  (+ 23 full email bodies)
-Iteration 4:  839K tokens  (model generates the briefing)
+Iteration 1:   42K tokens  (system + user message + accounts call)
+Iteration 2:   47K tokens  (+ email search results for 2 accounts)
+Iteration 3:  541K tokens  (+ 15 full email bodies)
+Iteration 4:  ~1M tokens   (+ 15 more email bodies — would OVERFLOW)
 ```
 
-If the user sends a follow-up message, all 839K tokens of email content are still in the conversation — even though the model already processed them and produced a summary. Without compaction, context would overflow within a few turns.
+Without compaction, iteration 4 would exceed the model's 967K input budget and fail with a 400 error. Worse, without a continuation nudge, the model might treat the compacted context as "done" and skip remaining work — reading 30 of 43 emails and producing a final summary, silently dropping the last 13.
 
-## Tier 1: Cheap Compaction
+## Three-Layer Defense
 
-Runs every iteration, before the LLM call. Zero cost — pure string slicing, no API calls.
+The compactor uses three layers to decide whether compaction is needed. Each layer catches failures the previous layer might miss.
 
-### What It Does
+### Layer 1: Proactive 75% Threshold
 
-Two passes over the message array:
+Every message's character count is converted to an estimated token count using a conservative ratio:
 
-**Pass 1 — Image eviction**: Keeps the 5 most recent screenshot images. Older screenshots have their base64 data removed. The tool's text output (dimensions, display info) is preserved, and a `[Screenshot analyzed — image omitted from context]` marker is prepended. The model's analysis of those screenshots is preserved in the adjacent assistant messages.
-
-**Pass 2 — Result truncation**: Tool results older than 2 assistant turns that exceed 2,000 characters are trimmed to a 500-character prefix. A marker is appended:
-
-```
-[...truncated 29,500 chars — full result was processed in an earlier iteration]
+```typescript
+const CHARS_PER_TOKEN = 1.5
+const COMPACTION_THRESHOLD = 0.75  // trigger at 75% of budget
+const COMPACTION_TARGET = 0.50     // compact down to 50%
 ```
 
-Error results are never truncated — the model may need them for retry logic.
+The chars-to-token ratio is deliberately aggressive. Different providers and content types tokenize at wildly different densities:
 
-### Why 2 Assistant Turns
+| Content Type | Typical Chars/Token |
+|---|---|
+| English prose | ~4 |
+| JSON/HTML | ~1.5-2.5 |
+| DeepSeek on JSON | ~1.2-1.8 |
 
-After two assistant responses have been produced since a tool result, the model has had ample opportunity to extract everything it needs from that result. The 500-character prefix is enough for the model to remember "I called `google_gmail_read` and got this email from X about Y" without carrying the full email body.
+Using 1.5 means the estimate will sometimes overcount tokens, triggering compaction earlier than strictly necessary. The cost of overestimation (an extra compaction pass) is far lower than underestimation (a 400 error that crashes the turn).
+
+Compaction triggers when the payload exceeds 75% of the input budget and compacts down to 50%, leaving substantial headroom for the model to continue working before the next compaction pass.
+
+### Layer 2: Calibration via Actual Token Counts
+
+After each LLM response, the API returns the actual `inputTokens` used. On the next iteration, this value is passed to the compactor as `lastKnownInputTokens`. The compactor uses the **higher** of the character estimate and the actual count:
+
+```typescript
+const currentTokens = Math.max(charEstimate, lastKnownInputTokens)
+```
+
+This catches cases where the character estimate underestimates — for example, when DeepSeek's tokenizer produces more tokens than 1.5 chars/token would predict. The actual data from the previous call doesn't lie.
+
+### Layer 3: Context-Overflow 400 Retry
+
+If both layers underestimate and the LLM returns a 400 context-overflow error, the agent catches it and forces compaction with `force: true`. This bypasses the threshold check entirely and compacts the largest messages unconditionally, then retries the LLM call.
+
+```
+Layer 1: char estimate says we're under 75%       → no compaction
+Layer 2: actual tokens say we're under 75%         → no compaction
+LLM call → 400 context overflow
+Layer 3: force compaction, retry                   → compacts + retries
+```
+
+This is the safety net. In practice, Layers 1 and 2 catch most cases. Layer 3 fires only when a large tool result tips the balance between the estimate and the actual limit.
+
+## Target Selection
+
+When compaction triggers, the compactor selects targets greedily in priority order until projected savings cover the excess between the current token count and the 50% target:
+
+**Pass 1 — Tool results** (largest first): Skip errors and the 3 most recent results. Largest results are compacted first because they yield the most savings per target.
+
+**Pass 2 — Older assistant messages** (oldest first): Skip the 3 most recent. The model's own responses contain analysis that may be referenced, so they're compacted only when tool results weren't enough.
+
+**Pass 3 — Older user messages** (oldest first): Skip `messages[0]` (the original task prompt) and the 3 most recent. User messages are the last resort — they're typically small and contain the user's intent.
+
+**Always protected:**
+- `messages[0]` — the first user message (original task prompt) is never compacted
+- Last 3 messages per role (tool, assistant, user)
+- Error tool results (`isError: true`)
+- Messages under 500 characters
+- Previously compacted summaries are NOT protected — allowing recursive compression across multiple passes
 
 ### Constants
 
 | Constant | Value | Purpose |
 |---|---|---|
-| `COMPACT_KEEP_IMAGES` | 5 | Screenshot images to preserve (most recent) |
-| `COMPACT_STALE_TURNS` | 2 | Assistant turns before a tool result is considered stale |
-| `COMPACT_TRUNCATE_ABOVE` | 2,000 | Minimum chars to be eligible for truncation |
-| `COMPACT_KEEP_CHARS` | 500 | Chars preserved as a prefix when truncating |
-
-### In-Flight Only
-
-All mutations are local to the in-flight `messages` array inside the agent loop. The conversation file on disk retains the full uncompacted content. When a conversation is reloaded for a new turn, the full content is available — and compaction runs again from scratch.
-
-## Tier 2: Overflow Compaction (LLM)
-
-Runs after cheap compaction, only when the estimated token count still exceeds the model's input budget. This is the safety net — rarely needed when cheap compaction keeps context lean.
-
-### Token Estimation
-
-Token counts are estimated at 2 characters per token. This is deliberately conservative for JSON-heavy tool results (which tokenize at ~2-2.5 chars/token). The cost of underestimation (context overflow causing a 400 error) far exceeds overestimation (unnecessary compaction).
-
-### Target Selection
-
-Targets are picked greedily in priority order until projected savings cover the excess:
-
-**Pass 1 — Tool results** (largest first): Skip errors and the 3 most recent results. Largest results are compacted first because they yield the most savings.
-
-**Pass 2 — Older assistant messages** (oldest first): Skip the 2 most recent. The model's own responses contain analysis that may be referenced, so they're compacted only when tool results weren't enough.
-
-**Pass 3 — Older user messages** (oldest first): Skip the 2 most recent. User messages are the last resort — they're typically small and contain the user's intent.
-
-### Per-Target Compaction
-
-Each target is compacted in parallel for speed:
-
-1. **LLM summarization** (primary): The content is sent to `thalamus.compactContent()`, which uses the cheapest available provider from the cascade. A `[Compacted by {provider}]` header is prepended to the summary.
-
-2. **Truncation fallback** (if LLM fails): First 2,000 chars + last 800 chars are kept, with a `[...chars compacted — summary unavailable, showing head+tail]` marker in between.
-
-If the content exceeds the compaction model's own context window, it's split into parts, each compacted separately, and the summaries are concatenated.
-
-### Constants
-
-| Constant | Value | Purpose |
-|---|---|---|
-| `PROTECT_TOOL_RESULTS` | 3 | Most recent tool results protected from compaction |
-| `PROTECT_RECENT_MESSAGES` | 2 | Most recent assistant/user messages protected |
+| `CHARS_PER_TOKEN` | 1.5 | Conservative chars-to-token ratio |
+| `COMPACTION_THRESHOLD` | 0.75 | Trigger compaction when payload exceeds this fraction of budget |
+| `COMPACTION_TARGET` | 0.50 | Compact down to this fraction — leaves headroom for continued work |
+| `PROTECT_RECENT` | 3 | Most recent messages per role protected from compaction |
 | `MIN_COMPACTION_SIZE` | 500 | Minimum chars for a message to be worth compacting |
-| `COMPACTION_RATIO` | 0.15 | Expected output size as fraction of input (85% savings) |
+| `COMPACTION_RATIO` | 0.25 | Expected retention after truncation (~25% of original) |
+| `HEAD_RATIO` / `HEAD_CAP` | 0.15 / 6,000 | Head excerpt: 15% of original, capped at 6K chars |
+| `TAIL_RATIO` / `TAIL_CAP` | 0.08 / 3,000 | Tail excerpt: 8% of original, capped at 3K chars |
+
+## The Compaction Flow
+
+Compaction runs in five steps — all in-place on the `messages` array:
+
+### Step 1: Strip Images
+
+All images are removed from tool results across the entire message array. A text marker is prepended if one isn't already present:
+
+```
+[Screenshot analyzed — image omitted from context]
+```
+
+This runs first because images (base64-encoded screenshots) are the single largest space consumers and never need to persist past the iteration where they were analyzed.
+
+### Step 2: Save Originals
+
+The full original content of each target is saved in memory before any mutation. These originals are used to build the summary prompt — the LLM sees the full content even though the messages array already holds truncated versions.
+
+### Step 3: Proportional Truncation
+
+Each target is truncated in-place using proportional head+tail sizing:
+
+```
+Head: min(content.length × 0.15, 6000) chars
+Tail: min(content.length × 0.08, 3000) chars
+```
+
+A clear label is inserted between head and tail:
+
+```
+[TRUNCATED — 45,000 chars original, 36,000 chars omitted,
+showing first 6,000 + last 3,000 chars]
+```
+
+For assistant messages, `reasoningContent` is cleared (the reasoning was consumed when the response was generated — it's not needed in history). `toolUses` are preserved so the model can see which tools it called.
+
+This step is instant — no LLM calls. The truncated content stays in the messages array permanently.
+
+### Step 4: One-Shot Summary
+
+A single LLM call processes all saved originals into a structured conversation summary. The summary prompt instructs the model to produce five sections:
+
+```
+TASK: What the user originally asked for
+PROGRESS: Numbered list of completed steps with key results
+REMAINING: What still needs to be done (exact items, counts, IDs)
+DATA: Key values — names, emails, dates, IDs, numbers, URLs, errors
+DECISIONS: Any decisions or confirmations made
+```
+
+The call uses `thalamus.summarize()`, which routes through the same provider cascade as the main agent stream. If the content exceeds the summarization model's own context window, it's split into parts, each summarized separately, and the results merged.
+
+The call retries up to 5 times with escalating backoff: 1s → 2s → 4s → 8s → 16s.
+
+### Step 5: Inject Summary + Continuation Nudge
+
+A user message is pushed onto the messages array containing the summary and an explicit instruction to continue:
+
+**When the summary succeeds:**
+
+```
+[Compaction Summary]
+
+TASK: Read all unread emails and produce a briefing.
+PROGRESS:
+1. Searched 2 accounts — found 43 unread
+2. Read emails 1-30 (batches of 15)
+REMAINING:
+1. 13 emails not yet read: [IDs]
+2. Final briefing not produced
+DATA:
+- Keeta order #KT-9284 delivered 2:43 AM
+- Apple DPLA deadline: July 9, 2026
+DECISIONS:
+- User confirmed all accounts should be included
+
+[Status: Context was compacted. The messages above contain truncated
+versions of older content. This summary captures the full conversation
+state. Continue where you left off. Do NOT produce final output until
+ALL steps are complete. Do NOT re-do completed work.]
+```
+
+**When the summary fails (all retries exhausted):**
+
+```
+[Compaction Notice: Context was compacted by truncating older messages
+(showing first and last portions of each). A conversation summary could
+not be generated. Review the truncated content carefully to reconstruct
+what has been completed and what remains. Continue where you left off.
+Do NOT produce final output until ALL steps are complete.]
+```
+
+This continuation nudge is critical — without it, models consistently treat compacted (shorter) context as "done" and produce final output, silently dropping remaining batch work.
+
+## Task File Summaries
+
+When the agent executes a multi-step task, each tool result is written to a task file at `brain/motor/tasks/TASK-{id}.md`. To keep these files small enough for the RAS module to index (the task file is included in the `<memory>` section of subsequent prompts), tool outputs are written as 2,000-character previews:
+
+```
+### Step 3: google_gmail_search
+- **Output:** (9,450 chars) {"account":"younes@wolffi.sh","count":41,... [7,450 chars omitted]
+```
+
+The full untruncated output is written to a separate detail log at `TASK-{id}-detail.log`. This file is never indexed by the cortex — it exists purely for debugging. You can read it to see the complete tool output for any step.
+
+This keeps the task file under ~100KB even for tasks with massive tool outputs (like reading 41 emails that would produce ~2.5MB of raw content), while preserving enough context for the model to reference what it found.
+
+## Runtime Batching Instruction
+
+The `<runtime>` block appended to every system prompt includes an advisory instruction for handling large tool sets:
+
+```xml
+<runtime>
+  Tool iteration this turn: 3
+  Tools called this turn: 15
+  IMPORTANT: When a task requires calling a tool for each item in a set
+  (e.g. reading N emails, fetching N pages), you MUST call the tool for
+  EVERY item before producing final output. Batch 10-15 calls per response
+  for efficiency, then continue with the remaining items in your next
+  response. Metadata from search/list results is NOT a substitute for
+  calling the per-item tool — if the task says "read all," call read for
+  ALL, not just a subset.
+</runtime>
+```
+
+This is a soft instruction — the model follows it voluntarily. It's not enforced programmatically. The instruction serves two purposes:
+
+1. **Prevents premature stopping**: Without it, models tend to read a subset of items and produce output using search metadata for the rest.
+2. **Encourages batching**: By suggesting 10-15 calls per response, the model produces manageable batches that the pre-iteration compaction check can handle between rounds.
 
 ## The Agent Loop
 
-Both tiers run in sequence before every LLM call:
+Compaction runs at one point in the agent loop — before each LLM call:
 
 ```
-compactMessages(messages)      → Tier 1: truncate stale results + evict old images
-                                 → emit compaction card if anything changed
-
-compactOverflow(messages)      → Tier 2: LLM summarization if still over budget
-                                 → emit compaction card if triggered
-
-thalamus.stream(messages)      → send to the model
+┌─────────────────────────────────────────────────────┐
+│ compactOverflow(messages, lastKnownTokens)          │  ← Before LLM call
+│   Layer 1: char estimate > 75% of budget?           │
+│   Layer 2: actual tokens > 75% of budget?           │
+│   → strip images                                    │
+│   → truncate targets proportionally (instant)       │
+│   → one LLM call: summarize originals               │
+│   → inject summary + continuation nudge             │
+│   → onStarted callback emits events + card          │
+├─────────────────────────────────────────────────────┤
+│ thalamus.stream(messages)                           │  ← LLM call
+│   → if 400 overflow: Layer 3 force + retry          │
+├─────────────────────────────────────────────────────┤
+│ Execute tool calls sequentially:                    │
+│   tool 1 → push result                              │
+│   tool 2 → push result                              │
+│   ...                                               │
+│   tool N → push result                              │
+│   → next iteration (back to top)                    │
+└─────────────────────────────────────────────────────┘
 ```
-
-In practice, Tier 1 handles most context reduction. Tier 2 fires only in extreme cases — conversations with many large tool results across multiple turns where even truncated stubs accumulate past the budget.
 
 ## Context Window Budgets
 
-The input budget for compaction is the model's context window minus its output token reserve. For providers with separate input/output windows (Anthropic), the full context window is available for input:
+The input budget is the model's context window minus its output token reserve:
 
 | Model | Context Window | Output Reserve | Input Budget |
 |---|---|---|---|
-| DeepSeek v4 Pro | 1,000,000 | 32,768 | 967,232 |
+| DeepSeek V4 Pro | 1,000,000 | 32,768 | 967,232 |
 | Claude Opus 4.6+ | 1,000,000 | 0 (separate) | 1,000,000 |
 | Claude Sonnet 4.6 | 1,000,000 | 0 (separate) | 1,000,000 |
 | Grok 4.3 | 1,000,000 | 65,536 | 934,464 |
@@ -160,45 +299,94 @@ The input budget for compaction is the model's context window minus its output t
 | Kimi K2 | 262,144 | 65,536 | 196,608 |
 | Qwen 3.7 Max | 1,000,000 | 65,536 | 934,464 |
 
-The context meter in the UI shows the full model context window (not the discounted input budget), so you see how much of the model's total capacity is in use.
+## Real-World Performance
+
+Here's what compaction looks like on a real 41-email reading task with DeepSeek V4 Pro under the new system:
+
+| Phase | Emails Read | Context After | Time |
+|---|---|---|---|
+| Discovery | — | 47K (5%) | 30s |
+| Batch 1 | 15 | 541K (56%) | 22s |
+| Compaction #1 | — | ~170K (truncate + summary) | ~25s |
+| Batch 2 | 15 | 627K (65%) | 33s |
+| Compaction #2 | — | ~170K (truncate + summary) | ~25s |
+| Batch 3 | 11 | 673K (70%) | 44s |
+| **Total** | **41/41** | — | **~3 min** |
+
+Key observations:
+- **Compaction triggers at 75%** — earlier than the old system (100%), preventing any risk of overflow
+- **Compaction is now fast** — ~25 seconds per pass (1 LLM call) vs 3-9 minutes (N LLM calls) previously
+- **Compaction no longer dominates wall-clock time** — the old system spent 83% of runtime on compaction; the new system spends ~15%
+- **The continuation nudge ensures all 41 emails are read** — previously the model might stop at 30
+
+### Previous vs New System
+
+| Metric | Previous | New |
+|---|---|---|
+| Trigger threshold | 100% of budget | 75% of budget |
+| Method | N parallel LLM summarization calls | Instant truncation + 1 LLM summary |
+| Time per pass | 3-9 minutes | ~25 seconds |
+| Continuation | No nudge (model might skip remaining work) | Structured summary + explicit nudge |
+| Protection | Last 3 tool results, last 2 assistant/user | Last 3 per role + first user message |
+| Recursive | No (compacted messages protected) | Yes (old summaries re-compactable) |
 
 ## Compaction Cards
 
-When either tier compacts content, a compaction card appears in the chat UI showing:
+Compaction shows two cards in the chat UI:
+
+**While compacting** — a `compaction_started` card appears with a pulsing blue badge showing the number of messages being compacted and how many targets were selected. This card disappears once compaction completes.
+
+**After compaction** — a `compaction` card replaces it, showing:
 
 - **Target count**: How many messages were compacted
-- **Tokens saved**: Estimated tokens reclaimed (chars / 4 for cheap compaction, measured before/after for LLM compaction)
-- **Duration**: 0 for cheap compaction (instant), actual wall-clock time for LLM compaction
-- **Per-target details** (expandable): Tool name, original size, compacted size, reduction percentage, and method (`truncation`, `image eviction`, or the model name for LLM compaction)
+- **Tokens saved**: Measured before/after token estimate
+- **Duration**: Wall-clock time for the compaction pass
+- **Per-target details** (expandable): Tool name, original size, compacted size, reduction percentage, and the compaction method
 
 ## Corpus Events
 
-Both tiers emit events on the corpus event bus:
+Compaction emits two events on the corpus event bus:
 
 ```
+// Fires when compaction begins (after target selection confirms work is needed)
+corpus.emit('compaction.started', {
+  messagesCount: 52,      // total messages in context
+  force: false             // true only on 400-overflow retry
+})
+
+// Fires when compaction completes
 corpus.emit('compaction.applied', {
-  tokensSaved: 250000,    // estimated tokens reclaimed
-  targetsCount: 23        // number of messages compacted
+  tokensSaved: 467089,    // estimated tokens reclaimed
+  targetsCount: 8         // number of messages compacted
 })
 ```
 
-These events are logged in the daily corpus log at `brain/corpus/YYYY-MM-DD.log.md` and can be used by the context meter to reflect pre-compaction context size.
+Both events are relayed to the renderer timeline via `TURN_RELAYED_EVENTS` and logged in the daily corpus log at `brain/corpus/YYYY-MM-DD.log.md`.
 
 ## Debugging
 
 To inspect compaction behavior:
 
-1. **Corpus logs** (`brain/corpus/YYYY-MM-DD.log.md`): Look for `compaction.applied` events. If none appear, compaction didn't trigger — the context fit within the budget.
+1. **Corpus logs** (`brain/corpus/YYYY-MM-DD.log.md`): Look for `compaction.started` and `compaction.applied` events. If neither appear, compaction didn't trigger — the context fit within 75% of the budget.
 
 2. **Prefrontal debug snapshots** (`brain/prefrontal/.debug/`): Each iteration writes a snapshot showing `tokenCount` (system prompt tokens) and `tokenBudget` (the input budget). Compare `tokenBudget` with the `inputTokens` from the `llm.response` event to see how close you are to the limit.
 
-3. **Compaction cards in the UI**: Expand the card details to see exactly which tool results were compacted, by how much, and by what method.
+3. **Compaction cards in the UI**: Expand the card details to see exactly which messages were compacted, by how much, and by what method.
 
 4. **Console logs**: The compactor logs its decision at each iteration:
    ```
-   [compactor] estimate=839203 budget=967232 messages=52 sysChars=26000 needsCompaction=false
+   [compactor] charEstimate=839203 lastKnown=541090 effective=839203
+               budget=967232 threshold=725424 (75%)
+               messages=52 sysChars=26000
+               tools=47 force=false needsCompaction=false
    ```
 
+5. **Task detail logs** (`brain/motor/tasks/TASK-{id}-detail.log`): Contains full untruncated tool outputs. Compare with the task file's 2,000-char previews to see what was truncated.
+
 <Info>
-  If compaction never triggers but context feels large, that's correct — Tier 1 (cheap compaction) keeps context lean by truncating stale results before they accumulate. Tier 2 (LLM compaction) is the safety net for when even truncated content overflows the budget.
+Compaction triggers at 75% of budget by design — this gives the system room to truncate and summarize before context pressure becomes critical. If you see compaction events when context is only at 50-60%, that's the calibration layer (Layer 2) using actual token data from the previous LLM call to detect that the character estimate is too optimistic. The system then compacts down to 50% of budget, leaving substantial headroom for the model to continue working.
 </Info>
+
+## In-Flight Only
+
+All mutations are local to the in-flight `messages` array inside the agent loop. The conversation file on disk retains the full uncompacted content. When a conversation is reloaded for a new turn, the full content is available — and compaction runs again from scratch.

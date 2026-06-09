@@ -39,7 +39,11 @@ On startup, `cerebellum.ts` scans `brain/cerebellum/` and for each folder:
 
 ## How Capabilities Are Selected
 
-Not every capability is included in every LLM call. The `ras` (attention filter) uses the `triggers` field from SKILL.md frontmatter to score relevance against the user's message. Only capabilities that pass the relevance threshold are included in the context.
+**Plugin capabilities** (with tools) are always included in the `<tools>` section — the LLM needs to know what tools it can call regardless of the message topic.
+
+**Pure skills** (no tools) are injected into a `<skills>` section only when the user's message matches their trigger keywords. The cerebellum scores each skill by how many trigger keywords appear in the message and injects the top 3 matches.
+
+A trigger of `"*"` (wildcard) makes a pure skill **always-on** — it's injected on every message without keyword matching and doesn't count against the top-3 limit. Use this for skills that define agent-wide behaviour like planning discipline or output formatting.
 
 ## Built-In Capabilities
 

@@ -73,10 +73,10 @@ If `wernicke` finds tool calls, the loop begins (max 8 iterations):
 3. **cerebellum.executeTool()** — Routes the call to the correct capability plugin.
 4. Results go back to the LLM for the next iteration.
 
-Before each iteration's LLM call, context compaction runs to keep the growing message array within the model's context window — first a cheap truncation pass (zero cost), then an LLM-summarization pass if still over budget.
+Before each iteration's LLM call, context compaction checks whether the message array exceeds 75% of the model's context budget. If it does, stale messages are proportionally truncated in-place and a single LLM call produces a structured conversation summary with a continuation nudge — ensuring the model finishes multi-step tasks even after compaction.
 
 <Card title="Context Compaction" icon="compress" href="/architecture/context-compaction">
-  How stale tool results and old screenshots are automatically trimmed to keep long conversations running.
+  How proportional truncation plus one-shot summarization keeps long conversations running without losing information.
 </Card>
 
 ### 7. Memory (hippocampus + basalganglia)
