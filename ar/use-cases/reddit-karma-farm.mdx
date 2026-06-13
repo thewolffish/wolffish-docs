@@ -1,0 +1,255 @@
+---
+title: "حصد كارما Reddit"
+description: "ينشر تلقائياً 10 ردود عالية القيمة عبر مواضيع subreddit شائعة لكسب الكارما باستخدام جلسة متصفحك المسجَّل دخولها — بدون Reddit API"
+---
+
+# حصد كارما Reddit
+
+يستخدم وولف فيش حساب Reddit الخاص بك **المسجَّل دخوله مسبقاً** عبر إضافة المتصفح لنشر 10 ردود أصلية عالية القيمة على مواضيع شائعة وعالية الزخم في مجال المصادر المفتوحة / وكلاء الذكاء الاصطناعي الشخصيين / النماذج اللغوية المحلية. كل رد يضيف شيئاً حقيقياً إلى الموضوع، ويدعو إلى مزيد من التفاعل، ويكسب كارما، ويُلمِّح بلطف إلى فلسفة وولف فيش. بدون Reddit API. بدون OAuth. يعمل داخل جلسة Chrome الحقيقية لديك، بصفتك، عبر وضع المصحِّح (debugger mode) في الإضافة.
+
+ينضم الوكيل إلى كل مجتمع قبل الرد فيه، ويقرأ المنشور وأبرز تعليقاته، ويجد معلومة موثَّقة، ويصيغ ← ينتقد ← يعيد الصياغة ثلاث مرات، يفحص ذاتياً، يرد، يتأكد أن الرد ظهر، ثم ينتظر مدة عشوائية بين دقيقتين و5 دقائق قبل التالي.
+
+<Warning>
+  **اقرأ هذا قبل التشغيل.** "حصد الكارما" بردود مؤتمتة يتعارض تماماً مع [سياسة محتوى Reddit](https://redditinc.com/policies/content-policy) ومعظم قواعد المجتمعات. التلاعب بالتصويت، والترويج غير المُفصَح عنه، وأنماط الردود الشبيهة بالبوتات قد تؤدي إلى حظر حسابك (shadowban) أو حظره نهائياً، ويزيل المشرفون الردود منخفضة الجهد أو خارج الموضوع بسرعة. وضع المصحِّح وhumanize يجعلان النشاط يبدو بشرياً لكنهما **لا** يجعلانه متوافقاً مع القواعد. استخدم هذا فقط في مجتمعات تشارك فيها فعلاً، وأبقِ كل رد جوهرياً، وأفصِح عن أي انتماء تتطلبه القواعد. أنت المسؤول عن كل ما يُنشر من حسابك. نحن لا نؤيّد انتهاك شروط أي منصة.
+</Warning>
+
+## الإعداد
+
+هذا السير يعمل **عبر إضافة المتصفح فقط** — لا يلمس Reddit API إطلاقاً. اقرأ دليل [التهيئة للنجاح](/ar/use-cases/setting-up-for-success) العام للصورة الكاملة؛ ما يلي خاص بهذا السير.
+
+### مطلوب
+
+- **وولف فيش مثبَّت ويعمل** — تطبيق سطح المكتب مع مساحة عمل دماغية مُهيأة.
+- **إضافة المتصفح مثبَّتة ومتصلة** — يعمل السير بأكمله عبرها. افتح **الإعدادات → الخدمات → إضافة المتصفح**، حمّل الإضافة غير المحزومة في Chrome أو Brave (`chrome://extensions` ← وضع المطوِّر ← تحميل غير محزوم)، وتأكد أن **نقطة الحالة خضراء** قبل أن تبدأ. بلا نقطة خضراء، لا وصول إلى Reddit — وستفشل التشغيلة عند أول إجراء. راجع [توثيق إضافة المتصفح](/ar/integrations/browser-extension).
+- **مسجَّل الدخول في Reddit داخل ذلك المتصفح** — تُعيد الإضافة استخدام جلستك الموجودة. تأكد أنك مسجَّل الدخول بالحساب الصحيح واترك المتصفح مفتوحاً. يعمل الوكيل بصفتك — بدون تخزين بيانات اعتماد، بدون عملية تسجيل دخول.
+- **وضع المصحِّح (debugger mode)** — يربط الوكيل بروتوكول Chrome DevTools (`ext_debugger_attach`) لكي تُكتب الردود وتُرسَل كأحداث إدخال موثوقة بدلاً من استدعاءات DOM قابلة للكشف. هذا هو "debugger mode" الذي يشير إليه الموجِّه. يربطه الوكيل تلقائياً.
+- **مفتاح API سحابي** — مُهيأ في **الإعدادات → النماذج**. هذا هو نموذج اللغة الذي يُشغّل الوكيل — قراءة الموضوع، وصياغة الردود متعددة التمريرات، وقرارات الحكم، وتنسيق استدعاء الأدوات. وهو **لا** يُجري البحث على الويب (تلك قدرة منفصلة — راجع «اختياري» أدناه).
+
+### موصى به
+
+- **DeepSeek V4 Flash في وضع Max.** قراءة المواضيع وأبرز التعليقات تعني الكثير من استدعاءات `ext_read_page`، وكل واحد يُعيد نص الصفحة بالكامل — ينمو السياق بسرعة وتهيمن تكلفة الرمز. DeepSeek V4 Flash هو أرخص نموذج قادر بسعر **0.14$ / 0.28$ لكل مليون رمز** (مقابل ~25$ لنفس جلسة التصفح على نموذج رائد — راجع [جدول تكاليف الإضافة](/ar/integrations/browser-extension#cost-why-model-choice-matters)). يُفعّل **وضع Max** الاستدلال العميق حيث يهم — قراءة ما يقوله الموضوع فعلاً، وحلقة الصياغة ← النقد ← إعادة الصياغة الثلاثية، وبوابة الفحص الذاتي، والتأكد من ظهور كل رد. حكم بمستوى النماذج الرائدة بأسعار تصفّح. اضبطه لكل محادثة؛ راجع [DeepSeek](/ar/configuration/deepseek).
+
+### اختياري
+
+- **[مفتاح Brave Search API](https://brave.com/search/api/)** — مُهيأ في **الإعدادات → الخدمات → Brave Search**. تعمل خطوة **RESEARCH** عبر `web_search` التي تعمل افتراضياً، لكن مفتاح Brave يحسّن جودة النتائج بوضوح — معلومات موثَّقة أفضل وأحدث يبني حولها الوكيل كل رد. اختياري، لكنه موصى به لهذا السير، لأن المعلومة الموثَّقة هي ما يكسب التصويتات الإيجابية.
+
+### قبل أن تبدأ
+
+اترك متصفحك مفتوحاً على Reddit، مسجَّل الدخول، ونقطة الإضافة خضراء. يستخدم الوكيل نافذتك الموجودة — لا متصفح جديد، لا جلسة headless.
+
+## الموجِّه
+
+أرسل هذا إلى وولف فيش في رسالة واحدة. يجد المواضيع، وينضم إلى المجتمعات، ويصيغ، ويرد، ويتحقق، وينتظر — مستقل بالكامل حتى يُنشر 10 ردود.
+
+```
+ROLE: You are Wolffish operating in full autonomous agent mode. Use your browser
+session capability (wolffish-extension / debugger mode) with my ALREADY LOGGED-IN
+Reddit account. Do not use the Reddit API. Do not ask me anything. Do not stop until
+the EXIT CONDITION is met.
+
+MISSION: Post 10 original, high-value REPLIES to popular posts across popular subreddits
+in the open-source / personal-AI-agent / local-LLM space. Each reply must invite further
+engagement and earn karma, while softly foreshadowing Wolffish's philosophy.
+
+WOLFFISH PHILOSOPHY TO FORESHADOW (never pitch it directly, never name it as a product
+— let it emerge as an opinion/idea):
+- brain-like architecture, but radically minimal and simple
+- built for END USERS, not just devs
+- does a FEW things extremely well instead of many things badly
+- local-first, markdown-as-truth, you can read your agent's whole brain in a text editor
+
+REASONING DISCIPLINE (think before every action):
+Before each phase, reason step by step in your scratchpad: what's the goal, what could
+go wrong, what's the best move. Then act. After each action, verify the result before
+continuing. Never assume success — confirm it. The mandatory wait between replies is a
+real action — never skip, shorten, or "simulate" it.
+
+PHASE 0 — TARGET SELECTION:
+Search and identify POPULAR, ACTIVE subreddits in this space (e.g. open-source AI
+agents, local LLMs, self-hosted AI, AI tooling, indie AI builders). Within them, find
+popular, recent, high-traffic posts where a thoughtful reply will be SEEN and upvoted
+(rising/hot threads with momentum, not dead ones). Spread your 10 replies across
+multiple subreddits and threads — never spam one thread.
+
+PER-REPLY LOOP (repeat until 10 replies are live, fully finish one before the next):
+
+  1. JOIN: Before replying in a subreddit, ensure you have JOINED it. If already a
+     member, skip. Never reply in a sub you haven't joined.
+
+  2. PLAN: Read the target post and its top comments. Reason about what reply would add
+     real value to THIS thread, ride its momentum, and earn upvotes — agree-and-extend,
+     a useful correction, a sharp insight, or a respectful hot take. Avoid low-effort
+     "great post" comments.
+
+  3. RESEARCH: Find ONE genuinely non-obvious, research-backed insight relevant to the
+     thread that the reader likely doesn't know. Examples of the FLAVOR (find current
+     real ones, don't reuse): a Chinese open model milestone, an AI-company
+     market-cap/IPO datapoint, a benchmark crossover, an adoption stat, a cost-curve
+     shift. It MUST be accurate, sourced, and on-topic. The reader should leave smarter.
+
+  4. DRAFT (three passes): draft 1, critique it, draft 2 fixing weak spots, draft 3
+     final. Final reply must:
+     - directly engage what the post/comment actually said (not generic)
+     - deliver the research insight as a payload
+     - end in a way that invites a response (a question, a counterpoint, an opening)
+     - foreshadow the Wolffish philosophy as a natural opinion
+     - sound HUMAN: casual, some emojis, occasional typo/abbreviation, not polished copy
+     - obey that subreddit's rules
+
+  5. SELF-CHECK before posting: Does it add real value to the thread? Is the insight
+     accurate and sourced? Does it fit the sub's rules? Will it spark a reply or upvotes?
+     If any answer is no, redraft. Do not post until all are yes.
+
+  6. POST: submit the reply on the target post via my logged-in Reddit session.
+
+  7. VERIFY: confirm the reply actually went live and capture its direct permalink. If it
+     failed or was auto-removed, diagnose and retry until it sticks.
+
+  8. WAIT: after a reply is verified live, pause for a RANDOM duration between 2 and 5
+     minutes before the next one. Pick a fresh random value each time. Skip this wait
+     only after the 10th and final reply.
+
+EXIT CONDITION: 10 replies verified live across multiple popular subreddits/threads, each
+subreddit joined before replying, with the 2–5 min wait honored between each. Do not
+stop, ask, or summarize before this is true.
+
+FINAL OUTPUT: a summary table — for each of the 10: subreddit name, the post replied to
+(title), the research insight used, and the direct permalink to your live reply.
+```
+
+## فهم الموجِّه
+
+نفس الهيكل المستقل الموجود في [التفاعل على Reddit](/ar/use-cases/reddit-engage)، مضبوطاً للردود بدل المنشورات. الفروق المهمة:
+
+| القسم | ما يفعله | لماذا هو موجود |
+|---|---|---|
+| **MISSION** | 10 ردود، موزَّعة على مواضيع ومجتمعات كثيرة، تكسب كارما وتدعو للتفاعل. | تُرى الردود على المواضيع الساخنة أسرع من المنشورات الجديدة — لكن فقط إن كانت موزَّعة ومفيدة فعلاً. |
+| **PHASE 0** | إيجاد مواضيع *صاعدة/ساخنة* ذات زخم، لا ميتة؛ موزَّعة عبر المجتمعات. | رد رائع على موضوع ميت لا يكسب شيئاً. الزخم + التوزيع هما اللعبة كلها، والتوزيع يتجنّب مظهر إغراق الموضوع. |
+| **JOIN** (الخطوة 1) | الانضمام للمجتمع قبل الرد فيه؛ التخطّي إن كنت عضواً. | الرد في مجتمعات لم تنضم إليها قط علامة بوت كلاسيكية — الانضمام أولاً يُقرأ كمشارك حقيقي. |
+| **PLAN** (الخطوة 2) | قراءة المنشور *وأبرز تعليقاته*، ثم اختيار زاوية: موافقة-وتوسيع، تصحيح مفيد، رؤية حادة، أو رأي جريء محترم. بلا حشو "منشور رائع!". | الردود منخفضة الجهد تُصوَّت سلباً أو تُزال؛ الزاوية هي ما يكسب التصويتات الإيجابية. |
+| **DRAFT** (الخطوة 4) | صياغة ثلاثية، يجب أن تتفاعل مع ما قيل فعلاً و**تنتهي بفتحة** (سؤال/وجهة نظر مضادة). | الدعوة الختامية هي ما يحوّل الرد إلى محادثة — والمحادثات هي حيث تتراكم الكارما. |
+| **VERIFY** (الخطوة 7) | تأكيد ظهور الرد، والتقاط **الرابط الدائم**. | قد تُزال الردود خفيةً أو تُرشَّح؛ الرابط الدائم هو إثباتك وأثرك للتدقيق. |
+| **WAIT** (الخطوة 8) | انتظار عشوائي 2–5 دقائق بين الردود، قيمة جديدة كل مرة. | الردود السريعة المتتالية عبر المجتمعات أسرع طريقة للوقوع في حدود المعدل أو التمييز. التوقف توقف *حقيقي*. |
+
+<Tip>
+  قاعدة **الانضمام-قبل-الرد** وقاعدة **قراءة-أبرز-التعليقات** هما ما يفصلان هذا عن الإزعاج. رد يتفاعل مع النقاش الفعلي ويضيف معطى موثَّقاً يكسب كارما بشرف؛ أما الرد العام المقتضب فيُزال. وضع Max هو ما يتيح للنموذج الرخيص أن يقرأ أجواء الغرفة فعلاً.
+</Tip>
+
+## كيف يعمل
+
+1. يُحمّل Prefrontal ملف `soul.md` + SKILL.md الخاص بإضافة المتصفح + SKILL.md الخاص بالبحث على الويب في السياق.
+2. يربط الوكيل المصحِّح بتبويب Reddit (`ext_debugger_attach`) لكي يُرسَل كل إدخال كأحداث CDP موثوقة.
+3. **اختيار الأهداف** — `ext_navigate` + `ext_read_page` عبر الخلاصات الساخنة/الصاعدة لإيجاد مواضيع عالية الزخم، موزَّعة على مجتمعات متعددة.
+4. لكل رد، بالتسلسل:
+   - **الانضمام** للمجتمع إن لم تكن عضواً (`ext_click` على زر الانضمام)، مع التحقق من العضوية.
+   - `ext_read_page` للمنشور الهدف وأبرز تعليقاته لفهم النقاش.
+   - `web_search` للعثور على معلومة واحدة موثَّقة وذات صلة بالموضوع.
+   - صياغة ← نقد ← إعادة صياغة ثلاث مرات، ثم بوابة الفحص الذاتي.
+   - `ext_navigate`/`ext_scroll` إلى صندوق التعليق، و`ext_type` للرد، و`ext_click` للإرسال. واختيارياً `ext_humanize` لإيقاع شبيه بالبشري.
+   - `ext_get_url` + `ext_read_page` للتأكد من عرض الرد والتقاط رابطه الدائم؛ والتشخيص وإعادة المحاولة إن رُشِّح.
+   - الانتظار مدة عشوائية جديدة 2–5 دقائق (توقف `sleep` حقيقي عبر قدرة الشِل) قبل التالي.
+5. بعد الرد العاشر، يُصدر الوكيل جدول الملخص ويتوقف. يسجّل Hippocampus التشغيلة كحلقة (episode).
+
+## القيود
+
+- **الحد الأدنى من الكارما جدار.** كثير من المجتمعات النشطة تشترط عمر حساب/كارما للتعليق. حساب جديد يُرشَّح تلقائياً مهما كان الرد جيداً — سيشير الوكيل إلى ذلك ويمضي.
+- **الإزالة الخفية غير مرئية لك وأنت مسجَّل الدخول.** قد يبدو الرد ظاهراً على شاشتك ومخفياً عن الجميع. تتحقق خطوة التحقق من العرض لكنها لا تكشف دائماً الحظر الخفي.
+- **حدود المعدل تضرب بسرعة على الردود.** يخنق Reddit الحسابات الجديدة بقوة. إن وقع الوكيل في حد المعدل، سيتراجع — تباعد 2–5 دقائق موجود جزئياً لتجنّب هذا.
+- **الزخم يتلاشى.** موضوع كان ساخناً عند اختيار الهدف قد يبرد عند رد الوكيل. يُنشر الرد رغم ذلك، لكنه قد يكسب أقل من المتوقع.
+- **تصفّح الإخراج.** راجع الردود النهائية دائماً — إحصائية "موثَّقة" خاطئة في رد أكثر ضرراً لسمعتك من الصمت.
+
+## الأتمتة باستخدام Heartbeat
+
+بمجرد أن تثق في الإخراج، جدوِله. افتح **الإعدادات → Heartbeat** لتشغيل المحرر المدمج — الصق الكتلة أدناه واحفظ. راجع [توثيق Heartbeat](/ar/configuration/heartbeat) لجميع تنسيقات الجدولة (`Daily`، `Weekday`، `Weekly`، `Cron`).
+
+<Warning>
+  مهام Heartbeat **توافق تلقائياً على كل استدعاء أداة**. مهمة غير مراقَبة تردّ باسمك عبر مجتمعات عامة عالية المخاطر وأسرع طريقة لاتخاذ إجراء ضد حسابك إن أخطأت. استخدم إيقاعاً بطيئاً، وراجع كل تشغيلة مبكرة، وقلّل عدد الردود (مثلاً 3 بدل 10) للتشغيلات المؤتمتة.
+</Warning>
+
+```markdown
+## Reddit Karma Farm | Weekly (Thursday 11:00)
+
+ROLE: You are Wolffish operating in full autonomous agent mode. Use your browser
+session capability (wolffish-extension / debugger mode) with my ALREADY LOGGED-IN
+Reddit account. Do not use the Reddit API. Do not ask me anything. Do not stop until
+the EXIT CONDITION is met.
+
+MISSION: Post 5 original, high-value REPLIES to popular posts across popular subreddits
+in the open-source / personal-AI-agent / local-LLM space. Each reply must invite further
+engagement and earn karma, while softly foreshadowing Wolffish's philosophy.
+
+WOLFFISH PHILOSOPHY TO FORESHADOW (never pitch it directly, never name it as a product
+— let it emerge as an opinion/idea):
+- brain-like architecture, but radically minimal and simple
+- built for END USERS, not just devs
+- does a FEW things extremely well instead of many things badly
+- local-first, markdown-as-truth, you can read your agent's whole brain in a text editor
+
+REASONING DISCIPLINE (think before every action):
+Before each phase, reason step by step in your scratchpad: what's the goal, what could
+go wrong, what's the best move. Then act. After each action, verify the result before
+continuing. Never assume success — confirm it. The mandatory wait between replies is a
+real action — never skip, shorten, or "simulate" it.
+
+PHASE 0 — TARGET SELECTION:
+Find POPULAR, ACTIVE subreddits in this space and, within them, popular recent
+high-traffic posts where a thoughtful reply will be SEEN and upvoted (rising/hot threads
+with momentum). Spread your replies across multiple subreddits and threads — never spam
+one thread.
+
+PER-REPLY LOOP (repeat until 5 replies are live, fully finish one before the next):
+
+  1. JOIN: Before replying in a subreddit, ensure you have JOINED it. Skip if already a
+     member. Never reply in a sub you haven't joined.
+
+  2. PLAN: Read the target post and its top comments. Pick an angle that adds real value
+     and rides the thread's momentum — agree-and-extend, a useful correction, a sharp
+     insight, or a respectful hot take. No low-effort "great post" comments.
+
+  3. RESEARCH: Find ONE non-obvious, research-backed, on-topic insight the reader likely
+     doesn't know. It MUST be accurate and sourced. The reader should leave smarter.
+
+  4. DRAFT (three passes): draft 1, critique, draft 2, draft 3 final. Final reply must
+     directly engage what was said, deliver the insight, end on an opening that invites a
+     response, foreshadow the Wolffish philosophy as a natural opinion, sound HUMAN, and
+     obey the rules.
+
+  5. SELF-CHECK: real value? insight accurate and sourced? fits the rules? sparks a reply
+     or upvotes? If any answer is no, redraft. Do not post until all yes.
+
+  6. POST: submit the reply via my logged-in Reddit session.
+
+  7. VERIFY: confirm the reply went live and capture its permalink. If it failed or was
+     removed, diagnose and retry until it sticks.
+
+  8. WAIT: after a reply is verified live, pause for a RANDOM duration between 2 and 5
+     minutes before the next. Fresh random value each time. Skip only after the final
+     reply.
+
+EXIT CONDITION: 5 replies verified live across multiple popular subreddits/threads, each
+subreddit joined before replying, with the 2–5 min wait honored between each. Do not
+stop, ask, or summarize before this is true.
+
+FINAL OUTPUT: a summary table — for each reply: subreddit name, the post replied to
+(title), the research insight used, and the direct permalink to your live reply.
+```
+
+<Tip>
+  نسخة Heartbeat أعلاه تخفض العدد من 10 إلى 5 — حجم أكثر أماناً للتشغيلات غير المراقَبة. غيّر `Weekly (Thursday 11:00)` إلى أي جدول، مثل `Weekly (Saturday 12:00)` أو `Cron (0 11 * * 4)`.
+</Tip>
+
+## النتيجة المتوقعة
+
+عند انتهاء التشغيلة، تحصل على جدول ملخص برابط دائم قابل للنقر لكل رد:
+
+| # | المجتمع | المنشور المُرَدّ عليه | المعلومة البحثية المستخدمة | الرابط الدائم للرد |
+|---|---|---|---|---|
+| 1 | r/LocalLLaMA | "ماذا يشغّل الجميع محلياً في 2026؟" | نموذج مفتوح الأوزان يتجاوز معياراً استدلالياً بجزء بسيط من تكلفة النموذج المغلق | `https://reddit.com/r/LocalLLaMA/comments/.../comment/...` |
+| 2 | r/selfhosted | "خرجت حزمتي المستضافة ذاتياً عن السيطرة" | إحصائية تبنّي الذكاء الاصطناعي المستضاف ذاتياً من استبيان حديث | `https://reddit.com/r/selfhosted/comments/.../comment/...` |
+| 3 | r/AI_Agents | "هل أطر الوكلاء معقّدة أكثر من اللازم؟" | معطى تقاطع معياري لتقييم الوكلاء | `https://reddit.com/r/AI_Agents/comments/.../comment/...` |
+| … | … | … | … | … |
+| 10 | r/opensource | "لماذا لا تستهدف أدوات الذكاء الاصطناعي المفتوحة المستخدمين النهائيين؟" | إنجاز نمو نجوم / تبنّي نموذج مفتوح مع المصدر | `https://reddit.com/r/opensource/comments/.../comment/...` |
+
+<Note>
+  المجتمعات والمواضيع والمعلومات أعلاه **توضيحية**. يجد الوكيل مواضيع جديدة عالية الزخم ومعطيات حالية موثَّقة في كل تشغيلة. عامل الجدول بوصفه *شكل* الإخراج، لا نصاً ثابتاً.
+</Note>
