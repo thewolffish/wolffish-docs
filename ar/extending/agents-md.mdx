@@ -176,103 +176,156 @@ generally help the user here, in their data — not in the app source.
 
 ## 3. The `.wolffish` folder — complete map
 
-`~/.wolffish/` has exactly three top-level subfolders. Only one of them
-(`workspace/`) is interesting to a human or an assistant.
+`~/.wolffish/` is the app's entire footprint — delete it and you're back to a fresh
+install. It has three top-level subfolders plus this guide. Below, **every folder is
+listed and explained, nested ones included.** Folders that are pure machine state are
+flagged disposable; everything else is human-readable content you can open and edit.
+
+### Root of `~/.wolffish/`
 
 ```
 ~/.wolffish/
-├── AGENTS.md          ← you are here (this guide)
-│
-├── logs/              Reserved app-logs path (app.setAppLogsPath). Often empty —
-│                      the live, dated logs are under workspace/logs/ (see below).
-│
-├── runtime/           Chromium / Electron internal state (app.setPath userData).
-│                      DISPOSABLE PLUMBING — not human-editable, safe to ignore.
-│                      Cache/ · Code Cache/ · GPUCache/ · DawnGraphiteCache/ ·
-│                      DawnWebGPUCache/ · Local Storage/ · Session Storage/ ·
-│                      Shared Dictionary/ · blob_storage/ · Preferences ·
-│                      Network Persistent State · Trust Tokens · .updaterId
-│
-└── workspace/         ★ EVERYTHING THE AGENT KNOWS. This is the real content. ★
-    │
-    ├── .lock                  Single-instance guard (PID). Don't touch.
-    ├── config.json            App configuration + provider API keys (see §8).
-    │
-    ├── brain/                 The 15-module brain state — all markdown + the index.
-    │   ├── identity/
-    │   │   ├── soul.md            WHO THE AGENT IS — personality, tone, humor, rules.
-    │   │   └── user.md            WHO YOU ARE — the user's name, work, prefs, goals.
-    │   │
-    │   ├── prefrontal/
-    │   │   ├── agents.core.md     The agent's core operating procedures (shipped, read-only).
-    │   │   ├── agents.md          The user's CUSTOM procedures/overrides (never overwritten).
-    │   │   └── .debug/            Per-turn dumps of the exact system prompt that was built.
-    │   │                          Files: YYYY-MM-DD_HH-MM-SS.mmm.md — gold for "why did it…".
-    │   │
-    │   ├── cerebellum/            CAPABILITIES (a.k.a. tools/skills). One DOT-PREFIXED
-    │   │   ├── .shell/            folder per capability (hidden — use `ls -a`).
-    │   │   ├── .filesystem/       Each has SKILL.md (+ optional plugin/index.mjs). See §6.
-    │   │   ├── .web-search/       ...24 capabilities total.
-    │   │   └── …
-    │   │
-    │   ├── hippocampus/           MEMORY (three tiers, all markdown).
-    │   │   ├── episodes/
-    │   │   │   └── YYYY-MM-DD.md   Daily turn-by-turn log (User / Tools / Response).
-    │   │   ├── consolidated/
-    │   │   │   └── YYYY-WNN.md     Weekly summaries (LLM compaction; created nightly).
-    │   │   └── knowledge/
-    │   │       ├── projects.md     Long-term facts, promoted from episodes or hand-written.
-    │   │       ├── people.md
-    │   │       ├── preferences.md
-    │   │       ├── technical.md
-    │   │       └── decisions.md
-    │   │
-    │   ├── conversations/         Full chat transcripts, one JSON per conversation:
-    │   │   └── conv-YYYY-MM-DD_HH-MM-SS.json   (id, messages, segments, timeline, contextMeter)
-    │   │
-    │   ├── motor/
-    │   │   └── tasks/             Multi-step task execution records.
-    │   │       ├── TASK-<id>.md          Human-readable transcript (status + every step).
-    │   │       └── TASK-<id>-detail.log  Verbose per-step detail.
-    │   │
-    │   ├── basalganglia/
-    │   │   └── YYYY-MM-DD.md       Daily outcome/feedback log (what worked, what didn't).
-    │   │
-    │   ├── brainstem/
-    │   │   └── heartbeat.md        Cron schedule — `##` headings define background jobs.
-    │   │
-    │   ├── corpus/
-    │   │   └── YYYY-MM-DD.log.md   Daily EVENT/TOOL-CALL log: every tool call, args, output.
-    │   │
-    │   ├── cortex.db               SQLite FTS5 search index. DISPOSABLE — rebuilds from
-    │   ├── cortex.db-shm           markdown on next launch. (+ -shm / -wal WAL sidecars.)
-    │   └── cortex.db-wal
-    │
-    ├── extension/             The bundled Chrome/Brave browser extension that the
-    │                          ext_* tools drive (manifest.json, background.js,
-    │                          content/, side-panel/, offscreen/, _locales/, icons).
-    │
-    ├── usage/                 TOKEN & COST ACCOUNTING.
-    │   ├── daily/
-    │   │   └── YYYY-MM-DD.md      Per-day ledger (provider · model · tokens · $cost).
-    │   └── providers/
-    │       └── <provider>.md      Per-provider ledger (anthropic, openai, deepseek, …).
-    │
-    ├── logs/                  Live application logs.
-    │   ├── YYYY-MM-DD.md/.log     Pino app log (updater, extension socket, errors).
-    │   └── extension/
-    │       └── YYYY-MM-DD_HH-MM-SS.jsonl   Extension event stream (navigate/click/…).
-    │
-    ├── files/                 Working files the agent reads/writes during tasks.
-    ├── uploads/               Files the user uploaded for processing.
-    ├── screenshots/           Screenshots captured by computer-use / browser tools.
-    ├── speech/                Speech-to-text working audio.
-    └── voice/                 Text-to-speech generated voice memos.
+├── AGENTS.md     This guide. App-managed — rewritten from the bundle on every launch.
+├── logs/         Reserved Electron app-logs path (app.setAppLogsPath). Usually EMPTY;
+│                 the live dated logs actually live under workspace/logs/ (see below).
+├── runtime/      Chromium/Electron user-data (app.setPath 'userData'). Engine state.
+└── workspace/    ★ Everything the agent knows. All the human-meaningful content. ★
 ```
 
-> **Reality vs. README.** Some older docs put `conversations/` and `cortex.db` at
-> the workspace root. On disk they live **under `brain/`** (as mapped above). Trust
-> the disk.
+### `runtime/` — Chromium engine state (disposable, never hand-edit)
+
+The embedded browser's own storage. You never need to read or edit it; it lives here
+only so `rm -rf ~/.wolffish` wipes browser state too. Every subfolder is Chromium-managed
+and self-regenerates — the exact set varies by OS and version.
+
+```
+runtime/
+├── Cache/                 HTTP response cache
+│   ├── Cache_Data/            cached entries
+│   └── No_Vary_Search/        cache-key metadata
+├── Code Cache/            compiled-script cache
+│   ├── js/                    V8 bytecode
+│   └── wasm/                  compiled WebAssembly
+├── GPUCache/              GPU shader/program cache
+├── DawnGraphiteCache/     Dawn (WebGPU) Graphite backend cache
+├── DawnWebGPUCache/       Dawn WebGPU pipeline cache
+├── Local Storage/
+│   └── leveldb/               window.localStorage, stored as LevelDB
+├── Session Storage/       window.sessionStorage (cleared each session)
+├── Shared Dictionary/
+│   └── cache/                 shared compression dictionaries
+├── blob_storage/
+│   └── <uuid>/                in-flight Blob/File data, one folder per session
+└── (loose files: Preferences, Network Persistent State, Trust Tokens, SharedStorage,
+     DIPS, .updaterId — Chromium + auto-updater bookkeeping)
+```
+
+### `workspace/` — the agent's world (top level)
+
+```
+workspace/
+├── .lock              Single-instance guard (holds the running PID). Don't touch.
+├── config.json        All app config + provider API keys (schema in §8). Holds secrets.
+├── brain/             The 15-module brain state — detailed next.
+├── extension/         The bundled Chrome/Brave extension the ext_* tools drive.
+├── usage/             Token & cost accounting.
+├── logs/              Live application + extension logs.
+├── files/             Working files the agent reads/writes during tasks.
+├── uploads/           Files you handed the agent to process (docs, images, audio).
+├── screenshots/       Screenshots captured by computer-use / browser tools.
+├── speech/            Speech-to-text scratch (incoming audio being transcribed).
+└── voice/             Text-to-speech output (generated voice memos).
+```
+
+### `workspace/brain/` — every module, every nested folder
+
+```
+brain/
+├── identity/              WHO. Read into every prompt.
+│   ├── soul.md                the agent's character: tone, humor, hard limits
+│   └── user.md                who you are: name, work, prefs, goals, boundaries
+│
+├── prefrontal/            PLANNING. The operating manual + per-turn prompt dumps.
+│   ├── agents.core.md         shipped core procedures (app-managed, overwritten)
+│   ├── agents.md              YOUR overrides (never overwritten; wins on conflict)
+│   └── .debug/                one timestamped dump per turn of the exact system
+│                              prompt that was built — the best "why did it…?" source
+│
+├── cerebellum/            CAPABILITIES (tools/skills). One DOT-prefixed folder per
+│   ├── .shell/                capability (hidden — `ls -a`). Each has a SKILL.md and an
+│   ├── .filesystem/           optional plugin/ folder of code. Full catalog in §6.
+│   ├── .web-search/           A capability's plugin/node_modules/ (when present) is its
+│   └── …  (24 total)          installed npm deps — machine state, safe to ignore.
+│
+├── hippocampus/           MEMORY (three tiers, all markdown).
+│   ├── episodes/              YYYY-MM-DD.md — daily turn-by-turn log (instant, no LLM)
+│   ├── consolidated/          YYYY-WNN.md — weekly summaries from nightly compaction
+│   │                          (this folder only appears after the first run)
+│   └── knowledge/             durable facts: projects / people / preferences /
+│                              technical / decisions.md
+│
+├── conversations/         One JSON per chat: conv-YYYY-MM-DD_HH-MM-SS.json
+│                          (messages, segments, timeline, contextMeter — see §8).
+│
+├── motor/                 EXECUTION.
+│   └── tasks/                 TASK-<id>.md (human transcript) + TASK-<id>-detail.log
+│                              (verbose). Written live, so a crash still leaves a trail.
+│
+├── basalganglia/          LEARNING. YYYY-MM-DD.md — daily outcome/feedback log.
+│
+├── brainstem/             SCHEDULING.
+│   └── heartbeat.md           cron-like jobs; each `##` heading is one scheduled task.
+│
+├── corpus/                EVENT-BUS LOG. YYYY-MM-DD.log.md — every tool call with its
+│                          args and raw output, in order. Best file for forensics.
+│
+└── cortex.db              SQLite FTS5 search index (+ cortex.db-shm, cortex.db-wal).
+                           DISPOSABLE — rebuilt from the markdown on launch; don't edit.
+```
+
+### `workspace/extension/` — the browser extension (bundled, app-managed)
+
+The unpacked extension loaded into the user's browser; the `ext_*` tools talk to it.
+App-managed (refreshed from the bundle), so treat it as read-only.
+
+```
+extension/
+├── manifest.json          the extension manifest
+├── background.js          background / service-worker script
+├── content/               content scripts injected into visited pages
+├── side-panel/            the in-browser side-panel UI
+│   ├── assets/                its compiled JS/CSS
+│   └── fonts/                 its fonts
+├── offscreen/             offscreen document for background DOM work
+│   └── assets/
+├── _locales/              i18n message catalogs
+│   ├── en/
+│   └── ar/
+└── icon*.png              toolbar / store icons
+```
+
+### `workspace/usage/` — token & cost accounting
+
+```
+usage/
+├── daily/                 YYYY-MM-DD.md — one line per model call (tokens + $ cost)
+└── providers/             <provider>.md — the same lines grouped per provider
+                           (anthropic, openai, deepseek, kimi, mimo, minimax, ollama, …)
+```
+
+### `workspace/logs/` — runtime logs
+
+```
+logs/
+├── YYYY-MM-DD.log         Pino app log (updater, extension socket, errors)
+└── extension/             browser-extension event stream
+    ├── YYYY-MM-DD_HH-MM-SS.jsonl   one JSON line per browser event (navigate/click/…)
+    └── .debug/                     extra extension debug dumps
+```
+
+> **Reality vs. older diagrams.** `conversations/` and `cortex.db` live **under `brain/`**
+> (not at the workspace root); capabilities are **dot-prefixed**; and
+> `hippocampus/consolidated/` only exists after the first consolidation. Trust the disk.
 
 ---
 
