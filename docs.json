@@ -31,6 +31,18 @@
       "github": "https://github.com/thewolffish"
     }
   },
+  "redirects": [
+    {
+      "source": "/use-cases/reddit-karma-farm",
+      "destination": "/use-cases/karma-farm",
+      "permanent": true
+    },
+    {
+      "source": "/ar/use-cases/reddit-karma-farm",
+      "destination": "/ar/use-cases/karma-farm",
+      "permanent": true
+    }
+  ],
   "navigation": {
     "global": {
       "anchors": [
@@ -85,7 +97,7 @@
                     "expanded": true,
                     "pages": [
                       "use-cases/reddit-engage",
-                      "use-cases/reddit-karma-farm",
+                      "use-cases/karma-farm",
                       "use-cases/media-conversion",
                       "use-cases/gmail-is-dead",
                       "use-cases/pdfs-everywhere",
@@ -252,7 +264,7 @@
                     "expanded": true,
                     "pages": [
                       "ar/use-cases/reddit-engage",
-                      "ar/use-cases/reddit-karma-farm",
+                      "ar/use-cases/karma-farm",
                       "ar/use-cases/media-conversion",
                       "ar/use-cases/gmail-is-dead",
                       "ar/use-cases/pdfs-everywhere",
