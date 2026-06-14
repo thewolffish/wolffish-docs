@@ -64,23 +64,23 @@ One of the most common things you'll ask a visiting assistant is *"teach Wolffis
 
 That's the whole extension model: **a folder of markdown teaches your agent a new trick.** See [Writing Plugins](/capabilities/writing-plugins) and [Safety Patterns](/extending/safety-patterns) for the depth.
 
-## Where to put it
+## Where it lives
 
-Save the text below as:
+Wolffish bundles this guide and writes it to the **root** of your data folder, refreshing it on every launch:
 
 ```bash
 ~/.wolffish/AGENTS.md
 ```
 
-It sits at the **root** of your data folder, next to `workspace/`, `runtime/`, and `logs/` — *not* inside `workspace/`. That keeps it clear of workspace re-initialization and makes it the first thing anyone sees when they open `~/.wolffish/`.
+It sits next to `workspace/`, `runtime/`, and `logs/` — *not* inside `workspace/`. That keeps it clear of workspace re-initialization and makes it the first thing anyone sees when they open `~/.wolffish/`.
 
 <Tip>
-  This file isn't created automatically — it's opt-in. Paste the text once. If you reinstall, paste it again; keeping it current with a new Wolffish version is just re-copying the latest text from this page.
+  This file is **managed by Wolffish** — the bundled copy is rewritten on every launch, so an app update always refreshes it to the current version. Treat it as read-only: local edits are replaced on the next launch. For custom agent behavior that should *persist*, use [`agents.md`](/configuration/agents-md) instead.
 </Tip>
 
 ## The full AGENTS.md
 
-Copy everything inside the block and save it as `~/.wolffish/AGENTS.md`.
+This is the exact text Wolffish bundles and keeps in sync at `~/.wolffish/AGENTS.md`, reproduced here for reference — read it, or drop it into an older install by hand.
 
 ````
 # Navigating Wolffish — A Guide for AI Assistants
