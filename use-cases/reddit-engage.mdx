@@ -7,7 +7,7 @@ description: "Autonomously research, draft, and publish 5 viral-optimized Reddit
 
 Wolffish takes over your **already logged-in** Reddit account through the browser extension, picks 5 active subreddits in the open-source / personal-AI-agent / local-LLM space, and submits one original, research-backed, discussion-seeding post to each. No Reddit API. No OAuth. No throwaway browser — it operates inside your real Chrome session, as you, through the extension's debugger mode.
 
-The agent does the full loop on its own: pick targets, read each sub's rules, find a non-obvious sourced insight, draft → critique → redraft three times, self-check against the rules, post, confirm it went live, then wait a random 2–5 minutes before the next one.
+The agent does the full loop on its own: pick targets, read each sub's rules, find a non-obvious sourced insight, draft → critique → redraft three times, self-check against the rules, post, confirm it went live, then wait a random 5–10 minutes before the next one.
 
 <Warning>
   **Read this before you run it.** This workflow posts to public communities under your identity, paces itself to look human (debugger mode + humanize), and softly seeds an opinion. Reddit's [Content Policy](https://redditinc.com/policies/content-policy) and most subreddits have rules about automation, self-promotion, and astroturfing — undisclosed, on-behalf-of-a-product posting can get your account shadowbanned or permanently banned, and individual subs remove posts that read as spam. Use this on communities where you're a genuine participant, keep the value real, and disclose affiliation where the rules require it. You own everything posted from your account. We don't endorse violating any platform's terms.
@@ -27,7 +27,7 @@ This workflow is **browser-extension-only** — it never touches the Reddit API.
 
 ### Recommended
 
-- **Claude Sonnet 4.6 on Max mode.** This workflow lives or dies on writing quality — a scroll-stopping title, a post that's genuinely funny or lands a roast, and judgment sharp enough to fit each sub's culture. Sonnet 4.6 is the best value for that: top-tier voice and humor, a **1M-token context window** that comfortably holds long multi-subreddit browsing sessions, and reliable multi-step tool use for the browse → draft → post → verify loop. **Max mode** turns on the deep, adaptive reasoning the prompt leans on — choosing subreddits, the three-pass draft → critique → redraft loop, the self-check gate, and verifying a post went live. At **$3 / $15 per MTok** it costs more than the budget models, but for public posts under your name the quality is worth it. Set it per-conversation in Wolffish; see [Anthropic](/configuration/anthropic). For cheaper bulk runs, DeepSeek V4 Flash on Max mode also works — see the [extension cost table](/integrations/browser-extension#cost-why-model-choice-matters).
+- **DeepSeek V4 Pro on Max mode.** Wolffish's recommended default for agentic work, and a strong fit here: frontier-class reasoning and tool-use reliability for the browse → draft → post → verify loop, a **1M-token context window** that comfortably holds long multi-subreddit browsing sessions, and writing sharp enough for a scroll-stopping title and the occasional roast. **Max mode** turns on the deep, adaptive reasoning the prompt leans on — choosing subreddits, the three-pass draft → critique → redraft loop, the self-check gate, and verifying a post went live. At **$0.44 / $0.87 per MTok** it's a fraction of frontier-model cost — which matters because browser sessions burn tokens fast. Set it per-conversation in Wolffish; see [DeepSeek](/configuration/deepseek). For the cheapest runs drop to DeepSeek V4 Flash; for maximum writing polish, [Claude Sonnet 4.6](/configuration/anthropic) — see the [extension cost table](/integrations/browser-extension#cost-why-model-choice-matters).
 
 ### Optional
 
@@ -43,9 +43,10 @@ Send this to Wolffish in one message. It selects, researches, drafts, posts, ver
 
 ```
 ROLE: You are Wolffish operating in full autonomous agent mode. Use your browser
-session capability (wolffish-extension / debugger mode) with my ALREADY LOGGED-IN
-Reddit account. Do not use the Reddit API. Do not ask me anything. Do not stop until
-the EXIT CONDITION is met.
+session capability (wolffish-extension / debugger mode, ext_* tools) in my real,
+ALREADY LOGGED-IN Chrome tab. Do NOT use the Reddit API, a headless browser, Playwright,
+or any new/throwaway browser — work only in my existing tab through the extension. Do
+not ask me anything. Do not stop until the EXIT CONDITION is met.
 
 MISSION: Submit 5 original, valuable, viral-optimized Reddit posts — one each to 5
 different subreddits in the open-source / personal-AI-agent / local-LLM space — that
@@ -63,6 +64,63 @@ Before each phase, reason step by step in your scratchpad: what's the goal, what
 go wrong, what's the best move. Then act. After each action, verify the result before
 continuing. Never assume success — confirm it. The mandatory wait between posts is a
 real action — never skip, shorten, or "simulate" it.
+
+REDDIT MECHANICS (follow exactly — this is how you avoid wasting calls):
+
+ENVIRONMENT — extension only, no headless:
+- Act ONLY through the Wolffish browser extension (ext_* tools) in my real, already
+  logged-in tab. NEVER call browser_launch / browser_navigate / any browser_* (Playwright)
+  tool, and never open a headless/throwaway browser or new window — those sessions are NOT
+  logged in and Reddit returns HTTP 403 for them. Reuse my existing tab only.
+- Do NOT pass a guessed tabId to any tool (tabId:1 fails with "No tab with id"). Omit
+  tabId to use the active tab; if you truly need the id, call ext_tabs_list once and reuse it.
+- First, confirm I'm logged in and note my username (top-right bar on old.reddit) — you
+  need it to verify posts later.
+
+USE OLD REDDIT FOR EVERYTHING:
+- Operate on https://old.reddit.com, never www/sh.reddit.com. New Reddit builds the
+  composer inside Shadow DOM + a Lexical editor that is slow and brittle to target and
+  will eat your run; old.reddit is plain HTML and works first try. If you ever land on
+  www.reddit.com, rewrite the URL to old.reddit.com before doing anything.
+
+SELECTORS (this is where runs break):
+- ext_query_selector accepts REAL CSS ONLY. ":has-text(...)", "button=save", and
+  "text=..." are NOT valid CSS and will throw. Use plain CSS: tag, .class, [attr="value"].
+- To click by visible label, use ext_click with selector "text=<label>".
+- Unsure of a field? ext_query_selector with CSS (match by name/class) to read the form,
+  then act on the exact element.
+
+SUBMIT A SELF (TEXT) POST on old.reddit:
+- Reach the sub from real links you read — never invent a sub/post URL (a wrong one 404s).
+- Go to https://old.reddit.com/r/SUB/submit?selftext=true
+- Fill the title field (CSS: textarea[name="title"], input[name="title"]) and the body
+  field (textarea[name="text"]) with ext_type (clearFirst:true).
+- Submit with ext_click "text=submit" (or button[type="submit"]). If a sub requires
+  membership to post, join first: the .fancy-toggle-button toggle in the sidebar (its
+  span reads "join"/"subscribe").
+
+VERIFY ONCE — NEVER DOUBLE-POST:
+- Verify EXACTLY ONCE via your profile: https://old.reddit.com/user/MY_USERNAME/submitted/
+  — confirm the newest post is yours and capture its permalink (the post URL).
+- If the submit click returned success, assume it posted and verify on the profile. Do
+  NOT retype and resubmit — that creates duplicates. Only retry if the profile clearly
+  shows it did not post.
+
+RATE LIMITS — respect them (this is the #1 thing that breaks these runs):
+- Reddit rate-limits WRITES (commenting, posting, joining) hard — a low-karma account may
+  only get ~1 write per 5–10 minutes. Reads (ext_navigate / ext_read_page) are cheap; it's
+  the WRITES you must pace.
+- One write per target. NEVER submit the same content twice — a duplicate storm is the
+  single fastest way to trip the limit (and it spams the thread). If a write's outcome is
+  unclear, VERIFY on your profile before ever resending; it almost always did post.
+- After every write, check for a rate-limit notice: "you are doing that too much (try
+  again in N minutes)", "looks like you're using an unofficial client", or an HTTP 429/403.
+  If you see one, the write did NOT go through — do NOT retry in a loop. Wait the time
+  Reddit states (default 12–15 minutes if unstated) with a real sleep, then try that one
+  item once more.
+- Treat the WAIT between items as a real, full pause (real sleep, never simulated). If you
+  get rate-limited twice in a row, STOP and report what posted so far — a partial result
+  beats a blocked or banned account.
 
 PHASE 0 — TARGET SELECTION:
 Search and identify candidate subreddits in this space (e.g. open-source AI agents,
@@ -106,16 +164,20 @@ PER-SUBREDDIT LOOP (repeat for each of the 5, fully finish one before starting n
   6. VERIFY: confirm the post actually went live and capture its URL. If it failed or was
      auto-removed, diagnose and retry until it sticks.
 
-  7. WAIT: after a post is verified live, pause for a RANDOM duration between 2 and 5
+  7. WAIT: after a post is verified live, pause for a RANDOM duration between 5 and 10
      minutes before starting the next subreddit. Pick a fresh random value each time (do
      not reuse the same number). Skip this wait only after the 5th and final post.
 
 EXIT CONDITION: 5 posts verified live across 5 distinct subreddits, with the mandatory
-2–5 min wait honored between each. Do not stop, ask, or summarize before this is true.
+5–10 min wait honored between each. Do not stop, ask, or summarize before this is true.
 
 FINAL OUTPUT: a summary table — for each of the 5: subreddit name, post title, the
 research insight used, and the direct link to the live post.
 ```
+
+<Tip>
+  **Why this version is faster:** it forces everything onto `old.reddit.com` (plain HTML — no Shadow-DOM/Lexical composer to fight), keeps all work inside your logged-in tab via the extension (no headless browser), restricts `ext_query_selector` to real CSS, and posts-then-verifies-once on your own profile so the agent never double-posts. Those are the exact failure modes that stall an unguided run.
+</Tip>
 
 ## Understanding the Prompt
 
@@ -129,7 +191,7 @@ The prompt is a self-contained autonomous spec. Here's what each part is doing a
 | **REASONING DISCIPLINE** | Forces step-by-step scratchpad reasoning, post-action verification, and a *real* wait. | This is why **Max mode** matters — the model has to plan, critique, and confirm at every step, not just call tools. |
 | **PHASE 0** | Discover and read 5 active subs' rules + top posts before writing a word. | Culture-fit is the difference between a post that lands and one auto-removed in 30 seconds. |
 | **PER-SUBREDDIT LOOP** | Plan → research → 3-pass draft → self-check → post → verify → wait, one sub fully finished before the next. | The 3-pass draft and the self-check gate are the quality engine; the verify step is what prevents "I posted it" hallucinations. |
-| **WAIT** | Random 2–5 min between posts, fresh value each time. | Spacing avoids tripping Reddit's rate/spam heuristics and reads as human cadence — the prompt insists it's a *real* pause, not simulated. |
+| **WAIT** | Random 5–10 min between posts (longer if Reddit signals a cooldown), fresh value each time. | Spacing avoids tripping Reddit's rate/spam heuristics and reads as human cadence — the prompt insists it's a *real* pause, not simulated. |
 | **EXIT CONDITION + FINAL OUTPUT** | 5 verified-live posts, then a summary table with links. | Gives you an auditable result you can click through and check. |
 
 <Tip>
@@ -140,13 +202,13 @@ The prompt is a self-contained autonomous spec. Here's what each part is doing a
 
 1. Prefrontal loads `soul.md` + the browser-extension SKILL.md + web-search SKILL.md into context.
 2. The agent attaches the debugger to the Reddit tab (`ext_debugger_attach`) so all input is dispatched as trusted CDP events, not detectable DOM calls.
-3. **Target selection** — `ext_navigate` to Reddit search, `ext_read_page` to read candidate subs, their rules pages, and recent top posts. The model picks 5 active, on-topic subs.
+3. **Target selection** — on `old.reddit.com` (plain HTML, far easier to drive than New Reddit's Shadow-DOM composer), `ext_navigate` + `ext_read_page` to read candidate subs, their rules, and recent top posts. The model picks 5 active, on-topic subs.
 4. For each subreddit, in sequence:
    - `web_search` for one non-obvious, sourced insight tied to the theme.
    - The model drafts, critiques, and redrafts three times, then runs the self-check gate.
-   - `ext_navigate` to the submit page, `ext_type` the title and body, `ext_click` to submit. Optional `ext_humanize` between actions for human-like pacing.
-   - `ext_get_url` + `ext_read_page` to confirm the post is live and capture its permalink. If it was auto-removed, the model diagnoses and retries.
-   - The agent waits a fresh random 2–5 minutes (a real `sleep` via the shell capability) before the next sub.
+   - `ext_navigate` to `old.reddit.com/r/SUB/submit?selftext=true`, `ext_type` the title and body, `ext_click` `text=submit`. Optional `ext_humanize` between actions for human-like pacing.
+   - Verify **once** via your profile (`old.reddit.com/user/<you>/submitted/`) and capture the permalink — a successful submit is treated as posted rather than resubmitted, so the agent never duplicates. Only if the profile shows it didn't post does it diagnose and retry.
+   - The agent waits a fresh random 5–10 minutes (a real `sleep` via the shell capability) before the next sub — longer if Reddit signals a cooldown.
 5. After the 5th post, the agent emits the summary table and stops. Hippocampus logs the run as an episode.
 
 ## Limits
@@ -154,6 +216,7 @@ The prompt is a self-contained autonomous spec. Here's what each part is doing a
 - **Subreddit rules vary wildly.** Some bans on links, some on self-promo, some require karma/age minimums. The agent reads the rules and adapts, but a brand-new account will get filtered regardless of post quality.
 - **Auto-removal is silent.** A post can appear to submit and then be removed by AutoModerator seconds later. The verify step catches this, but on a heavily filtered sub the agent may exhaust retries.
 - **CAPTCHA / verification walls** can interrupt the run. Debugger mode reduces but does not eliminate this — if Reddit challenges the session, the agent will pause and may need you to clear it.
+- **Reddit rate-limits posting.** Submitting too fast — or the same content twice — triggers "you're doing that too much." The prompt paces writes 5–10 min apart, waits out any stated cooldown, and never resubmits, but a brand-new or low-karma account will still hit walls; the agent then stops and reports a partial result rather than hammering.
 - **The insight must be real.** The model is instructed to source every datapoint, but always skim the final posts — a confidently stated wrong stat is worse than no stat.
 
 ## Automating with Heartbeat
@@ -168,9 +231,10 @@ Once you trust the output, schedule it. Open **Settings → Heartbeat** to launc
 ## Engage Reddit | Weekly (Tuesday 10:00)
 
 ROLE: You are Wolffish operating in full autonomous agent mode. Use your browser
-session capability (wolffish-extension / debugger mode) with my ALREADY LOGGED-IN
-Reddit account. Do not use the Reddit API. Do not ask me anything. Do not stop until
-the EXIT CONDITION is met.
+session capability (wolffish-extension / debugger mode, ext_* tools) in my real,
+ALREADY LOGGED-IN Chrome tab. Do NOT use the Reddit API, a headless browser, Playwright,
+or any new/throwaway browser — work only in my existing tab through the extension. Do
+not ask me anything. Do not stop until the EXIT CONDITION is met.
 
 MISSION: Submit 5 original, valuable, viral-optimized Reddit posts — one each to 5
 different subreddits in the open-source / personal-AI-agent / local-LLM space — that
@@ -188,6 +252,63 @@ Before each phase, reason step by step in your scratchpad: what's the goal, what
 go wrong, what's the best move. Then act. After each action, verify the result before
 continuing. Never assume success — confirm it. The mandatory wait between posts is a
 real action — never skip, shorten, or "simulate" it.
+
+REDDIT MECHANICS (follow exactly — this is how you avoid wasting calls):
+
+ENVIRONMENT — extension only, no headless:
+- Act ONLY through the Wolffish browser extension (ext_* tools) in my real, already
+  logged-in tab. NEVER call browser_launch / browser_navigate / any browser_* (Playwright)
+  tool, and never open a headless/throwaway browser or new window — those sessions are NOT
+  logged in and Reddit returns HTTP 403 for them. Reuse my existing tab only.
+- Do NOT pass a guessed tabId to any tool (tabId:1 fails with "No tab with id"). Omit
+  tabId to use the active tab; if you truly need the id, call ext_tabs_list once and reuse it.
+- First, confirm I'm logged in and note my username (top-right bar on old.reddit) — you
+  need it to verify posts later.
+
+USE OLD REDDIT FOR EVERYTHING:
+- Operate on https://old.reddit.com, never www/sh.reddit.com. New Reddit builds the
+  composer inside Shadow DOM + a Lexical editor that is slow and brittle to target and
+  will eat your run; old.reddit is plain HTML and works first try. If you ever land on
+  www.reddit.com, rewrite the URL to old.reddit.com before doing anything.
+
+SELECTORS (this is where runs break):
+- ext_query_selector accepts REAL CSS ONLY. ":has-text(...)", "button=save", and
+  "text=..." are NOT valid CSS and will throw. Use plain CSS: tag, .class, [attr="value"].
+- To click by visible label, use ext_click with selector "text=<label>".
+- Unsure of a field? ext_query_selector with CSS (match by name/class) to read the form,
+  then act on the exact element.
+
+SUBMIT A SELF (TEXT) POST on old.reddit:
+- Reach the sub from real links you read — never invent a sub/post URL (a wrong one 404s).
+- Go to https://old.reddit.com/r/SUB/submit?selftext=true
+- Fill the title field (CSS: textarea[name="title"], input[name="title"]) and the body
+  field (textarea[name="text"]) with ext_type (clearFirst:true).
+- Submit with ext_click "text=submit" (or button[type="submit"]). If a sub requires
+  membership to post, join first: the .fancy-toggle-button toggle in the sidebar (its
+  span reads "join"/"subscribe").
+
+VERIFY ONCE — NEVER DOUBLE-POST:
+- Verify EXACTLY ONCE via your profile: https://old.reddit.com/user/MY_USERNAME/submitted/
+  — confirm the newest post is yours and capture its permalink (the post URL).
+- If the submit click returned success, assume it posted and verify on the profile. Do
+  NOT retype and resubmit — that creates duplicates. Only retry if the profile clearly
+  shows it did not post.
+
+RATE LIMITS — respect them (this is the #1 thing that breaks these runs):
+- Reddit rate-limits WRITES (commenting, posting, joining) hard — a low-karma account may
+  only get ~1 write per 5–10 minutes. Reads (ext_navigate / ext_read_page) are cheap; it's
+  the WRITES you must pace.
+- One write per target. NEVER submit the same content twice — a duplicate storm is the
+  single fastest way to trip the limit (and it spams the thread). If a write's outcome is
+  unclear, VERIFY on your profile before ever resending; it almost always did post.
+- After every write, check for a rate-limit notice: "you are doing that too much (try
+  again in N minutes)", "looks like you're using an unofficial client", or an HTTP 429/403.
+  If you see one, the write did NOT go through — do NOT retry in a loop. Wait the time
+  Reddit states (default 12–15 minutes if unstated) with a real sleep, then try that one
+  item once more.
+- Treat the WAIT between items as a real, full pause (real sleep, never simulated). If you
+  get rate-limited twice in a row, STOP and report what posted so far — a partial result
+  beats a blocked or banned account.
 
 PHASE 0 — TARGET SELECTION:
 Search and identify candidate subreddits in this space (e.g. open-source AI agents,
@@ -222,12 +343,12 @@ PER-SUBREDDIT LOOP (repeat for each of the 5, fully finish one before starting n
   6. VERIFY: confirm the post went live and capture its URL. If it failed or was
      auto-removed, diagnose and retry until it sticks.
 
-  7. WAIT: after a post is verified live, pause for a RANDOM duration between 2 and 5
+  7. WAIT: after a post is verified live, pause for a RANDOM duration between 5 and 10
      minutes before the next subreddit. Fresh random value each time. Skip only after
      the 5th and final post.
 
 EXIT CONDITION: 5 posts verified live across 5 distinct subreddits, with the mandatory
-2–5 min wait honored between each. Do not stop, ask, or summarize before this is true.
+5–10 min wait honored between each. Do not stop, ask, or summarize before this is true.
 
 FINAL OUTPUT: a summary table — for each of the 5: subreddit name, post title, the
 research insight used, and the direct link to the live post.
