@@ -1,5 +1,5 @@
 ---
-title: "Reddit Karma Farm"
+title: "Karma Farm"
 description: "Autonomously post 5 high-value replies across popular subreddit threads to earn karma using your logged-in browser session — no Reddit API"
 ---
 
@@ -8,6 +8,19 @@ description: "Autonomously post 5 high-value replies across popular subreddit th
 Wolffish uses your **already logged-in** Reddit account through the browser extension to post 5 original, high-value replies to popular, high-momentum threads in the open-source / personal-AI-agent / local-LLM space. Each reply adds something real to the thread, invites further engagement, earns karma, and softly foreshadows Wolffish's philosophy. No Reddit API. No OAuth. It runs inside your real Chrome session, as you, through the extension's debugger mode.
 
 The agent joins each sub before replying, reads the post and its top comments, finds a sourced insight, drafts → critiques → redrafts three times, self-checks, replies, confirms the reply is live, then waits a random 5–10 minutes before the next one.
+
+## Video Walkthrough
+
+<iframe
+  width="100%"
+  height="400"
+  src="https://www.youtube.com/embed/lsFJf7qsZUg"
+  title="Karma Farm — Wolffish Demo"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+  style={{ borderRadius: '8px', marginTop: '1rem', marginBottom: '1rem' }}
+></iframe>
 
 <Warning>
   **Read this before you run it.** "Karma farming" with automated replies sits squarely against Reddit's [Content Policy](https://redditinc.com/policies/content-policy) and most subreddit rules. Vote manipulation, undisclosed promotion, and bot-like reply patterns can get your account shadowbanned or permanently banned, and mods remove low-effort or off-topic replies fast. Debugger mode and humanize make the activity look human but **do not** make it compliant. Use this only in communities where you genuinely participate, keep every reply substantive, and disclose any affiliation the rules require. You own everything posted from your account. We don't endorse violating any platform's terms.
@@ -241,7 +254,7 @@ Once you trust the output, schedule it. Open **Settings → Heartbeat** to launc
 </Warning>
 
 ```markdown
-## Reddit Karma Farm | Weekly (Thursday 11:00)
+## Karma Farm | Weekly (Thursday 11:00)
 
 ROLE: You are Wolffish operating in full autonomous agent mode. Use your browser
 session capability (wolffish-extension / debugger mode, ext_* tools) in my real,
