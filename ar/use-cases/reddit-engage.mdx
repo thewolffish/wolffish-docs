@@ -27,7 +27,7 @@ description: "يبحث ويصيغ وينشر تلقائياً 5 منشورات R
 
 ### موصى به
 
-- **DeepSeek V4 Flash في وضع Max.** تولّد أتمتة المتصفح سياقات كبيرة بسرعة — كل `ext_read_page` يُعيد نص الصفحة المرئي بالكامل، وقواعد مجتمع واحد + أبرز منشوراته تساوي عدداً كبيراً من الرموز. تهيمن تكلفة الرمز، لذا يفوز أرخص نموذج قادر: DeepSeek V4 Flash بسعر **0.14$ / 0.28$ لكل مليون رمز** (مقابل ~25$ لنفس جلسة التصفح على نموذج رائد — راجع [جدول تكاليف الإضافة](/ar/integrations/browser-extension#cost-why-model-choice-matters)). يُفعّل **وضع Max** الاستدلال العميق للأجزاء التي تحتاجه فعلاً — اختيار المجتمعات، وحلقة الصياغة ← النقد ← إعادة الصياغة الثلاثية، وبوابة الفحص الذاتي، والتأكد من ظهور المنشور. تحصل على حكم بمستوى النماذج الرائدة على نموذج بسعر تصفّح. اضبطه لكل محادثة في وولف فيش؛ راجع [DeepSeek](/ar/configuration/deepseek).
+- **Claude Sonnet 4.6 في وضع Max.** هذا السير ينجح أو يفشل بجودة الكتابة — عنوان يوقف التمرير، ومنشور مضحك فعلاً أو يوجّه «روست» موفّقاً، وحكم حادّ بما يكفي ليلائم ثقافة كل مجتمع. Sonnet 4.6 هو أفضل قيمة لذلك: صوت وفكاهة من الطراز الأول، و**نافذة سياق بمليون رمز** تستوعب جلسات التصفح الطويلة عبر مجتمعات متعددة بأريحية، واستخدام موثوق للأدوات متعدد الخطوات لحلقة التصفح ← الصياغة ← النشر ← التحقق. يُفعّل **وضع Max** الاستدلال العميق المتكيّف الذي يعتمد عليه الموجِّه — اختيار المجتمعات، وحلقة الصياغة ← النقد ← إعادة الصياغة الثلاثية، وبوابة الفحص الذاتي، والتأكد من ظهور المنشور. بسعر **3$ / 15$ لكل مليون رمز** يكلّف أكثر من النماذج الاقتصادية، لكن لمنشورات عامة باسمك الجودة تستحق ذلك. اضبطه لكل محادثة في وولف فيش؛ راجع [Anthropic](/ar/configuration/anthropic). للتشغيلات الكثيرة الأرخص، يعمل أيضاً DeepSeek V4 Flash في وضع Max — راجع [جدول تكاليف الإضافة](/ar/integrations/browser-extension#cost-why-model-choice-matters).
 
 ### اختياري
 
@@ -75,12 +75,15 @@ PER-SUBREDDIT LOOP (repeat for each of the 5, fully finish one before starting n
   1. PLAN: Reason about what THIS specific subreddit's audience actually cares about and
      what title format goes viral there (hooks, questions, hot takes, "TIL"-style).
 
-  2. RESEARCH: Find ONE genuinely non-obvious, research-backed industry insight the
-     reader almost certainly doesn't know — tied directly to the post's theme. Examples
-     of the FLAVOR (find current real ones, don't reuse these): a Chinese open model
-     milestone, an AI-company market-cap/IPO datapoint, a benchmark crossover, an
-     adoption stat, a cost-curve shift. It MUST be accurate, sourced, and relevant to
-     the point. The reader should leave smarter.
+  2. RESEARCH (mandatory — research before you draft): Run at least one `web_search` to
+     enrich your context before writing a word — never lean on generic model knowledge
+     alone. Find ONE genuinely non-obvious, research-backed industry insight the reader
+     almost certainly doesn't know, tied directly to the post's theme. Examples of the
+     FLAVOR (find current real ones, don't reuse these): a Chinese open model milestone,
+     an AI-company market-cap/IPO datapoint, a benchmark crossover, an adoption stat, a
+     cost-curve shift. It MUST be ADDITIVE and sourced — a concrete number, named
+     milestone, or dated event the reader couldn't get from a generic LLM, not vague
+     common knowledge. The reader should leave smarter.
 
   3. DRAFT (three passes): write draft 1, then critique it, then draft 2 fixing weak
      spots, then draft 3 as final. Final post must:
@@ -89,11 +92,14 @@ PER-SUBREDDIT LOOP (repeat for each of the 5, fully finish one before starting n
      - foreshadow the Wolffish philosophy as a natural opinion
      - sound HUMAN: casual tone, some emojis, occasional typo/abbreviation, not polished
        marketing copy
+     - be entertaining: humor is welcome, and a bit of roasting/snark is great where the
+       sub's culture rewards it — roast ideas, hype, and trends, never people
      - obey that subreddit's rules
 
-  4. SELF-CHECK before posting: Does it give real value? Is the insight accurate and
-     sourced? Does it fit the sub's rules? Will it spark discussion? If any answer is no,
-     redraft. Do not post until all are yes.
+  4. SELF-CHECK before posting: Did I actually research this (at least one search), and
+     does it carry an additive, sourced fact — not generic LLM knowledge? Does it give
+     real value? Is the insight accurate? Does it fit the sub's rules? Will it spark
+     discussion? If any answer is no, redraft. Do not post until all are yes.
 
   5. POST: submit it to that subreddit via my logged-in Reddit session.
 
@@ -194,17 +200,22 @@ PER-SUBREDDIT LOOP (repeat for each of the 5, fully finish one before starting n
   1. PLAN: Reason about what THIS specific subreddit's audience actually cares about and
      what title format goes viral there (hooks, questions, hot takes, "TIL"-style).
 
-  2. RESEARCH: Find ONE genuinely non-obvious, research-backed industry insight the
-     reader almost certainly doesn't know — tied directly to the post's theme. It MUST
-     be accurate, sourced, and relevant to the point. The reader should leave smarter.
+  2. RESEARCH (mandatory — research before you draft): Run at least one `web_search` to
+     enrich context before writing — never rely on generic model knowledge alone. Find
+     ONE genuinely non-obvious, research-backed industry insight the reader almost
+     certainly doesn't know, tied to the post's theme. It MUST be ADDITIVE and sourced —
+     a concrete number, named milestone, or dated event the reader couldn't get from a
+     generic LLM. The reader should leave smarter.
 
   3. DRAFT (three passes): write draft 1, then critique it, then draft 2 fixing weak
      spots, then draft 3 as final. Final post must be viral-optimized, deliver the
      insight as the core payload, foreshadow the Wolffish philosophy as a natural
-     opinion, sound HUMAN (casual, some emojis, occasional typo), and obey the rules.
+     opinion, sound HUMAN (casual, some emojis, occasional typo) — humor and a little
+     idea-roasting/snark welcome where the sub rewards it — and obey the rules.
 
-  4. SELF-CHECK before posting: real value? insight accurate and sourced? fits the sub's
-     rules? sparks discussion? If any answer is no, redraft. Do not post until all yes.
+  4. SELF-CHECK before posting: actually researched (≥1 search) with an additive sourced
+     fact, not generic knowledge? real value? accurate? fits the sub's rules? sparks
+     discussion? If any answer is no, redraft. Do not post until all yes.
 
   5. POST: submit it to that subreddit via my logged-in Reddit session.
 
