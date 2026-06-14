@@ -27,7 +27,7 @@ This workflow is **browser-extension-only** — it never touches the Reddit API.
 
 ### Recommended
 
-- **DeepSeek V4 Flash on Max mode.** Browser automation generates large contexts fast — every `ext_read_page` returns the full visible page text, and a single subreddit's rules + top posts is a lot of tokens. Per-token cost dominates, so the cheapest capable model wins: DeepSeek V4 Flash is **$0.14 / $0.28 per MTok** (vs ~$25 for the same browsing session on a frontier model — see the [extension cost table](/integrations/browser-extension#cost-why-model-choice-matters)). **Max mode** turns on deep reasoning for the parts that actually need it — choosing subreddits, the three-pass draft → critique → redraft loop, the self-check gate, and verifying a post went live. You get frontier-grade judgment on a browsing-priced model. Set it per-conversation in Wolffish; see [DeepSeek](/configuration/deepseek).
+- **Claude Sonnet 4.6 on Max mode.** This workflow lives or dies on writing quality — a scroll-stopping title, a post that's genuinely funny or lands a roast, and judgment sharp enough to fit each sub's culture. Sonnet 4.6 is the best value for that: top-tier voice and humor, a **1M-token context window** that comfortably holds long multi-subreddit browsing sessions, and reliable multi-step tool use for the browse → draft → post → verify loop. **Max mode** turns on the deep, adaptive reasoning the prompt leans on — choosing subreddits, the three-pass draft → critique → redraft loop, the self-check gate, and verifying a post went live. At **$3 / $15 per MTok** it costs more than the budget models, but for public posts under your name the quality is worth it. Set it per-conversation in Wolffish; see [Anthropic](/configuration/anthropic). For cheaper bulk runs, DeepSeek V4 Flash on Max mode also works — see the [extension cost table](/integrations/browser-extension#cost-why-model-choice-matters).
 
 ### Optional
 
@@ -75,12 +75,15 @@ PER-SUBREDDIT LOOP (repeat for each of the 5, fully finish one before starting n
   1. PLAN: Reason about what THIS specific subreddit's audience actually cares about and
      what title format goes viral there (hooks, questions, hot takes, "TIL"-style).
 
-  2. RESEARCH: Find ONE genuinely non-obvious, research-backed industry insight the
-     reader almost certainly doesn't know — tied directly to the post's theme. Examples
-     of the FLAVOR (find current real ones, don't reuse these): a Chinese open model
-     milestone, an AI-company market-cap/IPO datapoint, a benchmark crossover, an
-     adoption stat, a cost-curve shift. It MUST be accurate, sourced, and relevant to
-     the point. The reader should leave smarter.
+  2. RESEARCH (mandatory — research before you draft): Run at least one `web_search` to
+     enrich your context before writing a word — never lean on generic model knowledge
+     alone. Find ONE genuinely non-obvious, research-backed industry insight the reader
+     almost certainly doesn't know, tied directly to the post's theme. Examples of the
+     FLAVOR (find current real ones, don't reuse these): a Chinese open model milestone,
+     an AI-company market-cap/IPO datapoint, a benchmark crossover, an adoption stat, a
+     cost-curve shift. It MUST be ADDITIVE and sourced — a concrete number, named
+     milestone, or dated event the reader couldn't get from a generic LLM, not vague
+     common knowledge. The reader should leave smarter.
 
   3. DRAFT (three passes): write draft 1, then critique it, then draft 2 fixing weak
      spots, then draft 3 as final. Final post must:
@@ -89,11 +92,14 @@ PER-SUBREDDIT LOOP (repeat for each of the 5, fully finish one before starting n
      - foreshadow the Wolffish philosophy as a natural opinion
      - sound HUMAN: casual tone, some emojis, occasional typo/abbreviation, not polished
        marketing copy
+     - be entertaining: humor is welcome, and a bit of roasting/snark is great where the
+       sub's culture rewards it — roast ideas, hype, and trends, never people
      - obey that subreddit's rules
 
-  4. SELF-CHECK before posting: Does it give real value? Is the insight accurate and
-     sourced? Does it fit the sub's rules? Will it spark discussion? If any answer is no,
-     redraft. Do not post until all are yes.
+  4. SELF-CHECK before posting: Did I actually research this (at least one search), and
+     does it carry an additive, sourced fact — not generic LLM knowledge? Does it give
+     real value? Is the insight accurate? Does it fit the sub's rules? Will it spark
+     discussion? If any answer is no, redraft. Do not post until all are yes.
 
   5. POST: submit it to that subreddit via my logged-in Reddit session.
 
@@ -194,17 +200,22 @@ PER-SUBREDDIT LOOP (repeat for each of the 5, fully finish one before starting n
   1. PLAN: Reason about what THIS specific subreddit's audience actually cares about and
      what title format goes viral there (hooks, questions, hot takes, "TIL"-style).
 
-  2. RESEARCH: Find ONE genuinely non-obvious, research-backed industry insight the
-     reader almost certainly doesn't know — tied directly to the post's theme. It MUST
-     be accurate, sourced, and relevant to the point. The reader should leave smarter.
+  2. RESEARCH (mandatory — research before you draft): Run at least one `web_search` to
+     enrich context before writing — never rely on generic model knowledge alone. Find
+     ONE genuinely non-obvious, research-backed industry insight the reader almost
+     certainly doesn't know, tied to the post's theme. It MUST be ADDITIVE and sourced —
+     a concrete number, named milestone, or dated event the reader couldn't get from a
+     generic LLM. The reader should leave smarter.
 
   3. DRAFT (three passes): write draft 1, then critique it, then draft 2 fixing weak
      spots, then draft 3 as final. Final post must be viral-optimized, deliver the
      insight as the core payload, foreshadow the Wolffish philosophy as a natural
-     opinion, sound HUMAN (casual, some emojis, occasional typo), and obey the rules.
+     opinion, sound HUMAN (casual, some emojis, occasional typo) — humor and a little
+     idea-roasting/snark welcome where the sub rewards it — and obey the rules.
 
-  4. SELF-CHECK before posting: real value? insight accurate and sourced? fits the sub's
-     rules? sparks discussion? If any answer is no, redraft. Do not post until all yes.
+  4. SELF-CHECK before posting: actually researched (≥1 search) with an additive sourced
+     fact, not generic knowledge? real value? accurate? fits the sub's rules? sparks
+     discussion? If any answer is no, redraft. Do not post until all yes.
 
   5. POST: submit it to that subreddit via my logged-in Reddit session.
 
