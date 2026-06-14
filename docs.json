@@ -208,6 +208,7 @@
                 "group": "Extending Wolffish",
                 "expanded": true,
                 "pages": [
+                  "extending/agents-md",
                   "extending/creating-capabilities",
                   "extending/advanced-plugins",
                   "extending/adding-channels",
@@ -375,6 +376,7 @@
                 "group": "توسيع وولف فيش",
                 "expanded": true,
                 "pages": [
+                  "ar/extending/agents-md",
                   "ar/extending/creating-capabilities",
                   "ar/extending/advanced-plugins",
                   "ar/extending/adding-channels",

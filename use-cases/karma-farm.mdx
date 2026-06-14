@@ -7,7 +7,7 @@ description: "Autonomously post 5 high-value replies across popular subreddit th
 
 Wolffish uses your **already logged-in** Reddit account through the browser extension to post 5 original, high-value replies to popular, high-momentum threads in the open-source / personal-AI-agent / local-LLM space. Each reply adds something real to the thread, invites further engagement, earns karma, and softly foreshadows Wolffish's philosophy. No Reddit API. No OAuth. It runs inside your real Chrome session, as you, through the extension's debugger mode.
 
-The agent joins each sub before replying, reads the post and its top comments, finds a sourced insight, drafts → critiques → redrafts three times, self-checks, replies, confirms the reply is live, then waits a random 5–10 minutes before the next one.
+The agent joins each sub before replying, checks the thread is actually comment-able, reads the post and its top comments, finds a sourced insight, drafts → critiques → redrafts three times, self-checks, replies, confirms the reply is actually live by seeing it in the thread and on your profile, then paces itself with a short randomized wait before the next one.
 
 ## Video Walkthrough
 
@@ -52,156 +52,142 @@ Leave your browser open on Reddit, logged in, with the extension dot green. The 
 
 ## The Prompt
 
-Send this to Wolffish in one message. It finds threads, joins subs, drafts, replies, verifies, and waits — fully autonomous until 5 replies are live.
+Send this to Wolffish in one message. It finds high-momentum threads, joins subs, checks each thread is comment-able, drafts, replies, verifies each reply is actually live, and paces itself — fully autonomous until 5 replies are live.
 
 ```
-ROLE: You are Wolffish operating in full autonomous agent mode. Use your browser
-session capability (wolffish-extension / debugger mode, ext_* tools) in my real,
-ALREADY LOGGED-IN Chrome tab. Do NOT use the Reddit API, a headless browser, Playwright,
-or any new/throwaway browser — work only in my existing tab through the extension. Do
-not ask me anything. Do not stop until the EXIT CONDITION is met.
+ROLE: You are Wolffish in full autonomous agent mode. Work ONLY through the Wolffish
+browser extension (ext_* tools) in my real, already-logged-in Chrome tab. Never use the
+Reddit API, Playwright, browser_* tools, a headless browser, or a new window — those
+aren't logged in and Reddit returns 403. Don't ask me anything. Don't stop until the
+EXIT CONDITION is met.
 
-MISSION: Post 5 original, high-value REPLIES to popular posts across popular subreddits
-in the open-source / personal-AI-agent / local-LLM space. Each reply must invite further
-engagement and earn karma, while softly foreshadowing Wolffish's philosophy.
-
-WOLFFISH PHILOSOPHY TO FORESHADOW (never pitch it directly, never name it as a product
-— let it emerge as an opinion/idea):
+MISSION: Get 5 ORIGINAL, high-value REPLIES LIVE on popular, high-momentum threads,
+spread across multiple subreddits in the open-source / personal-AI-agent / local-LLM
+space. Each reply must add real value, invite a response, and earn karma — while softly
+foreshadowing a philosophy (never pitch it, never name it as a product — let it read as a
+personal opinion):
 - brain-like architecture, but radically minimal and simple
 - built for END USERS, not just devs
 - does a FEW things extremely well instead of many things badly
-- local-first, markdown-as-truth, you can read your agent's whole brain in a text editor
+- local-first, markdown-as-truth — you can read the agent's whole brain in a text editor
 
-REASONING DISCIPLINE (think before every action):
-Before each phase, reason step by step in your scratchpad: what's the goal, what could
-go wrong, what's the best move. Then act. After each action, verify the result before
-continuing. Never assume success — confirm it. The mandatory wait between replies is a
-real action — never skip, shorten, or "simulate" it.
+═══ CRITICAL RULES (these are exactly why these runs fail — obey them) ═══
+- A reply is LIVE only when you can SEE it after submitting — as a comment by MY username
+  in the thread, AND as the newest entry on
+  https://old.reddit.com/user/MY_NAME/comments/?sort=new. A tool's {"success":true} is
+  NOT proof: a comment submit can return success while it was rate-limited, karma-gated,
+  or auto-removed and never actually created.
+- Some threads can't be commented on: archived/locked threads, quarantined/restricted
+  subs, or subs that require a minimum karma/account-age to comment. If your reply doesn't
+  appear, READ the real reason on the page and SKIP to a backup thread — don't fight it.
+- Do NOT assume a rate limit. Only treat it as one if you LITERALLY SEE "you are doing
+  that too much" / "try again in N minutes" / "looks like you're using an unofficial
+  client" on the page. Inventing a rate limit just wastes the run.
+- Spread replies across different threads/subs and make each one genuinely DISTINCT — never
+  paste the same or near-same reply (or reuse the same datapoint) across threads. Duplicate
+  comments across threads are the fastest way to get shadowbanned.
 
-REDDIT MECHANICS (follow exactly — this is how you avoid wasting calls):
+ENVIRONMENT — extension only, old reddit only:
+- old.reddit ONLY (https://old.reddit.com). It's plain HTML and works first try; www/sh
+  Reddit build the comment composer in Shadow DOM + a Lexical editor that will eat the run.
+  If you ever land on www.reddit.com, rewrite the URL to old.reddit.com first.
+- Never call browser_launch / browser_navigate / any browser_* (Playwright) tool, and
+  never open a headless/throwaway browser or new window — those aren't logged in (403).
+- Don't pass a guessed tabId (tabId:1 fails with "No tab with id"). Omit it to use the
+  active tab; if you truly need the id, call ext_tabs_list once and reuse it.
+- First, confirm I'm logged in and capture my username: ext_query_selector ".user a"
+  (returns my name and /user/<name>/ href). You need it to verify replies.
 
-ENVIRONMENT — extension only, no headless:
-- Act ONLY through the Wolffish browser extension (ext_* tools) in my real, already
-  logged-in tab. NEVER call browser_launch / browser_navigate / any browser_* (Playwright)
-  tool, and never open a headless/throwaway browser or new window — those sessions are NOT
-  logged in and Reddit returns HTTP 403 for them. Reuse my existing tab only.
-- Do NOT pass a guessed tabId to any tool (tabId:1 fails with "No tab with id"). Omit
-  tabId to use the active tab; if you truly need the id, call ext_tabs_list once and reuse it.
-- First, confirm I'm logged in and note my username (top-right bar on old.reddit) — you
-  need it to verify replies later.
+SELECTORS (verified — use exactly these):
+- JOIN a sub: the .fancy-toggle-button toggle in the sidebar (its span reads
+  "join"/"subscribe" when you're not a member). ext_click it; if "text=join" isn't found,
+  click by that class.
+- Open a post from its real link in the listing/search — never invent a post ID (a wrong
+  one 404s): https://old.reddit.com/r/SUB/comments/POSTID/
+- The TOP-LEVEL reply box is the first <textarea> inside form.usertext in the .commentarea
+  (directly under the post — NOT a textarea nested inside an existing comment). Read the
+  page first to confirm you're targeting the top box.
+- Fill it with ext_set_value (framework-safe; more reliable here than ext_type).
+- Submit THAT form: ext_submit_form with selector = the top reply textarea, or ext_click
+  "form.usertext button.save" scoped to the top box. A bare ".usertext-buttons button"
+  matches every comment's reply form — never use it unscoped or you'll reply in the wrong
+  place.
+- ext_query_selector accepts REAL CSS ONLY — no "text=", no :has-text(), no "button=...".
+  ("text=" is valid for ext_click only.)
 
-USE OLD REDDIT FOR EVERYTHING:
-- Operate on https://old.reddit.com, never www/sh.reddit.com. New Reddit builds the
-  comment composer inside Shadow DOM + a Lexical editor that is slow and brittle to target
-  and will eat your run; old.reddit is plain HTML and works first try. If you ever land on
-  www.reddit.com, rewrite the URL to old.reddit.com before doing anything.
+PHASE 0 — FIND HIGH-MOMENTUM, COMMENT-ABLE TARGETS:
+Find POPULAR, ACTIVE subs in this space, and within them recent rising/hot threads with
+real momentum (lots of recent comments, not dead or archived) where a thoughtful reply
+will be SEEN and upvoted. Build a list of ~7 candidate threads spread across multiple subs
+(more than 5, so you have backups when one turns out gated or archived). A great reply on
+a dead or archived thread earns nothing.
 
-SELECTORS (this is where runs break):
-- ext_query_selector accepts REAL CSS ONLY. ":has-text(...)", "button=save", and
-  "text=..." are NOT valid CSS and will throw. Use plain CSS: tag, .class, [attr="value"].
-- To click by visible label, use ext_click with selector "text=<label>".
-- Unsure of a field? ext_query_selector with CSS (match by name/class) to read the form,
-  then act on the exact element.
+PER-REPLY LOOP (finish one fully before the next):
 
-JOIN A SUB on old.reddit:
-- The subscribe control is the .fancy-toggle-button toggle in the sidebar (its span reads
-  "join"/"subscribe" when you're not a member). Click it. If "text=join" isn't found,
-  click the toggle by that CSS class.
+  1. JOIN: ensure you've JOINED the sub before replying in it (skip if already a member).
+     Replying in a sub you've never joined is a bot tell.
 
-REPLY TO A POST on old.reddit:
-- Open the post from its real link in the listing/search — never invent a post ID (a wrong
-  ID 404s): https://old.reddit.com/r/SUB/comments/POSTID/
-- The top-level reply box is a <textarea> inside form.usertext (the comment area). Click
-  it, then ext_type with clearFirst:true.
-- Submit by clicking THAT form's button: selector "form.usertext button.save". A bare
-  ".usertext-buttons button" matches every comment's reply form — scope it to the top
-  comment box so you don't reply to the wrong place.
+  2. CHECK COMMENT-ABILITY: open the thread and ext_read_page. Confirm the top-level reply
+     box exists and the thread isn't archived/locked, and there's no "you must have N
+     karma to comment here" notice. If you can't comment, SKIP to a backup thread.
 
-VERIFY ONCE — NEVER DOUBLE-POST:
-- Verify EXACTLY ONCE via your profile: https://old.reddit.com/user/MY_USERNAME/comments/
-  — confirm your newest comment matches what you sent and capture its permalink (the
-  comment's "permalink"/a.bylink link).
-- If the submit click returned success, assume it posted and verify on the profile. Do
-  NOT retype and resubmit the same reply — that creates duplicate comments (spam). Only
-  retry if the profile clearly shows it did not post.
+  3. PLAN: read the post AND its top comments. Pick an angle that adds real value and rides
+     the thread's momentum — agree-and-extend, a useful correction, a sharp insight, or a
+     respectful hot take. No low-effort "great post" filler.
 
-RATE LIMITS — respect them (this is the #1 thing that breaks these runs):
-- Reddit rate-limits WRITES (commenting, posting, joining) hard — a low-karma account may
-  only get ~1 write per 5–10 minutes. Reads (ext_navigate / ext_read_page) are cheap; it's
-  the WRITES you must pace.
-- One write per target. NEVER submit the same content twice — a duplicate storm is the
-  single fastest way to trip the limit (and it spams the thread). If a write's outcome is
-  unclear, VERIFY on your profile before ever resending; it almost always did post.
-- After every write, check for a rate-limit notice: "you are doing that too much (try
-  again in N minutes)", "looks like you're using an unofficial client", or an HTTP 429/403.
-  If you see one, the write did NOT go through — do NOT retry in a loop. Wait the time
-  Reddit states (default 12–15 minutes if unstated) with a real sleep, then try that one
-  item once more.
-- Treat the WAIT between items as a real, full pause (real sleep, never simulated). If you
-  get rate-limited twice in a row, STOP and report what posted so far — a partial result
-  beats a blocked or banned account.
+  4. RESEARCH (mandatory, >=1 web_search before writing): find ONE non-obvious, sourced,
+     on-topic fact the reader likely doesn't know — a concrete number, named milestone,
+     benchmark crossover, adoption stat, or cost-curve shift. Use a DIFFERENT datapoint per
+     thread. The reader should leave smarter.
 
-PHASE 0 — TARGET SELECTION:
-Search and identify POPULAR, ACTIVE subreddits in this space (e.g. open-source AI
-agents, local LLMs, self-hosted AI, AI tooling, indie AI builders). Within them, find
-popular, recent, high-traffic posts where a thoughtful reply will be SEEN and upvoted
-(rising/hot threads with momentum, not dead ones). Spread your 5 replies across
-multiple subreddits and threads — never spam one thread.
+  5. DRAFT (three passes: draft → critique → final). The final reply must:
+     - directly engage what the post/top comments actually said (not generic)
+     - carry the research insight as a payload
+     - end on an opening that invites a response (a question / counterpoint)
+     - foreshadow the philosophy as a casual personal opinion, never a pitch
+     - sound HUMAN: casual, an emoji or two, an occasional typo; light snark at
+       hype/trends welcome (roast ideas, never people)
+     - obey that sub's rules
 
-PER-REPLY LOOP (repeat until 5 replies are live, fully finish one before the next):
+  6. SELF-CHECK: real research with an additive sourced fact (not generic knowledge)? adds
+     real value to THIS thread? accurate? fits the rules? invites a reply/upvotes? distinct
+     from your other replies? If any is no, redraft. Don't post until all are yes.
 
-  1. JOIN: Before replying in a subreddit, ensure you have JOINED it. If already a
-     member, skip. Never reply in a sub you haven't joined.
+  7. POST + VERIFY (deterministic — do this exactly):
+     a. ext_set_value the top reply textarea -> your reply, then submit that form
+        (ext_submit_form on the textarea, or ext_click "form.usertext button.save" scoped
+        to the top box).
+     b. Confirm it's LIVE: ext_read_page the .commentarea and find your comment (by MY
+        username + a unique ~8-word snippet of your text). Then navigate
+        https://old.reddit.com/user/MY_NAME/comments/?sort=new, ext_read_page #siteTable,
+        confirm the newest comment is this reply on this thread, and capture its permalink
+        (the comment's a.bylink href).
+     c. If it's NOT there -> it didn't post. ext_read_page near the form for the reason:
+        * karma/age gate, archived/locked, removed -> SKIP to a backup thread.
+        * "doing that too much / try again in N minutes / unofficial client" -> REAL rate
+          limit: ext_wait the stated minutes (default 10 if unstated) as one real sleep,
+          then retry THIS reply ONCE. If rate-limited twice, STOP and report.
+        * anything else -> fix what it says, or skip to a backup.
+     d. NEVER retype-and-resubmit a reply that already appears live — that double-posts.
 
-  2. PLAN: Read the target post and its top comments. Reason about what reply would add
-     real value to THIS thread, ride its momentum, and earn upvotes — agree-and-extend,
-     a useful correction, a sharp insight, or a respectful hot take. Avoid low-effort
-     "great post" comments.
+  8. WAIT before the next reply: a real ext_wait of a fresh RANDOM 120000-240000 ms
+     (2-4 min) — a natural human commenting cadence that avoids looking like reply-spam,
+     without burning the run on 5-10 min waits. ext_wait has NO cap. Skip the wait after
+     the 5th live reply. (Only the real-rate-limit branch above uses a longer wait.)
 
-  3. RESEARCH (mandatory — research before you draft): Run at least one `web_search` to
-     enrich your context before writing the reply — never lean on generic model knowledge
-     alone. Find ONE genuinely non-obvious, research-backed insight relevant to the
-     thread that the reader likely doesn't know. Examples of the FLAVOR (find current
-     real ones, don't reuse): a Chinese open model milestone, an AI-company
-     market-cap/IPO datapoint, a benchmark crossover, an adoption stat, a cost-curve
-     shift. It MUST be ADDITIVE, accurate, sourced, and on-topic — a concrete fact the
-     reader couldn't get from a generic LLM. The reader should leave smarter.
+EXIT CONDITION: 5 replies verified LIVE (each seen on
+https://old.reddit.com/user/MY_NAME/comments/ with a captured permalink), across multiple
+subs/threads, each sub joined first. Keep a running tally ("LIVE: 3/5"). If you run out of
+good comment-able threads before reaching 5, STOP and report what's live plus what you
+skipped and why — do NOT force replies into dead/gated threads or loop forever.
 
-  4. DRAFT (three passes): draft 1, critique it, draft 2 fixing weak spots, draft 3
-     final. Final reply must:
-     - directly engage what the post/comment actually said (not generic)
-     - deliver the research insight as a payload
-     - end in a way that invites a response (a question, a counterpoint, an opening)
-     - foreshadow the Wolffish philosophy as a natural opinion
-     - sound HUMAN: casual, some emojis, occasional typo/abbreviation, not polished copy
-     - be entertaining: humor is welcome, and a bit of roasting/snark is great where the
-       sub's culture rewards it — roast ideas, hype, and trends, never people
-     - obey that subreddit's rules
-
-  5. SELF-CHECK before posting: Did I actually research this (at least one search), and
-     does it carry an additive, sourced fact — not generic LLM knowledge? Does it add
-     real value to the thread? Is the insight accurate? Does it fit the sub's rules? Will
-     it spark a reply or upvotes? If any answer is no, redraft. Do not post until all yes.
-
-  6. POST: submit the reply on the target post via my logged-in Reddit session.
-
-  7. VERIFY: confirm the reply actually went live and capture its direct permalink. If it
-     failed or was auto-removed, diagnose and retry until it sticks.
-
-  8. WAIT: after a reply is verified live, pause for a RANDOM duration between 5 and 10
-     minutes before the next one. Pick a fresh random value each time. Skip this wait
-     only after the 5th and final reply.
-
-EXIT CONDITION: 5 replies verified live across multiple popular subreddits/threads, each
-subreddit joined before replying, with the 5–10 min wait honored between each. Do not
-stop, ask, or summarize before this is true.
-
-FINAL OUTPUT: a summary table — for each of the 5: subreddit name, the post replied to
-(title), the research insight used, and the direct permalink to your live reply.
+FINAL OUTPUT: a table — for each LIVE reply: subreddit, the post you replied to (title),
+the sourced insight used, and the direct permalink to your reply. Then list any threads
+skipped (with the blocker you saw).
 ```
 
 <Tip>
-  **Why this version is faster:** it forces everything onto `old.reddit.com` (plain HTML — no Shadow-DOM/Lexical composer to fight), keeps all work inside your logged-in tab via the extension (no headless browser), restricts `ext_query_selector` to real CSS, scopes the submit to `form.usertext button.save`, and replies-then-verifies-once on your own profile so the agent never double-posts. Those are the exact failure modes that stall an unguided run.
+  **Why this version lands replies:** it confirms each reply is *actually* live by finding it in the thread and on your `/user/<you>/comments/` profile (a tool's `success:true` isn't proof — a comment can be silently karma-gated or auto-removed), checks each thread is comment-able *before* drafting, only waits out a cooldown when Reddit literally shows one, paces replies at a natural 2–4 min, and forces a distinct reply + datapoint per thread so you don't trip shadowban heuristics. It keeps the parts that already work — JOIN-before-reply, reading the top comments, and scoping the submit to `form.usertext button.save` so it never replies in the wrong box.
 </Tip>
 
 ## Understanding the Prompt
@@ -210,13 +196,14 @@ Same autonomous skeleton as [Engage Reddit](/use-cases/reddit-engage), tuned for
 
 | Section | What it does | Why it's there |
 |---|---|---|
-| **MISSION** | 5 replies, spread across many threads/subs, that earn karma and invite engagement. | Replies on hot threads get seen faster than new posts — but only if they're spread out and genuinely useful. |
-| **PHASE 0** | Find *rising/hot* threads with momentum, not dead ones; spread across subs. | A great reply on a dead thread earns nothing. Momentum + spread is the whole game, and spreading avoids looking like thread spam. |
+| **CRITICAL RULES** | Names the failure modes: a reply counts only when you SEE it (not a tool `success`), some threads can't be commented on, don't invent a rate limit, keep every reply distinct. | These are the silent killers — surfacing them up top makes the agent design around them instead of discovering them mid-run. |
+| **MISSION** | 5 distinct replies, spread across many hot threads, that earn karma and invite engagement. | Replies on hot threads get seen faster than new posts — but only if they're spread out, genuinely useful, and not copy-paste. |
+| **PHASE 0** | Find *rising/hot, comment-able* threads with momentum; build ~7 candidates so you have backups. | A great reply on a dead, archived, or gated thread earns nothing. Momentum + spread + backups is the whole game. |
 | **JOIN** (step 1) | Join a sub before replying in it; skip if already a member. | Replying in subs you've never joined is a classic bot tell — joining first reads as a real participant. |
-| **PLAN** (step 2) | Read the post *and its top comments*, then pick an angle: agree-and-extend, useful correction, sharp insight, or respectful hot take. No "great post!" filler. | Low-effort replies get downvoted or removed; the angle is what earns upvotes. |
-| **DRAFT** (step 4) | Three-pass draft, must engage what was actually said and **end on an opening** (question/counterpoint). | The closing invitation is what turns a reply into a conversation — and conversations are where karma compounds. |
-| **VERIFY** (step 7) | Confirm the reply is live, capture the **permalink**. | Replies can be shadow-removed or filtered; the permalink is your proof and your audit trail. |
-| **WAIT** (step 8) | Random 5–10 min between replies (longer if Reddit signals a cooldown), fresh value each time. | Rapid-fire replies across subs is the fastest way to get rate-limited or flagged. The pause is a *real* pause. |
+| **CHECK COMMENT-ABILITY** (step 2) | Confirm the reply box exists and the thread isn't archived/locked/karma-gated *before* drafting. | The analog of Engage's lenient-sub vetting: don't spend a draft on a thread you can't actually comment in. |
+| **DRAFT** (step 5) | Three-pass draft, engages what was actually said, ends on an opening, distinct per thread. | The closing invitation turns a reply into a conversation; distinctness keeps it off the spam radar. |
+| **POST + VERIFY** (step 7) | `ext_set_value` + submit the scoped `form.usertext`, then confirm the comment in-thread **and** on your profile, capturing the permalink. | A submit's `success:true` is not proof — *seeing* the live comment is. This is what prevents "I replied" hallucinations and duplicate comments. |
+| **WAIT** (step 8) | A real, fresh random 2–4 min between replies; a long wait only when Reddit *literally* shows a cooldown. | Natural cadence that dodges reply-spam flags without burning the run on phantom 5–10 min waits. |
 
 <Tip>
   The **JOIN-before-reply** rule and the **read-the-top-comments** rule are what separate this from spam. A reply that engages the actual discussion and adds a sourced datapoint earns karma honestly; a generic one-liner gets removed. Max mode is what lets the model actually read the room.
@@ -226,22 +213,22 @@ Same autonomous skeleton as [Engage Reddit](/use-cases/reddit-engage), tuned for
 
 1. Prefrontal loads `soul.md` + the browser-extension SKILL.md + web-search SKILL.md into context.
 2. The agent attaches the debugger to the Reddit tab (`ext_debugger_attach`) so all input is dispatched as trusted CDP events.
-3. **Target selection** — on `old.reddit.com` (plain HTML, far easier to drive than New Reddit's Shadow-DOM composer), `ext_navigate` + `ext_read_page` across hot/rising feeds to find high-momentum threads, spread across multiple subs.
+3. **Target selection** — on `old.reddit.com` (plain HTML, far easier to drive than New Reddit's Shadow-DOM composer), `ext_navigate` + `ext_read_page` across hot/rising feeds to build ~7 high-momentum candidate threads spread across multiple subs.
 4. For each reply, in sequence:
    - **Join** the sub if not already a member (`ext_click` the Join button), verifying membership.
-   - `ext_read_page` the target post and its top comments to understand the discussion.
-   - `web_search` for one sourced, on-topic insight.
+   - **Check comment-ability** — `ext_read_page` the thread; if it's archived/locked or karma-gated (no usable reply box), skip to a backup.
+   - `ext_read_page` the post and its top comments to understand the discussion, then `web_search` for one sourced, on-topic insight (a different datapoint each time).
    - Draft → critique → redraft three times, then the self-check gate.
-   - On `old.reddit.com`, click the top `form.usertext` `<textarea>`, `ext_type` the reply, and submit with `ext_click` `form.usertext button.save`. Optional `ext_humanize` for human-like pacing.
-   - Verify **once** via your profile (`old.reddit.com/user/<you>/comments/`) and capture the permalink — a successful submit is treated as posted rather than resubmitted, so the agent never duplicates. Only if the profile shows it didn't post does it diagnose and retry.
-   - Wait a fresh random 5–10 minutes (a real `sleep` via the shell capability) before the next — longer if Reddit signals a cooldown.
-5. After the 5th reply, the agent emits the summary table and stops. Hippocampus logs the run as an episode.
+   - On `old.reddit.com`, `ext_set_value` the top `form.usertext` `<textarea>` and submit that scoped form (`ext_submit_form`, or `ext_click` `form.usertext button.save`). Optional `ext_humanize` for human-like pacing.
+   - **Deterministic verify:** read the `.commentarea` to confirm the comment rendered under your username, then check `old.reddit.com/user/<you>/comments/?sort=new` and capture the permalink. If it isn't there, the agent reads the actual error and skips to a backup thread (or, **only** on a literal "you're doing that too much" notice, waits out the stated cooldown). It never resubmits a reply that already shows live.
+   - A fresh random **2–4 min** `ext_wait` before the next reply (a real sleep, not simulated).
+5. After the 5th live reply, the agent emits the summary table and stops. Hippocampus logs the run as an episode.
 
 ## Limits
 
-- **Karma minimums are a wall.** Many active subs require account age/karma to comment. A young account gets auto-filtered no matter how good the reply is — the agent will note this and move on.
-- **Shadow-removal is invisible to you while logged in.** A reply can look live on your screen and be hidden from everyone else. The verify step checks rendering but cannot always detect a shadowban.
-- **Rate limits hit fast on writes.** Reddit throttles commenting hard — a low-karma account may only post ~1 comment per 5–10 min. The prompt paces writes, watches for "you're doing that too much" notices, waits out the stated cooldown, and never resubmits the same comment — but a young account will still hit walls. If it gets rate-limited twice in a row, it stops and reports a partial result instead of hammering (which is what spam-resubmitting and a duplicate storm cause).
+- **Karma minimums are a wall.** Many active subs require account age/karma to comment. A young account gets auto-filtered no matter how good the reply is — the agent checks comment-ability, notes this, and moves to a backup thread.
+- **Shadow-removal is invisible to you while logged in.** A reply can look live on your screen and be hidden from everyone else. The verify step checks that the comment renders and appears on your profile, but cannot always detect a shadowban.
+- **Rate limits are real but rarely the blocker** on an established account — commenting is throttled far less than posting. The prompt waits out a cooldown **only when Reddit literally shows one**; it won't invent one and burn the run waiting. A brand-new or low-karma account will still hit walls; if rate-limited twice in a row it stops and reports a partial result rather than hammering.
 - **Momentum decays.** A thread that was hot at target-selection may cool by the time the agent replies. The reply still posts, but may earn less than projected.
 - **Skim the output.** Always review the final replies — a wrong "sourced" stat in a reply is more damaging to your reputation than silence.
 
@@ -256,138 +243,131 @@ Once you trust the output, schedule it. Open **Settings → Heartbeat** to launc
 ```markdown
 ## Karma Farm | Weekly (Thursday 11:00)
 
-ROLE: You are Wolffish operating in full autonomous agent mode. Use your browser
-session capability (wolffish-extension / debugger mode, ext_* tools) in my real,
-ALREADY LOGGED-IN Chrome tab. Do NOT use the Reddit API, a headless browser, Playwright,
-or any new/throwaway browser — work only in my existing tab through the extension. Do
-not ask me anything. Do not stop until the EXIT CONDITION is met.
+ROLE: You are Wolffish in full autonomous agent mode. Work ONLY through the Wolffish
+browser extension (ext_* tools) in my real, already-logged-in Chrome tab. Never use the
+Reddit API, Playwright, browser_* tools, a headless browser, or a new window — those
+aren't logged in and Reddit returns 403. Don't ask me anything. Don't stop until the
+EXIT CONDITION is met.
 
-MISSION: Post 5 original, high-value REPLIES to popular posts across popular subreddits
-in the open-source / personal-AI-agent / local-LLM space. Each reply must invite further
-engagement and earn karma, while softly foreshadowing Wolffish's philosophy.
-
-WOLFFISH PHILOSOPHY TO FORESHADOW (never pitch it directly, never name it as a product
-— let it emerge as an opinion/idea):
+MISSION: Get 5 ORIGINAL, high-value REPLIES LIVE on popular, high-momentum threads,
+spread across multiple subreddits in the open-source / personal-AI-agent / local-LLM
+space. Each reply must add real value, invite a response, and earn karma — while softly
+foreshadowing a philosophy (never pitch it, never name it as a product — let it read as a
+personal opinion):
 - brain-like architecture, but radically minimal and simple
 - built for END USERS, not just devs
 - does a FEW things extremely well instead of many things badly
-- local-first, markdown-as-truth, you can read your agent's whole brain in a text editor
+- local-first, markdown-as-truth — you can read the agent's whole brain in a text editor
 
-REASONING DISCIPLINE (think before every action):
-Before each phase, reason step by step in your scratchpad: what's the goal, what could
-go wrong, what's the best move. Then act. After each action, verify the result before
-continuing. Never assume success — confirm it. The mandatory wait between replies is a
-real action — never skip, shorten, or "simulate" it.
+═══ CRITICAL RULES (these are exactly why these runs fail — obey them) ═══
+- A reply is LIVE only when you can SEE it after submitting — as a comment by MY username
+  in the thread, AND as the newest entry on
+  https://old.reddit.com/user/MY_NAME/comments/?sort=new. A tool's {"success":true} is
+  NOT proof: a comment submit can return success while it was rate-limited, karma-gated,
+  or auto-removed and never actually created.
+- Some threads can't be commented on: archived/locked threads, quarantined/restricted
+  subs, or subs that require a minimum karma/account-age to comment. If your reply doesn't
+  appear, READ the real reason on the page and SKIP to a backup thread — don't fight it.
+- Do NOT assume a rate limit. Only treat it as one if you LITERALLY SEE "you are doing
+  that too much" / "try again in N minutes" / "looks like you're using an unofficial
+  client" on the page. Inventing a rate limit just wastes the run.
+- Spread replies across different threads/subs and make each one genuinely DISTINCT — never
+  paste the same or near-same reply (or reuse the same datapoint) across threads. Duplicate
+  comments across threads are the fastest way to get shadowbanned.
 
-REDDIT MECHANICS (follow exactly — this is how you avoid wasting calls):
+ENVIRONMENT — extension only, old reddit only:
+- old.reddit ONLY (https://old.reddit.com). It's plain HTML and works first try; www/sh
+  Reddit build the comment composer in Shadow DOM + a Lexical editor that will eat the run.
+  If you ever land on www.reddit.com, rewrite the URL to old.reddit.com first.
+- Never call browser_launch / browser_navigate / any browser_* (Playwright) tool, and
+  never open a headless/throwaway browser or new window — those aren't logged in (403).
+- Don't pass a guessed tabId (tabId:1 fails with "No tab with id"). Omit it to use the
+  active tab; if you truly need the id, call ext_tabs_list once and reuse it.
+- First, confirm I'm logged in and capture my username: ext_query_selector ".user a"
+  (returns my name and /user/<name>/ href). You need it to verify replies.
 
-ENVIRONMENT — extension only, no headless:
-- Act ONLY through the Wolffish browser extension (ext_* tools) in my real, already
-  logged-in tab. NEVER call browser_launch / browser_navigate / any browser_* (Playwright)
-  tool, and never open a headless/throwaway browser or new window — those sessions are NOT
-  logged in and Reddit returns HTTP 403 for them. Reuse my existing tab only.
-- Do NOT pass a guessed tabId to any tool (tabId:1 fails with "No tab with id"). Omit
-  tabId to use the active tab; if you truly need the id, call ext_tabs_list once and reuse it.
-- First, confirm I'm logged in and note my username (top-right bar on old.reddit) — you
-  need it to verify replies later.
+SELECTORS (verified — use exactly these):
+- JOIN a sub: the .fancy-toggle-button toggle in the sidebar (its span reads
+  "join"/"subscribe" when you're not a member). ext_click it; if "text=join" isn't found,
+  click by that class.
+- Open a post from its real link in the listing/search — never invent a post ID (a wrong
+  one 404s): https://old.reddit.com/r/SUB/comments/POSTID/
+- The TOP-LEVEL reply box is the first <textarea> inside form.usertext in the .commentarea
+  (directly under the post — NOT a textarea nested inside an existing comment). Read the
+  page first to confirm you're targeting the top box.
+- Fill it with ext_set_value (framework-safe; more reliable here than ext_type).
+- Submit THAT form: ext_submit_form with selector = the top reply textarea, or ext_click
+  "form.usertext button.save" scoped to the top box. A bare ".usertext-buttons button"
+  matches every comment's reply form — never use it unscoped or you'll reply in the wrong
+  place.
+- ext_query_selector accepts REAL CSS ONLY — no "text=", no :has-text(), no "button=...".
+  ("text=" is valid for ext_click only.)
 
-USE OLD REDDIT FOR EVERYTHING:
-- Operate on https://old.reddit.com, never www/sh.reddit.com. New Reddit builds the
-  comment composer inside Shadow DOM + a Lexical editor that is slow and brittle to target
-  and will eat your run; old.reddit is plain HTML and works first try. If you ever land on
-  www.reddit.com, rewrite the URL to old.reddit.com before doing anything.
+PHASE 0 — FIND HIGH-MOMENTUM, COMMENT-ABLE TARGETS:
+Find POPULAR, ACTIVE subs in this space, and within them recent rising/hot threads with
+real momentum (lots of recent comments, not dead or archived) where a thoughtful reply
+will be SEEN and upvoted. Build a list of ~7 candidate threads spread across multiple subs
+(more than 5, so you have backups when one turns out gated or archived). A great reply on
+a dead or archived thread earns nothing.
 
-SELECTORS (this is where runs break):
-- ext_query_selector accepts REAL CSS ONLY. ":has-text(...)", "button=save", and
-  "text=..." are NOT valid CSS and will throw. Use plain CSS: tag, .class, [attr="value"].
-- To click by visible label, use ext_click with selector "text=<label>".
-- Unsure of a field? ext_query_selector with CSS (match by name/class) to read the form,
-  then act on the exact element.
+PER-REPLY LOOP (finish one fully before the next):
 
-JOIN A SUB on old.reddit:
-- The subscribe control is the .fancy-toggle-button toggle in the sidebar (its span reads
-  "join"/"subscribe" when you're not a member). Click it. If "text=join" isn't found,
-  click the toggle by that CSS class.
+  1. JOIN: ensure you've JOINED the sub before replying in it (skip if already a member).
+     Replying in a sub you've never joined is a bot tell.
 
-REPLY TO A POST on old.reddit:
-- Open the post from its real link in the listing/search — never invent a post ID (a wrong
-  ID 404s): https://old.reddit.com/r/SUB/comments/POSTID/
-- The top-level reply box is a <textarea> inside form.usertext (the comment area). Click
-  it, then ext_type with clearFirst:true.
-- Submit by clicking THAT form's button: selector "form.usertext button.save". A bare
-  ".usertext-buttons button" matches every comment's reply form — scope it to the top
-  comment box so you don't reply to the wrong place.
+  2. CHECK COMMENT-ABILITY: open the thread and ext_read_page. Confirm the top-level reply
+     box exists and the thread isn't archived/locked, and there's no "you must have N
+     karma to comment here" notice. If you can't comment, SKIP to a backup thread.
 
-VERIFY ONCE — NEVER DOUBLE-POST:
-- Verify EXACTLY ONCE via your profile: https://old.reddit.com/user/MY_USERNAME/comments/
-  — confirm your newest comment matches what you sent and capture its permalink (the
-  comment's "permalink"/a.bylink link).
-- If the submit click returned success, assume it posted and verify on the profile. Do
-  NOT retype and resubmit the same reply — that creates duplicate comments (spam). Only
-  retry if the profile clearly shows it did not post.
+  3. PLAN: read the post AND its top comments. Pick an angle that adds real value and rides
+     the thread's momentum — agree-and-extend, a useful correction, a sharp insight, or a
+     respectful hot take. No low-effort "great post" filler.
 
-RATE LIMITS — respect them (this is the #1 thing that breaks these runs):
-- Reddit rate-limits WRITES (commenting, posting, joining) hard — a low-karma account may
-  only get ~1 write per 5–10 minutes. Reads (ext_navigate / ext_read_page) are cheap; it's
-  the WRITES you must pace.
-- One write per target. NEVER submit the same content twice — a duplicate storm is the
-  single fastest way to trip the limit (and it spams the thread). If a write's outcome is
-  unclear, VERIFY on your profile before ever resending; it almost always did post.
-- After every write, check for a rate-limit notice: "you are doing that too much (try
-  again in N minutes)", "looks like you're using an unofficial client", or an HTTP 429/403.
-  If you see one, the write did NOT go through — do NOT retry in a loop. Wait the time
-  Reddit states (default 12–15 minutes if unstated) with a real sleep, then try that one
-  item once more.
-- Treat the WAIT between items as a real, full pause (real sleep, never simulated). If you
-  get rate-limited twice in a row, STOP and report what posted so far — a partial result
-  beats a blocked or banned account.
+  4. RESEARCH (mandatory, >=1 web_search before writing): find ONE non-obvious, sourced,
+     on-topic fact the reader likely doesn't know — a concrete number, named milestone,
+     benchmark crossover, adoption stat, or cost-curve shift. Use a DIFFERENT datapoint per
+     thread. The reader should leave smarter.
 
-PHASE 0 — TARGET SELECTION:
-Find POPULAR, ACTIVE subreddits in this space and, within them, popular recent
-high-traffic posts where a thoughtful reply will be SEEN and upvoted (rising/hot threads
-with momentum). Spread your replies across multiple subreddits and threads — never spam
-one thread.
+  5. DRAFT (three passes: draft → critique → final). The final reply must directly engage
+     what was actually said, carry the research insight as a payload, end on an opening that
+     invites a response, foreshadow the philosophy as a casual personal opinion (never a
+     pitch), sound HUMAN (casual, an emoji or two, an occasional typo; light snark at
+     hype/trends welcome — roast ideas, never people), and obey the rules.
 
-PER-REPLY LOOP (repeat until 5 replies are live, fully finish one before the next):
+  6. SELF-CHECK: real research with an additive sourced fact (not generic knowledge)? adds
+     real value to THIS thread? accurate? fits the rules? invites a reply/upvotes? distinct
+     from your other replies? If any is no, redraft. Don't post until all are yes.
 
-  1. JOIN: Before replying in a subreddit, ensure you have JOINED it. Skip if already a
-     member. Never reply in a sub you haven't joined.
+  7. POST + VERIFY (deterministic — do this exactly):
+     a. ext_set_value the top reply textarea -> your reply, then submit that form
+        (ext_submit_form on the textarea, or ext_click "form.usertext button.save" scoped
+        to the top box).
+     b. Confirm it's LIVE: ext_read_page the .commentarea and find your comment (by MY
+        username + a unique ~8-word snippet). Then navigate
+        https://old.reddit.com/user/MY_NAME/comments/?sort=new, ext_read_page #siteTable,
+        confirm the newest comment is this reply on this thread, and capture its permalink
+        (the comment's a.bylink href).
+     c. If it's NOT there -> it didn't post. ext_read_page near the form for the reason:
+        * karma/age gate, archived/locked, removed -> SKIP to a backup thread.
+        * "doing that too much / try again in N minutes / unofficial client" -> REAL rate
+          limit: ext_wait the stated minutes (default 10 if unstated), then retry THIS
+          reply ONCE. If rate-limited twice, STOP and report.
+        * anything else -> fix what it says, or skip to a backup.
+     d. NEVER retype-and-resubmit a reply that already appears live — that double-posts.
 
-  2. PLAN: Read the target post and its top comments. Pick an angle that adds real value
-     and rides the thread's momentum — agree-and-extend, a useful correction, a sharp
-     insight, or a respectful hot take. No low-effort "great post" comments.
+  8. WAIT before the next reply: a real ext_wait of a fresh RANDOM 120000-240000 ms
+     (2-4 min). Skip the wait after the 5th live reply. (Only the real-rate-limit branch
+     above uses a longer wait.)
 
-  3. RESEARCH (mandatory — research before you draft): Run at least one `web_search` to
-     enrich context before writing — never rely on generic model knowledge alone. Find
-     ONE non-obvious, research-backed, on-topic insight the reader likely doesn't know.
-     It MUST be ADDITIVE and sourced — a concrete fact the reader couldn't get from a
-     generic LLM. The reader should leave smarter.
+EXIT CONDITION: 5 replies verified LIVE (each seen on
+https://old.reddit.com/user/MY_NAME/comments/ with a captured permalink), across multiple
+subs/threads, each sub joined first. Keep a running tally. If you run out of good
+comment-able threads before reaching 5, STOP and report what's live plus what you skipped
+and why — do NOT force replies into dead/gated threads or loop forever.
 
-  4. DRAFT (three passes): draft 1, critique, draft 2, draft 3 final. Final reply must
-     directly engage what was said, deliver the insight, end on an opening that invites a
-     response, foreshadow the Wolffish philosophy as a natural opinion, sound HUMAN —
-     humor and a little idea-roasting/snark welcome where the sub rewards it — and obey
-     the rules.
-
-  5. SELF-CHECK: actually researched (≥1 search) with an additive sourced fact, not
-     generic knowledge? real value? accurate? fits the rules? sparks a reply or upvotes?
-     If any answer is no, redraft. Do not post until all yes.
-
-  6. POST: submit the reply via my logged-in Reddit session.
-
-  7. VERIFY: confirm the reply went live and capture its permalink. If it failed or was
-     removed, diagnose and retry until it sticks.
-
-  8. WAIT: after a reply is verified live, pause for a RANDOM duration between 5 and 10
-     minutes before the next. Fresh random value each time. Skip only after the final
-     reply.
-
-EXIT CONDITION: 5 replies verified live across multiple popular subreddits/threads, each
-subreddit joined before replying, with the 5–10 min wait honored between each. Do not
-stop, ask, or summarize before this is true.
-
-FINAL OUTPUT: a summary table — for each reply: subreddit name, the post replied to
-(title), the research insight used, and the direct permalink to your live reply.
+FINAL OUTPUT: a table — for each LIVE reply: subreddit, the post you replied to (title),
+the sourced insight used, and the direct permalink to your reply. Then list any threads
+skipped (with the blocker you saw).
 ```
 
 <Tip>
@@ -396,16 +376,16 @@ FINAL OUTPUT: a summary table — for each reply: subreddit name, the post repli
 
 ## Expected Outcome
 
-When the run finishes, you get a summary table with a clickable permalink for every reply:
+When the run finishes, you get a summary table with a clickable permalink for every reply — each one the agent confirmed live in-thread and on your profile:
 
 | # | Subreddit | Post Replied To | Research Insight Used | Reply Permalink |
 |---|---|---|---|---|
-| 1 | r/LocalLLaMA | "What's everyone running locally in 2026?" | Open-weight model crossing a reasoning benchmark at a fraction of closed-model cost | `https://reddit.com/r/LocalLLaMA/comments/.../comment/...` |
-| 2 | r/selfhosted | "My self-hosted stack got out of hand" | Self-hosted AI adoption stat from a recent survey | `https://reddit.com/r/selfhosted/comments/.../comment/...` |
-| 3 | r/AI_Agents | "Are agent frameworks overcomplicated?" | Agentic-eval benchmark crossover datapoint | `https://reddit.com/r/AI_Agents/comments/.../comment/...` |
-| 4 | r/artificial | "Is 'agentic' just a buzzword at this point?" | Cost-curve shift datapoint — inference $/token over the last year | `https://reddit.com/r/artificial/comments/.../comment/...` |
-| 5 | r/opensource | "Why do OSS AI tools never target end users?" | Open-model star-growth / adoption milestone with source | `https://reddit.com/r/opensource/comments/.../comment/...` |
+| 1 | r/LocalLLaMA | "What's everyone running locally in 2026?" | Open-weight model crossing a reasoning benchmark at a fraction of closed-model cost | `https://old.reddit.com/r/LocalLLaMA/comments/.../comment/...` |
+| 2 | r/selfhosted | "My self-hosted stack got out of hand" | Self-hosted AI adoption stat from a recent survey | `https://old.reddit.com/r/selfhosted/comments/.../comment/...` |
+| 3 | r/AI_Agents | "Are agent frameworks overcomplicated?" | Agentic-eval benchmark crossover datapoint | `https://old.reddit.com/r/AI_Agents/comments/.../comment/...` |
+| 4 | r/artificial | "Is 'agentic' just a buzzword at this point?" | Cost-curve shift datapoint — inference $/token over the last year | `https://old.reddit.com/r/artificial/comments/.../comment/...` |
+| 5 | r/ollama | "Show me your local setup" | Ollama download-growth / GitHub-star milestone with source | `https://old.reddit.com/r/ollama/comments/.../comment/...` |
 
 <Note>
-  The subreddits, threads, and insights above are **illustrative**. The agent finds fresh high-momentum threads and current, sourced datapoints on each run. Treat the table as the *shape* of the output, not a script.
+  The subreddits, threads, and insights above are **illustrative**. The agent finds fresh high-momentum, comment-able threads and current, sourced datapoints on each run, and skips any thread that's archived, locked, or karma-gated. Treat the table as the *shape* of the output, not a script.
 </Note>
