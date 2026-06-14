@@ -7,7 +7,7 @@ description: "يبحث ويصيغ وينشر تلقائياً 5 منشورات R
 
 يتولّى وولف فيش حساب Reddit الخاص بك **المسجَّل دخوله مسبقاً** عبر إضافة المتصفح، ويختار 5 مجتمعات subreddit نشطة في مجال المصادر المفتوحة / وكلاء الذكاء الاصطناعي الشخصيين / النماذج اللغوية المحلية، ويُرسل منشوراً أصلياً واحداً مدعوماً بالبحث ومُحفِّزاً للنقاش إلى كل منها. بدون Reddit API. بدون OAuth. بدون متصفح مؤقت — يعمل داخل جلسة Chrome الحقيقية لديك، بصفتك، عبر وضع المصحِّح (debugger mode) في الإضافة.
 
-ينفّذ الوكيل الحلقة الكاملة بنفسه: يختار الأهداف، يقرأ قواعد كل مجتمع، يجد معلومة غير بديهية ومُوثَّقة، يصيغ ← ينتقد ← يعيد الصياغة ثلاث مرات، يفحص ذاتياً مقابل القواعد، ينشر، يتأكد أن المنشور ظهر فعلاً، ثم ينتظر مدة عشوائية بين 5 و10 دقائق قبل التالي.
+ينفّذ الوكيل الحلقة الكاملة بنفسه: يفحص المجتمعات المرشَّحة ويُبقي المتساهلة فقط (بلا flair إلزامي، ولا بوابة كارما، ولا جدار عضوية)، يجد معلومة غير بديهية ومُوثَّقة، يصيغ ← ينتقد ← يعيد الصياغة ثلاث مرات، يفحص ذاتياً مقابل القواعد، ينشر، يتأكد أن المنشور ظهر فعلاً عبر فحص الرابط الناتج، ثم يضبط إيقاعه بانتظار عشوائي قصير قبل التالي.
 
 <Warning>
   **اقرأ هذا قبل التشغيل.** ينشر هذا السير في مجتمعات عامة باسم هويتك، ويضبط إيقاعه ليبدو بشرياً (وضع المصحِّح + humanize)، ويزرع رأياً بلطف. لدى [سياسة محتوى Reddit](https://redditinc.com/policies/content-policy) ومعظم المجتمعات قواعد حول الأتمتة والترويج الذاتي والتسويق المُقنَّع — النشر غير المُفصَح عنه نيابةً عن منتج قد يؤدي إلى حظر حسابك (shadowban) أو حظره نهائياً، وتزيل المجتمعات الفردية المنشورات التي تبدو كرسائل مزعجة. استخدم هذا في مجتمعات تشارك فيها فعلاً، وأبقِ القيمة حقيقية، وأفصِح عن الانتماء حيثما تتطلب القواعد. أنت المسؤول عن كل ما يُنشر من حسابك. نحن لا نؤيّد انتهاك شروط أي منصة.
@@ -27,7 +27,7 @@ description: "يبحث ويصيغ وينشر تلقائياً 5 منشورات R
 
 ### موصى به
 
-- **DeepSeek V4 Pro في وضع Max.** الخيار الافتراضي الموصى به في وولف فيش للمهام الوكيلية، ويلائم هذا السير جيداً: استدلال من الطراز الأول وموثوقية في استخدام الأدوات لحلقة التصفح ← الصياغة ← النشر ← التحقق، و**نافذة سياق بمليون رمز** تستوعب جلسات التصفح الطويلة عبر مجتمعات متعددة بأريحية، وكتابة حادّة بما يكفي لعنوان يوقف التمرير و«روست» موفّق أحياناً. يُفعّل **وضع Max** الاستدلال العميق المتكيّف الذي يعتمد عليه الموجِّه — اختيار المجتمعات، وحلقة الصياغة ← النقد ← إعادة الصياغة الثلاثية، وبوابة الفحص الذاتي، والتأكد من ظهور المنشور. بسعر **0.44$ / 0.87$ لكل مليون رمز** يكلّف جزءاً بسيطاً من تكلفة النماذج الرائدة — وهذا مهم لأن جلسات المتصفح تستهلك الرموز بسرعة. اضبطه لكل محادثة في وولف فيش؛ راجع [DeepSeek](/ar/configuration/deepseek). للتشغيلات الأرخص انزل إلى DeepSeek V4 Flash؛ ولأقصى صقل في الكتابة، [Claude Sonnet 4.6](/ar/configuration/anthropic) — راجع [جدول تكاليف الإضافة](/ar/integrations/browser-extension#cost-why-model-choice-matters).
+- **DeepSeek V4 Pro في وضع Max.** الخيار الافتراضي الموصى به في وولف فيش للمهام الوكيلية، ويلائم هذا السير جيداً: استدلال من الطراز الأول وموثوقية في استخدام الأدوات لحلقة التصفح ← الصياغة ← النشر ← التحقق، و**نافذة سياق بمليون رمز** تستوعب جلسات التصفح الطويلة عبر مجتمعات متعددة بأريحية، وكتابة حادّة بما يكفي لعنوان يوقف التمرير و«روست» موفّق أحياناً. يُفعّل **وضع Max** الاستدلال العميق المتكيّف الذي يعتمد عليه الموجِّه — فحص المجتمعات للتساهل، وحلقة الصياغة ← النقد ← إعادة الصياغة الثلاثية، وبوابة الفحص الذاتي، والتأكد من ظهور المنشور. بسعر **0.44$ / 0.87$ لكل مليون رمز** يكلّف جزءاً بسيطاً من تكلفة النماذج الرائدة — وهذا مهم لأن جلسات المتصفح تستهلك الرموز بسرعة. اضبطه لكل محادثة في وولف فيش؛ راجع [DeepSeek](/ar/configuration/deepseek). للتشغيلات الأرخص انزل إلى DeepSeek V4 Flash؛ ولأقصى صقل في الكتابة، [Claude Sonnet 4.6](/ar/configuration/anthropic) — راجع [جدول تكاليف الإضافة](/ar/integrations/browser-extension#cost-why-model-choice-matters).
 
 ### اختياري
 
@@ -39,144 +39,133 @@ description: "يبحث ويصيغ وينشر تلقائياً 5 منشورات R
 
 ## الموجِّه
 
-أرسل هذا إلى وولف فيش في رسالة واحدة. يختار ويبحث ويصيغ وينشر ويتحقق وينتظر — مستقل بالكامل حتى تُنشر 5 منشورات.
+أرسل هذا إلى وولف فيش في رسالة واحدة. يفحص المجتمعات المتساهلة، ويبحث، ويصيغ، وينشر، ويتحقق أن كل منشور ظهر فعلاً، ويضبط إيقاعه — مستقل بالكامل حتى تُنشر 5 منشورات.
 
 ```
-ROLE: You are Wolffish operating in full autonomous agent mode. Use your browser
-session capability (wolffish-extension / debugger mode, ext_* tools) in my real,
-ALREADY LOGGED-IN Chrome tab. Do NOT use the Reddit API, a headless browser, Playwright,
-or any new/throwaway browser — work only in my existing tab through the extension. Do
-not ask me anything. Do not stop until the EXIT CONDITION is met.
+ROLE: You are Wolffish in full autonomous agent mode. Work ONLY through the Wolffish
+browser extension (ext_* tools) in my real, already-logged-in Chrome tab. Never use the
+Reddit API, Playwright, browser_* tools, a headless browser, or a new window — those
+aren't logged in and Reddit returns 403. Don't ask me anything. Don't stop until the
+EXIT CONDITION is met.
 
-MISSION: Submit 5 original, valuable, viral-optimized Reddit posts — one each to 5
-different subreddits in the open-source / personal-AI-agent / local-LLM space — that
-seed discussion and softly foreshadow Wolffish's philosophy.
-
-WOLFFISH PHILOSOPHY TO FORESHADOW (never pitch it directly, never name it as a product
-— let it emerge as an opinion/idea):
+MISSION: Get 5 ORIGINAL, valuable, discussion-seeding TEXT posts LIVE — one each in 5
+DIFFERENT, lenient subreddits in the open-source / personal-AI-agent / local-LLM space.
+Softly foreshadow a philosophy (never pitch it, never name it as a product — let it read
+as a personal opinion):
 - brain-like architecture, but radically minimal and simple
 - built for END USERS, not just devs
 - does a FEW things extremely well instead of many things badly
-- local-first, markdown-as-truth, you can read your agent's whole brain in a text editor
+- local-first, markdown-as-truth — you can read the agent's whole brain in a text editor
 
-REASONING DISCIPLINE (think before every action):
-Before each phase, reason step by step in your scratchpad: what's the goal, what could
-go wrong, what's the best move. Then act. After each action, verify the result before
-continuing. Never assume success — confirm it. The mandatory wait between posts is a
-real action — never skip, shorten, or "simulate" it.
+═══ CRITICAL RULES (these are exactly why these runs fail — obey them) ═══
+- Most failures come from posting to STRICT subs that require post flair, a minimum
+  karma/account-age, or membership. On old.reddit those submits SILENTLY fail: the tool
+  returns {"success":true} but the post is never created. So you MUST (a) only target
+  lenient subs (Phase 0 vets this) and (b) verify every post for real (step 4).
+- A post is LIVE only when, right after submitting, ext_get_url returns a URL containing
+  "/comments/". Nothing else counts as success — not a tool's {"success":true}, not the
+  profile listing.
+- Do NOT assume a rate limit. Only treat it as one if you LITERALLY SEE "you are doing
+  that too much" / "try again in N minutes" / "looks like you're using an unofficial
+  client" on the page after a submit. Inventing a rate limit just wastes the run.
 
-REDDIT MECHANICS (follow exactly — this is how you avoid wasting calls):
+ENVIRONMENT — extension only, old reddit only:
+- old.reddit ONLY (https://old.reddit.com). It's plain HTML and works first try; www/sh
+  Reddit build the composer in Shadow DOM + a Lexical editor that will eat the run. If you
+  ever land on www.reddit.com, rewrite the URL to old.reddit.com before doing anything.
+- Never call browser_launch / browser_navigate / any browser_* (Playwright) tool, and
+  never open a headless/throwaway browser or new window — those aren't logged in (403).
+- Don't pass a guessed tabId (tabId:1 fails with "No tab with id"). Omit it to use the
+  active tab; if you truly need the id, call ext_tabs_list once and reuse it.
+- First, confirm I'm logged in and capture my username: ext_query_selector ".user a"
+  (returns my name and /user/<name>/ href). You need it for the secondary profile check.
 
-ENVIRONMENT — extension only, no headless:
-- Act ONLY through the Wolffish browser extension (ext_* tools) in my real, already
-  logged-in tab. NEVER call browser_launch / browser_navigate / any browser_* (Playwright)
-  tool, and never open a headless/throwaway browser or new window — those sessions are NOT
-  logged in and Reddit returns HTTP 403 for them. Reuse my existing tab only.
-- Do NOT pass a guessed tabId to any tool (tabId:1 fails with "No tab with id"). Omit
-  tabId to use the active tab; if you truly need the id, call ext_tabs_list once and reuse it.
-- First, confirm I'm logged in and note my username (top-right bar on old.reddit) — you
-  need it to verify posts later.
+SELECTORS (verified — use exactly these):
+- Title field (a TEXTAREA on old.reddit, not an input): textarea[name="title"]
+- Body field: textarea[name="text"]
+- Fill both with ext_set_value (framework-safe; more reliable here than ext_type).
+- Submit with ext_submit_form, selector "textarea[name=\"text\"]" (submits the containing
+  form). Only if that returns no success, fall back to ext_click "text=submit".
+- ext_query_selector accepts REAL CSS ONLY — no "text=", no :has-text(), no "button=...".
+  ("text=" is valid for ext_click only.)
 
-USE OLD REDDIT FOR EVERYTHING:
-- Operate on https://old.reddit.com, never www/sh.reddit.com. New Reddit builds the
-  composer inside Shadow DOM + a Lexical editor that is slow and brittle to target and
-  will eat your run; old.reddit is plain HTML and works first try. If you ever land on
-  www.reddit.com, rewrite the URL to old.reddit.com before doing anything.
+PHASE 0 — BUILD A LENIENT TARGET POOL (this is the whole game):
+Goal: 5 subs that accept a plain text/self post with NO required flair, NO minimum
+karma/age, NO membership gate, and NO blanket "no AI / no self-promo" rule.
 
-SELECTORS (this is where runs break):
-- ext_query_selector accepts REAL CSS ONLY. ":has-text(...)", "button=save", and
-  "text=..." are NOT valid CSS and will throw. Use plain CSS: tag, .class, [attr="value"].
-- To click by visible label, use ext_click with selector "text=<label>".
-- Unsure of a field? ext_query_selector with CSS (match by name/class) to read the form,
-  then act on the exact element.
+Known-lenient anchors (good defaults — use ~2 of your 5 here): r/ollama, r/opencode.
+Known-STRICT — DO NOT POST (they silently reject): r/LocalLLaMA (requires flair + bans
+LLM-generated content), r/OpenAI, r/artificial, r/AI_Agents (flair + karma + automod).
+Other candidates to VET: r/LocalLLM, r/selfhosted, r/LangChain, r/aipromptprogramming,
+r/SideProject, r/IndieDev, r/selfhostedAI, r/LocalAIServers, r/AIAssisted.
 
-SUBMIT A SELF (TEXT) POST on old.reddit:
-- Reach the sub from real links you read — never invent a sub/post URL (a wrong one 404s).
-- Go to https://old.reddit.com/r/SUB/submit?selftext=true
-- Fill the title field (CSS: textarea[name="title"], input[name="title"]) and the body
-  field (textarea[name="text"]) with ext_type (clearFirst:true).
-- Submit with ext_click "text=submit" (or button[type="submit"]). If a sub requires
-  membership to post, join first: the .fancy-toggle-button toggle in the sidebar (its
-  span reads "join"/"subscribe").
+For EACH candidate, before drafting, run a LENIENCY CHECK:
+  1. ext_navigate https://old.reddit.com/r/SUB/submit?selftext=true
+  2. ext_read_page (full) and scan the page + sidebar for blockers:
+     - a REQUIRED post flair (a flair selector you must set before it will submit)
+     - "you must be a member" / "only approved submitters" / "requires N karma"
+     - rules banning AI-generated content or all self-promo
+  3. If ANY blocker is present → SKIP this sub and move to the next candidate; don't fight
+     it. If clean → it's a target. Continue until you have 5 clean targets (vet a couple
+     extra as backups for when one turns out strict).
 
-VERIFY ONCE — NEVER DOUBLE-POST:
-- Verify EXACTLY ONCE via your profile: https://old.reddit.com/user/MY_USERNAME/submitted/
-  — confirm the newest post is yours and capture its permalink (the post URL).
-- If the submit click returned success, assume it posted and verify on the profile. Do
-  NOT retype and resubmit — that creates duplicates. Only retry if the profile clearly
-  shows it did not post.
+PER-TARGET LOOP (finish one fully before starting the next):
 
-RATE LIMITS — respect them (this is the #1 thing that breaks these runs):
-- Reddit rate-limits WRITES (commenting, posting, joining) hard — a low-karma account may
-  only get ~1 write per 5–10 minutes. Reads (ext_navigate / ext_read_page) are cheap; it's
-  the WRITES you must pace.
-- One write per target. NEVER submit the same content twice — a duplicate storm is the
-  single fastest way to trip the limit (and it spams the thread). If a write's outcome is
-  unclear, VERIFY on your profile before ever resending; it almost always did post.
-- After every write, check for a rate-limit notice: "you are doing that too much (try
-  again in N minutes)", "looks like you're using an unofficial client", or an HTTP 429/403.
-  If you see one, the write did NOT go through — do NOT retry in a loop. Wait the time
-  Reddit states (default 12–15 minutes if unstated) with a real sleep, then try that one
-  item once more.
-- Treat the WAIT between items as a real, full pause (real sleep, never simulated). If you
-  get rate-limited twice in a row, STOP and report what posted so far — a partial result
-  beats a blocked or banned account.
+  1. RESEARCH (mandatory, >=1 web_search before writing): find ONE non-obvious, sourced,
+     DATED fact tied to THIS post's angle — a concrete number, named milestone, benchmark
+     crossover, adoption stat, or cost-curve shift the reader couldn't get from a generic
+     LLM. The reader should leave smarter.
 
-PHASE 0 — TARGET SELECTION:
-Search and identify candidate subreddits in this space (e.g. open-source AI agents,
-local LLMs, self-hosted AI, AI tooling, indie AI builders). Randomly choose 5 that are
-ACTIVE and topically relevant. For each, fetch and READ its posting rules + recent top
-posts so your post fits the culture and won't be removed as spam/self-promo.
+  2. DRAFT — and make EACH post genuinely DISTINCT. Near-identical posts across subs get
+     spam-flagged AND flop, so vary the angle, hook format, opening line, and datapoint
+     per sub; never reuse one template five times. Three passes: draft → critique → final.
+     The final post must:
+     - have a scroll-stopping title that invites replies/debate (hook / question / hot
+       take / "TIL"-style)
+     - carry the research insight as its payload
+     - foreshadow the philosophy as a casual personal opinion, never a pitch
+     - sound HUMAN: casual, a little messy, an emoji or two, an occasional abbreviation;
+       light snark at hype/trends is welcome (roast ideas, never people)
+     - obey that sub's rules
 
-PER-SUBREDDIT LOOP (repeat for each of the 5, fully finish one before starting next):
+  3. SELF-CHECK before posting: real research with an additive sourced fact (not generic
+     knowledge)? real value? accurate? fits the rules? sparks discussion? If any is no,
+     redraft. Don't post until all are yes.
 
-  1. PLAN: Reason about what THIS specific subreddit's audience actually cares about and
-     what title format goes viral there (hooks, questions, hot takes, "TIL"-style).
+  4. POST + VERIFY (deterministic — do this exactly; do NOT navigate away first):
+     a. ext_set_value textarea[name="title"]  -> your title
+        ext_set_value textarea[name="text"]   -> your body
+        ext_submit_form selector "textarea[name=\"text\"]"
+     b. ext_get_url.
+        - URL contains "/comments/"  -> LIVE. Record the full permalink. Done with this
+          sub. NEVER resubmit (resubmitting is the only way to create a duplicate).
+        - URL still ends in "/submit" -> the post did NOT go through. ext_read_page and
+          read the real reason:
+            * flair / karma / membership error -> SKIP this sub, pick a backup (re-vet it).
+            * "doing that too much / try again in N minutes / unofficial client" -> REAL
+              rate limit: ext_wait the stated minutes (default 12 if unstated) as one real
+              sleep, then retry THIS sub ONCE. If it rate-limits twice, STOP and report.
+            * anything else -> fix what it says, or skip to a backup.
+     c. (Optional, once) navigate /user/<MY_NAME>/submitted/?sort=new, ext_read_page
+        #siteTable, confirm your captured permalink is the newest entry.
 
-  2. RESEARCH (mandatory — research before you draft): Run at least one `web_search` to
-     enrich your context before writing a word — never lean on generic model knowledge
-     alone. Find ONE genuinely non-obvious, research-backed industry insight the reader
-     almost certainly doesn't know, tied directly to the post's theme. Examples of the
-     FLAVOR (find current real ones, don't reuse these): a Chinese open model milestone,
-     an AI-company market-cap/IPO datapoint, a benchmark crossover, an adoption stat, a
-     cost-curve shift. It MUST be ADDITIVE and sourced — a concrete number, named
-     milestone, or dated event the reader couldn't get from a generic LLM, not vague
-     common knowledge. The reader should leave smarter.
+  5. WAIT before the next sub: a real ext_wait of a fresh RANDOM 60000-150000 ms (60-150s).
+     That's plenty — there's no aggressive write limit on a normal account, and long 5-10
+     min waits just waste the run. ext_wait has NO cap, so one call is fine. Skip the wait
+     after the 5th live post. (Only the real-rate-limit branch above uses a long wait.)
 
-  3. DRAFT (three passes): write draft 1, then critique it, then draft 2 fixing weak
-     spots, then draft 3 as final. Final post must:
-     - be optimized for virality (scroll-stopping title, invites replies/debate)
-     - deliver the research insight as the core payload
-     - foreshadow the Wolffish philosophy as a natural opinion
-     - sound HUMAN: casual tone, some emojis, occasional typo/abbreviation, not polished
-       marketing copy
-     - be entertaining: humor is welcome, and a bit of roasting/snark is great where the
-       sub's culture rewards it — roast ideas, hype, and trends, never people
-     - obey that subreddit's rules
+EXIT CONDITION: 5 permalinks captured, each containing "/comments/", across 5 distinct
+subreddits. Keep a running tally ("LIVE: 3/5 — r/ollama, r/opencode, r/..."). If you
+exhaust your vetted candidates before reaching 5, STOP and report what's live plus which
+subs you skipped and why — do NOT loop forever or post to a strict sub hoping it sticks.
 
-  4. SELF-CHECK before posting: Did I actually research this (at least one search), and
-     does it carry an additive, sourced fact — not generic LLM knowledge? Does it give
-     real value? Is the insight accurate? Does it fit the sub's rules? Will it spark
-     discussion? If any answer is no, redraft. Do not post until all are yes.
-
-  5. POST: submit it to that subreddit via my logged-in Reddit session.
-
-  6. VERIFY: confirm the post actually went live and capture its URL. If it failed or was
-     auto-removed, diagnose and retry until it sticks.
-
-  7. WAIT: after a post is verified live, pause for a RANDOM duration between 5 and 10
-     minutes before starting the next subreddit. Pick a fresh random value each time (do
-     not reuse the same number). Skip this wait only after the 5th and final post.
-
-EXIT CONDITION: 5 posts verified live across 5 distinct subreddits, with the mandatory
-5–10 min wait honored between each. Do not stop, ask, or summarize before this is true.
-
-FINAL OUTPUT: a summary table — for each of the 5: subreddit name, post title, the
-research insight used, and the direct link to the live post.
+FINAL OUTPUT: a table — for each LIVE post: subreddit, title, the sourced research
+insight, and the direct /comments/ permalink. Then list any subs skipped (with the
+blocker you saw).
 ```
 
 <Tip>
-  **لماذا هذه النسخة أسرع:** تفرض العمل بالكامل على `old.reddit.com` (HTML بسيط — بلا محرّر Shadow-DOM/Lexical تصارعه)، وتُبقي كل العمل داخل تبويبك المسجَّل دخوله عبر الإضافة (بلا متصفح headless)، وتقصُر `ext_query_selector` على CSS حقيقي، وتنشر ثم تتحقق مرة واحدة من ملفك الشخصي حتى لا يكرّر الوكيل النشر. هذه بالضبط أنماط الفشل التي تُعطّل التشغيلة غير الموجَّهة.
+  **لماذا تنجح هذه النسخة في إيصال المنشورات:** تستهدف المجتمعات *المتساهلة* فقط (تقرأ صفحة النشر أولاً وتتخطّى أي مجتمع يطلب flair أو كارما أو عضوية — وهي القاتل الصامت)، وتتحقق من كل منشور فعلياً عبر `ext_get_url` (رابط يحتوي `/comments/` هو الدليل الوحيد على ظهور المنشور)، وتباعد عمليات الكتابة بانتظار قصير 60–150 ثانية بدل تخمين حدّ المعدل، وتفرض زاوية مختلفة لكل مجتمع كي لا تُطلق كاشفات الإزعاج عبر المجتمعات. هذه بالضبط أنماط الفشل التي تُعطّل التشغيلة غير الموجَّهة.
 </Tip>
 
 ## فهم الموجِّه
@@ -186,13 +175,13 @@ research insight used, and the direct link to the live post.
 | القسم | ما يفعله | لماذا هو موجود |
 |---|---|---|
 | **ROLE** | يثبّت الوكيل في وضع الاستقلال الكامل، والإضافة (لا الـ API)، وجلستك المسجَّل دخولها، وقاعدة صارمة بعدم التوقف حتى الانتهاء. | يمنع الوكيل من طلب الإذن في منتصف التشغيل أو الرجوع إلى API يحتاج مفاتيح ويصطدم بحدود المعدل. |
-| **MISSION** | 5 منشورات، 5 مجتمعات مختلفة، في مجال محدد، تُحفِّز النقاش. | هدف قابل للعد والتحقق — يعرف الوكيل بالضبط متى انتهى. |
-| **PHILOSOPHY** | أربع أفكار *يُلمِّح* إليها، دون ترويج مباشر. | يُبقي المنشورات تُقرأ كرأي حقيقي لا كتسويق — وهو أيضاً ما يمنع إزالتها كترويج ذاتي. |
-| **REASONING DISCIPLINE** | يفرض استدلالاً خطوة بخطوة، وتحققاً بعد كل إجراء، وانتظاراً *حقيقياً*. | لهذا يهم **وضع Max** — على النموذج أن يخطط وينتقد ويتأكد في كل خطوة، لا أن يستدعي الأدوات فحسب. |
-| **PHASE 0** | اكتشاف وقراءة قواعد 5 مجتمعات نشطة + أبرز منشوراتها قبل كتابة كلمة. | ملاءمة الثقافة هي الفرق بين منشور ينجح وآخر يُزال خلال 30 ثانية. |
-| **PER-SUBREDDIT LOOP** | تخطيط ← بحث ← صياغة ثلاثية ← فحص ذاتي ← نشر ← تحقق ← انتظار، مجتمع واحد يُنهى تماماً قبل التالي. | الصياغة الثلاثية وبوابة الفحص الذاتي هما محرّك الجودة؛ وخطوة التحقق هي ما يمنع هلوسة "لقد نشرته". |
-| **WAIT** | انتظار عشوائي 5–10 دقائق بين المنشورات (أطول إن أشار Reddit إلى تهدئة)، قيمة جديدة في كل مرة. | التباعد يتجنّب إطلاق كاشفات معدل/إزعاج Reddit ويُقرأ كإيقاع بشري — يصرّ الموجِّه على أنه توقف *حقيقي* لا محاكى. |
-| **EXIT CONDITION + FINAL OUTPUT** | 5 منشورات مؤكَّدة الظهور، ثم جدول ملخص بالروابط. | يمنحك نتيجة قابلة للتدقيق تنقر خلالها وتتحقق. |
+| **MISSION + PHILOSOPHY** | 5 منشورات في 5 مجتمعات *متساهلة* مختلفة تُحفِّز النقاش و*تُلمِّح* إلى أربع أفكار دون ترويجها. | هدف قابل للعد والتحقق — ومنشورات تُقرأ كرأي حقيقي لا كتسويق (وهو أيضاً ما يمنع إزالتها كترويج ذاتي). |
+| **CRITICAL RULES** | يسمّي الأمور الثلاثة التي تُعطّل التشغيلات فعلاً: المجتمعات الصارمة التي ترفض بصمت، وفحص نجاح حقيقي عبر رابط `/comments/`، وعدم اختلاق حدّ معدل. | هذه أنماط الفشل المرصودة في التشغيلات الحقيقية — وضعها في المقدمة يجعل الوكيل يصمّم حولها بدل اكتشافها بالطريقة الصعبة. |
+| **PHASE 0 — فحص التساهل** | يقرأ صفحة النشر + قواعد كل مرشَّح و**يتخطّى** أي مجتمع يطلب flair أو كارما/عمر حساب أو عضوية قبل كتابة كلمة. | اختيار الأهداف *هو* التشغيلة. منشور مثالي إلى مجتمع يشترط flair يفشل بصمت؛ وأرخص حل ألّا تستهدفه أصلاً. |
+| **PER-TARGET LOOP** | بحث ← صياغة ثلاثية مميّزة ← فحص ذاتي ← نشر ← تحقق حتمي، مجتمع واحد يُنهى تماماً قبل التالي. | الصياغة الثلاثية والفحص الذاتي هما محرّك الجودة؛ وقاعدة الزاوية المميّزة تتجنّب كاشفات الإزعاج عبر المجتمعات. |
+| **POST + VERIFY** | يملأ بـ `ext_set_value`، ويُرسل بـ `ext_submit_form`، ثم يؤكّد بـ `ext_get_url` (رابط `/comments/` = ظهر فعلاً) ولا يعيد إرسال منشور حيّ أبداً. | `success:true` من الأداة ليس دليلاً — الرابط الناتج وحده هو الدليل. هذا ما يمنع هلوسة "لقد نشرته" والتكرار. |
+| **WAIT** | انتظار حقيقي جديد 60–150 ثانية بين المنشورات؛ وانتظار طويل فقط حين يُظهر Reddit تهدئة *صراحةً*. | التباعد يُقرأ كإيقاع بشري دون إهدار التشغيلة على انتظارات وهمية — الحساب المُؤسَّس ليس محدوداً بهذا الإيقاع. |
+| **EXIT CONDITION + FINAL OUTPUT** | 5 روابط `/comments/` ملتقَطة، وعدّاد جارٍ، وتوقف صارم عند استنفاد القائمة؛ ثم جدول ملخص. | يمنحك نتيجة قابلة للتدقيق ويمنع الوكيل من الدوران للأبد أو إقحام منشور في مجتمع صارم. |
 
 <Tip>
   خطوة **RESEARCH** هي ما يجعل هذه المنشورات تستحق القراءة. يشغّل الوكيل `web_search` للحصول على معلومة حالية موثَّقة (إنجاز نموذج صيني مفتوح، تقاطع معياري، تحوّل في منحنى التكلفة) ويبني المنشور حولها. زاوية وولف فيش هي التتبيلة لا الطبق — وهذا متعمَّد.
@@ -202,21 +191,21 @@ research insight used, and the direct link to the live post.
 
 1. يُحمّل Prefrontal ملف `soul.md` + SKILL.md الخاص بإضافة المتصفح + SKILL.md الخاص بالبحث على الويب في السياق.
 2. يربط الوكيل المصحِّح بتبويب Reddit (`ext_debugger_attach`) لكي يُرسَل كل إدخال كأحداث CDP موثوقة، لا استدعاءات DOM قابلة للكشف.
-3. **اختيار الأهداف** — على `old.reddit.com` (HTML بسيط، أسهل بكثير من Reddit الجديد ذي محرّر Shadow-DOM)، `ext_navigate` + `ext_read_page` لقراءة المجتمعات المرشَّحة وقواعدها وأبرز منشوراتها الأخيرة. يختار النموذج 5 مجتمعات نشطة وذات صلة بالموضوع.
-4. لكل مجتمع، بالتسلسل:
+3. **فحص التساهل** — على `old.reddit.com` (HTML بسيط، أسهل بكثير من Reddit الجديد ذي محرّر Shadow-DOM)، يمرّ `ext_navigate` + `ext_read_page` على صفحة النشر (`/r/SUB/submit?selftext=true`) وقواعد كل مرشَّح، و**يتخطّى** أي مجتمع يطلب flair أو كارما/عمر حساب أو عضوية أو يحظر محتوى الذكاء الاصطناعي/الترويج الذاتي. يستمر حتى يؤكّد 5 أهداف متساهلة (مع مرشَّحَين احتياطيين).
+4. لكل هدف، بالتسلسل:
    - `web_search` للعثور على معلومة واحدة غير بديهية وموثَّقة مرتبطة بالموضوع.
-   - يصيغ النموذج وينتقد ويعيد الصياغة ثلاث مرات، ثم يمرّ ببوابة الفحص الذاتي.
-   - `ext_navigate` إلى `old.reddit.com/r/SUB/submit?selftext=true`، و`ext_type` للعنوان والمتن، و`ext_click` على `text=submit`. واختيارياً `ext_humanize` بين الإجراءات لإيقاع شبيه بالبشري.
-   - التحقق **مرة واحدة** عبر ملفك الشخصي (`old.reddit.com/user/<you>/submitted/`) والتقاط الرابط الدائم — يُعامَل الإرسال الناجح كمنشور بدل إعادة إرساله، فلا يكرّر الوكيل أبداً. وفقط إن أظهر الملف أنه لم يُنشر، يشخّص ويعيد المحاولة.
-   - ينتظر الوكيل مدة عشوائية جديدة 5–10 دقائق (توقف `sleep` حقيقي عبر قدرة الشِل) قبل المجتمع التالي — أطول إن أشار Reddit إلى تهدئة.
-5. بعد المنشور الخامس، يُصدر الوكيل جدول الملخص ويتوقف. يسجّل Hippocampus التشغيلة كحلقة (episode).
+   - يصيغ النموذج وينتقد ويعيد الصياغة ثلاث مرات — **زاوية مميّزة لكل مجتمع** — ثم يمرّ ببوابة الفحص الذاتي.
+   - يملأ `ext_set_value` حقلَي `textarea[name="title"]` و`textarea[name="text"]`؛ و`ext_submit_form` ينشر. واختيارياً `ext_humanize` بين الإجراءات لإيقاع شبيه بالبشري.
+   - **تحقق حتمي:** `ext_get_url` — رابط يحتوي `/comments/` يعني أنه ظهر، فيلتقط الوكيل الرابط الدائم ولا يعيد الإرسال أبداً. وإن بقي على `/submit`، يقرأ الوكيل الخطأ الفعلي ثم يتخطّى إلى مجتمع احتياطي، أو — **فقط** عند إشعار حرفي «you're doing that too much» — ينتظر مدة التهدئة المذكورة.
+   - انتظار عشوائي جديد **60–150 ثانية** عبر `ext_wait` قبل المجتمع التالي (توقف حقيقي لا محاكى).
+5. بعد 5 روابط حيّة، يُصدر الوكيل جدول الملخص ويتوقف. يسجّل Hippocampus التشغيلة كحلقة (episode).
 
 ## القيود
 
-- **قواعد المجتمعات تختلف بشدة.** بعضها يحظر الروابط، وبعضها الترويج الذاتي، وبعضها يشترط حداً أدنى من الكارما/عمر الحساب. يقرأ الوكيل القواعد ويتكيّف، لكن حساباً جديداً تماماً سيُرشَّح بغض النظر عن جودة المنشور.
-- **الإزالة التلقائية صامتة.** قد يبدو المنشور أنه أُرسل ثم يُزيله AutoModerator بعد ثوانٍ. تلتقط خطوة التحقق هذا، لكن في مجتمع شديد التصفية قد يستنفد الوكيل محاولات إعادة النشر.
+- **المجتمعات الصارمة ترفض بصمت.** المجتمعات التي تشترط flair للمنشور أو حداً أدنى من الكارما/عمر الحساب أو العضوية ستقبل الإرسال (تُعيد الأداة `success`) لكنها لا تنشئ المنشور أبداً. يفحص الموجِّه صفحة نشر كل مجتمع أولاً ويتخطّاها — ما يعني أن بعض المجتمعات الكبيرة وثيقة الصلة (r/LocalLLaMA، r/OpenAI، r/artificial، r/AI_Agents) خارج النطاق للمنشورات النصية. تقايض الوصول مقابل منشورات تظهر فعلاً.
+- **الإزالة التلقائية ما زالت صامتة.** قد يجتاز المنشور فحص رابط `/comments/` ثم يُزيله AutoModerator بعد ثوانٍ في مجتمع شديد التصفية. يلتقط فحص الملف الشخصي الاختياري معظم ذلك لا كله.
 - **جدران CAPTCHA / التحقق** قد تقاطع التشغيلة. يقلّل وضع المصحِّح هذا لكنه لا يلغيه — إن تحدّى Reddit الجلسة، سيتوقف الوكيل وقد يحتاج منك إلى تجاوزه.
-- **Reddit يحدّ معدل النشر.** الإرسال السريع جداً — أو نفس المحتوى مرتين — يُطلق «you're doing that too much». يباعد الموجِّه عمليات الكتابة 5–10 دقائق، وينتظر أي مدة تهدئة مذكورة، ولا يعيد الإرسال، لكن الحساب الجديد أو منخفض الكارما سيصطدم بالحدود رغم ذلك؛ عندها يتوقف الوكيل ويبلّغ بنتيجة جزئية بدل الإلحاح.
+- **حدود المعدل حقيقية لكنها نادراً ما تكون العائق** على حساب مُؤسَّس. ينتظر الموجِّه التهدئة **فقط حين يُظهر Reddit واحدة صراحةً** — لن يختلق واحدة ويُهدر التشغيلة بالانتظار. الحساب الجديد أو منخفض الكارما سيصطدم بحدود أقسى؛ عندها يتوقف الوكيل ويبلّغ بنتيجة جزئية بدل الإلحاح.
 - **يجب أن تكون المعلومة حقيقية.** النموذج مُوجَّه لتوثيق كل معطى، لكن تصفّح المنشورات النهائية دائماً — إحصائية خاطئة مذكورة بثقة أسوأ من غياب أي إحصائية.
 
 ## الأتمتة باستخدام Heartbeat
@@ -230,128 +219,119 @@ research insight used, and the direct link to the live post.
 ```markdown
 ## Engage Reddit | Weekly (Tuesday 10:00)
 
-ROLE: You are Wolffish operating in full autonomous agent mode. Use your browser
-session capability (wolffish-extension / debugger mode, ext_* tools) in my real,
-ALREADY LOGGED-IN Chrome tab. Do NOT use the Reddit API, a headless browser, Playwright,
-or any new/throwaway browser — work only in my existing tab through the extension. Do
-not ask me anything. Do not stop until the EXIT CONDITION is met.
+ROLE: You are Wolffish in full autonomous agent mode. Work ONLY through the Wolffish
+browser extension (ext_* tools) in my real, already-logged-in Chrome tab. Never use the
+Reddit API, Playwright, browser_* tools, a headless browser, or a new window — those
+aren't logged in and Reddit returns 403. Don't ask me anything. Don't stop until the
+EXIT CONDITION is met.
 
-MISSION: Submit 5 original, valuable, viral-optimized Reddit posts — one each to 5
-different subreddits in the open-source / personal-AI-agent / local-LLM space — that
-seed discussion and softly foreshadow Wolffish's philosophy.
-
-WOLFFISH PHILOSOPHY TO FORESHADOW (never pitch it directly, never name it as a product
-— let it emerge as an opinion/idea):
+MISSION: Get 5 ORIGINAL, valuable, discussion-seeding TEXT posts LIVE — one each in 5
+DIFFERENT, lenient subreddits in the open-source / personal-AI-agent / local-LLM space.
+Softly foreshadow a philosophy (never pitch it, never name it as a product — let it read
+as a personal opinion):
 - brain-like architecture, but radically minimal and simple
 - built for END USERS, not just devs
 - does a FEW things extremely well instead of many things badly
-- local-first, markdown-as-truth, you can read your agent's whole brain in a text editor
+- local-first, markdown-as-truth — you can read the agent's whole brain in a text editor
 
-REASONING DISCIPLINE (think before every action):
-Before each phase, reason step by step in your scratchpad: what's the goal, what could
-go wrong, what's the best move. Then act. After each action, verify the result before
-continuing. Never assume success — confirm it. The mandatory wait between posts is a
-real action — never skip, shorten, or "simulate" it.
+═══ CRITICAL RULES (these are exactly why these runs fail — obey them) ═══
+- Most failures come from posting to STRICT subs that require post flair, a minimum
+  karma/account-age, or membership. On old.reddit those submits SILENTLY fail: the tool
+  returns {"success":true} but the post is never created. So you MUST (a) only target
+  lenient subs (Phase 0 vets this) and (b) verify every post for real (step 4).
+- A post is LIVE only when, right after submitting, ext_get_url returns a URL containing
+  "/comments/". Nothing else counts as success — not a tool's {"success":true}, not the
+  profile listing.
+- Do NOT assume a rate limit. Only treat it as one if you LITERALLY SEE "you are doing
+  that too much" / "try again in N minutes" / "looks like you're using an unofficial
+  client" on the page after a submit. Inventing a rate limit just wastes the run.
 
-REDDIT MECHANICS (follow exactly — this is how you avoid wasting calls):
+ENVIRONMENT — extension only, old reddit only:
+- old.reddit ONLY (https://old.reddit.com). It's plain HTML and works first try; www/sh
+  Reddit build the composer in Shadow DOM + a Lexical editor that will eat the run. If you
+  ever land on www.reddit.com, rewrite the URL to old.reddit.com before doing anything.
+- Never call browser_launch / browser_navigate / any browser_* (Playwright) tool, and
+  never open a headless/throwaway browser or new window — those aren't logged in (403).
+- Don't pass a guessed tabId (tabId:1 fails with "No tab with id"). Omit it to use the
+  active tab; if you truly need the id, call ext_tabs_list once and reuse it.
+- First, confirm I'm logged in and capture my username: ext_query_selector ".user a"
+  (returns my name and /user/<name>/ href). You need it for the secondary profile check.
 
-ENVIRONMENT — extension only, no headless:
-- Act ONLY through the Wolffish browser extension (ext_* tools) in my real, already
-  logged-in tab. NEVER call browser_launch / browser_navigate / any browser_* (Playwright)
-  tool, and never open a headless/throwaway browser or new window — those sessions are NOT
-  logged in and Reddit returns HTTP 403 for them. Reuse my existing tab only.
-- Do NOT pass a guessed tabId to any tool (tabId:1 fails with "No tab with id"). Omit
-  tabId to use the active tab; if you truly need the id, call ext_tabs_list once and reuse it.
-- First, confirm I'm logged in and note my username (top-right bar on old.reddit) — you
-  need it to verify posts later.
+SELECTORS (verified — use exactly these):
+- Title field (a TEXTAREA on old.reddit, not an input): textarea[name="title"]
+- Body field: textarea[name="text"]
+- Fill both with ext_set_value (framework-safe; more reliable here than ext_type).
+- Submit with ext_submit_form, selector "textarea[name=\"text\"]" (submits the containing
+  form). Only if that returns no success, fall back to ext_click "text=submit".
+- ext_query_selector accepts REAL CSS ONLY — no "text=", no :has-text(), no "button=...".
+  ("text=" is valid for ext_click only.)
 
-USE OLD REDDIT FOR EVERYTHING:
-- Operate on https://old.reddit.com, never www/sh.reddit.com. New Reddit builds the
-  composer inside Shadow DOM + a Lexical editor that is slow and brittle to target and
-  will eat your run; old.reddit is plain HTML and works first try. If you ever land on
-  www.reddit.com, rewrite the URL to old.reddit.com before doing anything.
+PHASE 0 — BUILD A LENIENT TARGET POOL (this is the whole game):
+Goal: 5 subs that accept a plain text/self post with NO required flair, NO minimum
+karma/age, NO membership gate, and NO blanket "no AI / no self-promo" rule.
 
-SELECTORS (this is where runs break):
-- ext_query_selector accepts REAL CSS ONLY. ":has-text(...)", "button=save", and
-  "text=..." are NOT valid CSS and will throw. Use plain CSS: tag, .class, [attr="value"].
-- To click by visible label, use ext_click with selector "text=<label>".
-- Unsure of a field? ext_query_selector with CSS (match by name/class) to read the form,
-  then act on the exact element.
+Known-lenient anchors (good defaults — use ~2 of your 5 here): r/ollama, r/opencode.
+Known-STRICT — DO NOT POST (they silently reject): r/LocalLLaMA (requires flair + bans
+LLM-generated content), r/OpenAI, r/artificial, r/AI_Agents (flair + karma + automod).
+Other candidates to VET: r/LocalLLM, r/selfhosted, r/LangChain, r/aipromptprogramming,
+r/SideProject, r/IndieDev, r/selfhostedAI, r/LocalAIServers, r/AIAssisted.
 
-SUBMIT A SELF (TEXT) POST on old.reddit:
-- Reach the sub from real links you read — never invent a sub/post URL (a wrong one 404s).
-- Go to https://old.reddit.com/r/SUB/submit?selftext=true
-- Fill the title field (CSS: textarea[name="title"], input[name="title"]) and the body
-  field (textarea[name="text"]) with ext_type (clearFirst:true).
-- Submit with ext_click "text=submit" (or button[type="submit"]). If a sub requires
-  membership to post, join first: the .fancy-toggle-button toggle in the sidebar (its
-  span reads "join"/"subscribe").
+For EACH candidate, before drafting, run a LENIENCY CHECK:
+  1. ext_navigate https://old.reddit.com/r/SUB/submit?selftext=true
+  2. ext_read_page (full) and scan the page + sidebar for blockers:
+     - a REQUIRED post flair (a flair selector you must set before it will submit)
+     - "you must be a member" / "only approved submitters" / "requires N karma"
+     - rules banning AI-generated content or all self-promo
+  3. If ANY blocker is present → SKIP this sub and move to the next candidate; don't fight
+     it. If clean → it's a target. Continue until you have 5 clean targets (vet a couple
+     extra as backups for when one turns out strict).
 
-VERIFY ONCE — NEVER DOUBLE-POST:
-- Verify EXACTLY ONCE via your profile: https://old.reddit.com/user/MY_USERNAME/submitted/
-  — confirm the newest post is yours and capture its permalink (the post URL).
-- If the submit click returned success, assume it posted and verify on the profile. Do
-  NOT retype and resubmit — that creates duplicates. Only retry if the profile clearly
-  shows it did not post.
+PER-TARGET LOOP (finish one fully before starting the next):
 
-RATE LIMITS — respect them (this is the #1 thing that breaks these runs):
-- Reddit rate-limits WRITES (commenting, posting, joining) hard — a low-karma account may
-  only get ~1 write per 5–10 minutes. Reads (ext_navigate / ext_read_page) are cheap; it's
-  the WRITES you must pace.
-- One write per target. NEVER submit the same content twice — a duplicate storm is the
-  single fastest way to trip the limit (and it spams the thread). If a write's outcome is
-  unclear, VERIFY on your profile before ever resending; it almost always did post.
-- After every write, check for a rate-limit notice: "you are doing that too much (try
-  again in N minutes)", "looks like you're using an unofficial client", or an HTTP 429/403.
-  If you see one, the write did NOT go through — do NOT retry in a loop. Wait the time
-  Reddit states (default 12–15 minutes if unstated) with a real sleep, then try that one
-  item once more.
-- Treat the WAIT between items as a real, full pause (real sleep, never simulated). If you
-  get rate-limited twice in a row, STOP and report what posted so far — a partial result
-  beats a blocked or banned account.
+  1. RESEARCH (mandatory, >=1 web_search before writing): find ONE non-obvious, sourced,
+     DATED fact tied to THIS post's angle — a concrete number, named milestone, benchmark
+     crossover, adoption stat, or cost-curve shift the reader couldn't get from a generic
+     LLM. The reader should leave smarter.
 
-PHASE 0 — TARGET SELECTION:
-Search and identify candidate subreddits in this space (e.g. open-source AI agents,
-local LLMs, self-hosted AI, AI tooling, indie AI builders). Randomly choose 5 that are
-ACTIVE and topically relevant. For each, fetch and READ its posting rules + recent top
-posts so your post fits the culture and won't be removed as spam/self-promo.
+  2. DRAFT — and make EACH post genuinely DISTINCT. Near-identical posts across subs get
+     spam-flagged AND flop, so vary the angle, hook format, opening line, and datapoint
+     per sub; never reuse one template five times. Three passes: draft → critique → final.
+     The final post must be viral-optimized (scroll-stopping title that invites debate),
+     deliver the insight as its payload, foreshadow the philosophy as a casual personal
+     opinion (never a pitch), sound HUMAN (casual, an emoji or two, an occasional typo;
+     light snark at hype/trends welcome — roast ideas, never people), and obey the rules.
 
-PER-SUBREDDIT LOOP (repeat for each of the 5, fully finish one before starting next):
+  3. SELF-CHECK before posting: real research with an additive sourced fact (not generic
+     knowledge)? real value? accurate? fits the rules? sparks discussion? If any is no,
+     redraft. Don't post until all are yes.
 
-  1. PLAN: Reason about what THIS specific subreddit's audience actually cares about and
-     what title format goes viral there (hooks, questions, hot takes, "TIL"-style).
+  4. POST + VERIFY (deterministic — do this exactly; do NOT navigate away first):
+     a. ext_set_value textarea[name="title"] -> title; ext_set_value textarea[name="text"]
+        -> body; ext_submit_form selector "textarea[name=\"text\"]".
+     b. ext_get_url.
+        - URL contains "/comments/"  -> LIVE. Record the permalink. Done. NEVER resubmit
+          (resubmitting is the only way to create a duplicate).
+        - URL still ends in "/submit" -> did NOT post. ext_read_page and read the reason:
+            * flair / karma / membership error -> SKIP this sub, pick a backup (re-vet it).
+            * "doing that too much / try again in N minutes / unofficial client" -> REAL
+              rate limit: ext_wait the stated minutes (default 12 if unstated), then retry
+              THIS sub ONCE. If it rate-limits twice, STOP and report.
+            * anything else -> fix what it says, or skip to a backup.
+     c. (Optional, once) navigate /user/<MY_NAME>/submitted/?sort=new, ext_read_page
+        #siteTable, confirm your captured permalink is the newest entry.
 
-  2. RESEARCH (mandatory — research before you draft): Run at least one `web_search` to
-     enrich context before writing — never rely on generic model knowledge alone. Find
-     ONE genuinely non-obvious, research-backed industry insight the reader almost
-     certainly doesn't know, tied to the post's theme. It MUST be ADDITIVE and sourced —
-     a concrete number, named milestone, or dated event the reader couldn't get from a
-     generic LLM. The reader should leave smarter.
+  5. WAIT before the next sub: a real ext_wait of a fresh RANDOM 60000-150000 ms (60-150s).
+     Skip the wait after the 5th live post. (Only the real-rate-limit branch uses a long
+     wait.)
 
-  3. DRAFT (three passes): write draft 1, then critique it, then draft 2 fixing weak
-     spots, then draft 3 as final. Final post must be viral-optimized, deliver the
-     insight as the core payload, foreshadow the Wolffish philosophy as a natural
-     opinion, sound HUMAN (casual, some emojis, occasional typo) — humor and a little
-     idea-roasting/snark welcome where the sub rewards it — and obey the rules.
+EXIT CONDITION: 5 permalinks captured, each containing "/comments/", across 5 distinct
+subreddits. Keep a running tally. If you exhaust your vetted candidates before reaching 5,
+STOP and report what's live plus which subs you skipped and why — do NOT loop forever or
+post to a strict sub hoping it sticks.
 
-  4. SELF-CHECK before posting: actually researched (≥1 search) with an additive sourced
-     fact, not generic knowledge? real value? accurate? fits the sub's rules? sparks
-     discussion? If any answer is no, redraft. Do not post until all yes.
-
-  5. POST: submit it to that subreddit via my logged-in Reddit session.
-
-  6. VERIFY: confirm the post went live and capture its URL. If it failed or was
-     auto-removed, diagnose and retry until it sticks.
-
-  7. WAIT: after a post is verified live, pause for a RANDOM duration between 5 and 10
-     minutes before the next subreddit. Fresh random value each time. Skip only after
-     the 5th and final post.
-
-EXIT CONDITION: 5 posts verified live across 5 distinct subreddits, with the mandatory
-5–10 min wait honored between each. Do not stop, ask, or summarize before this is true.
-
-FINAL OUTPUT: a summary table — for each of the 5: subreddit name, post title, the
-research insight used, and the direct link to the live post.
+FINAL OUTPUT: a table — for each LIVE post: subreddit, title, the sourced research
+insight, and the direct /comments/ permalink. Then list any subs skipped (with the
+blocker you saw).
 ```
 
 <Tip>
@@ -360,16 +340,16 @@ research insight used, and the direct link to the live post.
 
 ## النتيجة المتوقعة
 
-عند انتهاء التشغيلة، تحصل على جدول ملخص تنقر خلاله وتتحقق:
+عند انتهاء التشغيلة، تحصل على جدول ملخص تنقر خلاله وتتحقق — كل رابط هو رابط `/comments/` حقيقي أكّد الوكيل ظهوره:
 
 | # | المجتمع | عنوان المنشور | المعلومة البحثية المستخدمة | الرابط المباشر |
 |---|---|---|---|---|
-| 1 | r/LocalLLaMA | "قضيت عطلة أسبوع أقرأ 'دماغ' وكيلي بالكامل في محرر نصوص — غيّر نظرتي للأمر" | نموذج رائد مفتوح الأوزان تجاوز معياراً استدلالياً كبيراً بجزء بسيط من تكلفة أقرب نموذج مغلق | `https://reddit.com/r/LocalLLaMA/comments/...` |
-| 2 | r/selfhosted | "لماذا يريد كل 'ذكاء اصطناعي شخصي' أن يكون منصّة؟ أريده أن يُتقن 3 أشياء فقط" | معطى عن تبنّي أدوات الذكاء الاصطناعي المستضافة ذاتياً من استبيان مطوّرين حديث | `https://reddit.com/r/selfhosted/comments/...` |
-| 3 | r/opensource | "اكتشفت أن أكثر أطر الوكلاء المفتوحة نجوماً يستخدمها... المطورون، لا من 'صُنعت لأجلهم'" | إنجاز نموذج مفتوح / إحصائية نمو النجوم مع المصدر | `https://reddit.com/r/opensource/comments/...` |
-| 4 | r/artificial | "رأي جريء: 'البساطة + المحلية' تتفوّق على 'الثراء بالمزايا + السحابة' للوكلاء الشخصيين" | معطى تحوّل منحنى التكلفة (سعر الاستدلال لكل رمز خلال العام الماضي) | `https://reddit.com/r/artificial/comments/...` |
-| 5 | r/AI_Agents | "ماذا لو كانت ذاكرة وكيلك مجرد ملفات markdown يمكنك البحث فيها بـ grep؟" | معطى تقاطع معياري / تقييم وكلائي مع المصدر | `https://reddit.com/r/AI_Agents/comments/...` |
+| 1 | r/ollama | "Ollama بلغ 52 مليون تنزيل شهري لأنه يُتقن شيئاً واحداً — فلماذا تعجز أطر الوكلاء؟" | نمو تنزيلات Ollama (من 100 ألف إلى 52 مليون خلال 3 سنوات) وعدد نجوم GitHub، مع المصدر | `https://old.reddit.com/r/ollama/comments/...` |
+| 2 | r/opencode | "وكيلك لا يحتاج 47 أداة. يحتاج 5 ومحرّر نصوص." | معطى عدد الأدوات مقابل الدقة + «استدعاءات API الخام أبسط وأرخص» لإعدادات الوكيل المفرد | `https://old.reddit.com/r/opencode/comments/...` |
+| 3 | r/LocalLLM | "كلما بسّطت إعداد الذكاء الاصطناعي المحلي لديّ، زادت موثوقيته. هل لاحظ أحد غيري؟" | نموذج رائد مفتوح الأوزان يتجاوز معياراً استدلالياً محلياً بجزء بسيط من تكلفة الـ API | `https://old.reddit.com/r/LocalLLM/comments/...` |
+| 4 | r/LangChain | "رأي جريء: 'البساطة + المحلية' تتفوّق على 'الثراء بالمزايا + السحابة' للوكلاء الشخصيين" | معطى تحوّل منحنى التكلفة (سعر الاستدلال لكل رمز خلال العام الماضي) مع المصدر | `https://old.reddit.com/r/LangChain/comments/...` |
+| 5 | r/aipromptprogramming | "ماذا لو كانت ذاكرة وكيلك مجرد ملفات markdown يمكنك البحث فيها بـ grep؟" | إحصائية تبنّي/نمو نجوم نموذج مفتوح مع المصدر | `https://old.reddit.com/r/aipromptprogramming/comments/...` |
 
 <Note>
-  المجتمعات والعناوين والمعلومات أعلاه **توضيحية** — يختار الوكيل أهدافاً جديدة ومعطيات حالية موثَّقة في كل تشغيلة. عامل الجدول بوصفه *شكل* الإخراج، لا نصاً ثابتاً.
+  المجتمعات والعناوين والمعلومات أعلاه **توضيحية** — يفحص الوكيل أهدافاً متساهلة جديدة ومعطيات حالية موثَّقة في كل تشغيلة، ويتخطّى أي مجتمع تطلب صفحة نشره flair أو كارما أو عضوية. عامل الجدول بوصفه *شكل* الإخراج، لا نصاً ثابتاً.
 </Note>
