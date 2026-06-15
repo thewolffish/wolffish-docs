@@ -15,6 +15,19 @@ No third-party uninstaller apps. No "cleaner" utilities of dubious provenance. J
 This is a **destructive, one-time operation**. It deletes applications, system files, services, and registry keys. Read [The Surgeon's Rules](#the-surgeons-rules) below before you run it, and let Wolffish show you the full inventory before you approve any deletion. This is **not** a workflow to put on your heartbeat — see [Don't Schedule This](#dont-schedule-this).
 </Warning>
 
+## Video Walkthrough
+
+<iframe
+  width="100%"
+  height="400"
+  src="https://www.youtube.com/embed/0aPy0TznIjw"
+  title="Nuke Adobe — Wolffish Demo"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+  style={{ borderRadius: '8px', marginTop: '1rem', marginBottom: '1rem' }}
+></iframe>
+
 ## Capabilities Required
 
 - `shell` — the entire workflow, OS-aware. Discovery (`find` / `mdfind` / `launchctl` / `pkgutil` on macOS; `Get-Service` / `Get-ScheduledTask` / `reg query` on Windows; `find` / `systemctl` / Wine-prefix scans on Linux), precise removal, and verification. The agent detects your OS and runs the matching commands.
