@@ -3,7 +3,7 @@ title: "Context Compaction"
 description: "How Wolffish keeps long conversations within the model's context window without losing information"
 ---
 
-# Context Compaction
+# The Context Window Problem
 
 Wolffish is stateless — every LLM call carries the full conversation history. As a turn accumulates tool results (email bodies, web pages, shell output, screenshots), the message array can grow past the model's context window. Context compaction solves this by truncating stale content and producing a structured summary, keeping the conversation running without losing anything the model needs.
 
