@@ -1,0 +1,538 @@
+---
+title: "خادم الأخبار"
+description: "مكتب أخبار شخصي في أمر واحد — يمسح وولف فيش الويب العام بشكل استقصائي بحثاً عن كل ما حدث هذا الأسبوع ضمن المواضيع التي تهمك تحديداً، ويقاطع كل ادعاء بمصادر أخرى، ويفحص خلفية كل منفذ إخباري، ثم يسلّمك ملف PDF واحداً نظيفاً ومرمَّزاً بالألوان مع ملخص تنفيذي وأرقام سهلة ورسوم بيانية. اعرف كل ما يهم، ولا تثق بما لا يمكنك التحقق منه"
+---
+
+# خادم الأخبار
+
+كبير الخدم الجيّد يقرأ كل الصحف عند الفجر كي لا تضطر أنت لذلك. يتخلّص من الإشاعات، ويدقّق العناوين بعضها ببعض، وعند الفطور يسلّمك بطاقة واحدة: *هذا ما حدث فعلاً، وهذا ما لم يُؤكَّد بعد، وهذا من قاله.* لا سيل جارف. لا تصفّح لا ينتهي. مجرد الحقيقة، مُصفّاة إلى ما يهمّك **أنت**.
+
+هذه هي هذه الحالة. تعطي وولف فيش قائمة بالمواضيع — مجالاتك — فيُجري مسحاً **استقصائياً** للويب المتاح للعامة بحثاً عن كل حدث كبير وقع خلال الأيام السبعة الأخيرة، **حتى اليوم وبما فيه اليوم**. ثم يفعل ما لا يفعله أي موجز إخباري: **يقاطع كل ادعاء مهم بمصادر أخرى** قبل أن يطبعه، ويعلّم ما اعتمد على مصدر واحد أو ما كان متنازَعاً عليه، ويُجري فحصاً سريعاً لخلفية كل منفذ يستشهد به — ماهيّته، مقرّه، من يملكه، إلى أين يميل، وهل تثق به الصناعة. والنتيجة ملف **PDF واحد نظيف وعصري ومرمَّز بالألوان** مع ملخص تنفيذي في الأعلى، وأرقام ورسوم بيانية سهلة الهضم، ونصّ بالقدر الكافي فقط — مُفصَّل حيث تستحق القصة ذلك، وسطر واحد موجز في كل ما عداه.
+
+والمقصد أنك **يجب ألّا تحتاج للبحث عن أي شيء آخر.** افتح ملف PDF، اقرأ الملخص التنفيذي في دقيقة، تصفّح الأقسام المرمَّزة بالألوان، وستكون قد لحقت بعالمك — مع إشارة واضحة بجانب كل بند تخبرك بمقدار الثقة التي يستحقها.
+
+<Note>
+هذا سير عمل **بحثي للقراءة فقط** — بحث على الويب وتوليد ملف فقط. لا ينشر، ولا يرسل، ولا ينقر عبر حساباتك، ولا يمسّ نظامك. وهذا أيضاً ما يجعله مرشحاً ممتازاً للـ heartbeat (راجع قسم **الأتمتة عبر heartbeat**): موجز جديد بانتظارك كل صباح.
+</Note>
+
+## لماذا هو خادم لا مجرد موجز
+
+ثلاثة أمور تميّز هذا عن أمر «لخّص الأخبار» العادي:
+
+<CardGroup cols={1}>
+  <Card title="استقصائي فيما يهم" icon="magnifying-glass">
+    يواصل البحث في كل موضوع حتى تتوقّف عمليات البحث الجديدة عن إظهار قصص كبيرة جديدة — كي لا تفوتك أي قصة مهمة — مع قصّ الحشو وبريد SEO المزعج ونسخ الوكالات المعاد تدويرها بلا رحمة.
+  </Card>
+  <Card title="لا يثق بما لا يُتحقق منه" icon="scale-balanced">
+    كل ادعاء مهم يُقاطَع عبر منافذ **مستقلة**. كل قصة تحمل شارة: مؤكَّد، أو مصدر واحد، أو متنازَع عليه — مع عرض الأرقام المتعارضة جنباً إلى جنب حين تختلف المنافذ.
+  </Card>
+  <Card title="يعرف حامل الرسالة" icon="id-card">
+    فحص سريع لخلفية كل منفذ مستشهَد به — ماهيّته، مقرّه، عام أم خاص، مالكه، إيراداته التقريبية، ميله السياسي، ومدى الثقة به — كي تزن المصدر، لا القصة وحدها.
+  </Card>
+</CardGroup>
+
+كل ذلك يصبّ في ملف PDF واحد، مصمَّم ليُقرأ في خمس دقائق، لا في جدار نصّي لن تنهيه أبداً.
+
+## القدرات المطلوبة
+
+- `web-search` — محرّك العمل كله. يشغّل `web_search` المسح متعدد الاستعلامات الاستقصائي عبر مواضيعك؛ ويفتح `web_fetch` المقالات الفعلية ويقرأها كي تُقيَّم الادعاءات من النص الكامل لا من المقتطفات — وهو ما يشغّل المقاطعة بين المصادر وفحوص خلفية المصادر.
+- `shell` — يصيّر الموجز النهائي. يكتب الوكيل HTML منسَّقاً ويطبعه إلى PDF عبر متصفح headless (Playwright/Puppeteer عبر `npx`) — وهو نفس المسار وراء [PDFs في كل مكان](/ar/use-cases/pdfs-everywhere) و[مُفصِّل السيرة الذاتية](/ar/use-cases/cv-tailor). بلا LaTeX، بلا Word، بلا واجهة PDF من طرف ثالث.
+
+هذا كل شيء — **بلا computer-use، بلا OAuth، بلا أوامر مدمِّرة.** كل شيء بحث للقراءة فقط إضافة إلى كتابة ملف واحد. كل ذلك يأتي مدمجاً مع وولف فيش.
+
+## الإعداد
+
+اقرأ دليل [التهيئة للنجاح](/ar/use-cases/setting-up-for-success) العام أولاً — وما يلي خاص بهذا السير.
+
+### النموذج الموصى به
+
+**ما يهم هنا هو جهد الاستدلال، لا السعر.** الجزء الصعب ليس التلخيص — بل الحُكم: تقرير ما إذا كان منفذان يؤكّدان قصة *بشكل مستقل* أم يعيدان نشر الخبر ذاته من الوكالة نفسها، ورصد حين لا تتطابق أعداد القتلى أو الأرقام المالية، وموازنة موثوقية المصدر. تريد نموذجاً يتأمّل.
+
+- **DeepSeek V4 Pro على وضع الاستدلال Max** — التوصية. استدلال وكيلي من الطراز الأول وموثوقية في استخدام الأدوات بجزء يسير من التكلفة، ويمنحه وضع **Max** كامل ميزانية الاستدلال ليتّخذ قرارات «هل هذه فعلاً مصادر مستقلة؟» بدل التخمين. اضبط جهد الاستدلال على **Max** في الإعدادات > النماذج. راجع [إعداد DeepSeek](/ar/configuration/deepseek).
+- **Claude Opus / Sonnet 4.x** — بدائل قوية إن كنت على Anthropic؛ وOpus الأكثر دقة عند حدّ المؤكَّد مقابل المتنازَع عليه، بسعر أعلى بـ 10–20 ضعفاً.
+- **تجنّب إعدادات الجهد المنخفض في مرحلة التحقق** — DeepSeek **Flash**، أو أي نموذج على وضع **None**، أو Haiku. هي مناسبة لموجز سريع، لكن قيمة *الخادم* كلها في التدقيق — وهذا بالضبط حيث يمرّر نموذج لا يتأمّل إشاعةً دون فحص.
+
+### المتطلبات
+
+- **وولف فيش مثبت ويعمل** — تطبيق سطح المكتب مع مساحة عمل دماغية مُعدّة.
+- **مفتاح API سحابي قوي** — يُنصح بـ DeepSeek (V4 Pro) أو Anthropic (Claude)، مُعد في الإعدادات > النماذج.
+
+### موصى به بشدة
+
+- **[مفتاح Brave Search API](https://brave.com/search/api/)** — مُعد في الإعدادات > الخدمات > Brave Search. هو «اختياري» في أوامر PDF الأخف، لكن لمسح **استقصائي** عبر سبعة مواضيع مع مقاطعة بين المصادر يكاد يكون أساسياً: يطلق سير العمل *عشرات* عمليات البحث، وسيصطدم البحث الافتراضي بحدّ المعدّل في منتصف الطريق ويترك ثغرات. مع مفتاح Brave، يفضّله وولف فيش تلقائياً ويجري المسح نظيفاً. الباقة المجانية تكفي لتشغيل يومي بسهولة.
+
+### اختياري
+
+- **`filesystem`** — لسجل تدقيق أنظف عند كتابة HTML وحفظ الـ PDF (مسار `shell` يعمل بدونه).
+- **متصفح headless** — يثبّت وولف فيش Playwright/Puppeteer عند أول استخدام إن لم يكن أيٌّ منهما موجوداً. وجود `npm`/`npx` في مسار PATH يجعل ذلك فورياً.
+
+## ما الذي يتابعه الخادم
+
+هذه هي المجالات الافتراضية المضمَّنة في الأمر — المواضيع في هذا المثال. يصبح كلٌّ منها قسماً **مرمَّزاً بلون** في الـ PDF. بدّلها بمواضيعك (راجع قسم **خصّصه**).
+
+| # | الموضوع | النطاق | لون القسم |
+|---|---------|--------|-----------|
+| 1 | **السعودية** | أي شيء كبير على مستوى الدولة — سياسات، اقتصاد، رؤية 2030 / نيوم / صندوق الاستثمارات العامة / أرامكو، دبلوماسية، أحداث وطنية كبرى | زمرّدي |
+| 2 | **صناعة الذكاء الاصطناعي** | أخبار واختراقات كبرى من أي نوع — إطلاق نماذج، إنجازات بحثية، تمويلات فارقة، تحركات مختبرات كبرى، تنظيمات | نيلي |
+| 3 | **Fable 5** | الوضع حول حظر Fable 5 في الولايات المتحدة، وما الذي فعلته Anthropic فعلاً حياله — ماذا حدث، ومتى، ولماذا، وما ردّ الشركة | كهرماني |
+| 4 | **الألعاب** | أخبار الصناعة الكبرى فقط — إعلانات ضخمة، مواعيد إصدار، تحركات استوديوهات/ناشرين كبار، استحواذات أو إغلاقات كبرى | بنفسجي |
+| 5 | **الأنمي والمسلسلات والأفلام** | أخبار كبرى فقط — إعلانات كبيرة، إصدارات مهمة، تجديد/إلغاء، إنجازات شبّاك التذاكر أو البثّ اللافتة | وردي |
+| 6 | **إيلون ماسك وSpaceX** | أخبار ماسك الكبرى، وبخاصة أي تطورات حول **اكتتاب SpaceX** — ملفات، توقيت، تقييم، تصريحات رسمية | فيروزي |
+| 7 | **الولايات المتحدة / إسرائيل / إيران** | الصراع — ضربات، تصعيد أو تهدئة، دبلوماسية ومحادثات، حالة وقف إطلاق النار، تدخّل أمريكي، خسائر كبرى | قرمزي |
+
+## نموذج التحقق
+
+هذا قلب الخادم. كل ادعاء مهم يحصل على شارة، وللشارة معنى دقيق:
+
+<CardGroup cols={1}>
+  <Card title="🟢 مؤكَّد" icon="circle-check">
+    منفذان مستقلان أو أكثر يذكران الوقائع الأساسية نفسها. إعادة النشر لا تُحتسب — ثلاثة مواقع تعيد خبر وكالة واحداً هي مصدر *واحد*، لا ثلاثة. يبحث الخادم عن تقارير منفصلة فعلاً.
+  </Card>
+  <Card title="🟡 مصدر واحد / قيد التطور" icon="circle-half-stroke">
+    منفذ واحد فقط لديه الخبر، أو هو رقيق ومبكّر. يُطبَع — يجب أن تعرف بوجوده — لكنه مُعلَّم كي تتعامل معه كطرف خيط، لا كحقيقة.
+  </Card>
+  <Card title="🔴 متنازَع عليه" icon="circle-exclamation">
+    تتعارض المنافذ في الوقائع أو الأرقام. **تُعرَض كلتا الروايتين**، مع من قال ماذا، كي ترى الخلاف بدل أن تُسلَّم طرفاً واحداً منه.
+  </Card>
+</CardGroup>
+
+حين تختلف الأرقام بين المنافذ — أعداد القتلى، المبالغ المالية، التواريخ، التقييمات — يعطيك الخادم **المدى** ويذكر من يخالف، مفضّلاً رقم المصدر الأساسي. المصادر الأساسية (الإعلانات الرسمية، الملفات، التصريحات الحكومية) تتقدّم على التعليقات حولها.
+
+## الأمر
+
+أرسل هذا إلى وولف فيش عند الطلب، أو ضعه على الـ heartbeat (راجع قسم **الأتمتة عبر heartbeat**). هو طويل لأن «استقصائي ومُتحقَّق منه ومُنسَّق بجمال» عقدٌ حقيقي — كل كتلة أدناه تستحق مكانها. والمواضيع في المنتصف هي الجزء الوحيد الذي ستغيّره عادةً.
+
+```
+You are my News Butler. Your job: make sure I know
+EVERYTHING that matters to me that happened in the last 7
+days — up to and including today — across the exact topics
+I care about, and nothing I don't. Be exhaustive on what's
+major; be ruthless about cutting filler. Then deliver it as
+ONE clean, modern PDF I can read in five minutes.
+
+Work like an old-school news desk with a trusted editor:
+gather widely, then TRUST NOTHING until you've checked it
+against other outlets. You are the person who knows
+everyone, reads everything, and verifies the truth before
+printing it.
+
+FIRST, fix the window. Run `date +%F` to get today. The
+window is the last 7 days through today. Anything older
+than 7 days is out — unless it's the one line of backstory
+needed to understand something that broke this week.
+
+=== TOPICS I CARE ABOUT (each is its own PDF section) ===
+1. SAUDI ARABIA — anything major at the country level:
+   policy, economy, Vision 2030 / NEOM / PIF / Aramco,
+   diplomacy, major national events.
+2. AI INDUSTRY — major news and breakthroughs of any kind:
+   model releases, research breakthroughs, landmark
+   funding, big lab/company moves, regulation.
+3. FABLE 5 — the situation around Fable 5 being blocked in
+   the US, and what Anthropic (the company) actually did
+   about it. Find what happened, when, why, and Anthropic's
+   official response and actions. If you cannot confirm it,
+   say so plainly — do NOT invent or assume it.
+4. GAMING — major industry news only: blockbuster game
+   announcements, release dates, big studio/publisher
+   moves, major acquisitions or shutdowns.
+5. ANIME, TV & MOVIES — major news only: big
+   announcements, major releases, renewals/cancellations,
+   notable box-office or streaming milestones. Skip minor.
+6. ELON MUSK & SPACEX — major Musk news, and ESPECIALLY any
+   SpaceX IPO developments (filing, timing, valuation,
+   official statements).
+7. USA / ISRAEL / IRAN — the conflict: military strikes,
+   escalation or de-escalation, diplomacy and talks,
+   ceasefire status, US involvement, major casualties.
+
+=== HOW TO RESEARCH (exhaustive, then verified) ===
+For EACH topic run several web searches — a broad one plus
+specific angles — e.g. "<topic> news this week", "<topic>
+latest <current month year>", plus the named sub-topics
+above. Keep searching until new searches stop turning up
+NEW major items (diminishing returns). That is what
+"exhaustive" means here: not every blog post, but nothing
+significant missed. Then OPEN and READ the actual articles
+with web_fetch — never judge a story from the snippet.
+
+ONLY use free, publicly accessible sources. Good general
+ones: Reuters, AP News, BBC, Al Jazeera English, The
+Guardian, NPR, CNBC, The Verge, Ars Technica, TechCrunch,
+VentureBeat, Arab News, Al Arabiya, IGN, GameSpot,
+Eurogamer, Variety, The Hollywood Reporter, Anime News
+Network, Space.com, and official company / government
+pages. Prefer PRIMARY sources (official announcements,
+filings, government statements) whenever they exist.
+
+DO NOT fetch paywalled sites — Bloomberg, WSJ, NYT,
+Financial Times, The Information, The Athletic. They return
+403 and waste time; skip to the next result. Skip SEO spam,
+content farms, and AI-generated rewrites with no original
+reporting.
+
+=== VERIFY LIKE YOU DON'T TRUST ANYONE ===
+For every significant claim, cross-check it across outlets
+before printing, and tag it:
+- CORROBORATED (green): two or more INDEPENDENT outlets
+  report the same core facts. Syndication does NOT count —
+  if several sites rerun the same wire story, that is ONE
+  source. Look for genuinely separate reporting.
+- SINGLE-SOURCE / DEVELOPING (amber): only one outlet has
+  it, or it's thin/early. Print it, but flag it.
+- DISPUTED (red): outlets contradict each other on facts or
+  numbers. Show BOTH versions and who says which.
+When numbers differ (death tolls, dollar amounts, dates,
+valuations), give the RANGE and say who disagrees; prefer
+the primary source's figure and note who departs from it.
+
+=== SIZE UP THE MESSENGER (minimal, not a deep dive) ===
+For each outlet you END UP CITING, do ONE quick lookup —
+not an investigation — and grab whatever is readily
+available:
+- what it is (wire service, newspaper, trade site, blog)
+  and HQ location / country
+- public or private, and who owns it (parent company)
+- rough annual revenue, if it's publicly known
+- editorial leaning — left / center / right — per
+  reputable media-bias references, labeled approximate
+- industry standing — widely trusted, mixed, or low-trust
+- if it's quick: a one-line note on the article's author
+  (who they are, what they cover)
+One look per outlet, grab what's there, move on. Do NOT
+rabbit-hole. If something isn't readily available, leave it
+blank — never guess.
+
+=== NOW BUILD THE PDF ===
+Write it as styled HTML, then render to PDF with a headless
+browser. Save to the workspace as news-butler-YYYY-MM-DD.pdf
+(today's date).
+
+Design: clean, modern, minimal, COLOR-CODED, skimmable in
+five minutes. Default to MINIMAL TEXT — earn every sentence.
+Most stories are ONE tight summary line; write a real
+paragraph ONLY when a story genuinely needs it. Let badges,
+numbers, and charts carry the load — not prose.
+
+Use color to MEAN things, and include a small legend:
+- Each of the 7 topic sections gets its own accent color
+  (distinct, readable palette).
+- Verification badge per story: green = corroborated, amber
+  = single-source/developing, red = disputed.
+- Source-leaning chips in the ledger: blue = left, gray =
+  center, red = right (the OUTLET's editorial lean, labeled
+  neutral/approximate). Keep these visually distinct from
+  the red "disputed" badge.
+
+Structure, in this order:
+1. MASTHEAD — "NEWS BUTLER" large, the date window ("Week
+   of <start> – <today>"), and a one-line tagline.
+2. EXECUTIVE SUMMARY — the handful of things I MUST know
+   this week, one tight line each, each tagged with its
+   topic color and verification badge. If I read only this,
+   I'm caught up. Keep it to the genuinely major.
+3. BY THE NUMBERS — a compact dashboard of easy, useful
+   figures with simple charts drawn as inline SVG or CSS
+   bars (NO external chart libraries or CDNs — they may not
+   load in headless render):
+   - total major stories, # sources consulted, # claims
+     cross-checked
+   - bar chart: number of stories per topic
+   - verification mix: % corroborated / single / disputed
+     (stacked bar or donut)
+   - source-leaning spread: left / center / right
+     (diverging bar)
+   Only charts that actually tell me something — no
+   chart-junk, no decoration masquerading as data.
+4. SEVEN TOPIC SECTIONS — in the order above, each in its
+   accent color. Per story: headline, a one-line summary
+   (paragraph only if warranted), the verification badge
+   with a short "who confirms / who disputes" note, and the
+   source outlet name(s). Add a one-line "why it matters"
+   ONLY when it isn't obvious. If a topic had nothing major
+   this week, say so in ONE line — do not pad it.
+5. SOURCE TRUST LEDGER — one compact table of every outlet
+   you cited: Outlet | What it is | HQ | Public/Private
+   (owner) | Revenue (approx) | Leaning | Standing | Author
+   note. Leave cells blank when unknown.
+6. METHODOLOGY & CAVEATS — short: the exact window, how
+   many searches and sources, what corroborated / disputed
+   mean, that paywalled sources were skipped, and that the
+   outlet profiles are a light touch, not full vetting.
+
+Footer on every page: "Generated by Wolffish" left, "Page X
+of Y" right.
+
+=== WHEN DONE ===
+Tell me three things: the single biggest story of the week,
+anything DISPUTED I should stay skeptical about, and any
+topic where you came up nearly empty — so I know it's quiet,
+not missed.
+```
+
+<Tip>
+المواضيع السبعة المرقّمة هي الجزء الوحيد الذي ستغيّره بانتظام. كل ما عداه — انضباط البحث، وقواعد التحقق، وتصميم الـ PDF — يبقى كما هو تماماً. عامِل كتلة المواضيع كإعداداتك واترك الباقي وشأنه.
+</Tip>
+
+### خصّصه
+
+غيّر أيّاً من هذه لتجعل الخادم خادمك:
+
+| ماذا | أين في الأمر | أفكار |
+|------|--------------|-------|
+| **مواضيعك** | المواضيع السبعة المرقّمة | بدّل بمجالاتك — `Formula 1`، أو موافقات FDA الحيوية، أو أسهم محفظتك، أو أخبار مدينتك المحلية، أو منافسيك |
+| **النافذة الزمنية** | `the last 7 days` | `last 24 hours` لنبض يومي، `last 30 days` لمراجعة شهرية |
+| **المصادر الموثوقة** | قائمة "Good general ones" | أضِف الصحافة المتخصّصة في مجالك، أو منافذ إقليمية، أو مدوّنات محددة تعتمد عليها |
+| **صرامة التحقق** | `two or more` للأخضر | اشترط **ثلاثة** منافذ مستقلة للأخضر (أصرم)، أو انزل إلى واحد للسرعة |
+| **عمق فحص المصادر** | كتلة "size up the messenger" | أوقفه كلياً لتشغيل أسرع، أو وسّعه إلى ملف أوفى لكل منفذ |
+| **لوحة الألوان** | قواعد الألوان | اربط الأقسام بألوان علامتك التجارية |
+| **اللغة** | أضِف سطراً في النهاية | `Write the entire PDF in Arabic` — مسار متصفح headless يصيّر RTL بنظافة |
+
+## كيف يعمل
+
+يقود الأمر خط أنابيب من خمس مراحل. يحمّل Prefrontal قدرتَي `web-search` و`shell` إلى السياق، ويثبّت النموذج تاريخ اليوم، ثم يشغّل:
+
+| المرحلة | ما يحدث | المُخرَج |
+|---------|---------|---------|
+| **1 — الجمع** | مسح استقصائي متعدد الاستعلامات لكل موضوع عبر `web_search` (Brave عند إعداده)، حتى تتوقّف عمليات البحث الجديدة عن إظهار بنود كبيرة جديدة | قائمة مرشّحة خام بالقصص لكل موضوع |
+| **2 — القراءة** | يفتح `web_fetch` المقالات الفعلية — نص كامل، لا مقتطفات — عبر منافذ متعددة لكل قصة | المحتوى الحقيقي، جاهز للمقارنة |
+| **3 — التحقق** | يُقاطَع كل ادعاء مهم عبر منافذ **مستقلة**؛ ويُعلَّم مؤكَّد / مصدر واحد / متنازَع عليه؛ وتُوفَّق الأرقام المتعارضة إلى مدى | شارة ثقة على كل قصة |
+| **4 — الملف** | فحص خلفية سريع واحد لكل منفذ مستشهَد به — ماهيّته/مقرّه/مالكه/إيراداته/ميله/مكانته/المؤلف | سجل ثقة المصادر |
+| **5 — التصميم والتصيير** | HTML منسَّق ومرمَّز بالألوان مع ملخص تنفيذي ورسوم لوحة المعلومات وسبعة أقسام ← يُطبَع إلى PDF عبر متصفح headless | `news-butler-YYYY-MM-DD.pdf` |
+
+يسجّل Hippocampus التشغيل كحلقة، ويسجّل Basalganglia النتيجة، فيُحفَظ كل موجز للرجوع إليه — مفيد حين تريد مقارنة هذا الأسبوع بالذي قبله.
+
+### ما الذي يحويه الـ PDF
+
+المُخرَج مصمَّم ليُقرأ من الأعلى إلى الأسفل في خمس دقائق، أو يُتصفَّح باللون في دقيقة واحدة:
+
+| القسم | ما يعطيك | لماذا هو موجود |
+|-------|----------|----------------|
+| **الترويسة** | العنوان + النافذة الزمنية الدقيقة + التاريخ | تعرف بدقة الفترة التي يغطّيها |
+| **الملخص التنفيذي** | البنود التي يجب معرفتها، سطر لكلٍّ، مُعلَّمة باللون والشارة | تلحق في 60 ثانية إن كان هذا كل ما تقرأ |
+| **بالأرقام** | أعداد القصص والمصادر والادعاءات المدقَّقة + رسوم | شكل الأسبوع في لمحة — بلا قراءة |
+| **الأقسام السبعة** | مجالاتك، مرمَّزة بالألوان، كل قصة مُشارة ومُسنَدة لمصدر | الجوهر — نصّ أدنى، إشارة أعلى |
+| **سجل ثقة المصادر** | كل منفذ: ماهيّته/مقرّه/مالكه/ميله/مكانته | تزن حامل الرسالة، لا الرسالة وحدها |
+| **المنهجية** | النافذة، الأعداد، معنى الشارات، التحذيرات | تعرف كيف صُنع الموجز — وحدوده |
+
+### نظام الألوان
+
+اللون يؤدّي عملاً في هذا الـ PDF — ليس زينة. ثلاث لغات لونية مستقلة، لكلٍّ مفتاحها:
+
+| استخدام اللون | المعنى | لوحة مثال |
+|---------------|--------|-----------|
+| **لون القسم** | أي موضوع تقرأ | زمرّدي = السعودية، نيلي = الذكاء الاصطناعي، كهرماني = Fable 5، بنفسجي = الألعاب، وردي = الأنمي/المسلسلات، فيروزي = ماسك/SpaceX، قرمزي = أمريكا/إسرائيل/إيران |
+| **شارة التحقق** | مقدار الثقة بالقصة | 🟢 مؤكَّد · 🟡 مصدر واحد · 🔴 متنازَع عليه |
+| **شريحة الميل** | الميل التحريري للمنفذ | 🔵 يسار · ⚪ وسط · 🔴 يمين (تقريبي، في السجل فقط) |
+
+## مثال تشغيل
+
+هذا شكل موجز منتهٍ. هذا **مثال توضيحي** للتخطيط والنبرة — تشغيلك الفعلي يسحب قصصاً حيّة للأسبوع الفعلي. لاحظ كيف أن معظم البنود سطر واحد، وكيف تحمل الشارات إشارة الثقة، وكيف يعرض البند المتنازَع عليه كلا الرقمين.
+
+<Accordion title="موجز مثال (تخطيط توضيحي)">
+
+---
+
+**NEWS BUTLER**
+*أسبوع 9–15 يونيو 2026 — كل ما يهمك، مُتحقَّقاً منه*
+
+---
+
+**الملخص التنفيذي**
+
+- 🟢 🟦 **الذكاء الاصطناعي:** مختبر كبير أطلق نموذجاً متقدّماً بقفزة نوعية على معايير الأداء الوكيلية — مؤكَّد عبر أربعة منافذ مستقلة وملاحظات الإطلاق الرسمية.
+- 🟢 🟩 **السعودية:** أعلن صندوق الاستثمارات العامة مشروعاً صناعياً بمليارات الدولارات مرتبطاً برؤية 2030؛ الرقم متّسق بين Reuters وArab News.
+- 🔴 🟥 **أمريكا / إسرائيل / إيران:** تقارير عن ضربة ليلية — تختلف المنافذ في **عدد الضحايا** (راجع القسم). تعامَل معها كخبر قيد التطور.
+- 🟡 🟧 **Fable 5:** تنتشر ادعاءات عن حظر أمريكي لـ Fable 5 من منفذ واحد؛ ولم تنشر Anthropic بياناً رسمياً أمكنني التحقق منه. مُعلَّم كقيد التطور.
+- 🟢 🟪 **الألعاب:** تتمّة ضخمة حصلت على موعد إصدار مؤكَّد في عرض كبير — مؤكَّد من IGN وGameSpot والناشر.
+
+---
+
+**بالأرقام**
+
+| القصص الكبرى | المنافذ المستشارة | الادعاءات المدقَّقة |
+|:---:|:---:|:---:|
+| 37 | 21 | 14 |
+
+*القصص لكل موضوع*
+
+| الموضوع | العدد |
+|---------|:---:|
+| الذكاء الاصطناعي | 8 |
+| أمريكا/إسرائيل/إيران | 7 |
+| الألعاب | 5 |
+| السعودية | 5 |
+| الأنمي/المسلسلات | 4 |
+| ماسك/SpaceX | 4 |
+| Fable 5 | 3 |
+
+*مزيج التحقق* — 🟢 68% مؤكَّد · 🟡 24% مصدر واحد · 🔴 8% متنازَع عليه
+
+*ميل المصادر* — 🔵 يسار 9 · ⚪ وسط 8 · 🔴 يمين 4
+
+---
+
+**🟩 السعودية**
+
+**صندوق الاستثمارات العامة يطلق مشروعاً صناعياً ضمن رؤية 2030** — 🟢 مؤكَّد (Reuters وArab News والبيان الرسمي للصندوق يتفقون على النطاق والرقم). *سطر واحد لكلٍّ؛ بلا حشو.*
+
+**زيارة دبلوماسية تُنتج مذكرة تفاهم في الطاقة** — 🟢 مؤكَّد (AP وAl Arabiya).
+
+---
+
+**🟦 صناعة الذكاء الاصطناعي**
+
+**إطلاق نموذج متقدّم بقفزة في المعايير الوكيلية** — 🟢 مؤكَّد (The Verge وArs Technica وVentureBeat + الملاحظات الرسمية). *لماذا يهم: يعيد ضبط السقف الذي كان المنافسون يستهدفونه للربع الثالث.*
+
+**إغلاق جولة تمويل فارقة للأوزان المفتوحة** — 🟢 مؤكَّد (TechCrunch وReuters).
+
+---
+
+**🟧 Fable 5**
+
+**حظر أمريكي مُبلَّغ عنه لـ Fable 5** — 🟡 مصدر واحد / قيد التطور. منفذ واحد يذكر تقييد وصول Fable 5 في الولايات المتحدة؛ لم أجد تأكيداً مستقلاً ثانياً، و**لم يكن أي بيان رسمي من Anthropic قابلاً للتحقق** وقت الإعداد. تعامَل معه كطرف خيط، لا كحقيقة — سألتقط أي تأكيد في التشغيل القادم.
+
+---
+
+**🟪 الألعاب**
+
+**تتمّة ضخمة بموعد في عرض كبير** — 🟢 مؤكَّد (IGN وGameSpot والناشر).
+
+**إغلاق استحواذ على استوديو كبير** — 🟢 مؤكَّد (Eurogamer وReuters).
+
+---
+
+**🟥 أمريكا / إسرائيل / إيران**
+
+**ضربة ليلية مُبلَّغ عنها** — 🔴 **متنازَع عليه.** المنفذ A يذكر **~14** ضحية؛ المنفذ B يذكر **«عشرات».** لا رقم من مصدر أساسي مؤكَّد بعد. كلا الرقمين معروضان عمداً — لا ترسُ على أيٍّ منهما حتى يثبت.
+
+**محادثات مُبلَّغ عن جدولتها** — 🟡 مصدر واحد / قيد التطور (منفذ واحد، بلا تأكيد).
+
+---
+
+**سجل ثقة المصادر**
+
+| المنفذ | ماهيّته | المقر | عام/خاص | الإيرادات | الميل | المكانة | المؤلف |
+|--------|---------|-------|---------|-----------|-------|---------|--------|
+| Reuters | وكالة أنباء | لندن، UK | خاصة (Thomson Reuters) | ~$7B (المجموعة) | ⚪ وسط | عالية | — |
+| AP News | تعاونية أنباء | نيويورك، US | غير ربحية | ~$0.5B | ⚪ وسط | عالية | — |
+| The Verge | أخبار تقنية | نيويورك، US | خاصة (Vox Media) | — | 🔵 ميل يساري | موثوق (تقني) | — |
+| Arab News | صحيفة | الرياض، SA | خاصة (SRMG) | — | ⚪ وسط | إقليمي، راسخ | — |
+
+*(…صفّ لكل منفذ مستشهَد به؛ فراغات حيث لا يتوفّر بسهولة.)*
+
+---
+
+**المنهجية والتحذيرات**
+
+النافذة: 9–15 يونيو 2026 (آخر 7 أيام بما فيها اليوم). 21 منفذاً عبر أكثر من 30 عملية بحث؛ 14 ادعاءً مهماً مدقَّقاً. المصادر خلف جدار الدفع (Bloomberg، WSJ، NYT، FT) متجاوَزة عمداً. ملفات المنافذ فحص خلفية سريع — إرشادي، لا تدقيق كامل. «مؤكَّد» = منفذان مستقلان أو أكثر؛ «متنازَع عليه» = المنافذ تختلف في الوقائع.
+
+*Generated by Wolffish — Page 1 of 4*
+
+</Accordion>
+
+<Note>
+المثال أعلاه يُبقي ادعاءات القصص عامة عمداً — تشغيلك يملؤها بقصص حقيقية مُسنَدة ومؤرَّخة. لاحظ بندَي **Fable 5** و**الضربة**: بدل أن يجزم بما لا يستطيع تأكيده، يطبع الخادم الخبر *ويخبرك أنه غير مُتحقَّق منه أو متنازَع عليه*. هذه الأمانة هي الميزة.
+</Note>
+
+## القيود
+
+- **«استقصائي» يعني استقصائياً في الأخبار *الكبرى***، لا كل منشور على الإنترنت. يتوقّف الخادم عند كل موضوع عند تناقص العوائد — لن يفوّت قصة مهمة، لكنه يتجاوز عمداً الحشو الثانوي، وقد لا تكون الأخبار العاجلة جداً (الساعة الأخيرة) مفهرسة في محركات البحث بعد.
+- **التحقق يعتمد على التغطية.** قصة حقيقية غطّاها منفذ واحد فقط *بشكل صحيح* ستبقى مُعلَّمة كمصدر واحد — الشارة تعكس عدد المنافذ المستقلة التي أبلغت عنها، لا الحقيقة المطلقة. القصص النادرة والأخبار المحلية جداً ستميل إلى الكهرماني.
+- **ملفات المصادر إرشادية لا مُدقَّقة.** تسميات الميل السياسي تأتي من مراجع تحيّز إعلامي عامة وهي تقريبية؛ والإيرادات والملكية «إن توفّرت بسهولة». هذا فحص خلفية سريع، بالتصميم — لا تدقيق بمستوى الصحافة. لا تتّخذ قرارات عالية المخاطر استناداً إلى السجل وحده.
+- **المنافذ خلف جدار الدفع متجاوَزة.** Bloomberg وWSJ وNYT وFT وأمثالها تُرجع 403 لـ `web_fetch`. قد تكون تقاريرها المصدر الأساسي لقصة؛ يلتفّ الخادم حولها بمنافذ مجانية، لكن ذلك يعني أحياناً أن قصة ما أرقّ مما لو توفّر الوصول.
+- **تصيير الـ PDF يحتاج متصفح headless.** يستخدم وولف فيش Playwright أو Puppeteer؛ وإن لم يكن أيٌّ منهما مثبتاً سيحاول تثبيت أحدهما، وهو ما ينجح عادةً لكنه يحتاج `npm`/`npx` في مسار PATH.
+- **يُبلِّغ، لا يَنصح.** يخبرك الخادم بما حدث ومدى موثوقيته. أما قرارات الحُكم — ماذا تفعل حياله — فتبقى لك.
+
+## التكلفة ودليل النماذج
+
+أثقل من موجز أخبار بسيط — المسح الاستقصائي، وقراءات التحقق، وفحوص كل منفذ تعني عمليات بحث وجلب كثيرة. ومع ذلك غير مكلف على النموذج الموصى به.
+
+### التكلفة التقريبية لكل تشغيل
+
+| النموذج | التكلفة التقديرية لكل تشغيل | ملاحظات |
+|---------|----------------------------|---------|
+| **DeepSeek V4 Pro (وضع Max)** | ~$0.08–0.25 | **موصى به.** استدلال رائد لقرارات التحقق بجزء يسير من السعر |
+| DeepSeek V4 Flash | ~$0.03–0.08 | أرخص وأسرع؛ أضعف في حُكم استقلال المصادر — مناسب لموجز عابر |
+| Qwen 3.7 Max | ~$0.15–0.40 | بديل متين |
+| Claude Sonnet 4.x | ~$0.40–0.90 | نثر مصقول؛ تحقق قوي |
+| Claude Opus | ~$1.50–3.50 | الأكثر دقة عند حدّ المؤكَّد مقابل المتنازَع عليه؛ مبالغة للاستخدام اليومي |
+
+### ميزانية الرموز
+
+~250٬000–600٬000 رمز لكل تشغيل. يهيمن المسح الاستقصائي متعدد المواضيع وجلب النصوص الكاملة؛ وتضيف مرحلة التحقق وفحوص المصادر الباقي. مفتاح **Brave Search** المُعد يمنع التشغيل من التعثّر بسبب حدود المعدّل، وهو ما يضخّم الوقت والرموز لولاه. نحو 30–60 نداء للنموذج (عمليات بحث وجلب، واستدلال التحقق، وملفات المصادر، وتصيير HTML).
+
+مقابل بضعة سنتات يومياً كي لا يفوتك شيء يهمّك — وكي تعرف أي الادعاءات تستحق الثقة — يسدّد ثمنه أول مرة يعلّم فيها إشاعة كنت ستكرّرها.
+
+## الأتمتة عبر heartbeat
+
+هذه من **أفضل** مرشحات الـ heartbeat في المكتبة كلها: بحث للقراءة فقط يكتب ملفاً واحداً — بلا نشر، بلا إرسال، بلا أوامر مدمِّرة، ولا شيء يحتاج إنساناً عند بوابة الموافقة. بالضبط نوع المهام القابلة للتراجع ومنخفضة الأثر التي وُجد الـ heartbeat لها. (للقاعدة العامة حول ما يَأمَن أتمتته، راجع [ماذا تجدوِل](/ar/configuration/what-to-schedule).)
+
+افتح **الإعدادات > heartbeat**، الصق الكتلة أدناه، وسيكون موجز جديد بانتظارك في مساحة عملك كل صباح قبل أن تفتح حاسوبك.
+
+```markdown
+## News Butler | Daily (07:00)
+
+You are my News Butler. Make sure I know EVERYTHING that
+matters to me from the last 7 days — up to and including
+today — across the topics below, and nothing I don't. Be
+exhaustive on what's major, ruthless about filler. Deliver
+ONE clean, modern, color-coded PDF I can read in five
+minutes. Trust nothing until you've checked it against
+other outlets.
+
+Run `date +%F` for today; window is the last 7 days.
+
+Topics (each its own color-coded section):
+1. Saudi Arabia — anything major at the country level.
+2. AI industry — major news and breakthroughs of any kind.
+3. Fable 5 — the US-blocking situation and what Anthropic
+   did; say so plainly if you can't confirm it.
+4. Gaming — major industry news only.
+5. Anime, TV & movies — major news only.
+6. Elon Musk & SpaceX — esp. any SpaceX IPO developments.
+7. USA / Israel / Iran — the conflict.
+
+For each topic: several searches until new ones stop
+surfacing new major items, then web_fetch the real
+articles. Free sources only (Reuters, AP, BBC, Al Jazeera,
+The Verge, Ars Technica, TechCrunch, Arab News, IGN,
+Variety, Space.com, official pages); skip paywalls
+(Bloomberg, WSJ, NYT, FT) and SEO spam. Prefer primary
+sources.
+
+Verify every significant claim: green = 2+ INDEPENDENT
+outlets agree (syndication = one source); amber =
+single-source/developing; red = outlets disagree (show both
+numbers). For each cited outlet, ONE quick lookup: what it
+is, HQ, public/private + owner, rough revenue, leaning
+(left/center/right, approximate), standing, author note —
+minimal, leave blanks, don't rabbit-hole.
+
+Build the PDF as styled HTML then render via headless
+browser; save as news-butler-YYYY-MM-DD.pdf. Minimal text —
+earn every sentence; let badges, numbers, and charts carry
+it. Sections: masthead; executive summary (must-knows, one
+line each, color + badge); by-the-numbers dashboard with
+inline-SVG/CSS charts (stories per topic, verification mix,
+source leaning — no external chart libs); the 7 topic
+sections (color-coded, each story badged + sourced, "nothing
+major" in one line if quiet); source trust ledger; short
+methodology + caveats. Footer: "Generated by Wolffish" /
+"Page X of Y".
+```
+
+<Tip>
+‏`Daily (07:00)` يمنحك لحاقاً متدحرجاً لسبعة أيام كل صباح. تفضّل موجزاً أسبوعياً نظيفاً؟ استخدم `Weekly (Monday 07:00)` وغيّر سطر النافذة إلى "the last 7 days". لنبض أضيق، `Daily (07:00)` مع نافذة "last 24 hours" يحوّله إلى موجز صباحي حقيقي.
+</Tip>
+
+## اصنع خادمك
+
+النمط يعمّم على أي مهمة «أبقِني مطّلعاً، لكن مُتحقَّقاً منه»:
+
+- **موجز المستثمر الصباحي** — أسهمك، قطاعاتك، الأرباح والملفات، بنفس انضباط المؤكَّد/المتنازَع عليه على الإشاعات.
+- **رادار المنافسة** — إطلاقات منافسيك وتمويلاتهم وتوظيفاتهم وأعطالهم — مُسنَدة ومُشارة بالثقة.
+- **مكتب إقليمي** — سياسة بلدك أو مدينتك واقتصادها وأحداثها، بالاعتماد على منافذ محلية تُدرجها كموثوقة.
+- **مكتب المعجبين** — رياضة، أو استوديو، أو امتياز — أخبار كبرى فقط، بلا ضجيج طاحونة الإشاعات.
+
+الانضباط واحد في كل مرة: **استقصائي فيما يهم، متشكّك في كل شيء، أمين بشأن المصدر.** غيّر المجالات؛ وأبقِ الخادم.
