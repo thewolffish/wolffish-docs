@@ -1,0 +1,433 @@
+---
+title: "استئصال Adobe"
+description: "استئصال Adobe Creative Cloud وكل أثر له من جهازك بدقة جراحية وبشكل شامل — يعمل على macOS وWindows وLinux. جرد أولاً، ثم قطع بدقة، مع ترك كل ما لا علاقة له دون مساس، وينتهي بتقرير مصنَّف لما تمت إزالته وما يجب أن تتولاه بنفسك"
+---
+
+# استئصال Adobe
+
+Adobe لا يُثبَّت — بل ينتشر كالورم. تنزيل واحد لـ Creative Cloud يبثّ حِزم تطبيقات، وخدمات خلفية، ووكلاء تشغيل تلقائي، ومساعدين بصلاحيات مرتفعة، وخدمة Genuine Service تتصل بالخوادم، وذاكرات تخزين مؤقت، وتفضيلات، وسجلّات، وخطوطاً، وسجلّات تثبيت — عبر نظامك بأكمله: مجلدات مبعثرة على macOS وLinux، إضافة إلى خدمات ومهام مجدولة ومفاتيح ريجستري على Windows. اسحب التطبيق إلى سلة المهملات (أو اضغط إلغاء التثبيت) وسيبقى معظمه خلفه، ويظل يعمل عند الإقلاع.
+
+هذه الحالة تجعل وولف فيش يزيلها كلها — **كجرّاح يستأصل ورماً: أخرِج كل خلية منه، واترك كل نسيج سليم دون مساس.** يكتشف نظام تشغيلك، ويجرد بصمة Adobe كاملةً أولاً، ويعرض عليك القائمة، ولا يقطع إلا بعد موافقتك. يرفض أن يمسّ أي شيء لا ينتمي إلى Adobe بشكل قاطع — لا ملفات `.psd` الخاصة بك، ولا المكتبات المشتركة، ولا الخطوط التي قد تستخدمها تطبيقات أخرى، ولا مدير الحزم لديك، ولا ملف hosts، ولا مفاتيح الريجستري خارج أشجار Adobe. عند الانتهاء تحصل على جهاز نظيف بلا ملفات أو مجلدات أو خدمات أو مفاتيح ريجستري معلَّقة، وعلى تقرير مصنَّف لِما تمت إزالته بالضبط، وما تُرِك عمداً، وما يجب أن تتولاه بنفسك.
+
+بدون تطبيقات إزالة من طرف ثالث. بدون أدوات «تنظيف» مشبوهة المصدر. مجرد أوامر شِل — يكتشف الوكيل ما إن كنت على **macOS أو Windows أو Linux** ويشغّل الاستكشاف والإزالة والتحقق المناسب لكلٍّ منها — محلياً، مع بوابة موافقة على كل خطوة مدمِّرة.
+
+<Warning>
+هذه عملية **مدمِّرة تُجرى مرة واحدة**. تحذف تطبيقات وملفات نظام وخدمات ومفاتيح ريجستري. اقرأ قسم **قواعد الجرّاح** أدناه قبل تشغيلها، ودَع وولف فيش يعرض عليك الجرد الكامل قبل أن توافق على أي حذف. هذه **ليست** حالة تُضاف إلى الـ heartbeat — راجع قسم **لا تجدوِل هذا** في الأسفل.
+</Warning>
+
+## القدرات المطلوبة
+
+- `shell` — سير العمل بأكمله، مدرك لنظام التشغيل. الاستكشاف (`find` / `mdfind` / `launchctl` / `pkgutil` على macOS؛ و`Get-Service` / `Get-ScheduledTask` / `reg query` على Windows؛ و`find` / `systemctl` / مسح بادئات Wine على Linux)، والإزالة الدقيقة، والتحقق. يكتشف الوكيل نظام التشغيل ويشغّل الأوامر المطابقة.
+
+الأوامر المدمِّرة — `rm -rf` و`sudo` ونظائرها على Windows/الريجستري (`Remove-Item` و`reg delete` و`sc delete`) — تمرّ عبر Amygdala لأخذ موافقتك الصريحة. وهي بالضبط بوابة الأمان التي تريدها هنا.
+
+### اختيارية
+
+- `filesystem` — لقراءة الملفات وقياس أحجامها قبل الإزالة، ما ينتج سجل تدقيق أنظف من الشِل وحده.
+- `computer-use` — فقط إن أردت أن يقود الوكيل أداة الإزالة الرسومية من Adobe أو أداة **Creative Cloud Cleaner Tool** الرسمية (macOS/Windows) بالنقر عبرها. الإزالة عبر الشِل البحت لا تحتاجها.
+
+كل ذلك يأتي مدمجاً مع وولف فيش. لا حاجة لكود أو إضافات.
+
+## الإعداد
+
+هذه الحالة هي بالكامل تقريباً أوامر شِل وحُكم دقيق. اقرأ دليل [التهيئة للنجاح](/ar/use-cases/setting-up-for-success) العام أولاً — وما يلي خاص بهذا السير.
+
+### النموذج الموصى به
+
+**ما يهم هنا هو جهد الاستدلال، لا السعر.** المهمة كلها تعتمد على الحُكم: تقرير ما إذا كان ملف أو خدمة أو مفتاح ريجستري معيّن ينتمي إلى Adobe بشكل قاطع أم قد يكون مشتركاً مع شيء آخر. تريد نموذجاً *يتأمّل* قبل أن يحذف.
+
+- **DeepSeek V4 Pro على وضع الاستدلال Max** — التوصية. يقدّم استدلالاً وكيلياً من الطراز الأول وموثوقية في استخدام الأدوات، ويمنحه وضع **Max** كامل ميزانية الاستدلال ليتّخذ قرارات «هل هذا فعلاً Adobe؟» بعناية بدل التخمين — وبجزء يسير من تكلفة البدائل الرائدة. اضبط جهد الاستدلال على **Max** في الإعدادات > النماذج. راجع [إعداد DeepSeek](/ar/configuration/deepseek).
+- **Claude Sonnet 4.x / Opus** — بدائل قوية إن كنت على Anthropic؛ وOpus الأكثر دقة عند حدّ المشترك مقابل Adobe.
+- **تجنّب إعدادات الجهد المنخفض** — DeepSeek **Flash**، أو أي نموذج على وضع الاستدلال **None**، أو Haiku. هي رائعة للحالات الأرخص، لكن المسح المدمِّر لمرة واحدة هو بالضبط حيث يكلّفك نموذج لا يتأمّل.
+
+### المتطلبات
+
+- **وولف فيش مثبت ويعمل** — تطبيق سطح المكتب مع مساحة عمل دماغية مُعدّة.
+- **مفتاح API سحابي قوي** — يُنصح بـ DeepSeek (V4 Pro) أو Anthropic (Claude)، مُعد في الإعدادات > النماذج.
+- **صلاحيات مرتفعة** — يبعثر Adobe ملفات وخدمات في مواقع على مستوى النظام: `/Library` على macOS، و`Program Files` إضافة إلى خلية الريجستري `HKLM` على Windows، و`/opt` ووحدات النظام على Linux. تحتاج هذه إلى `sudo` (macOS/Linux) أو **Administrator** (Windows). يطلب وولف فيش (عبر Amygdala) التأكيد قبل كل أمر بصلاحيات. بدون الرفع، تتم إزالة ملفات المستخدم لكن خدمات النظام والمواقع المحمية تبقى.
+
+### اختياري
+
+- **Creative Cloud Cleaner Tool** — أداة التنظيف العميق الرسمية من Adobe لـ **macOS وWindows** ([نزّلها من هنا](https://helpx.adobe.com/creative-cloud/kb/cc-cleaner-tool-installation-problems.html)). إن وضعتها في مجلد التنزيلات، يمكن للوكيل استخدامها كمرحلة أولى قبل كنس الباقي يدوياً. اختيارية — الكنس اليدوي شامل بمفرده. (لا توجد نسخة Linux؛ وعلى Linux يكون Adobe غالباً داخل بادئة Wine على أي حال.)
+
+## قواعد الجرّاح
+
+هذه هي حدود الأمان المضمَّنة في الأمر. وهي جوهر سير العمل، لذا يستحق فهمها قبل التشغيل:
+
+<CardGroup cols={2}>
+  <Card title="الجرد قبل القطع" icon="magnifying-glass">
+    المرحلة 1 للقراءة فقط بصرامة. لا شيء — لا ملف ولا خدمة ولا مفتاح ريجستري — يُحذف أو يُنقل أو يُعدَّل حتى توافق على قائمة كاملة بما سيُزال وكم مساحة سيستردّ.
+  </Card>
+  <Card title="Adobe فقط، بلا استثناء" icon="scalpel">
+    لا يُزال عنصر إلا إن كان ينتمي إلى Adobe *بشكل قاطع* — مساره أو مفتاح الريجستري يحتوي «Adobe»، أو معرّف الخدمة/الحزمة هو `com.adobe.` أو اسم خدمة Adobe، أو هو مساعد Adobe معروف. أي شيء دون هذا المعيار يُترك.
+  </Card>
+  <Card title="أعمالك أبداً" icon="folder-open">
+    مستنداتك وملفات مشاريعك — `.psd`، `.ai`، `.indd`، `.prproj`، `.aep`، ملفات PDF المُصدَّرة — تُكتشف وتُدرَج، ولا تُحذف أبداً. محتواك ملكك.
+  </Card>
+  <Card title="لا شيء مشترك" icon="shield-halved">
+    أي شيء قد تستخدمه تطبيقات غير Adobe — وقت تشغيل Adobe AIR، الخطوط المشتركة، مدير الحزم لديك، ملف hosts، مخزن بيانات اعتماد النظام، مفاتيح الريجستري خارج أشجار Adobe، أو بادئة Wine تحوي تطبيقات أخرى — يُعلَّم لك، ولا يُحذف تلقائياً.
+  </Card>
+</CardGroup>
+
+وفوق ذلك: **مسارات مطلقة وأسماء مفاتيح كاملة دقيقة، عنصراً واحداً في كل مرة** — بلا أنماط شاملة مثل `rm -rf ~/Library/*` وبلا حذف خلية ريجستري كاملة — و**عند أي غموض، يتوقف الوكيل ويسألك** بدل أن يخمّن.
+
+## الأمر
+
+أرسل هذا إلى وولف فيش عند الطلب. هو طويل لأن إزالةً دقيقة وشاملة *وآمنة* عبر ثلاثة أنظمة تشغيل تحتاج إلى عقد صريح — كل قاعدة أدناه تستحق مكانها. يكتشف الوكيل نظام تشغيلك ولا يشغّل إلا القسم المطابق. (يُترك الأمر بالإنجليزية ليُرسَل حرفياً، إذ يحتوي على مسارات وأوامر ومعرّفات يجب ألا تتغير.)
+
+```
+You are going to completely and surgically remove Adobe from
+this machine. Treat it like a surgeon excising a tumor: take
+out ALL of it, leave every healthy tissue untouched. FIRST
+detect my operating system (macOS, Windows, or Linux) and use
+the locations and commands that match it. Read every rule
+below before you run a single command.
+
+SCOPE — WHAT COUNTS AS "ADOBE":
+In scope is the Adobe Creative Cloud desktop app, every Adobe
+application (Photoshop, Illustrator, Premiere Pro, Lightroom,
+After Effects, Acrobat, InDesign, Bridge, Media Encoder, XD,
+Audition, Animate, Dreamweaver, and any other), AND every
+Adobe background service, helper, agent, daemon, scheduled
+task, auto-start / login item, preference, registry key,
+cache, log, saved state, plug-in, font folder, and installer
+record that belongs to them.
+
+An item is "Adobe" ONLY if it unambiguously belongs to Adobe:
+  - its path or registry key contains "Adobe"
+    (case-insensitive), OR
+  - its bundle id / service name / launchd label / scheduled
+    task is "com.adobe." or a named Adobe service, OR
+  - it is a known Adobe helper: Creative Cloud, Core Sync,
+    CCXProcess, CCLibrary, AdobeIPCBroker, AdobeGCClient,
+    AGSService, AGMService, Adobe Genuine, Adobe Desktop
+    Service, AdobeUpdateService, Adobe Crash Reporter.
+If it does not clearly meet that bar, it is NOT in scope.
+
+THE SURGEON'S RULES — DO NOT BREAK THESE:
+1. INVENTORY BEFORE YOU CUT. Phase 1 is read-only. Do not
+   delete, move, or modify anything — no files, no services,
+   no registry keys — until I approve the full manifest.
+2. NEVER touch anything that isn't unambiguously Adobe. When
+   in doubt, leave it and ask me.
+3. NEVER delete my own work. Find but DO NOT remove my
+   documents and project files (.psd, .psb, .ai, .indd,
+   .prproj, .aep, .pdf, exports, presets I made, etc.). List
+   where they are so I can decide for myself.
+4. DO NOT touch shared or possibly-shared components. If
+   something could be used by a non-Adobe app — the Adobe AIR
+   runtime/framework, shared system fonts, anything owned by
+   a package manager (Homebrew, apt/dnf, winget, Chocolatey),
+   the hosts file (/etc/hosts or
+   C:\Windows\System32\drivers\etc\hosts), the OS credential
+   store (macOS Keychain, Windows Credential Manager, Linux
+   Secret Service), or any registry key OUTSIDE the Adobe
+   trees — DO NOT delete it. Flag it for me with a reason
+   instead. On Linux, if Adobe lives inside a Wine / Bottles
+   / PlayOnLinux prefix that also holds non-Adobe apps,
+   remove ONLY the Adobe subtree, never the whole prefix.
+5. Use EXACT absolute paths / full key names, ONE item at a
+   time. No broad wildcards (never `rm -rf ~/Library/*`,
+   never delete a whole registry hive) that could sweep up a
+   non-Adobe neighbor.
+6. Stop and ask me whenever anything is ambiguous.
+
+PHASE 1 — INVENTORY (read-only). Detect the OS, then
+exhaustively locate every Adobe artifact in the right places:
+  - macOS: running processes; launchd jobs (`launchctl list
+    | grep -i adobe`); login items; /Applications and
+    /Applications/Utilities; everything Adobe under ~/Library
+    and /Library (Application Support, Caches, Preferences
+    incl. ByHost, Logs, Saved Application State, Cookies,
+    LaunchAgents, LaunchDaemons, PrivilegedHelperTools,
+    Internet Plug-Ins, CrashReporter); the Adobe fonts folder
+    (~/Library/Application Support/Adobe/CoreSync); receipts
+    (`pkgutil --pkgs | grep -i adobe`). Use `mdfind` for
+    strays.
+  - Windows: Adobe processes; services (`Get-Service
+    *Adobe*`, plus AGSService, AGMService, AdobeUpdateService,
+    Adobe Acrobat Update Service); scheduled tasks
+    (`Get-ScheduledTask *Adobe*`); install dirs (C:\Program
+    Files\Adobe, C:\Program Files (x86)\Adobe, C:\Program
+    Files\Common Files\Adobe); user/system data
+    (%AppData%\Adobe, %LocalAppData%\Adobe, %ProgramData%\
+    Adobe, %Public%\Adobe); Start Menu Adobe shortcuts;
+    auto-start Run keys; and registry trees (HKCU\Software\
+    Adobe, HKLM\SOFTWARE\Adobe, HKLM\SOFTWARE\WOW6432Node\
+    Adobe) plus Adobe uninstall entries.
+  - Linux: Adobe processes and any systemd units
+    (`systemctl list-units | grep -i adobe`); native installs
+    (/opt/Adobe, .desktop entries in ~/.local/share/
+    applications and /usr/share/applications); dotfiles
+    (~/.adobe, ~/.macromedia, ~/.config/Adobe, ~/.cache/
+    Adobe); and Adobe folders INSIDE Wine / Bottles /
+    PlayOnLinux / Lutris prefixes (native Adobe CC doesn't
+    exist on Linux — it's almost always under Wine).
+Record the full absolute path / key name and size of each
+item. Then show me ONE manifest, grouped by category, with
+the total disk space to reclaim — and WAIT for my explicit
+go-ahead before deleting anything.
+
+PHASE 2 — STOP THE VITALS. After I approve: quit Creative
+Cloud and all Adobe apps gracefully, then stop every Adobe
+background process and service so nothing relaunches —
+  - macOS: terminate Adobe processes; `launchctl bootout`
+    each Adobe agent/daemon BEFORE deleting its plist.
+  - Windows: `Stop-Service` then `sc delete` each Adobe
+    service; disable Adobe Run-key auto-starts; unregister
+    Adobe scheduled tasks.
+  - Linux: stop/disable any Adobe systemd unit; kill Wine
+    Adobe processes.
+
+PHASE 3 — EXCISE. Prefer Adobe's OWN uninstallers when
+present (per-app uninstallers, the Creative Cloud uninstaller,
+or the Creative Cloud Cleaner Tool on macOS/Windows if it's in
+my Downloads) — they unregister cleanly. Then manually remove
+every remaining in-scope item from the approved manifest,
+using the OS-correct method:
+  - Files/dirs: delete by exact absolute path.
+  - macOS: `pkgutil --forget` every com.adobe.* receipt.
+  - Windows: delete the Adobe registry trees and Adobe
+    uninstall/Run entries by full key name (reg delete /
+    Remove-Item), and remove Adobe Start Menu shortcuts.
+  - Linux: remove the Adobe subtree inside any Wine prefix
+    and the Adobe .desktop entries; for package-managed Adobe
+    bits (e.g. flashplugin), flag for me instead of forcing.
+Each privileged/destructive step (sudo, Administrator, `rm
+-rf`, reg delete) needs my approval — let it prompt me.
+
+PHASE 4 — VERIFY (no dangling). Re-scan every location from
+Phase 1 for my OS. Confirm zero Adobe files or folders remain,
+zero Adobe services / launchd jobs / systemd units, zero Adobe
+processes, zero Adobe scheduled tasks or auto-start entries,
+zero Adobe registry keys (Windows), and zero Adobe receipts
+(macOS). List anything that survived and exactly why (locked,
+in use, permission denied) along with how to finish it off.
+
+PHASE 5 — REPORT (classify everything). End with a summary
+that CLASSIFIES every action you took:
+  - REMOVED — Applications
+  - REMOVED — Background services, agents, daemons, scheduled
+    tasks, auto-starts
+  - REMOVED — Support files, caches, preferences, logs, state
+  - REMOVED — Registry keys (Windows) / receipts (macOS)
+  - Disk space reclaimed (total)
+  - LEFT UNTOUCHED ON PURPOSE — my documents/work files (with
+    paths), shared or ambiguous items (with the reason),
+    anything I told you to skip
+  - COULD NOT REMOVE — with the reason and how to finish it
+Then a final "ANYTHING ELSE TO WORRY ABOUT?" section covering:
+my Adobe subscription is still billing and must be cancelled
+at adobe.com (you can't do that from this machine); any Adobe
+credentials still in my OS credential store I may want to
+remove manually; Adobe Fonts now being unavailable in other
+apps; and anything else I should know before considering this
+done.
+```
+
+ينفّذ الوكيل المراحل بالترتيب، متوقفاً في نهاية المرحلة 1 لأخذ موافقتك، ومرة أخرى قبل كل حذف بصلاحيات مرتفعة. تبقى أنت المتحكم طوال الطريق.
+
+## كيف يعمل
+
+يقود الأمرُ خطَّ معالجة من خمس مراحل. يحمّل Prefrontal قدرة `shell` إلى السياق، ويكتشف النموذج نظام تشغيلك، ثم ينفّذ:
+
+| المرحلة | ما يحدث | قابلة للتراجع؟ |
+|---------|---------|----------------|
+| **1 — الجرد** | استكشاف للقراءة فقط عبر العمليات والخدمات/launchd/systemd ومجلدات التثبيت وبيانات المستخدم/النظام والمهام المجدولة والريجستري (Windows) والإيصالات (macOS). يبني قائمة واحدة بالمسارات والأحجام. | نعم — لم يتغيّر شيء |
+| **2 — إيقاف العلامات الحيوية** | يُغلق التطبيقات، ويقتل عمليات Adobe المتبقية، ويوقف ويزيل خدمات Adobe، ويلغي تسجيل المهام المجدولة والتشغيل التلقائي | إعادة الإقلاع/التثبيت تستعيد العمليات |
+| **3 — الاستئصال** | أدوات الإزالة الرسمية أولاً، ثم إزالة بمسار دقيق لكل عنصر ضمن النطاق، ثم الإيصالات/مفاتيح الريجستري | **لا — مدمِّر** |
+| **4 — التحقق** | يعيد مسح كل مواقع المرحلة 1؛ يثبت عدم بقاء أي أثر لـ Adobe | نعم — للقراءة فقط |
+| **5 — التقرير** | ملخص مصنَّف: ما أُزيل / ما تُرك / ما تعذّر / ما تتولاه بنفسك | نعم |
+
+يسجّل Hippocampus التشغيل كحلقة (episode)، ويسجّل Basalganglia النتيجة — فتُحفظ القائمة والتقرير النهائي للرجوع إليهما.
+
+### أين يختبئ Adobe — حسب نظام التشغيل
+
+هذه المواقع التي يكنسها الوكيل. كل شيء يُطابَق على ملكية `Adobe` / `com.adobe.` قبل الإزالة. يكتشف الوكيل نظام تشغيلك ولا يمسّ إلا ذلك العمود:
+
+| الفئة | macOS | Windows | Linux |
+|-------|-------|---------|-------|
+| مجلدات تثبيت التطبيقات | `/Applications/Adobe*` | `C:\Program Files\Adobe`، `…(x86)\Adobe` | `/opt/Adobe`، Wine `…/Program Files/Adobe` |
+| بيانات لكل مستخدم | `~/Library/Application Support/Adobe` | `%AppData%\Adobe`، `%LocalAppData%\Adobe` | `~/.adobe`، `~/.config/Adobe` |
+| بيانات على مستوى النظام | `/Library/Application Support/Adobe` | `%ProgramData%\Adobe`، `%Public%\Adobe` | (نادر) |
+| ذاكرات مؤقتة | `~/Library/Caches/Adobe`، `com.adobe.*` | `%LocalAppData%\Adobe\…\cache` | `~/.cache/Adobe`، `~/.macromedia` |
+| تفضيلات / إعدادات | `~/Library/Preferences/com.adobe.*` | `HKCU\Software\Adobe`، `HKLM\SOFTWARE\Adobe` | ملفات dot في `~/.adobe` |
+| خدمات خلفية | launchd `com.adobe.*` | AGSService، AGMService، AdobeUpdateService | وحدات systemd (نادر) |
+| تشغيل تلقائي / مهام | LaunchAgents `com.adobe.*` | مفاتيح Run + مهام مجدولة `*Adobe*` | تشغيل تلقائي `.desktop` |
+| مساعدون بصلاحيات | `/Library/PrivilegedHelperTools/com.adobe.*` | ملفات الخدمات في Common Files | — |
+| الخطوط | `…/Adobe/CoreSync` | `%AppData%\Adobe\CoreSync` | — |
+| سجلات التثبيت | إيصالات `pkgutil` ‏`com.adobe.*` | مدخلات Uninstall في الريجستري | مدير الحزم (يُعلَّم) |
+
+### ما يُترك عمداً دون مساس
+
+هذا هو النصف الآخر من «الجراحية». يجد الوكيل هذه لكنه **لا** يحذفها:
+
+| العنصر | لماذا يُترك | ما تحصل عليه |
+|--------|-------------|--------------|
+| ملفاتك `.psd` / `.ai` / `.prproj` / `.aep` / المُصدَّرة | عملك أنت، لا Adobe | تُدرَج بمساراتها لتقرر بنفسك |
+| الخطوط المشتركة (`/Library/Fonts`، `C:\Windows\Fonts`، `/usr/share/fonts`) | قد تستخدمها تطبيقات أخرى | تُعلَّم، لا تُمسّ |
+| وقت تشغيل/إطار Adobe AIR | بعض تطبيقات الطرف الثالث تعتمد عليه | يُعلَّم مع السبب |
+| مديرو الحزم (Homebrew، apt/dnf، winget، Chocolatey) | لا علاقة لهم بـ Adobe إطلاقاً | لا يُمسّون |
+| ملف hosts (`/etc/hosts`، `…\drivers\etc\hosts`) | ملف نظام مشترك؛ قد تكون تعديلاته غير ذات صلة | لا يُمسّ، يُعلَّم إن احتوى مدخلات Adobe |
+| مخزن بيانات اعتماد النظام (Keychain / Credential Manager / Secret Service) | حذف بيانات الاعتماد قرارك أنت | يُعلَّم للإزالة اليدوية الاختيارية |
+| بادئة Wine تحوي تطبيقات غير Adobe (Linux) | حاوية مشتركة | تُزال شجرة Adobe الفرعية فقط |
+
+## مثال تشغيل
+
+إليك كيف يبدو التقرير المصنَّف بعد تشغيل فعلي على جهاز Mac كان عليه Photoshop وLightroom وAcrobat وCreative Cloud. (تشغيلات Windows وLinux تتبع الشكل نفسه — انظر الملاحظة بعده.)
+
+<Accordion title="تقرير مثال كامل (macOS)">
+
+تمت الموافقة على الجرد. أُغلقت التطبيقات، وأُلغي تحميل الوكلاء، وشُغّلت أدوات الإزالة الرسمية حيثما وُجدت، وكُنس الباقي بالمسار الدقيق، ونُسيت الإيصالات. تؤكّد إعادة المسح جهازاً نظيفاً. إليك التفصيل.
+
+---
+
+**استئصال Adobe — yana-macbook-pro**
+
+**نظام التشغيل:** macOS Tahoe 26.5 — Apple Silicon<br/>
+**التاريخ:** 2026-06-15<br/>
+**النتيجة:** نظيف. لا يبقى أي أثر لـ Adobe.
+
+---
+
+**أُزيلت — التطبيقات (4)**
+
+```
+/Applications/Adobe Photoshop 2026
+/Applications/Adobe Lightroom
+/Applications/Adobe Acrobat
+/Applications/Adobe Creative Cloud
+```
+
+أُزيل Photoshop وAcrobat عبر أدوات الإزالة الخاصة بهما (إلغاء تسجيل نظيف)؛ وأُزيل Lightroom وتطبيق Creative Cloud يدوياً بعد `launchctl bootout`.
+
+---
+
+**أُزيلت — خدمات الخلفية ووكلاء وdaemons التحميل (9)**
+
+```
+~/Library/LaunchAgents/com.adobe.ccxprocess.plist
+~/Library/LaunchAgents/com.adobe.AdobeCreativeCloud.plist
+~/Library/LaunchAgents/com.adobe.GC.Invoker-1.0.plist
+~/Library/LaunchAgents/com.adobe.coresync.plist
+/Library/LaunchDaemons/com.adobe.acc.installer.v2.plist
+/Library/LaunchDaemons/com.adobe.agsservice.plist
+/Library/LaunchAgents/com.adobe.AdobeCreativeCloud.plist
+/Library/PrivilegedHelperTools/com.adobe.acc.installer.v2
+/Library/PrivilegedHelperTools/com.adobe.AdobeGenuineHelper
+```
+
+أُلغي تحميل كلٍّ بـ `launchctl bootout` قبل الحذف — لم يُعد تشغيل شيء. خدمة Adobe Genuine Service (تلك التي تتصل بالخوادم) اختفت.
+
+---
+
+**أُزيلت — ملفات الدعم والذاكرة المؤقتة والتفضيلات والسجلات والحالة (31 عنصراً)**
+
+```
+~/Library/Application Support/Adobe/        (3.2 GB)
+/Library/Application Support/Adobe/         (1.1 GB)
+~/Library/Caches/Adobe/                     (4.7 GB)
+~/Library/Caches/com.adobe.* (12 مدخلاً)
+~/Library/Preferences/com.adobe.* (14 plist)
+~/Library/Preferences/ByHost/com.adobe.* (3)
+~/Library/Logs/Adobe/, ~/Library/Logs/CreativeCloud/
+~/Library/Saved Application State/com.adobe.* (4)
+~/Library/Application Support/Adobe/CoreSync/  (خطوط Adobe)
+```
+
+---
+
+**أُزيلت — إيصالات التثبيت (7)**
+
+```
+pkgutil --forget com.adobe.acc.installer.v2
+pkgutil --forget com.adobe.acrobat.DC.viewer.app.pkg.MUI
+pkgutil --forget com.adobe.PS.2026
+…و4 إيصالات com.adobe.* أخرى
+```
+
+---
+
+**المساحة المستردّة: 11.4 GB**
+
+---
+
+**تُرك عمداً دون مساس**
+
+*عملك (وُجد، لم يُحذف):*
+```
+~/Documents/Design/*.psd  (47 ملفاً)
+~/Documents/Design/*.ai   (12 ملفاً)
+~/Pictures/Lightroom/Catalog-2/  (كتالوج صورك)
+~/Documents/Adobe/Premiere Pro auto-save/  (ملفات مشاريع)
+```
+هذه ملكك. لم ألمسها. احذفها يدوياً إن أردت التخلص منها.
+
+*مشترك / غامض (عُلِّم، لم يُحذف):*
+- **`/Library/Frameworks/Adobe AIR.framework`** — Adobe AIR وقت تشغيل لا تزال بعض التطبيقات غير التابعة لـ Adobe تعتمد عليه. تركته. أزِله بنفسك فقط إن تأكدت أن لا شيء آخر يستخدمه.
+- **`/Library/Fonts` (9 خطوط تحمل اسم Adobe)** — تعيش في مجلد الخطوط المشترك حيث يمكن لتطبيقات أخرى استخدامها. عُلِّمت، لم تُزَل. القرار لك.
+- **`/etc/hosts`** — يحتوي سطرين `127.0.0.1 ...adobe.com` (على الأرجح حظر تفعيل قديم). إنه ملف نظام مشترك، فتركته. احذف هذين السطرين يدوياً إن شئت.
+
+---
+
+**تعذّرت الإزالة**
+
+لا شيء — أُزيل كل عنصر ضمن النطاق بنجاح.
+
+---
+
+**هل من شيء آخر يستدعي القلق؟**
+
+1. **اشتراكك ما زال يُحاسَب.** إزالة البرنامج لا تُلغي خطتك. ألغِها من [adobe.com](https://account.adobe.com/plans) — لا أستطيع فعل ذلك من هذا الجهاز.
+2. **بيانات اعتماد الـ Keychain.** لا يزال في الـ Keychain 3 مدخلات `Adobe` / `com.adobe.*` (كلمات مرور/رموز مخزَّنة). تركتها — افتح **Keychain Access**، وابحث عن "Adobe"، واحذفها إن أردت صفحة نظيفة تماماً.
+3. **خطوط Adobe اختفت.** أي مستند في تطبيق آخر استخدم خطاً مزامَناً من Typekit/Adobe سيتحول الآن إلى بديل، لأن CoreSync أُزيل.
+4. **إعادة التثبيت لاحقاً** تبدأ من جديد تماماً — بلا حالة متبقية موروثة، وهذا عادةً ميزة.
+
+الخلاصة: الجهاز نظيف. استُرِدّ 11.4 GB، اختفت كل خدمة خلفية، لا ملفات معلَّقة. الأشياء الوحيدة التي ما زالت "Adobe" هي ملفات مشاريعك (بالتصميم) والعناصر المشتركة الثلاثة التي علّمتها لك لتحكم فيها.
+
+</Accordion>
+
+<Note>
+**على Windows**، يكتسب التقرير نفسه فئات لا وجود لها على macOS: **الخدمات** (AGSService، AGMService، AdobeUpdateService — تُوقَف وتُحذف بـ `sc delete`)، و**المهام المجدولة** و**التشغيل التلقائي عبر مفاتيح Run** (يُلغى تسجيلها)، و**مفاتيح الريجستري** (`HKCU\Software\Adobe`، `HKLM\SOFTWARE\Adobe`، إضافة إلى مدخلات Uninstall — تُحذف بالاسم الكامل للمفتاح). وتستبدل قائمة «تُرك دون مساس» الـ Keychain بـ **Windows Credential Manager**.
+
+**على Linux**، لا يوجد عادةً Adobe أصلي — يتمحور التقرير حول **بادئة Wine/Bottles** وملفات dot (`~/.adobe`، `~/.macromedia`). تُزال فقط شجرة Adobe الفرعية داخل بادئة مشتركة؛ والأجزاء المُدارة بمدير الحزم مثل `flashplugin` تُعلَّم، لا تُزال بالقوة.
+</Note>
+
+## القيود
+
+- **بعض العناصر تحتاج رفع صلاحيات.** ملفات على مستوى النظام وخدمات وخلية الريجستري `HKLM` تتطلب `sudo` (macOS/Linux) أو Administrator (Windows) — يطلب Amygdala التأكيد لكلٍّ. تجاوز الرفع وستبقى هذه.
+- **ملفات مقفلة أو قيد الاستخدام.** إن رفضت عملية أو خدمة Adobe التوقف (نادر)، لا يمكن حذف ملفاتها حتى تتوقف. يُبلّغ الوكيل عنها في المرحلة 4 مع الحل (عادةً إعادة إقلاع ثم تكرار المرحلة 3 للبقايا).
+- **Adobe ليس أصلياً على Linux.** لا يصدر Creative Cloud لـ Linux — ما يوجد غالباً داخل بادئة Wine/Bottles/PlayOnLinux. يزيل الوكيل شجرة Adobe الفرعية فقط، لا بادئة كاملة قد تحوي تطبيقات Windows أخرى.
+- **الريجستري جراحي لا جملي.** على Windows يحذف الوكيل مفاتيح Adobe بالاسم الدقيق ولا يزيل خلية أصلية، فتبقى البرامج غير المرتبطة سليمة.
+- **الاشتراك منفصل.** هذا يزيل البرنامج، لا الفوترة. ألغِ خطتك من adobe.com بنفسك.
+- **العناصر المشتركة قرارك.** Adobe AIR، والخطوط المشتركة، وملف hosts، ومدخلات مخزن بيانات الاعتماد تُعلَّم ولا تُزال تلقائياً — بالتصميم. القرار النهائي لك في أي شيء قد يخص شيئاً آخر.
+- **تغطية الاستكشاف.** يستخدم macOS الـ Spotlight (`mdfind`) للبقايا؛ ويُعدّد Windows الخدمات والمهام والريجستري؛ ويمشي Linux عبر `find` وبادئات Wine المعروفة. إن كانت الفهرسة معطّلة، يرجع الوكيل إلى `find` مباشر عبر المواقع المعروفة — أبطأ لكن شامل.
+
+## التكلفة ودليل النماذج
+
+تكلفة متوسطة — العمل أوامر شِل كثيرة (استكشاف، إزالة، تحقق) إضافة إلى حُكم دقيق لكل عنصر، لكن بلا بحث على الويب أو وسائط كبيرة.
+
+### تكلفة تقريبية لكل تشغيل
+
+| النموذج | التكلفة التقديرية لكل تشغيل | ملاحظات |
+|---------|----------------------------|---------|
+| DeepSeek V4 Pro (وضع Max) | ~0.30–0.70 USD | **موصى به.** استدلال وكيلي رائد بجزء يسير من السعر؛ وضع Max لقرارات الحُكم |
+| Claude Sonnet 4.x | ~0.40–0.90 USD | بديل قوي على Anthropic |
+| Claude Opus | ~1.50–3.50 USD | أقصى حذر عند حدّ «هل هذا Adobe؟» |
+| إعدادات الجهد المنخفض (Flash، وضع None، Haiku) | — | **غير موصى بها** — المسح المدمِّر يحتاج تأمّلاً |
+
+### ميزانية الرموز (Tokens)
+
+~150,000–300,000 رمز لكل تشغيل (تشغيلات Windows أعلى نسبياً — تعداد الريجستري والخدمات يضيف مخرجات). الجزء الأكبر من جرد المرحلة 1 وتحقق المرحلة 4 عبر مواقع كثيرة. حوالي 20–40 استدعاء للنموذج (أوامر استكشاف، إزالة لكل عنصر مع الموافقات، إعادة مسح، تقرير).
+
+إنها مهمة لمرة واحدة، فالتكلفة لمرة واحدة. مقارنةً بـ 11 GB مساحة مستردّة وخدمة Genuine Service تتوقف عن الاتصال بالخوادم، فهي تسدّد ثمنها بنفسها.
+
+## لا تجدوِل هذا
+
+معظم الحالات تنتهي بكتلة heartbeat. هذه لا تنتهي بها — ولا ينبغي. (للقاعدة العامة حول أي المهام آمنة للأتمتة وأيها يجب أن يبقى عند الطلب، راجع [ما الذي تجدوِله](/ar/configuration/what-to-schedule).)
+
+<Warning>
+**لا تضع إزالة مدمِّرة على الـ heartbeat أبداً.** الاستئصال إجراء متعمَّد يُجرى مرة واحدة بموافقة بشرية. أتمتته تعني عملية غير مراقَبة تحذف تطبيقات وخدمات ومفاتيح ريجستري حسب جدول بلا أحد يراقب بوابة الموافقة — وهو بالضبط الشيء الخطأ لجعله مستقلاً. شغّله عند الطلب، وراقب الجرد، ووافق بوعي. وحين ينتهي، ينتهي.
+</Warning>
+
+إن أعدت تثبيت Adobe لاحقاً وأردت استئصاله مجدداً، فأرسل الأمر مرة أخرى فحسب. تصميم «الجرد أولاً» يعني أن إعادة التشغيل آمنة دائماً — سيكتشف نظام تشغيلك، ويجد ما هو موجود الآن، ويعرض عليك القائمة قبل أن يمسّ أي شيء.

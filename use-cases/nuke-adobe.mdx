@@ -1,0 +1,433 @@
+---
+title: "Nuke Adobe"
+description: "Surgically and exhaustively remove Adobe Creative Cloud and every trace of it from your machine — works on macOS, Windows, and Linux. Inventory first, cut with precision, leave everything unrelated untouched, then get a classified report of what was removed and what you still need to handle yourself"
+---
+
+# Nuke Adobe
+
+Adobe doesn't install — it metastasizes. One Creative Cloud download spreads app bundles, background services, auto-start agents, privileged helpers, a Genuine Service that phones home, caches, preferences, logs, fonts, and installer records across your whole system — scattered folders on macOS and Linux, plus services, scheduled tasks, and registry keys on Windows. Drag the app to the Trash (or click Uninstall) and most of it stays behind, still launching at boot.
+
+This use case has Wolffish remove all of it — **like a surgeon excising a tumor: take out every last cell, leave every healthy tissue untouched.** It detects your OS, inventories the entire Adobe footprint first, shows you the manifest, and only cuts after you approve. It refuses to touch anything that isn't unambiguously Adobe — not your `.psd` files, not shared runtimes, not fonts other apps might use, not your package manager, not your hosts file, not registry keys outside Adobe's own trees. When it's done, you get a clean machine with no dangling files, folders, services, or registry keys, and a classified report of exactly what was removed, what was deliberately left alone, and what you still need to handle yourself.
+
+No third-party uninstaller apps. No "cleaner" utilities of dubious provenance. Just shell commands — the agent detects whether you're on **macOS, Windows, or Linux** and runs the right discovery, removal, and verification for each — locally, with every destructive step gated behind your approval.
+
+<Warning>
+This is a **destructive, one-time operation**. It deletes applications, system files, services, and registry keys. Read [The Surgeon's Rules](#the-surgeons-rules) below before you run it, and let Wolffish show you the full inventory before you approve any deletion. This is **not** a workflow to put on your heartbeat — see [Don't Schedule This](#dont-schedule-this).
+</Warning>
+
+## Capabilities Required
+
+- `shell` — the entire workflow, OS-aware. Discovery (`find` / `mdfind` / `launchctl` / `pkgutil` on macOS; `Get-Service` / `Get-ScheduledTask` / `reg query` on Windows; `find` / `systemctl` / Wine-prefix scans on Linux), precise removal, and verification. The agent detects your OS and runs the matching commands.
+
+Destructive commands — `rm -rf`, `sudo`, and their Windows/registry equivalents (`Remove-Item`, `reg delete`, `sc delete`) — route through the Amygdala for your explicit approval. That's exactly the safety gate you want here.
+
+### Optional
+
+- `filesystem` — for reading and sizing files before removal, producing a cleaner audit trail than shell alone.
+- `computer-use` — only if you want the agent to drive Adobe's GUI uninstaller or the official **Creative Cloud Cleaner Tool** (macOS/Windows) by clicking through it. Pure-shell removal doesn't need it.
+
+Everything ships with Wolffish. No extra code or plugins.
+
+## Setup
+
+This use case is almost entirely shell commands and careful judgment. Read the general [Setting Up for Success](/use-cases/setting-up-for-success) guide first — what's below is specific to this workflow.
+
+### Recommended Model
+
+**What matters here is reasoning effort, not price.** The whole job hinges on judgment: deciding whether a given file, service, or registry key unambiguously belongs to Adobe or might be shared with something else. You want a model that *deliberates* before it deletes.
+
+- **DeepSeek V4 Pro on Max reasoning mode** — the recommendation. It delivers frontier-class agentic reasoning and tool-use reliability, and **Max** mode gives it the full reasoning budget to make the "is this really Adobe?" calls carefully instead of guessing — at a fraction of the cost of frontier alternatives. Set the reasoning effort to **Max** in Settings > Models. See [DeepSeek configuration](/configuration/deepseek).
+- **Claude Sonnet 4.x / Opus** — strong alternatives if you're already on Anthropic; Opus is the most careful at the shared-versus-Adobe boundary.
+- **Avoid low-effort configs** — DeepSeek **Flash**, any model on **None** reasoning mode, or Haiku. They're great for the cheaper use cases, but a destructive, one-shot sweep is exactly where a model that doesn't deliberate costs you.
+
+### Required
+
+- **Wolffish installed and running** — the desktop app with a configured brain workspace.
+- **A capable cloud API key** — DeepSeek (V4 Pro) recommended, or Anthropic (Claude); configured in Settings > Models.
+- **Elevated rights** — Adobe scatters files and services into system-level locations: `/Library` on macOS, `Program Files` plus the `HKLM` registry hive on Windows, `/opt` and system units on Linux. These need `sudo` (macOS/Linux) or **Administrator** (Windows). Wolffish prompts you (via the Amygdala) before every privileged command. Without elevation, user-level removal still runs but system services and protected locations survive.
+
+### Optional
+
+- **Adobe Creative Cloud Cleaner Tool** — Adobe's own official deep-clean utility for **macOS and Windows** ([download here](https://helpx.adobe.com/creative-cloud/kb/cc-cleaner-tool-installation-problems.html)). If you place it in your Downloads folder, the agent can use it as the first pass before sweeping the remainder by hand. Optional — the manual sweep is exhaustive on its own. (There's no Linux build; on Linux, Adobe is almost always inside a Wine prefix anyway.)
+
+## The Surgeon's Rules
+
+These are the safety boundaries baked into the prompt. They're the whole point of the workflow, so they're worth understanding before you run it:
+
+<CardGroup cols={2}>
+  <Card title="Inventory before cutting" icon="magnifying-glass">
+    Phase 1 is strictly read-only. Nothing — no file, service, or registry key — is deleted, moved, or modified until you approve a complete manifest of what will be removed and how much space it reclaims.
+  </Card>
+  <Card title="Adobe-only, no exceptions" icon="scalpel">
+    An item is removed only if it *unambiguously* belongs to Adobe — its path or registry key contains "Adobe", its service/bundle id is `com.adobe.` or an Adobe service name, or it's a known Adobe helper. Anything below that bar is left alone.
+  </Card>
+  <Card title="Never your work" icon="folder-open">
+    Your documents and project files — `.psd`, `.ai`, `.indd`, `.prproj`, `.aep`, exported PDFs — are found and listed, never deleted. Your content is yours.
+  </Card>
+  <Card title="Nothing shared" icon="shield-halved">
+    Anything possibly used by a non-Adobe app — the Adobe AIR runtime, shared system fonts, your package manager, the hosts file, the OS credential store, registry keys outside Adobe's trees, a Wine prefix holding other apps — is flagged for you, not auto-deleted.
+  </Card>
+</CardGroup>
+
+On top of those: **exact absolute paths and full key names, one item at a time** — no broad wildcards like `rm -rf ~/Library/*` and no deleting a whole registry hive — and **when anything is ambiguous, the agent stops and asks you** instead of guessing.
+
+## The Prompt
+
+Send this to Wolffish on-demand. It's long because a precise, exhaustive, *safe* removal across three operating systems needs an explicit contract — every rule below earns its place. The agent detects your OS and only runs the matching section.
+
+```
+You are going to completely and surgically remove Adobe from
+this machine. Treat it like a surgeon excising a tumor: take
+out ALL of it, leave every healthy tissue untouched. FIRST
+detect my operating system (macOS, Windows, or Linux) and use
+the locations and commands that match it. Read every rule
+below before you run a single command.
+
+SCOPE — WHAT COUNTS AS "ADOBE":
+In scope is the Adobe Creative Cloud desktop app, every Adobe
+application (Photoshop, Illustrator, Premiere Pro, Lightroom,
+After Effects, Acrobat, InDesign, Bridge, Media Encoder, XD,
+Audition, Animate, Dreamweaver, and any other), AND every
+Adobe background service, helper, agent, daemon, scheduled
+task, auto-start / login item, preference, registry key,
+cache, log, saved state, plug-in, font folder, and installer
+record that belongs to them.
+
+An item is "Adobe" ONLY if it unambiguously belongs to Adobe:
+  - its path or registry key contains "Adobe"
+    (case-insensitive), OR
+  - its bundle id / service name / launchd label / scheduled
+    task is "com.adobe." or a named Adobe service, OR
+  - it is a known Adobe helper: Creative Cloud, Core Sync,
+    CCXProcess, CCLibrary, AdobeIPCBroker, AdobeGCClient,
+    AGSService, AGMService, Adobe Genuine, Adobe Desktop
+    Service, AdobeUpdateService, Adobe Crash Reporter.
+If it does not clearly meet that bar, it is NOT in scope.
+
+THE SURGEON'S RULES — DO NOT BREAK THESE:
+1. INVENTORY BEFORE YOU CUT. Phase 1 is read-only. Do not
+   delete, move, or modify anything — no files, no services,
+   no registry keys — until I approve the full manifest.
+2. NEVER touch anything that isn't unambiguously Adobe. When
+   in doubt, leave it and ask me.
+3. NEVER delete my own work. Find but DO NOT remove my
+   documents and project files (.psd, .psb, .ai, .indd,
+   .prproj, .aep, .pdf, exports, presets I made, etc.). List
+   where they are so I can decide for myself.
+4. DO NOT touch shared or possibly-shared components. If
+   something could be used by a non-Adobe app — the Adobe AIR
+   runtime/framework, shared system fonts, anything owned by
+   a package manager (Homebrew, apt/dnf, winget, Chocolatey),
+   the hosts file (/etc/hosts or
+   C:\Windows\System32\drivers\etc\hosts), the OS credential
+   store (macOS Keychain, Windows Credential Manager, Linux
+   Secret Service), or any registry key OUTSIDE the Adobe
+   trees — DO NOT delete it. Flag it for me with a reason
+   instead. On Linux, if Adobe lives inside a Wine / Bottles
+   / PlayOnLinux prefix that also holds non-Adobe apps,
+   remove ONLY the Adobe subtree, never the whole prefix.
+5. Use EXACT absolute paths / full key names, ONE item at a
+   time. No broad wildcards (never `rm -rf ~/Library/*`,
+   never delete a whole registry hive) that could sweep up a
+   non-Adobe neighbor.
+6. Stop and ask me whenever anything is ambiguous.
+
+PHASE 1 — INVENTORY (read-only). Detect the OS, then
+exhaustively locate every Adobe artifact in the right places:
+  - macOS: running processes; launchd jobs (`launchctl list
+    | grep -i adobe`); login items; /Applications and
+    /Applications/Utilities; everything Adobe under ~/Library
+    and /Library (Application Support, Caches, Preferences
+    incl. ByHost, Logs, Saved Application State, Cookies,
+    LaunchAgents, LaunchDaemons, PrivilegedHelperTools,
+    Internet Plug-Ins, CrashReporter); the Adobe fonts folder
+    (~/Library/Application Support/Adobe/CoreSync); receipts
+    (`pkgutil --pkgs | grep -i adobe`). Use `mdfind` for
+    strays.
+  - Windows: Adobe processes; services (`Get-Service
+    *Adobe*`, plus AGSService, AGMService, AdobeUpdateService,
+    Adobe Acrobat Update Service); scheduled tasks
+    (`Get-ScheduledTask *Adobe*`); install dirs (C:\Program
+    Files\Adobe, C:\Program Files (x86)\Adobe, C:\Program
+    Files\Common Files\Adobe); user/system data
+    (%AppData%\Adobe, %LocalAppData%\Adobe, %ProgramData%\
+    Adobe, %Public%\Adobe); Start Menu Adobe shortcuts;
+    auto-start Run keys; and registry trees (HKCU\Software\
+    Adobe, HKLM\SOFTWARE\Adobe, HKLM\SOFTWARE\WOW6432Node\
+    Adobe) plus Adobe uninstall entries.
+  - Linux: Adobe processes and any systemd units
+    (`systemctl list-units | grep -i adobe`); native installs
+    (/opt/Adobe, .desktop entries in ~/.local/share/
+    applications and /usr/share/applications); dotfiles
+    (~/.adobe, ~/.macromedia, ~/.config/Adobe, ~/.cache/
+    Adobe); and Adobe folders INSIDE Wine / Bottles /
+    PlayOnLinux / Lutris prefixes (native Adobe CC doesn't
+    exist on Linux — it's almost always under Wine).
+Record the full absolute path / key name and size of each
+item. Then show me ONE manifest, grouped by category, with
+the total disk space to reclaim — and WAIT for my explicit
+go-ahead before deleting anything.
+
+PHASE 2 — STOP THE VITALS. After I approve: quit Creative
+Cloud and all Adobe apps gracefully, then stop every Adobe
+background process and service so nothing relaunches —
+  - macOS: terminate Adobe processes; `launchctl bootout`
+    each Adobe agent/daemon BEFORE deleting its plist.
+  - Windows: `Stop-Service` then `sc delete` each Adobe
+    service; disable Adobe Run-key auto-starts; unregister
+    Adobe scheduled tasks.
+  - Linux: stop/disable any Adobe systemd unit; kill Wine
+    Adobe processes.
+
+PHASE 3 — EXCISE. Prefer Adobe's OWN uninstallers when
+present (per-app uninstallers, the Creative Cloud uninstaller,
+or the Creative Cloud Cleaner Tool on macOS/Windows if it's in
+my Downloads) — they unregister cleanly. Then manually remove
+every remaining in-scope item from the approved manifest,
+using the OS-correct method:
+  - Files/dirs: delete by exact absolute path.
+  - macOS: `pkgutil --forget` every com.adobe.* receipt.
+  - Windows: delete the Adobe registry trees and Adobe
+    uninstall/Run entries by full key name (reg delete /
+    Remove-Item), and remove Adobe Start Menu shortcuts.
+  - Linux: remove the Adobe subtree inside any Wine prefix
+    and the Adobe .desktop entries; for package-managed Adobe
+    bits (e.g. flashplugin), flag for me instead of forcing.
+Each privileged/destructive step (sudo, Administrator, `rm
+-rf`, reg delete) needs my approval — let it prompt me.
+
+PHASE 4 — VERIFY (no dangling). Re-scan every location from
+Phase 1 for my OS. Confirm zero Adobe files or folders remain,
+zero Adobe services / launchd jobs / systemd units, zero Adobe
+processes, zero Adobe scheduled tasks or auto-start entries,
+zero Adobe registry keys (Windows), and zero Adobe receipts
+(macOS). List anything that survived and exactly why (locked,
+in use, permission denied) along with how to finish it off.
+
+PHASE 5 — REPORT (classify everything). End with a summary
+that CLASSIFIES every action you took:
+  - REMOVED — Applications
+  - REMOVED — Background services, agents, daemons, scheduled
+    tasks, auto-starts
+  - REMOVED — Support files, caches, preferences, logs, state
+  - REMOVED — Registry keys (Windows) / receipts (macOS)
+  - Disk space reclaimed (total)
+  - LEFT UNTOUCHED ON PURPOSE — my documents/work files (with
+    paths), shared or ambiguous items (with the reason),
+    anything I told you to skip
+  - COULD NOT REMOVE — with the reason and how to finish it
+Then a final "ANYTHING ELSE TO WORRY ABOUT?" section covering:
+my Adobe subscription is still billing and must be cancelled
+at adobe.com (you can't do that from this machine); any Adobe
+credentials still in my OS credential store I may want to
+remove manually; Adobe Fonts now being unavailable in other
+apps; and anything else I should know before considering this
+done.
+```
+
+The agent works the phases in order, pausing at the end of Phase 1 for your approval and again before each privileged deletion. You stay in control the whole way.
+
+## How It Works
+
+The prompt drives a five-phase pipeline. Prefrontal loads the `shell` capability into context, the model detects your OS, and executes:
+
+| Phase | What happens | Reversible? |
+|-------|--------------|-------------|
+| **1 — Inventory** | Read-only discovery across processes, services/launchd/systemd, install dirs, user/system data, scheduled tasks, registry (Windows), receipts (macOS). Builds one manifest with paths + sizes. | Yes — nothing changed |
+| **2 — Stop vitals** | Quits apps, kills lingering Adobe processes, stops & removes Adobe services, unregisters scheduled tasks/auto-starts | Reboot/reinstall restores processes |
+| **3 — Excise** | Official uninstallers first, then exact-path removal of every in-scope item, then receipts/registry keys | **No — destructive** |
+| **4 — Verify** | Re-scans all Phase 1 locations; proves zero Adobe artifacts remain | Yes — read-only |
+| **5 — Report** | Classified summary: removed / left untouched / couldn't remove / what to handle yourself | Yes |
+
+Hippocampus logs the run as an episode, and Basalganglia records the outcome — so the manifest and the final report are kept for reference.
+
+### Where Adobe Hides — by OS
+
+These are the locations the agent sweeps. Everything is matched on `Adobe` / `com.adobe.` ownership before removal. The agent detects your OS and only touches that column:
+
+| Category | macOS | Windows | Linux |
+|----------|-------|---------|-------|
+| App install dirs | `/Applications/Adobe*` | `C:\Program Files\Adobe`, `…(x86)\Adobe` | `/opt/Adobe`, Wine `…/Program Files/Adobe` |
+| Per-user data | `~/Library/Application Support/Adobe` | `%AppData%\Adobe`, `%LocalAppData%\Adobe` | `~/.adobe`, `~/.config/Adobe` |
+| System-wide data | `/Library/Application Support/Adobe` | `%ProgramData%\Adobe`, `%Public%\Adobe` | (rare) |
+| Caches | `~/Library/Caches/Adobe`, `com.adobe.*` | `%LocalAppData%\Adobe\…\cache` | `~/.cache/Adobe`, `~/.macromedia` |
+| Preferences / settings | `~/Library/Preferences/com.adobe.*` | `HKCU\Software\Adobe`, `HKLM\SOFTWARE\Adobe` | dotfiles in `~/.adobe` |
+| Background services | launchd `com.adobe.*` | AGSService, AGMService, AdobeUpdateService | systemd units (rare) |
+| Auto-start / tasks | LaunchAgents `com.adobe.*` | Run keys + scheduled tasks `*Adobe*` | `.desktop` autostart |
+| Privileged helpers | `/Library/PrivilegedHelperTools/com.adobe.*` | service binaries in Common Files | — |
+| Fonts | `…/Adobe/CoreSync` | `%AppData%\Adobe\CoreSync` | — |
+| Install records | `pkgutil` receipts `com.adobe.*` | Uninstall registry entries | package manager (flag) |
+
+### What's Deliberately Left Alone
+
+This is the other half of "surgical." The agent finds these but does **not** delete them:
+
+| Item | Why it's left | What you get |
+|------|---------------|--------------|
+| Your `.psd` / `.ai` / `.prproj` / `.aep` / exported files | It's your work, not Adobe's | Listed with paths so you decide |
+| Shared system fonts (`/Library/Fonts`, `C:\Windows\Fonts`, `/usr/share/fonts`) | Other apps may use them | Flagged, not touched |
+| Adobe AIR runtime / framework | Some third-party apps depend on it | Flagged with a reason |
+| Package managers (Homebrew, apt/dnf, winget, Chocolatey) | Entirely unrelated to Adobe | Untouched |
+| Hosts file (`/etc/hosts`, `…\drivers\etc\hosts`) | Shared system file; edits may be unrelated | Untouched, flagged if it has Adobe entries |
+| OS credential store (Keychain / Credential Manager / Secret Service) | Deleting credentials is your call | Flagged for optional manual removal |
+| A Wine prefix holding non-Adobe apps (Linux) | Shared container | Only the Adobe subtree is removed |
+
+## Example Run
+
+Here's what the classified report looks like after a real run on a Mac that had Photoshop, Lightroom, Acrobat, and Creative Cloud installed. (Windows and Linux runs follow the same shape — see the note after.)
+
+<Accordion title="Full Example Report (macOS)">
+
+Inventory approved. Apps quit, agents unloaded, official uninstallers run where present, remainder swept by exact path, receipts forgotten. Re-scan confirms a clean machine. Here's the breakdown.
+
+---
+
+**Nuke Adobe — yana-macbook-pro**
+
+**OS:** macOS Tahoe 26.5 — Apple Silicon<br/>
+**Date:** 2026-06-15<br/>
+**Result:** Clean. Zero Adobe artifacts remain.
+
+---
+
+**REMOVED — Applications (4)**
+
+```
+/Applications/Adobe Photoshop 2026
+/Applications/Adobe Lightroom
+/Applications/Adobe Acrobat
+/Applications/Adobe Creative Cloud
+```
+
+Photoshop and Acrobat were removed via their own uninstallers (clean unregister); Lightroom and the Creative Cloud app were removed by hand after `launchctl bootout`.
+
+---
+
+**REMOVED — Background services, launch agents & daemons (9)**
+
+```
+~/Library/LaunchAgents/com.adobe.ccxprocess.plist
+~/Library/LaunchAgents/com.adobe.AdobeCreativeCloud.plist
+~/Library/LaunchAgents/com.adobe.GC.Invoker-1.0.plist
+~/Library/LaunchAgents/com.adobe.coresync.plist
+/Library/LaunchDaemons/com.adobe.acc.installer.v2.plist
+/Library/LaunchDaemons/com.adobe.agsservice.plist
+/Library/LaunchAgents/com.adobe.AdobeCreativeCloud.plist
+/Library/PrivilegedHelperTools/com.adobe.acc.installer.v2
+/Library/PrivilegedHelperTools/com.adobe.AdobeGenuineHelper
+```
+
+Each was unloaded with `launchctl bootout` before deletion — nothing relaunched. Adobe Genuine Service (the one that phones home) is gone.
+
+---
+
+**REMOVED — Support files, caches, preferences, logs, state (31 items)**
+
+```
+~/Library/Application Support/Adobe/        (3.2 GB)
+/Library/Application Support/Adobe/         (1.1 GB)
+~/Library/Caches/Adobe/                     (4.7 GB)
+~/Library/Caches/com.adobe.* (12 entries)
+~/Library/Preferences/com.adobe.* (14 plists)
+~/Library/Preferences/ByHost/com.adobe.* (3)
+~/Library/Logs/Adobe/, ~/Library/Logs/CreativeCloud/
+~/Library/Saved Application State/com.adobe.* (4)
+~/Library/Application Support/Adobe/CoreSync/  (Adobe Fonts)
+```
+
+---
+
+**REMOVED — Installer receipts (7)**
+
+```
+pkgutil --forget com.adobe.acc.installer.v2
+pkgutil --forget com.adobe.acrobat.DC.viewer.app.pkg.MUI
+pkgutil --forget com.adobe.PS.2026
+…and 4 more com.adobe.* receipts
+```
+
+---
+
+**Disk space reclaimed: 11.4 GB**
+
+---
+
+**LEFT UNTOUCHED ON PURPOSE**
+
+*Your work (found, not deleted):*
+```
+~/Documents/Design/*.psd  (47 files)
+~/Documents/Design/*.ai   (12 files)
+~/Pictures/Lightroom/Catalog-2/  (your photo catalog)
+~/Documents/Adobe/Premiere Pro auto-save/  (project files)
+```
+These are yours. I didn't touch them. Delete manually if you want them gone.
+
+*Shared / ambiguous (flagged, not deleted):*
+- **`/Library/Frameworks/Adobe AIR.framework`** — Adobe AIR is a runtime some non-Adobe apps still bundle against. I left it. Remove it yourself only if you're sure nothing else uses it.
+- **`/Library/Fonts` (9 fonts with Adobe in the name)** — these live in the shared font folder where other apps can use them. Flagged, not removed. Your call.
+- **`/etc/hosts`** — has two `127.0.0.1 ...adobe.com` lines (likely an old activation block). It's a shared system file, so I left it. Remove those lines by hand if you like.
+
+---
+
+**COULD NOT REMOVE**
+
+Nothing — every in-scope item was removed successfully.
+
+---
+
+**ANYTHING ELSE TO WORRY ABOUT?**
+
+1. **Your subscription is still billing.** Removing the software does not cancel your plan. Cancel at [adobe.com](https://account.adobe.com/plans) — I can't do that from this machine.
+2. **Keychain credentials.** Your login Keychain still has 3 `Adobe` / `com.adobe.*` entries (stored passwords/tokens). I left them — open **Keychain Access**, search "Adobe", and delete them if you want a truly clean slate.
+3. **Adobe Fonts are gone.** Any document in another app that used a Typekit/Adobe-synced font will now fall back to a substitute, since CoreSync is removed.
+4. **Reinstalling later** starts completely fresh — no leftover state to inherit, which is usually a feature.
+
+Bottom line: the machine is clean. 11.4 GB back, every background service gone, no dangling files. The only things still "Adobe" are your own project files (by design) and the three shared items I flagged for you to judge.
+
+</Accordion>
+
+<Note>
+**On Windows**, the same report gains two categories that don't exist on macOS: **services** (AGSService, AGMService, AdobeUpdateService — stopped and `sc delete`d), **scheduled tasks** and **Run-key auto-starts** (unregistered), and **registry keys** (`HKCU\Software\Adobe`, `HKLM\SOFTWARE\Adobe`, plus uninstall entries — deleted by exact key name). The "left untouched" list swaps Keychain for **Windows Credential Manager**.
+
+**On Linux**, there's usually no native Adobe — the report centers on a **Wine/Bottles prefix** and dotfiles (`~/.adobe`, `~/.macromedia`). Only the Adobe subtree inside a shared prefix is removed; package-managed bits like `flashplugin` are flagged, not force-removed.
+</Note>
+
+## Limits
+
+- **Some items need elevation.** System-level files, services, and the `HKLM` registry hive require `sudo` (macOS/Linux) or Administrator (Windows) — the Amygdala prompts for each. Skip elevation and those survive.
+- **Locked or in-use files.** If an Adobe process or service won't stop (rare), its files can't be deleted until it does. The agent reports these in Phase 4 with the fix (usually a reboot, then re-run Phase 3 for the stragglers).
+- **Adobe isn't native on Linux.** Creative Cloud doesn't ship for Linux — what's there is almost always inside a Wine/Bottles/PlayOnLinux prefix. The agent removes only the Adobe subtree, never a whole prefix that might hold other Windows apps.
+- **Registry is surgical, not wholesale.** On Windows the agent deletes Adobe keys by exact name and never removes a parent hive, so unrelated software stays intact.
+- **Subscription is separate.** This removes software, not billing. Cancel your plan at adobe.com yourself.
+- **Shared items are your decision.** Adobe AIR, shared fonts, the hosts file, and credential-store entries are flagged, never auto-removed — by design. You make the final call on anything that could belong to something else.
+- **Discovery coverage.** macOS uses Spotlight (`mdfind`) for strays; Windows enumerates services, tasks, and the registry; Linux walks `find` plus known Wine prefixes. If indexing is disabled, the agent falls back to a direct `find` across the known locations — slower but thorough.
+
+## Cost & Model Guide
+
+Moderate cost — the work is many shell calls (discovery, removal, verification) plus careful per-item judgment, but no web research or large media.
+
+### Approximate Cost Per Run
+
+| Model | Est. Cost Per Run | Notes |
+|-------|-------------------|-------|
+| DeepSeek V4 Pro (Max mode) | ~0.30–0.70 USD | **Recommended.** Frontier agentic reasoning at a fraction of the price; Max mode for the judgment calls |
+| Claude Sonnet 4.x | ~0.40–0.90 USD | Strong alternative if you're on Anthropic |
+| Claude Opus | ~1.50–3.50 USD | Maximum caution on the "is this Adobe?" boundary |
+| Low-effort configs (Flash, None mode, Haiku) | — | **Not recommended** — a destructive sweep needs deliberation |
+
+### Token Budget
+
+~150,000–300,000 tokens per run (Windows runs trend higher — registry and service enumeration add output). The bulk is Phase 1 inventory and Phase 4 verification across many locations. Roughly 20–40 LLM calls (discovery commands, per-item removal with approvals, re-scan, report).
+
+It's a one-time job, so the cost is a one-time cost. Compared to 11 GB of reclaimed disk and a Genuine Service that stops phoning home, it pays for itself.
+
+## Don't Schedule This
+
+Most use cases end with a heartbeat block. This one doesn't — and shouldn't. (For the general rule on which workflows are safe to automate and which must stay on-demand, see [What to Schedule](/configuration/what-to-schedule).)
+
+<Warning>
+**Never put a destructive removal on your heartbeat.** A nuke is a deliberate, one-time, human-approved action. Automating it would mean an unattended process deleting applications, services, and registry keys on a schedule with no one watching the approval gate — exactly the wrong thing to make autonomous. Run it on-demand, watch the inventory, approve consciously. When it's done, it's done.
+</Warning>
+
+If you reinstall Adobe later and want to nuke it again, just send the prompt again. The inventory-first design means it's always safe to re-run — it'll detect your OS, find whatever is there now, and show you the manifest before touching anything.
