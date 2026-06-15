@@ -131,7 +131,9 @@
                   "capabilities/overview",
                   "capabilities/skill-md-reference",
                   "capabilities/writing-plugins",
-                  "capabilities/built-in-capabilities"
+                  "capabilities/creating-capabilities",
+                  "capabilities/built-in-capabilities",
+                  "capabilities/community-capabilities"
                 ]
               },
               {
@@ -212,10 +214,8 @@
                 "expanded": true,
                 "pages": [
                   "extending/agents-md",
-                  "extending/creating-capabilities",
                   "extending/advanced-plugins",
                   "extending/adding-channels",
-                  "extending/community-capabilities",
                   "extending/safety-patterns"
                 ]
               },
@@ -302,7 +302,9 @@
                   "ar/capabilities/overview",
                   "ar/capabilities/skill-md-reference",
                   "ar/capabilities/writing-plugins",
-                  "ar/capabilities/built-in-capabilities"
+                  "ar/capabilities/creating-capabilities",
+                  "ar/capabilities/built-in-capabilities",
+                  "ar/capabilities/community-capabilities"
                 ]
               },
               {
@@ -383,10 +385,8 @@
                 "expanded": true,
                 "pages": [
                   "ar/extending/agents-md",
-                  "ar/extending/creating-capabilities",
                   "ar/extending/advanced-plugins",
                   "ar/extending/adding-channels",
-                  "ar/extending/community-capabilities",
                   "ar/extending/safety-patterns"
                 ]
               },
