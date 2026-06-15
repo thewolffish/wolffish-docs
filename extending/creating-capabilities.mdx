@@ -7,6 +7,30 @@ description: "Step-by-step guide to building a new Wolffish capability"
 
 This guide walks through creating a new capability from scratch. By the end, you'll have a working capability that Wolffish discovers, loads, and makes available to the LLM.
 
+## Installing a Capability
+
+You don't have to touch the filesystem. The quickest way to add a capability is to **drop it onto Settings → Cellebrum** — or click the import field to browse. Three shapes are accepted:
+
+<CardGroup cols={3}>
+  <Card title="A single SKILL.md" icon="file-lines">
+    A markdown procedure with YAML frontmatter (name, description, optional triggers). Imported as a **pure skill** — no tools to install.
+  </Card>
+  <Card title="A capability folder" icon="folder">
+    A folder with a `SKILL.md` plus an optional `plugin/` (`index.mjs`) and `package.json`. The **full capability** — tools and all.
+  </Card>
+  <Card title="A .zip archive" icon="file-zipper">
+    The same folder, zipped (e.g. macOS *Compress*). It's unpacked to a temp dir, validated, then added.
+  </Card>
+</CardGroup>
+
+Every drop is **validated before anything is written to disk**, so a bad import can't half-install or clobber an existing capability. On success the list refreshes and your capability appears immediately — tagged **Unknown** rather than **Official**, since it's yours and not bundled. If validation fails, the panel surfaces exactly what went wrong (missing `name`, invalid YAML, a `plugin/` with no entry file, a duplicate name…) in a code block, so you can fix it and re-drop.
+
+To remove an imported capability, click the **trash icon** next to it and confirm — that cleanly deletes its folder from `brain/cerebellum/`. Official and built-in capabilities have no delete button and can't be removed this way.
+
+<Tip>
+  Prefer the terminal? Create the folder by hand instead — the steps below show exactly that. After editing files manually, click **Resync** in the Cellebrum panel (or restart Wolffish) to pick up the changes. The rules in [Packaging for Import and Sharing](#packaging-for-import-and-sharing) are worth following either way — they're what keep a capability clean and portable.
+</Tip>
+
 ## Step 1: Create the Folder
 
 ```bash
@@ -287,3 +311,20 @@ Before shipping your capability:
 - [ ] Plugin handles errors gracefully (returns `ToolResult` with `success: false`)
 - [ ] The markdown body has clear, specific instructions
 - [ ] Tested with both cloud and local models
+
+## Packaging for Import and Sharing
+
+Whether someone adds your capability as a folder or a `.zip`, the importer runs the same checks. Meeting them keeps your capability clean, portable, and safe to share:
+
+- **Exactly one `SKILL.md`.** The importer finds it at the root or up to three folders deep, so a zip of a folder (`my-skill/SKILL.md`) just works. Zero or more than one `SKILL.md` is rejected.
+- **Valid frontmatter.** It must begin with a `---` block that parses as YAML and has a non-empty `name`. Optional fields are shape-checked when present: `triggers` and `requires` must be lists of strings, and every entry in `tools` needs a `name`. See the [SKILL.md Reference](/capabilities/skill-md-reference).
+- **Something to load.** A SKILL.md with an empty body *and* no tools does nothing, and is rejected — give it a body, tools, or both.
+- **A plugin needs an entry file.** If you ship a `plugin/` folder, it must contain `index.mjs`, `index.js`, or `index.cjs`. Declaring `tools` in a folder/zip with no `plugin/` is rejected — the tools would have nothing to run.
+- **A unique name.** The `name` can't collide with a capability you already have (bundled or imported). The on-disk folder name is derived from `name` by slugifying it (`My Cool Skill` → `my-cool-skill`).
+- **Junk is stripped automatically.** `node_modules/`, `.git/`, `.DS_Store`, and `__MACOSX/` are skipped on import — don't bother removing them first, and leave `node_modules/` out of your zip to keep it small.
+- **Size limits.** `SKILL.md` ≤ 1 MB, total payload ≤ 50 MB, ≤ 5000 files. Zips are extracted with path-traversal protection.
+- **Dependencies install lazily.** Anything in `requires` (system tools) or your `package.json` (npm packages) installs the **first time the capability runs**, not at import — so importing stays fast and offline-safe.
+
+<Tip>
+  The simplest way to hand someone a capability is to zip the folder and send it — they drop the `.zip` onto their Cellebrum panel and it's live. For ongoing distribution, push it to git instead (see [Community Capabilities](/extending/community-capabilities)).
+</Tip>
