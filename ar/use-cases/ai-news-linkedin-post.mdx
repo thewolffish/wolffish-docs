@@ -1,11 +1,11 @@
 ---
 title: "منشور LinkedIn اليومي"
-description: "تنسيق أخبار الذكاء الاصطناعي ونشرها على LinkedIn باستخدام البحث على الويب ووضع المصحِّح في إضافة المتصفح"
+description: "تنسيق أخبار الذكاء الاصطناعي ونشرها على LinkedIn باستخدام البحث على الويب والتحكم بالحاسوب"
 ---
 
 # نظرة عامة
 
-يبحث وولف فيش عن أبرز أخبار الذكاء الاصطناعي اليوم، ويكتب منشوراً على LinkedIn بأسلوبك، وينشره عبر وضع المصحِّح (debugger mode) في إضافة المتصفح — مستخدماً جلسة Chrome الموجودة لديك. بدون واجهة LinkedIn API. بدون OAuth. بدون لقطات شاشة. مجرد بحث على الويب + أدوات الإضافة ترسل أحداث CDP موثوقة إلى متصفحك المسجَّل الدخول فيه.
+يبحث وولف فيش عن أبرز أخبار الذكاء الاصطناعي اليوم، ويكتب منشوراً على LinkedIn بأسلوبك، وينشره باستخدام جلسة Chrome الموجودة لديك. بدون واجهة LinkedIn API. بدون OAuth. مجرد بحث على الويب + تحكم بالحاسوب.
 
 ## شرح بالفيديو
 
@@ -22,19 +22,50 @@ description: "تنسيق أخبار الذكاء الاصطناعي ونشرها
 
 ## الإعداد
 
-سير العمل هذا يعتمد على **إضافة المتصفح فقط** — لا يستخدم التحكم بالحاسوب أبداً (لا لقطات شاشة، لا نقر بالبكسل، لا أذونات تسجيل شاشة macOS). اقرأ دليل [التهيئة للنجاح](/ar/use-cases/setting-up-for-success) العام للصورة الكاملة؛ ما يلي خاص بسير العمل هذا.
-
 ### مطلوب
 
-- **وولف فيش مثبت ويعمل** — تطبيق سطح المكتب مع مساحة عمل دماغ مُهيأة.
-- **إضافة المتصفح مثبتة ومتصلة** — هذا هو المحرك بالكامل. افتح **الإعدادات > الخدمات > إضافة المتصفح**، حمّل الإضافة غير المحزمة في Chrome أو Brave (`chrome://extensions` > وضع المطور > تحميل غير محزم)، وتأكد أن **نقطة الحالة خضراء** قبل البدء. إذا لم تكن متصلة، لا يمكن للوكيل الوصول إلى LinkedIn وسيفشل التشغيل فوراً. راجع [توثيق إضافة المتصفح](/ar/integrations/browser-extension) للتحميل لمرة واحدة.
-- **مسجَّل دخولك في LinkedIn في ذلك المتصفح** — تعيد الإضافة استخدام جلستك الحالية. افتح LinkedIn، تأكد أنك مسجَّل الدخول، واترك المتصفح مفتوحاً. يعمل الوكيل كأنه أنت — بدون بيانات اعتماد مخزنة، بدون تسجيل دخول.
-- **وضع المصحِّح (Debugger mode)** — يُرفق الوكيل Chrome DevTools Protocol (`ext_debugger_attach`) فتُرسل جميع التفاعلات (النقر، الكتابة، التمرير) كأحداث إدخال موثوقة بدلاً من استدعاءات DOM القابلة للاكتشاف. محرر LinkedIn محرر نصوص غني يرفض أحداث DOM البرمجية — يتجاوز وضع المصحِّح هذا بالدخول إلى خط أنابيب إدخال المتصفح بنفس مستوى أحداث لوحة المفاتيح والفأرة الفعلية. لا حاجة لتهيئة — يُرفقه الوكيل بنفسه.
-- **مفتاح Cloud API** — مُهيأ في **الإعدادات > النماذج**. هذا هو LLM الذي يُشغّل الوكيل — البحث والتنسيق والكتابة وتنسيق الأدوات. لا يجري بحثاً على الويب (هذه قدرة منفصلة — انظر الاختياري أدناه).
+- **وولف فيش مثبت ويعمل**
+- **مفتاح Claude Opus API** — مُهيأ في الإعدادات > النماذج. يربط سير العمل هذا البحث والتنسيق والكتابة والتحكم بالحاسوب متعدد الخطوات. يتعامل Opus مع قرارات الحكم بشكل أفضل بكثير من النماذج الأصغر. يعمل Sonnet ولكن توقع جودة تنسيق أدنى. لا تناسب Haiku والنماذج المحلية هذه الحالة.
+- **Chrome** — مثبت مع ملف تعريف مسجَّل دخوله في LinkedIn. يستخدم الوكيل جلسة المتصفح الموجودة مباشرة — بدون LinkedIn API، بدون رموز OAuth.
+- **أذونات macOS** — تسجيل الشاشة وإمكانية الوصول والأتمتة. تُمنح جميعها في **إعدادات النظام > الخصوصية والأمان**.
 
-### موصى به
+<Accordion title="تسجيل الشاشة">
+**ما تفعله:** تتيح لـ وولف فيش التقاط لقطات شاشة لسطح مكتبك.
 
-- **DeepSeek V4 Pro في وضع Max.** الخيار الافتراضي الموصى به من وولف فيش للعمل الوكيلي، ومناسب جداً هنا: استدلال من الطراز الأول وموثوقية استخدام الأدوات لحلقة البحث > التنسيق > النشر، و**نافذة سياق مليون رمز** تحتوي جلسات قراءة المقالات المتعددة بسهولة، وكتابة حادة كافية لجولة أخبار مميزة. **وضع Max** يُفعّل الاستدلال العميق التكيفي الذي يعتمد عليه الموجِّه — اختيار القصص الجديرة بالتغطية، ومطابقة نبرة soul.md، وتسلسل النشر > التحقق. بسعر **$0.44 / $0.87 لكل MTok** هو جزء من تكلفة النماذج المتقدمة — وهذا مهم لأن قراءة المقالات تستهلك الرموز بسرعة. عيّنه لكل محادثة في وولف فيش؛ انظر [DeepSeek](/ar/configuration/deepseek). للتشغيلات الأرخص انتقل إلى DeepSeek V4 Flash؛ لأقصى جودة كتابة، [Claude Sonnet 4.6](/ar/configuration/anthropic) — انظر [جدول تكلفة الإضافة](/ar/integrations/browser-extension#cost-why-model-choice-matters).
+**ما يحدث بدونها:** يفشل `computer_screenshot` بصمت — يُعيد الوكيل المحاولة حتى 10 مرات، مستهلكاً ~300 ثانية لكل محاولة قبل الاستسلام. لا رسالة خطأ، فقط نتيجة فارغة.
+
+**كيفية منحها:**
+1. افتح **إعدادات النظام > الخصوصية والأمان > تسجيل الشاشة**
+2. انقر على زر `+`، ابحث عن **وولف فيش** وأضفه
+3. **أعد تشغيل وولف فيش** — لا يسري هذا الإذن إلا بعد إعادة تشغيل التطبيق
+</Accordion>
+
+<Accordion title="إمكانية الوصول">
+**ما تفعله:** تتيح لـ وولف فيش التحكم بالفأرة ولوحة المفاتيح.
+
+**ما يحدث بدونها:** يفشل `computer_mouse_click` و`computer_keyboard_type` فوراً بـ "غير مسموح به".
+
+**كيفية منحها:**
+1. افتح **إعدادات النظام > الخصوصية والأمان > إمكانية الوصول**
+2. انقر على زر `+`، ابحث عن **وولف فيش** وأضفه
+3. تسري فوراً — لا حاجة لإعادة التشغيل
+</Accordion>
+
+<Accordion title="الأتمتة">
+**ما تفعله:** تتيح لـ وولف فيش إرسال أوامر إلى تطبيقات أخرى (Chrome وFinder وغيرها) عبر AppleScript.
+
+**ما يحدث بدونها:** يفشل أي استدعاء `osascript` بـ "غير مصرح بإرسال أحداث Apple". يُعيد الوكيل المحاولة — في إحدى تشغيلات الاختبار استهلك ~264 ثانية على 6 محاولات قبل النجاح بعد ظهور الموجه.
+
+**كيفية منحها:**
+1. افتح **إعدادات النظام > الخصوصية والأمان > الأتمتة**
+2. ابحث عن **وولف فيش** في القائمة
+3. فعّل كل تطبيق هدف يحتاج الوكيل إليه — كحد أدنى، **Google Chrome**
+4. قد يطلب منك macOS أيضاً عند أول استخدام — انقر على "موافق" عند ظهور الطلب
+</Accordion>
+
+<Warning>
+**امنح الأذونات الثلاثة قبل أول تشغيلة.** إذا كان أي إذن مفقوداً، سيستنزف الوكيل ميزانية الرموز في إعادة محاولة استدعاءات أدوات فاشلة. تسجيل الشاشة هو الأسوأ — يفشل بصمت، فلا يعرف الوكيل حتى أنه لا يستطيع رؤية الشاشة.
+</Warning>
 
 ### اختياري
 
@@ -42,60 +73,34 @@ description: "تنسيق أخبار الذكاء الاصطناعي ونشرها
 
 ### قبل أن تبدأ
 
-اترك Chrome مفتوحاً مع جلسة LinkedIn نشطة ونقطة الإضافة خضراء. يستخدم الوكيل نافذتك الموجودة — لا متصفح جديد، لا جلسة بدون واجهة.
+اترك Chrome مفتوحاً مع جلسة LinkedIn نشطة. يستخدم الوكيل نافذتك الموجودة — لا يُشغّل متصفحاً جديداً.
 
 ## الموجِّه
 
 أرسل هذا إلى وولف فيش. يبحث ويكتب وينشر — محادثة واحدة.
 
 ```
-ROLE: You are Wolffish in full autonomous agent mode. Work ONLY through the Wolffish
-browser extension (ext_* tools) in my real, already-logged-in Chrome tab. Never use
-computer-use (computer_screenshot, computer_mouse_click, computer_keyboard_type),
-Playwright, browser_* tools, a headless browser, or a new window — those aren't logged
-in and LinkedIn returns 403. Don't ask me anything.
+Research today's top AI and tech news. Run multiple searches:
+"AI news today", "LLM breakthroughs this week", "artificial
+intelligence announcements", "AI funding rounds", "AI policy
+regulation". Read the full content of the top articles using
+web_fetch.
 
-MISSION: Research today's top AI news, curate 5-10 stories, write a LinkedIn post in my
-voice (match soul.md tone), and publish it — fully autonomous.
+ONLY use free, open sources that web_fetch can read without
+hitting a paywall. Good sources: The Verge, Ars Technica,
+TechCrunch, arXiv, Papers With Code, Anthropic Blog, OpenAI
+Blog, Google AI Blog, Hacker News, r/MachineLearning,
+VentureBeat, The Register, CNBC Technology.
 
-═══ CRITICAL RULES ═══
-- Extension only: every interaction with LinkedIn goes through ext_* tools. Never take
-  a screenshot to orient — use ext_read_page instead.
-- Debugger mode FIRST: call ext_debugger_attach before ANY interaction with LinkedIn.
-  LinkedIn's rich-text editor rejects programmatic DOM events — CDP input events bypass
-  this. Without the debugger attached, typing and clicking WILL fail silently.
-- The post is LIVE only when ext_get_url returns a URL that has moved AWAY from the
-  composer (no longer contains "shareActive"). A tool's success response is NOT proof.
+DO NOT fetch from paywalled sites — Bloomberg, WSJ, NYT,
+Financial Times, The Information. They return HTTP 403 and
+waste time. If a search result points to a paywalled domain,
+skip it and pick the next one. Also skip SEO spam, listicles,
+AI-generated summaries of summaries, and aggregator sites that
+rewrite other outlets with no original reporting.
 
-ENVIRONMENT — extension only:
-- Never call computer_screenshot / computer_mouse_click / computer_keyboard_type / any
-  computer-use tool.
-- Never call browser_launch / browser_navigate / any browser_* (Playwright) tool.
-- Don't pass a guessed tabId (tabId:1 fails with "No tab with id"). Omit it to use the
-  active tab; if you truly need the id, call ext_tabs_list once and reuse it.
-
-═══ PHASE 1 — RESEARCH ═══
-
-Run multiple web searches:
-"AI news today", "LLM breakthroughs this week", "artificial intelligence announcements",
-"AI funding rounds", "AI policy regulation". Read the full content of the top articles
-using web_fetch.
-
-ONLY use free, open sources that web_fetch can read without hitting a paywall. Good
-sources: The Verge, Ars Technica, TechCrunch, arXiv, Papers With Code, Anthropic Blog,
-OpenAI Blog, Google AI Blog, Hacker News, r/MachineLearning, VentureBeat, The Register,
-CNBC Technology.
-
-DO NOT fetch from paywalled sites — Bloomberg, WSJ, NYT, Financial Times, The
-Information. They return HTTP 403 and waste time. If a search result points to a paywalled
-domain, skip it and pick the next one. Also skip SEO spam, listicles, AI-generated
-summaries of summaries, and aggregator sites that rewrite other outlets with no original
-reporting.
-
-═══ PHASE 2 — WRITE ═══
-
-Write a LinkedIn post in my voice (match soul.md tone). Under 3000 characters. Use this
-exact format — every line break matters:
+Write a LinkedIn post in my voice (match soul.md tone). Under
+3000 characters. Use this exact format — every line break matters:
 
 🤖 AI News Roundup — N Things You Need to Know Today
 (blank line)
@@ -123,74 +128,61 @@ Rules:
   The value is the curation.
 - End with: Generated with Wolffish 🐟
 
-═══ PHASE 3 — POST (deterministic — follow exactly) ═══
+After writing the post, publish it to LinkedIn using
+computer-use. My Chrome browser is already open on display 0
+(primary display) with my LinkedIn session logged in and ready
+to use. Do NOT spin up a new browser instance. Do NOT use a
+headless browser. Do NOT launch Playwright or any automation
+framework. Use my existing Chrome window — it's already there.
 
-Step 1: Save the post with correct encoding.
-Generate a timestamped filename: files/linkedin-post-YYYY-MM-DD-HHMMSS.txt. Write the
-post content to that file so emojis are saved with proper UTF-8 encoding.
+Begin by taking a screenshot to see the current screen state.
 
-Step 2: Attach debugger mode.
-ext_debugger_attach on the active tab. Wait for confirmation. This routes all subsequent
-ext_click / ext_type / ext_keypress calls through CDP — making them indistinguishable from
-real keyboard and mouse input. Without this, LinkedIn's rich-text editor will reject
-the input.
+Then save the post with correct encoding:
+Generate a timestamped filename using the current date and
+time: files/linkedin-post-YYYY-MM-DD-HHMMSS.txt (e.g.
+files/linkedin-post-2026-05-22-143052.txt). Write the post
+content to that file so emojis are saved with proper UTF-8
+encoding. Then copy it to the clipboard using this exact
+shell command (with your actual filename):
+LANG=en_US.UTF-8 pbcopy < files/linkedin-post-YYYY-MM-DD-HHMMSS.txt
+This forces pbcopy to read the file as UTF-8 regardless of
+the terminal's locale — it prevents emoji corruption (e.g.
+🤖 turning into ü§ñ) that happens with raw copy-paste.
 
-Step 3: Navigate to the LinkedIn composer.
-ext_navigate https://www.linkedin.com/feed/?shareActive=true
-ext_wait_for_navigation to confirm the page loaded.
+Then post it:
+Navigate to: https://www.linkedin.com/feed/?shareActive=true
+This opens the post composer directly AND the text area is
+already focused with the cursor blinking — ready for input
+immediately. Do NOT click the composer text area. Just run
+the paste command (Cmd+V) right away to paste from the
+clipboard.
 
-Step 4: Copy post to clipboard and paste.
-ext_clipboard_write with the full post text (this handles UTF-8/emoji encoding natively —
-no pbcopy workaround needed). Then ext_click the composer text area to focus it, then
-ext_keypress "Meta+v" to paste from clipboard.
+After pasting, take ONE screenshot of the composer. Verify
+the emojis and formatting look correct — numbered items,
+topic emojis, blank lines between stories. If it looks right,
+click the "Post" button immediately. Do not scroll through
+the post. Do not take additional screenshots to verify. Do
+not try to get the post URL after posting.
 
-Step 5: Verify and post.
-ext_read_page to confirm the post text is in the composer (check for the "AI News
-Roundup" heading and the "Wolffish" footer). If it looks right, ext_click "text=Post" to
-submit. Do not take screenshots. Do not scroll through the post.
-
-Step 6: Confirm it went live.
-ext_wait 3000 (let LinkedIn process). ext_get_url — if the URL no longer contains
-"shareActive", the post was submitted. Done.
-
-Five actions: save file, clipboard-paste, verify, post, confirm. Done.
+Four actions total: save file, clipboard-paste, verify, post.
+Done.
 ```
-
-## فهم الموجِّه
-
-يتبع الموجِّه نفس نمط الإضافة فقط المستخدم في [التفاعل مع Reddit](/ar/use-cases/reddit-engage) و[مزرعة الكارما](/ar/use-cases/karma-farm)، مُكيَّف لمحرر النصوص الغني في LinkedIn.
-
-| القسم | ما يفعله | لماذا هو موجود |
-|---|---|---|
-| **ROLE** | يُثبّت الوكيل في الوضع المستقل الكامل، الإضافة (ليس التحكم بالحاسوب)، جلستك المسجَّلة. | يمنع الوكيل من الرجوع إلى التحكم بالحاسوب القائم على لقطات الشاشة (بطيء، مكلف، هش) أو تشغيل متصفح بدون واجهة (غير مسجَّل الدخول). |
-| **CRITICAL RULES** | المصحِّح أولاً، الإضافة فقط، التحقق بفحص URL. | محرر LinkedIn محرر نصوص غني (مثل محرر Lexical في Reddit الجديد) — يرفض `element.value = '...'` و`element.click()`. أحداث CDP من المصحِّح تتجاوز هذا. |
-| **PHASE 1 — RESEARCH** | بحث ويب متعدد الاستعلامات مع تصفية المصادر. | نفس نمط البحث في كل سير عمل وولف فيش — شبكة واسعة، تخطي المصادر المدفوعة/SEO، قراءة المقالات كاملة. |
-| **PHASE 2 — WRITE** | تنسيق، صياغة، فرض قواعد الأسطر الفارغة. | يطوي LinkedIn النص بدون أسطر فارغة — مواصفات التنسيق تمنع عرض جدار النص. |
-| **PHASE 3 — POST** | حفظ > مصحِّح > تنقل > لصق الحافظة > تحقق > نقر Post > تأكيد URL. | مسار الحافظة (`ext_clipboard_write` + لصق) يتعامل مع ترميز الرموز التعبيرية أصلاً ويعمل مع محرر contenteditable في LinkedIn. فحص URL يؤكد أن المنشور غادر المؤلف. |
-
-<Tip>
-  **لماذا مسار الحافظة وليس ext_type؟** محرر LinkedIn هو `contenteditable` div وليس `<textarea>`. الكتابة المباشرة عبر `ext_type` تعمل لكنها بطيئة لمنشورات 3000 حرف ويمكن أن تُسقط الرموز التعبيرية. `ext_clipboard_write` + اللصق يضع النص الكامل دفعة واحدة بترميز صحيح — نفس النهج الذي استخدمته نسخة التحكم بالحاسوب، لكن بدون حمل لقطات الشاشة.
-</Tip>
 
 ## كيف يعمل
 
-1. يُحمّل Prefrontal `soul.md` + browser-extension SKILL.md + web-search SKILL.md في السياق.
+1. يُحمّل Prefrontal soul.md + web-search SKILL.md + computer-use SKILL.md في السياق.
 2. يستدعي LLM `web_search` عبر استعلامات متعددة — أخبار، اختراقات، تمويل، سياسة.
 3. يستدعي LLM `web_fetch` على المقالات الأهم لقراءة المحتوى الكامل.
 4. ينسّق LLM 5-10 قصص ويكتب المنشور المُنسَّق.
-5. يحفظ LLM المنشور في ملف مؤرَّخ للأرشفة.
-6. يُرفق الوكيل المصحِّح بالتبويب (`ext_debugger_attach`) فتُرسل جميع المُدخلات كأحداث CDP موثوقة.
-7. يفتح `ext_navigate` صفحة `linkedin.com/feed/?shareActive=true` — يُحمَّل المؤلف.
-8. يضع `ext_clipboard_write` نص المنشور في الحافظة، ويُركّز `ext_click` المؤلف، ويلصق `ext_keypress "Meta+v"`.
-9. يؤكد `ext_read_page` أن النص في المؤلف، ثم ينشر `ext_click "text=Post"`.
-10. يؤكد `ext_get_url` أن URL انتقل بعيداً عن المؤلف — المنشور منشور.
+5. يحفظ LLM المنشور في ملف مؤرَّخ وينسخه إلى الحافظة عبر `pbcopy`.
+6. يأخذ LLM لقطة شاشة لنافذة Chrome الموجودة ليتوجّه.
+7. يفتح LLM `linkedin.com/feed/?shareActive=true` — يُفتح المؤلف مُركَّزاً — ويلصق بـ Cmd+V.
+8. لقطة شاشة واحدة للتحقق من التنسيق، ثم ينقر على "Post".
 
 ## الحدود
 
-- **محرر LinkedIn محرر نصوص غني.** على عكس `<textarea>` العادي في old.reddit، يستخدم LinkedIn `contenteditable` div. مسار اللصق من الحافظة يتعامل مع هذا بموثوقية؛ `ext_set_value` المباشر لن يعمل هنا.
-- **وضع المصحِّح إلزامي.** بدون `ext_debugger_attach`، يتجاهل محرر LinkedIn الإدخال البرمجي. شعار "debugging" الأصفر يظهر أثناء الجلسة — إذا كان ذلك مقلقاً، يفصل الوكيل المصحِّح بعد النشر.
-- **تغييرات واجهة LinkedIn تُمتص تلقائياً.** يجد الوكيل العناصر بمحتوى النص (`ext_click "text=Post"`)، ليس بإحداثيات البكسل — فلا تكسر تغييرات تخطيط الواجهة الأمور كما يحدث مع التحكم بالحاسوب القائم على لقطات الشاشة.
-- **جدران CAPTCHA / التحقق** يمكن أن تقطع التشغيل. يقلل وضع المصحِّح هذا لكن لا يقضي عليه — إذا تحدى LinkedIn الجلسة، سيتوقف الوكيل وقد تحتاج لتجاوزها يدوياً.
+- قد يُطلق computer-use لأول مرة موجِّهات أتمتة macOS — امنحها مسبقاً في الإعداد
+- إذا غيّر LinkedIn تخطيط واجهته، يتكيّف LLM في لقطة الشاشة التالية — بدون محددات مُشفّرة
 
 ## الأتمتة بـ Heartbeat
 
@@ -201,53 +193,27 @@ Five actions: save file, clipboard-paste, verify, post, confirm. Done.
 ```markdown
 ## Daily LinkedIn Post | Weekday (08:00)
 
-ROLE: You are Wolffish in full autonomous agent mode. Work ONLY through the Wolffish
-browser extension (ext_* tools) in my real, already-logged-in Chrome tab. Never use
-computer-use (computer_screenshot, computer_mouse_click, computer_keyboard_type),
-Playwright, browser_* tools, a headless browser, or a new window — those aren't logged
-in and LinkedIn returns 403. Don't ask me anything.
+Research today's top AI and tech news. Run multiple searches:
+"AI news today", "LLM breakthroughs this week", "artificial
+intelligence announcements", "AI funding rounds", "AI policy
+regulation". Read the full content of the top articles using
+web_fetch.
 
-MISSION: Research today's top AI news, curate 5-10 stories, write a LinkedIn post in my
-voice (match soul.md tone), and publish it — fully autonomous.
+ONLY use free, open sources that web_fetch can read without
+hitting a paywall. Good sources: The Verge, Ars Technica,
+TechCrunch, arXiv, Papers With Code, Anthropic Blog, OpenAI
+Blog, Google AI Blog, Hacker News, r/MachineLearning,
+VentureBeat, The Register, CNBC Technology.
 
-═══ CRITICAL RULES ═══
-- Extension only: every interaction with LinkedIn goes through ext_* tools. Never take
-  a screenshot to orient — use ext_read_page instead.
-- Debugger mode FIRST: call ext_debugger_attach before ANY interaction with LinkedIn.
-  LinkedIn's rich-text editor rejects programmatic DOM events — CDP input events bypass
-  this. Without the debugger attached, typing and clicking WILL fail silently.
-- The post is LIVE only when ext_get_url returns a URL that has moved AWAY from the
-  composer (no longer contains "shareActive"). A tool's success response is NOT proof.
+DO NOT fetch from paywalled sites — Bloomberg, WSJ, NYT,
+Financial Times, The Information. They return HTTP 403 and
+waste time. If a search result points to a paywalled domain,
+skip it and pick the next one. Also skip SEO spam, listicles,
+AI-generated summaries of summaries, and aggregator sites that
+rewrite other outlets with no original reporting.
 
-ENVIRONMENT — extension only:
-- Never call computer_screenshot / computer_mouse_click / computer_keyboard_type / any
-  computer-use tool.
-- Never call browser_launch / browser_navigate / any browser_* (Playwright) tool.
-- Don't pass a guessed tabId (tabId:1 fails with "No tab with id"). Omit it to use the
-  active tab; if you truly need the id, call ext_tabs_list once and reuse it.
-
-═══ PHASE 1 — RESEARCH ═══
-
-Run multiple web searches:
-"AI news today", "LLM breakthroughs this week", "artificial intelligence announcements",
-"AI funding rounds", "AI policy regulation". Read the full content of the top articles
-using web_fetch.
-
-ONLY use free, open sources that web_fetch can read without hitting a paywall. Good
-sources: The Verge, Ars Technica, TechCrunch, arXiv, Papers With Code, Anthropic Blog,
-OpenAI Blog, Google AI Blog, Hacker News, r/MachineLearning, VentureBeat, The Register,
-CNBC Technology.
-
-DO NOT fetch from paywalled sites — Bloomberg, WSJ, NYT, Financial Times, The
-Information. They return HTTP 403 and waste time. If a search result points to a paywalled
-domain, skip it and pick the next one. Also skip SEO spam, listicles, AI-generated
-summaries of summaries, and aggregator sites that rewrite other outlets with no original
-reporting.
-
-═══ PHASE 2 — WRITE ═══
-
-Write a LinkedIn post in my voice (match soul.md tone). Under 3000 characters. Use this
-exact format — every line break matters:
+Write a LinkedIn post in my voice (match soul.md tone). Under
+3000 characters. Use this exact format — every line break matters:
 
 🤖 AI News Roundup — N Things You Need to Know Today
 (blank line)
@@ -275,37 +241,44 @@ Rules:
   The value is the curation.
 - End with: Generated with Wolffish 🐟
 
-═══ PHASE 3 — POST (deterministic — follow exactly) ═══
+After writing the post, publish it to LinkedIn using
+computer-use. My Chrome browser is already open on display 0
+(primary display) with my LinkedIn session logged in and ready
+to use. Do NOT spin up a new browser instance. Do NOT use a
+headless browser. Do NOT launch Playwright or any automation
+framework. Use my existing Chrome window — it's already there.
 
-Step 1: Save the post with correct encoding.
-Generate a timestamped filename: files/linkedin-post-YYYY-MM-DD-HHMMSS.txt. Write the
-post content to that file so emojis are saved with proper UTF-8 encoding.
+Begin by taking a screenshot to see the current screen state.
 
-Step 2: Attach debugger mode.
-ext_debugger_attach on the active tab. Wait for confirmation. This routes all subsequent
-ext_click / ext_type / ext_keypress calls through CDP — making them indistinguishable from
-real keyboard and mouse input. Without this, LinkedIn's rich-text editor will reject
-the input.
+Then save the post with correct encoding:
+Generate a timestamped filename using the current date and
+time: files/linkedin-post-YYYY-MM-DD-HHMMSS.txt (e.g.
+files/linkedin-post-2026-05-22-143052.txt). Write the post
+content to that file so emojis are saved with proper UTF-8
+encoding. Then copy it to the clipboard using this exact
+shell command (with your actual filename):
+LANG=en_US.UTF-8 pbcopy < files/linkedin-post-YYYY-MM-DD-HHMMSS.txt
+This forces pbcopy to read the file as UTF-8 regardless of
+the terminal's locale — it prevents emoji corruption (e.g.
+🤖 turning into ü§ñ) that happens with raw copy-paste.
 
-Step 3: Navigate to the LinkedIn composer.
-ext_navigate https://www.linkedin.com/feed/?shareActive=true
-ext_wait_for_navigation to confirm the page loaded.
+Then post it:
+Navigate to: https://www.linkedin.com/feed/?shareActive=true
+This opens the post composer directly AND the text area is
+already focused with the cursor blinking — ready for input
+immediately. Do NOT click the composer text area. Just run
+the paste command (Cmd+V) right away to paste from the
+clipboard.
 
-Step 4: Copy post to clipboard and paste.
-ext_clipboard_write with the full post text (this handles UTF-8/emoji encoding natively —
-no pbcopy workaround needed). Then ext_click the composer text area to focus it, then
-ext_keypress "Meta+v" to paste from clipboard.
+After pasting, take ONE screenshot of the composer. Verify
+the emojis and formatting look correct — numbered items,
+topic emojis, blank lines between stories. If it looks right,
+click the "Post" button immediately. Do not scroll through
+the post. Do not take additional screenshots to verify. Do
+not try to get the post URL after posting.
 
-Step 5: Verify and post.
-ext_read_page to confirm the post text is in the composer (check for the "AI News
-Roundup" heading and the "Wolffish" footer). If it looks right, ext_click "text=Post" to
-submit. Do not take screenshots. Do not scroll through the post.
-
-Step 6: Confirm it went live.
-ext_wait 3000 (let LinkedIn process). ext_get_url — if the URL no longer contains
-"shareActive", the post was submitted. Done.
-
-Five actions: save file, clipboard-paste, verify, post, confirm. Done.
+Four actions total: save file, clipboard-paste, verify, post.
+Done.
 ```
 
 <Tip>
