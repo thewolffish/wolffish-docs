@@ -1,13 +1,15 @@
 ---
 title: "Karma Farm"
-description: "Autonomously post 5 high-value replies across popular subreddit threads to earn karma using your logged-in browser session — no Reddit API"
+description: "Autonomously post 5 high-value replies across small, lax-moderation subreddits to build karma using your logged-in browser session — no Reddit API"
 ---
 
 # Overview
 
-Wolffish uses your **already logged-in** Reddit account through the browser extension to post 5 original, high-value replies to popular, high-momentum threads in the open-source / personal-AI-agent / local-LLM space. Each reply adds something real to the thread, invites further engagement, earns karma, and softly foreshadows Wolffish's philosophy. No Reddit API. No OAuth. It runs inside your real Chrome session, as you, through the extension's debugger mode.
+Wolffish uses your **already logged-in** Reddit account through the browser extension to post 5 original, high-value replies in small, lightly moderated subreddits — the kind that let anyone comment without karma gates, flair requirements, or membership walls. Each reply adds something real to the thread, invites further engagement, earns karma, and softly foreshadows Wolffish's philosophy. No Reddit API. No OAuth. It runs inside your real Chrome session, as you, through the extension's debugger mode.
 
-The agent joins each sub before replying, checks the thread is actually comment-able, reads the post and its top comments, finds a sourced insight, drafts → critiques → redrafts three times, self-checks, replies, confirms the reply is actually live by seeing it in the thread and on your profile, then paces itself with a short randomized wait before the next one.
+The strategy is deliberate: big subs (r/LocalLLaMA, r/OpenAI, r/artificial) look attractive but silently reject low-karma accounts with automod filters, required flair, or minimum-age gates. Small subs with a few thousand members and relaxed rules actually let your reply land — and a visible reply on a small sub builds real karma faster than a silently filtered one on a big sub.
+
+The agent joins each sub before replying, vets that the sub has no karma/flair/membership gates, checks the thread is actually comment-able, reads the post and its top comments, finds a sourced insight, drafts → critiques → redrafts three times, self-checks, replies, confirms the reply is actually live by seeing it in the thread and on your profile, then paces itself with a short randomized wait before the next one.
 
 ## Video Walkthrough
 
@@ -40,7 +42,7 @@ This workflow is **browser-extension-only** — it never touches the Reddit API.
 
 ### Recommended
 
-- **DeepSeek V4 Pro on Max mode.** Wolffish's recommended default for agentic work, and a strong fit here: frontier-class reasoning and tool-use reliability for the read → draft → reply → verify loop, a **1M-token context window** that holds long thread-reading sessions without overflowing, and writing sharp enough to read the room and land a roast where the sub rewards it. **Max mode** enables the deep, adaptive reasoning the prompt leans on — reading what the thread actually says, the three-pass draft → critique → redraft loop, the self-check gate, and verifying each reply landed. At **$0.44 / $0.87 per MTok** it's a fraction of frontier-model cost — which matters because thread-reading burns tokens fast. Set it per-conversation; see [DeepSeek](/configuration/deepseek). For the cheapest runs drop to DeepSeek V4 Flash; for maximum writing polish, [Claude Sonnet 4.6](/configuration/anthropic) — see the [extension cost table](/integrations/browser-extension#cost-why-model-choice-matters).
+- **DeepSeek V4 Pro on Max mode.** Wolffish's recommended default for agentic work, and a strong fit here: frontier-class reasoning and tool-use reliability for the read → draft → reply → verify loop, a **1M-token context window** that holds long thread-reading sessions without overflowing, and writing sharp enough to read the room and land a roast where the sub rewards it. **Max mode** enables the deep, adaptive reasoning the prompt leans on — vetting subs for lax rules, reading what the thread actually says, the three-pass draft → critique → redraft loop, the self-check gate, and verifying each reply landed. At **$0.44 / $0.87 per MTok** it's a fraction of frontier-model cost — which matters because thread-reading burns tokens fast. Set it per-conversation; see [DeepSeek](/configuration/deepseek). For the cheapest runs drop to DeepSeek V4 Flash; for maximum writing polish, [Claude Sonnet 4.6](/configuration/anthropic) — see the [extension cost table](/integrations/browser-extension#cost-why-model-choice-matters).
 
 ### Optional
 
@@ -52,7 +54,7 @@ Leave your browser open on Reddit, logged in, with the extension dot green. The 
 
 ## The Prompt
 
-Send this to Wolffish in one message. It finds high-momentum threads, joins subs, checks each thread is comment-able, drafts, replies, verifies each reply is actually live, and paces itself — fully autonomous until 5 replies are live.
+Send this to Wolffish in one message. It finds small lax subs, vets them for low barriers, finds comment-able threads, drafts, replies, verifies each reply is actually live, and paces itself — fully autonomous until 5 replies are live.
 
 ```
 ROLE: You are Wolffish in full autonomous agent mode. Work ONLY through the Wolffish
@@ -61,28 +63,33 @@ Reddit API, Playwright, browser_* tools, a headless browser, or a new window —
 aren't logged in and Reddit returns 403. Don't ask me anything. Don't stop until the
 EXIT CONDITION is met.
 
-MISSION: Get 5 ORIGINAL, high-value REPLIES LIVE on popular, high-momentum threads,
-spread across multiple subreddits in the open-source / personal-AI-agent / local-LLM
-space. Each reply must add real value, invite a response, and earn karma — while softly
-foreshadowing a philosophy (never pitch it, never name it as a product — let it read as a
-personal opinion):
+MISSION: Get 5 ORIGINAL, high-value REPLIES LIVE on recent threads in 5 DIFFERENT, SMALL,
+LAX-MODERATION subreddits in the open-source / personal-AI-agent / local-LLM / self-hosted
+space. Target subs where replies actually LAND — no karma gates, no flair requirements, no
+membership walls. Each reply must add real value, invite a response, and earn karma — while
+softly foreshadowing a philosophy (never pitch it, never name it as a product — let it read
+as a personal opinion):
 - brain-like architecture, but radically minimal and simple
 - built for END USERS, not just devs
 - does a FEW things extremely well instead of many things badly
 - local-first, markdown-as-truth — you can read the agent's whole brain in a text editor
 
 ═══ CRITICAL RULES (these are exactly why these runs fail — obey them) ═══
+- TARGET SMALL SUBS WITH LAX RULES. Big subs (r/LocalLLaMA, r/OpenAI, r/artificial,
+  r/AI_Agents, r/selfhosted) silently reject low-karma accounts — automod filters,
+  required flair, minimum account-age. Those subs return {"success":true} but the reply
+  is never created. Skip ALL of them. Find subs roughly under ~50K members with no
+  visible automod gates, no flair requirements, and no karma minimums in their rules.
 - A reply is LIVE only when you can SEE it after submitting — as a comment by MY username
   in the thread, AND as the newest entry on
   https://old.reddit.com/user/MY_NAME/comments/?sort=new. A tool's {"success":true} is
   NOT proof: a comment submit can return success while it was rate-limited, karma-gated,
   or auto-removed and never actually created.
-- Some threads can't be commented on: archived/locked threads, quarantined/restricted
-  subs, or subs that require a minimum karma/account-age to comment. If your reply doesn't
-  appear, READ the real reason on the page and SKIP to a backup thread — don't fight it.
+- If your reply doesn't appear, READ the real reason on the page and SKIP to a backup
+  thread — don't fight it, don't retry the same sub.
 - Do NOT assume a rate limit. Only treat it as one if you LITERALLY SEE "you are doing
   that too much" / "try again in N minutes" / "looks like you're using an unofficial
-  client" on the page. Inventing a rate limit just wastes the run.
+  client" on the page after a submit. Inventing a rate limit just wastes the run.
 - Spread replies across different threads/subs and make each one genuinely DISTINCT — never
   paste the same or near-same reply (or reuse the same datapoint) across threads. Duplicate
   comments across threads are the fastest way to get shadowbanned.
@@ -90,7 +97,8 @@ personal opinion):
 ENVIRONMENT — extension only, old reddit only:
 - old.reddit ONLY (https://old.reddit.com). It's plain HTML and works first try; www/sh
   Reddit build the comment composer in Shadow DOM + a Lexical editor that will eat the run.
-  If you ever land on www.reddit.com, rewrite the URL to old.reddit.com first.
+  If you ever land on www.reddit.com, rewrite the URL to old.reddit.com before doing
+  anything.
 - Never call browser_launch / browser_navigate / any browser_* (Playwright) tool, and
   never open a headless/throwaway browser or new window — those aren't logged in (403).
 - Don't pass a guessed tabId (tabId:1 fails with "No tab with id"). Omit it to use the
@@ -115,12 +123,40 @@ SELECTORS (verified — use exactly these):
 - ext_query_selector accepts REAL CSS ONLY — no "text=", no :has-text(), no "button=...".
   ("text=" is valid for ext_click only.)
 
-PHASE 0 — FIND HIGH-MOMENTUM, COMMENT-ABLE TARGETS:
-Find POPULAR, ACTIVE subs in this space, and within them recent rising/hot threads with
-real momentum (lots of recent comments, not dead or archived) where a thoughtful reply
-will be SEEN and upvoted. Build a list of ~7 candidate threads spread across multiple subs
-(more than 5, so you have backups when one turns out gated or archived). A great reply on
-a dead or archived thread earns nothing.
+PHASE 0 — BUILD A POOL OF SMALL, LAX SUBS (this is the whole game):
+Goal: find 7+ small, lightly moderated subreddits where a plain reply from any account
+will actually land. The ideal target sub has:
+  - Roughly under ~50K members (small enough that automod is minimal or absent)
+  - NO required post/comment flair
+  - NO minimum karma or account-age requirement
+  - NO membership-only commenting ("you must be a member" / "only approved submitters")
+  - NO blanket ban on AI-related or self-promo content
+  - At least one recent thread (< 7 days old) with real activity
+
+Known-LAX anchors (good defaults — use ~2 of these): r/ollama, r/opencode.
+Known-STRICT — DO NOT REPLY (they silently reject): r/LocalLLaMA (requires flair + bans
+LLM-generated content), r/OpenAI, r/artificial, r/AI_Agents (flair + karma + automod),
+r/selfhosted (heavy automod on young accounts).
+Other candidates to VET: r/LocalLLM, r/aipromptprogramming, r/SideProject, r/IndieDev,
+r/selfhostedAI, r/LocalAIServers, r/AIAssisted, r/ChatGPTCoding, r/LLMDevs,
+r/PrivateAI, r/AIAgentBuilders, r/OpenSourceAI.
+
+For EACH candidate, before drafting, run a LENIENCY CHECK:
+  1. ext_navigate https://old.reddit.com/r/SUB
+  2. ext_read_page (full) and scan the sidebar + rules for blockers:
+     - a REQUIRED comment flair or post flair
+     - "you must be a member" / "only approved submitters" / "requires N karma" /
+       "accounts must be at least N days old"
+     - rules banning AI-generated content or all self-promo
+     - heavy automod rules that mention karma, age, or filtering
+  3. Check subscriber count in the sidebar — if it's over ~50K, SKIP. Big subs almost
+     always have invisible automod filters even when the visible rules look clean.
+  4. Check the sub has recent threads with real comments (not a dead sub with no posts
+     in 2 weeks). At least one thread from the last 7 days with >=2 comments.
+  5. If ANY blocker is present or the sub is too big → SKIP and move to the next
+     candidate. If clean → it's a target. Continue until you have 7+ clean targets.
+
+Then, for EACH vetted sub, pick ONE recent, comment-able thread to reply in.
 
 PER-REPLY LOOP (finish one fully before the next):
 
@@ -129,11 +165,12 @@ PER-REPLY LOOP (finish one fully before the next):
 
   2. CHECK COMMENT-ABILITY: open the thread and ext_read_page. Confirm the top-level reply
      box exists and the thread isn't archived/locked, and there's no "you must have N
-     karma to comment here" notice. If you can't comment, SKIP to a backup thread.
+     karma to comment here" notice. If you can't comment, SKIP to a backup thread in a
+     different vetted sub.
 
-  3. PLAN: read the post AND its top comments. Pick an angle that adds real value and rides
-     the thread's momentum — agree-and-extend, a useful correction, a sharp insight, or a
-     respectful hot take. No low-effort "great post" filler.
+  3. PLAN: read the post AND its top comments. Pick an angle that adds real value —
+     agree-and-extend, a useful correction, a sharp insight, or a respectful hot take.
+     No low-effort "great post" filler.
 
   4. RESEARCH (mandatory, >=1 web_search before writing): find ONE non-obvious, sourced,
      on-topic fact the reader likely doesn't know — a concrete number, named milestone,
@@ -163,7 +200,8 @@ PER-REPLY LOOP (finish one fully before the next):
         confirm the newest comment is this reply on this thread, and capture its permalink
         (the comment's a.bylink href).
      c. If it's NOT there -> it didn't post. ext_read_page near the form for the reason:
-        * karma/age gate, archived/locked, removed -> SKIP to a backup thread.
+        * karma/age gate, archived/locked, removed -> this sub is STRICTER than it looked.
+          SKIP to a backup sub (re-vet it). Do NOT retry this sub — it will fail again.
         * "doing that too much / try again in N minutes / unofficial client" -> REAL rate
           limit: ext_wait the stated minutes (default 10 if unstated) as one real sleep,
           then retry THIS reply ONCE. If rate-limited twice, STOP and report.
@@ -176,33 +214,33 @@ PER-REPLY LOOP (finish one fully before the next):
      the 5th live reply. (Only the real-rate-limit branch above uses a longer wait.)
 
 EXIT CONDITION: 5 replies verified LIVE (each seen on
-https://old.reddit.com/user/MY_NAME/comments/ with a captured permalink), across multiple
-subs/threads, each sub joined first. Keep a running tally ("LIVE: 3/5"). If you run out of
-good comment-able threads before reaching 5, STOP and report what's live plus what you
-skipped and why — do NOT force replies into dead/gated threads or loop forever.
+https://old.reddit.com/user/MY_NAME/comments/ with a captured permalink), across 5
+DIFFERENT subs, each sub joined first. Keep a running tally ("LIVE: 3/5"). If you exhaust
+your vetted subs before reaching 5, STOP and report what's live plus which subs you
+skipped and why — do NOT loop forever or force replies into strict subs hoping they stick.
 
-FINAL OUTPUT: a table — for each LIVE reply: subreddit, the post you replied to (title),
-the sourced insight used, and the direct permalink to your reply. Then list any threads
-skipped (with the blocker you saw).
+FINAL OUTPUT: a table — for each LIVE reply: subreddit (with ~member count), the post you
+replied to (title), the sourced research insight used, and the direct permalink to your
+reply. Then list any subs skipped (with the blocker you saw).
 ```
 
 <Tip>
-  **Why this version lands replies:** it confirms each reply is *actually* live by finding it in the thread and on your `/user/<you>/comments/` profile (a tool's `success:true` isn't proof — a comment can be silently karma-gated or auto-removed), checks each thread is comment-able *before* drafting, only waits out a cooldown when Reddit literally shows one, paces replies at a natural 2–4 min, and forces a distinct reply + datapoint per thread so you don't trip shadowban heuristics. It keeps the parts that already work — JOIN-before-reply, reading the top comments, and scoping the submit to `form.usertext button.save` so it never replies in the wrong box.
+  **Why small subs work better for karma farming:** Big subs look attractive but silently filter low-karma accounts. r/LocalLLaMA requires flair and bans LLM-generated content; r/AI_Agents has automod karma gates; r/selfhosted's automod flags young accounts. Small subs (~1K–30K members) with no visible automod let your reply actually land — and a *visible* reply on a small sub builds real karma, while a silently filtered reply on a big sub builds nothing.
 </Tip>
 
 ## Understanding the Prompt
 
-Same autonomous skeleton as [Engage Reddit](/use-cases/reddit-engage), tuned for replies instead of posts. The differences that matter:
+Same autonomous skeleton as [Engage Reddit](/use-cases/reddit-engage), tuned for replies in small, lax subs. The key difference from the original is the targeting strategy — everything else (extension-only, debugger mode, selectors, verify, pacing) is identical.
 
 | Section | What it does | Why it's there |
 |---|---|---|
-| **CRITICAL RULES** | Names the failure modes: a reply counts only when you SEE it (not a tool `success`), some threads can't be commented on, don't invent a rate limit, keep every reply distinct. | These are the silent killers — surfacing them up top makes the agent design around them instead of discovering them mid-run. |
-| **MISSION** | 5 distinct replies, spread across many hot threads, that earn karma and invite engagement. | Replies on hot threads get seen faster than new posts — but only if they're spread out, genuinely useful, and not copy-paste. |
-| **PHASE 0** | Find *rising/hot, comment-able* threads with momentum; build ~7 candidates so you have backups. | A great reply on a dead, archived, or gated thread earns nothing. Momentum + spread + backups is the whole game. |
+| **CRITICAL RULES** | Names the failure modes: big subs silently reject, a reply counts only when you SEE it (not a tool `success`), don't invent a rate limit, keep every reply distinct. | The #1 cause of failed karma-farm runs is targeting subs that look open but silently filter. Putting this up top makes the agent avoid them entirely. |
+| **MISSION** | 5 distinct replies, each in a DIFFERENT small/lax sub, that earn karma and invite engagement. | Small lax subs let replies land; spreading across 5 different subs avoids cross-sub spam patterns. |
+| **PHASE 0 — leniency vetting** | Reads each candidate sub's sidebar, rules, and member count. Skips any sub over ~50K members, any sub requiring flair/karma/membership, and any dead sub with no recent threads. | Target selection *is* the run. A flawless reply to a karma-gated sub silently fails; the cheapest fix is to never target it. Big subs almost always have invisible automod filters even when the visible rules look clean. |
 | **JOIN** (step 1) | Join a sub before replying in it; skip if already a member. | Replying in subs you've never joined is a classic bot tell — joining first reads as a real participant. |
-| **CHECK COMMENT-ABILITY** (step 2) | Confirm the reply box exists and the thread isn't archived/locked/karma-gated *before* drafting. | The analog of Engage's lenient-sub vetting: don't spend a draft on a thread you can't actually comment in. |
+| **CHECK COMMENT-ABILITY** (step 2) | Confirm the reply box exists and the thread isn't archived/locked/karma-gated *before* drafting. | The second filter: even a lax sub can have individual locked or archived threads. Don't spend a draft on a thread you can't comment in. |
 | **DRAFT** (step 5) | Three-pass draft, engages what was actually said, ends on an opening, distinct per thread. | The closing invitation turns a reply into a conversation; distinctness keeps it off the spam radar. |
-| **POST + VERIFY** (step 7) | `ext_set_value` + submit the scoped `form.usertext`, then confirm the comment in-thread **and** on your profile, capturing the permalink. | A submit's `success:true` is not proof — *seeing* the live comment is. This is what prevents "I replied" hallucinations and duplicate comments. |
+| **POST + VERIFY** (step 7) | `ext_set_value` + submit the scoped `form.usertext`, then confirm the comment in-thread **and** on your profile, capturing the permalink. If it fails, the sub was stricter than it looked — skip it entirely, don't retry. | A submit's `success:true` is not proof — *seeing* the live comment is. And a sub that silently rejects once will reject again, so move on. |
 | **WAIT** (step 8) | A real, fresh random 2–4 min between replies; a long wait only when Reddit *literally* shows a cooldown. | Natural cadence that dodges reply-spam flags without burning the run on phantom 5–10 min waits. |
 
 <Tip>
@@ -213,23 +251,23 @@ Same autonomous skeleton as [Engage Reddit](/use-cases/reddit-engage), tuned for
 
 1. Prefrontal loads `soul.md` + the browser-extension SKILL.md + web-search SKILL.md into context.
 2. The agent attaches the debugger to the Reddit tab (`ext_debugger_attach`) so all input is dispatched as trusted CDP events.
-3. **Target selection** — on `old.reddit.com` (plain HTML, far easier to drive than New Reddit's Shadow-DOM composer), `ext_navigate` + `ext_read_page` across hot/rising feeds to build ~7 high-momentum candidate threads spread across multiple subs.
+3. **Sub vetting** — on `old.reddit.com` (plain HTML, far easier to drive than New Reddit's Shadow-DOM composer), `ext_navigate` + `ext_read_page` walk each candidate sub's sidebar and rules, checking member count (~50K cap), flair/karma/membership requirements, and recent activity. Subs that are too big, too strict, or too dead get skipped. The agent keeps going until 7+ small, lax targets are confirmed.
 4. For each reply, in sequence:
    - **Join** the sub if not already a member (`ext_click` the Join button), verifying membership.
    - **Check comment-ability** — `ext_read_page` the thread; if it's archived/locked or karma-gated (no usable reply box), skip to a backup.
    - `ext_read_page` the post and its top comments to understand the discussion, then `web_search` for one sourced, on-topic insight (a different datapoint each time).
    - Draft → critique → redraft three times, then the self-check gate.
    - On `old.reddit.com`, `ext_set_value` the top `form.usertext` `<textarea>` and submit that scoped form (`ext_submit_form`, or `ext_click` `form.usertext button.save`). Optional `ext_humanize` for human-like pacing.
-   - **Deterministic verify:** read the `.commentarea` to confirm the comment rendered under your username, then check `old.reddit.com/user/<you>/comments/?sort=new` and capture the permalink. If it isn't there, the agent reads the actual error and skips to a backup thread (or, **only** on a literal "you're doing that too much" notice, waits out the stated cooldown). It never resubmits a reply that already shows live.
+   - **Deterministic verify:** read the `.commentarea` to confirm the comment rendered under your username, then check `old.reddit.com/user/<you>/comments/?sort=new` and capture the permalink. If it isn't there, the sub was stricter than it looked — the agent skips it entirely (no retry) and moves to a backup. Only on a literal "you're doing that too much" notice does it wait out the stated cooldown. It never resubmits a reply that already shows live.
    - A fresh random **2–4 min** `ext_wait` before the next reply (a real sleep, not simulated).
 5. After the 5th live reply, the agent emits the summary table and stops. Hippocampus logs the run as an episode.
 
 ## Limits
 
-- **Karma minimums are a wall.** Many active subs require account age/karma to comment. A young account gets auto-filtered no matter how good the reply is — the agent checks comment-ability, notes this, and moves to a backup thread.
+- **Even small subs can have invisible automod.** The agent reads the sidebar and rules, but some subs run automod configs that don't show up there. A reply that gets silently filtered on a sub that looked clean → the agent skips it and moves to a backup, but that's still a wasted draft.
 - **Shadow-removal is invisible to you while logged in.** A reply can look live on your screen and be hidden from everyone else. The verify step checks that the comment renders and appears on your profile, but cannot always detect a shadowban.
+- **Small subs have less traffic.** A reply on r/LocalAIServers (5K members) gets fewer eyeballs than one on r/LocalLLaMA (500K). You trade visibility for reliability — the reply actually lands instead of being silently filtered.
 - **Rate limits are real but rarely the blocker** on an established account — commenting is throttled far less than posting. The prompt waits out a cooldown **only when Reddit literally shows one**; it won't invent one and burn the run waiting. A brand-new or low-karma account will still hit walls; if rate-limited twice in a row it stops and reports a partial result rather than hammering.
-- **Momentum decays.** A thread that was hot at target-selection may cool by the time the agent replies. The reply still posts, but may earn less than projected.
 - **Skim the output.** Always review the final replies — a wrong "sourced" stat in a reply is more damaging to your reputation than silence.
 
 ## Automating with Heartbeat
@@ -249,25 +287,30 @@ Reddit API, Playwright, browser_* tools, a headless browser, or a new window —
 aren't logged in and Reddit returns 403. Don't ask me anything. Don't stop until the
 EXIT CONDITION is met.
 
-MISSION: Get 5 ORIGINAL, high-value REPLIES LIVE on popular, high-momentum threads,
-spread across multiple subreddits in the open-source / personal-AI-agent / local-LLM
-space. Each reply must add real value, invite a response, and earn karma — while softly
-foreshadowing a philosophy (never pitch it, never name it as a product — let it read as a
-personal opinion):
+MISSION: Get 5 ORIGINAL, high-value REPLIES LIVE on recent threads in 5 DIFFERENT, SMALL,
+LAX-MODERATION subreddits in the open-source / personal-AI-agent / local-LLM / self-hosted
+space. Target subs where replies actually LAND — no karma gates, no flair requirements, no
+membership walls. Each reply must add real value, invite a response, and earn karma — while
+softly foreshadowing a philosophy (never pitch it, never name it as a product — let it read
+as a personal opinion):
 - brain-like architecture, but radically minimal and simple
 - built for END USERS, not just devs
 - does a FEW things extremely well instead of many things badly
 - local-first, markdown-as-truth — you can read the agent's whole brain in a text editor
 
 ═══ CRITICAL RULES (these are exactly why these runs fail — obey them) ═══
+- TARGET SMALL SUBS WITH LAX RULES. Big subs (r/LocalLLaMA, r/OpenAI, r/artificial,
+  r/AI_Agents, r/selfhosted) silently reject low-karma accounts — automod filters,
+  required flair, minimum account-age. Those subs return {"success":true} but the reply
+  is never created. Skip ALL of them. Find subs roughly under ~50K members with no
+  visible automod gates, no flair requirements, and no karma minimums in their rules.
 - A reply is LIVE only when you can SEE it after submitting — as a comment by MY username
   in the thread, AND as the newest entry on
   https://old.reddit.com/user/MY_NAME/comments/?sort=new. A tool's {"success":true} is
   NOT proof: a comment submit can return success while it was rate-limited, karma-gated,
   or auto-removed and never actually created.
-- Some threads can't be commented on: archived/locked threads, quarantined/restricted
-  subs, or subs that require a minimum karma/account-age to comment. If your reply doesn't
-  appear, READ the real reason on the page and SKIP to a backup thread — don't fight it.
+- If your reply doesn't appear, READ the real reason on the page and SKIP to a backup
+  thread — don't fight it, don't retry the same sub.
 - Do NOT assume a rate limit. Only treat it as one if you LITERALLY SEE "you are doing
   that too much" / "try again in N minutes" / "looks like you're using an unofficial
   client" on the page. Inventing a rate limit just wastes the run.
@@ -278,7 +321,8 @@ personal opinion):
 ENVIRONMENT — extension only, old reddit only:
 - old.reddit ONLY (https://old.reddit.com). It's plain HTML and works first try; www/sh
   Reddit build the comment composer in Shadow DOM + a Lexical editor that will eat the run.
-  If you ever land on www.reddit.com, rewrite the URL to old.reddit.com first.
+  If you ever land on www.reddit.com, rewrite the URL to old.reddit.com before doing
+  anything.
 - Never call browser_launch / browser_navigate / any browser_* (Playwright) tool, and
   never open a headless/throwaway browser or new window — those aren't logged in (403).
 - Don't pass a guessed tabId (tabId:1 fails with "No tab with id"). Omit it to use the
@@ -303,12 +347,40 @@ SELECTORS (verified — use exactly these):
 - ext_query_selector accepts REAL CSS ONLY — no "text=", no :has-text(), no "button=...".
   ("text=" is valid for ext_click only.)
 
-PHASE 0 — FIND HIGH-MOMENTUM, COMMENT-ABLE TARGETS:
-Find POPULAR, ACTIVE subs in this space, and within them recent rising/hot threads with
-real momentum (lots of recent comments, not dead or archived) where a thoughtful reply
-will be SEEN and upvoted. Build a list of ~7 candidate threads spread across multiple subs
-(more than 5, so you have backups when one turns out gated or archived). A great reply on
-a dead or archived thread earns nothing.
+PHASE 0 — BUILD A POOL OF SMALL, LAX SUBS (this is the whole game):
+Goal: find 7+ small, lightly moderated subreddits where a plain reply from any account
+will actually land. The ideal target sub has:
+  - Roughly under ~50K members (small enough that automod is minimal or absent)
+  - NO required post/comment flair
+  - NO minimum karma or account-age requirement
+  - NO membership-only commenting ("you must be a member" / "only approved submitters")
+  - NO blanket ban on AI-related or self-promo content
+  - At least one recent thread (< 7 days old) with real activity
+
+Known-LAX anchors (good defaults — use ~2 of these): r/ollama, r/opencode.
+Known-STRICT — DO NOT REPLY (they silently reject): r/LocalLLaMA (requires flair + bans
+LLM-generated content), r/OpenAI, r/artificial, r/AI_Agents (flair + karma + automod),
+r/selfhosted (heavy automod on young accounts).
+Other candidates to VET: r/LocalLLM, r/aipromptprogramming, r/SideProject, r/IndieDev,
+r/selfhostedAI, r/LocalAIServers, r/AIAssisted, r/ChatGPTCoding, r/LLMDevs,
+r/PrivateAI, r/AIAgentBuilders, r/OpenSourceAI.
+
+For EACH candidate, before drafting, run a LENIENCY CHECK:
+  1. ext_navigate https://old.reddit.com/r/SUB
+  2. ext_read_page (full) and scan the sidebar + rules for blockers:
+     - a REQUIRED comment flair or post flair
+     - "you must be a member" / "only approved submitters" / "requires N karma" /
+       "accounts must be at least N days old"
+     - rules banning AI-generated content or all self-promo
+     - heavy automod rules that mention karma, age, or filtering
+  3. Check subscriber count in the sidebar — if it's over ~50K, SKIP. Big subs almost
+     always have invisible automod filters even when the visible rules look clean.
+  4. Check the sub has recent threads with real comments (not a dead sub with no posts
+     in 2 weeks). At least one thread from the last 7 days with >=2 comments.
+  5. If ANY blocker is present or the sub is too big → SKIP and move to the next
+     candidate. If clean → it's a target. Continue until you have 7+ clean targets.
+
+Then, for EACH vetted sub, pick ONE recent, comment-able thread to reply in.
 
 PER-REPLY LOOP (finish one fully before the next):
 
@@ -317,11 +389,12 @@ PER-REPLY LOOP (finish one fully before the next):
 
   2. CHECK COMMENT-ABILITY: open the thread and ext_read_page. Confirm the top-level reply
      box exists and the thread isn't archived/locked, and there's no "you must have N
-     karma to comment here" notice. If you can't comment, SKIP to a backup thread.
+     karma to comment here" notice. If you can't comment, SKIP to a backup thread in a
+     different vetted sub.
 
-  3. PLAN: read the post AND its top comments. Pick an angle that adds real value and rides
-     the thread's momentum — agree-and-extend, a useful correction, a sharp insight, or a
-     respectful hot take. No low-effort "great post" filler.
+  3. PLAN: read the post AND its top comments. Pick an angle that adds real value —
+     agree-and-extend, a useful correction, a sharp insight, or a respectful hot take.
+     No low-effort "great post" filler.
 
   4. RESEARCH (mandatory, >=1 web_search before writing): find ONE non-obvious, sourced,
      on-topic fact the reader likely doesn't know — a concrete number, named milestone,
@@ -348,7 +421,8 @@ PER-REPLY LOOP (finish one fully before the next):
         confirm the newest comment is this reply on this thread, and capture its permalink
         (the comment's a.bylink href).
      c. If it's NOT there -> it didn't post. ext_read_page near the form for the reason:
-        * karma/age gate, archived/locked, removed -> SKIP to a backup thread.
+        * karma/age gate, archived/locked, removed -> this sub is STRICTER than it looked.
+          SKIP to a backup sub (re-vet it). Do NOT retry this sub.
         * "doing that too much / try again in N minutes / unofficial client" -> REAL rate
           limit: ext_wait the stated minutes (default 10 if unstated), then retry THIS
           reply ONCE. If rate-limited twice, STOP and report.
@@ -360,14 +434,14 @@ PER-REPLY LOOP (finish one fully before the next):
      above uses a longer wait.)
 
 EXIT CONDITION: 5 replies verified LIVE (each seen on
-https://old.reddit.com/user/MY_NAME/comments/ with a captured permalink), across multiple
-subs/threads, each sub joined first. Keep a running tally. If you run out of good
-comment-able threads before reaching 5, STOP and report what's live plus what you skipped
-and why — do NOT force replies into dead/gated threads or loop forever.
+https://old.reddit.com/user/MY_NAME/comments/ with a captured permalink), across 5
+DIFFERENT subs, each sub joined first. Keep a running tally. If you exhaust your vetted
+subs before reaching 5, STOP and report what's live plus which subs you skipped and why
+— do NOT loop forever or force replies into strict subs hoping they stick.
 
-FINAL OUTPUT: a table — for each LIVE reply: subreddit, the post you replied to (title),
-the sourced insight used, and the direct permalink to your reply. Then list any threads
-skipped (with the blocker you saw).
+FINAL OUTPUT: a table — for each LIVE reply: subreddit (with ~member count), the post you
+replied to (title), the sourced research insight used, and the direct permalink to your
+reply. Then list any subs skipped (with the blocker you saw).
 ```
 
 <Tip>
@@ -380,12 +454,12 @@ When the run finishes, you get a summary table with a clickable permalink for ev
 
 | # | Subreddit | Post Replied To | Research Insight Used | Reply Permalink |
 |---|---|---|---|---|
-| 1 | r/LocalLLaMA | "What's everyone running locally in 2026?" | Open-weight model crossing a reasoning benchmark at a fraction of closed-model cost | `https://old.reddit.com/r/LocalLLaMA/comments/.../comment/...` |
-| 2 | r/selfhosted | "My self-hosted stack got out of hand" | Self-hosted AI adoption stat from a recent survey | `https://old.reddit.com/r/selfhosted/comments/.../comment/...` |
-| 3 | r/AI_Agents | "Are agent frameworks overcomplicated?" | Agentic-eval benchmark crossover datapoint | `https://old.reddit.com/r/AI_Agents/comments/.../comment/...` |
-| 4 | r/artificial | "Is 'agentic' just a buzzword at this point?" | Cost-curve shift datapoint — inference $/token over the last year | `https://old.reddit.com/r/artificial/comments/.../comment/...` |
-| 5 | r/ollama | "Show me your local setup" | Ollama download-growth / GitHub-star milestone with source | `https://old.reddit.com/r/ollama/comments/.../comment/...` |
+| 1 | r/ollama (~45K) | "What's everyone running locally in 2026?" | Open-weight model crossing a reasoning benchmark at a fraction of closed-model cost | `https://old.reddit.com/r/ollama/comments/.../comment/...` |
+| 2 | r/opencode (~8K) | "Your agent doesn't need 47 tools" | Tool-count vs. accuracy datapoint from a recent agentic eval | `https://old.reddit.com/r/opencode/comments/.../comment/...` |
+| 3 | r/LocalLLM (~12K) | "Best way to run a local assistant?" | Inference cost-curve shift — $/token over the last year | `https://old.reddit.com/r/LocalLLM/comments/.../comment/...` |
+| 4 | r/selfhostedAI (~6K) | "Simple setups that actually work" | Self-hosted AI adoption stat from a recent survey | `https://old.reddit.com/r/selfhostedAI/comments/.../comment/...` |
+| 5 | r/aipromptprogramming (~15K) | "What if your agent's memory was just files?" | Open-model adoption / star-growth stat with source | `https://old.reddit.com/r/aipromptprogramming/comments/.../comment/...` |
 
 <Note>
-  The subreddits, threads, and insights above are **illustrative**. The agent finds fresh high-momentum, comment-able threads and current, sourced datapoints on each run, and skips any thread that's archived, locked, or karma-gated. Treat the table as the *shape* of the output, not a script.
+  The subreddits, threads, and insights above are **illustrative** — the agent vets fresh small/lax targets and current, sourced datapoints on each run, and skips any sub that's too big, too strict, or too dead. Treat the table as the *shape* of the output, not a script.
 </Note>
