@@ -96,8 +96,8 @@
                     "group": "Use Cases",
                     "expanded": true,
                     "pages": [
-                      "use-cases/news-butler",
                       "use-cases/product-hunter",
+                      "use-cases/news-butler",
                       "use-cases/nuke-adobe",
                       "use-cases/reddit-engage",
                       "use-cases/karma-farm",
@@ -268,8 +268,8 @@
                     "group": "حالات الاستخدام",
                     "expanded": true,
                     "pages": [
-                      "ar/use-cases/news-butler",
                       "ar/use-cases/product-hunter",
+                      "ar/use-cases/news-butler",
                       "ar/use-cases/nuke-adobe",
                       "ar/use-cases/reddit-engage",
                       "ar/use-cases/karma-farm",
