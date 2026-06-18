@@ -1,0 +1,477 @@
+---
+title: "صيّاد المنتجات"
+description: "موجز استخباراتي أسبوعي للإطلاقات في أمر واحد — يتصفّح وولف فيش Product Hunt عبر إضافة المتصفح المسجَّل دخولها، ويتتبّع كل إطلاق متصدّر خلال الأسبوع الماضي، ويبحث عن الشركة والمؤسسين والتمويل وراء كلٍّ منها، ويقرأ إجماع المجتمع، ويسلّم ملف PDF نظيفاً مرتّباً ومصنَّفاً بالفئات مع إحصائيات وروابط وأبرز التعليقات وملخص تنفيذي"
+---
+
+# رادار الإطلاقات الأسبوعي
+
+أفضل المنتجات تُطلَق كل يوم على Product Hunt — لكن لا أحد لديه وقت للتحقق كل يوم، وقراءة كل موضوع تعليقات، والبحث عن كل مؤسس، ومعرفة أي الإطلاقات تستحق الاهتمام فعلاً. تفتح الموقع يوم الجمعة وفائزو الأسبوع مدفونون تحت إطلاقات اليوم.
+
+هذه هي هذه الحالة. تعطي وولف فيش أمراً واحداً فيؤدي المهمة كاملة: **يتصفح Product Hunt عبر إضافة المتصفح المسجَّل دخولها**، ويجمع كل إطلاق متصدّر من الأسبوع الماضي، ثم **يتعمّق في كلٍّ منها** — الشركة وراءه، والمؤسسون، وأي تاريخ تمويل، والصفحة الرئيسية، وعرض YouTube إن وُجد، وحُكم المجتمع من قسم التعليقات، والإحصائيات الخام. والنتيجة ملف **PDF واحد نظيف ومرتَّب ومصنَّف بالفئات** مع ملخص تنفيذي في الأعلى، وكل منتج مرقَّم حسب الترتيب مع إحصائيات كاملة، وتعليق كافٍ فقط لتعرف ما يستحق انتباهك.
+
+والمقصد أنك **يجب ألّا تحتاج لتصفّح Product Hunt إطلاقاً.** افتح ملف PDF، اقرأ الملخص التنفيذي، تصفّح الفئات، وستعرف بالضبط ما أُطلِق، ومن بناه، وهل هو ممُوَّل، وما رأي المجتمع — كل ذلك في مكان واحد.
+
+<Note>
+هذا سير عمل **تصفّح وقراءة** — تصفّح Product Hunt عبر الإضافة، وبحث على الويب لأبحاث الشركات، وتوليد ملف. لا يصوّت، ولا يعلّق، ولا ينشر، ولا يعدّل أي شيء نيابةً عنك. وهذا أيضاً يجعله مرشحاً قوياً للـ heartbeat (راجع قسم **الأتمتة عبر heartbeat**): موجز إطلاقات جديد بانتظارك كل صباح اثنين.
+</Note>
+
+## لماذا هو صيّاد لا مجرد تمرير
+
+ثلاثة أمور تميّز هذا عن تصفّح صفحة Product Hunt الرئيسية:
+
+<CardGroup cols={1}>
+  <Card title="بحث معمَّق لكل إطلاق" icon="building">
+    لا يكتفي بسرد المنتج — بل يجد الشركة وراءه، والمؤسسين وخلفياتهم، وأي جولات تمويل (سابقة أو جديدة)، والصفحة الرئيسية، ورابط عرض YouTube إن وُجد. تحصل على الصورة الكاملة، لا مجرد شعار ترويجي.
+  </Card>
+  <Card title="إجماع المجتمع، لا مجرد تصويتات" icon="comments">
+    التصويتات تخبرك بالشعبية. هذا يخبرك *لماذا* — يقرأ مواضيع التعليقات الفعلية، ويستخلص المزاج العام، ويسحب أبرز 5 تعليقات قيّمة لكل منتج كي تسمع الإشارة الحقيقية.
+  </Card>
+  <Card title="مرتَّب ومصنَّف ومرقَّم" icon="ranking-star">
+    كل منتج مرقَّم حسب الترتيب، ومصنَّف ضمن فئته (ذكاء اصطناعي، أدوات مطورين، تصميم، إنتاجية، إلخ)، ومعروض بإحصائيات إطلاق كاملة — تصويتات، تعليقات، صانعون. لا تخمين حول من فاز بالأسبوع.
+  </Card>
+</CardGroup>
+
+كل ذلك يصبّ في ملف PDF واحد، مصمَّم ليُقرأ في عشر دقائق، لا في جدار بطاقات منتجات لن تنهيه أبداً.
+
+## القدرات المطلوبة
+
+- `computer-use` — مصدر البيانات الأساسي. يستخدم وولف فيش **إضافة المتصفح** لتصفّح Product Hunt عبر جلستك المسجَّل دخولها — يتنقّل في لوحة المتصدّرين، ويفتح كل صفحة منتج، ويقرأ الأوصاف والإحصائيات ومواضيع التعليقات. Product Hunt مربوط بالفعل ومتاح عبر الإضافة.
+- `web-search` — محرّك البحث. لكل منتج، يجد `web_search` و`web_fetch` موقع الشركة، وسِيَر المؤسسين، وملفات Crunchbase/LinkedIn، وتاريخ التمويل، وعروض YouTube. هنا يأتي العمق.
+- `shell` — يصيّر الموجز النهائي. يكتب الوكيل HTML منسَّقاً ويطبعه إلى PDF عبر متصفح headless (Playwright/Puppeteer عبر `npx`) — وهو نفس المسار وراء [PDFs في كل مكان](/ar/use-cases/pdfs-everywhere) و[مُفصِّل السيرة الذاتية](/ar/use-cases/cv-tailor).
+
+## الإعداد
+
+اقرأ دليل [التهيئة للنجاح](/ar/use-cases/setting-up-for-success) العام أولاً — وما يلي خاص بهذا السير.
+
+### النموذج الموصى به
+
+**ما يهم هنا هو الموثوقية الوكيلية وعمق البحث.** الجزء الصعب هو التنقّل في Product Hunt بنظافة، ثم إجراء مسح بحثي معمَّق لكل منتج — إيجاد الشركة الحقيقية، والمؤسسين الفعليين، وتمييز إعلانات التمويل الحقيقية من التكهّنات الصحفية، وتلخيص عشرات التعليقات في إجماع مفيد. تريد نموذجاً منهجياً.
+
+- **DeepSeek V4 Pro على وضع الاستدلال Max** — التوصية. استخدام أدوات وكيلي من الطراز الأول واستدلال بجزء يسير من التكلفة. يمنحه وضع **Max** كامل ميزانية الاستدلال لنداءات البحث — إيجاد صفحة Crunchbase الحقيقية وليس شركة مشابهة الاسم، وتمييز جولة seed من إشاعة صحفية. اضبط جهد الاستدلال على **Max** في الإعدادات > النماذج. راجع [إعداد DeepSeek](/ar/configuration/deepseek).
+- **Claude Opus / Sonnet 4.x** — بدائل قوية إن كنت على Anthropic؛ وOpus الأكثر دقة في مرحلة بحث المؤسسين والتمويل، بسعر أعلى بـ 10–20 ضعفاً.
+- **تجنّب إعدادات الجهد المنخفض** — DeepSeek **Flash**، أو أي نموذج على وضع **None**، أو Haiku. يمكنها تصفّح Product Hunt بشكل جيد، لكن بحث الشركات وتلخيص التعليقات هو حيث يهلوس نموذج لا يتأمّل جولات تمويل أو يخلط بين شركات متشابهة الأسماء.
+
+### المتطلبات
+
+- **وولف فيش مثبت ويعمل** — تطبيق سطح المكتب مع مساحة عمل دماغية مُعدّة.
+- **مفتاح API سحابي قوي** — يُنصح بـ DeepSeek (V4 Pro) أو Anthropic (Claude)، مُعد في الإعدادات > النماذج.
+- **Product Hunt متاح عبر إضافة المتصفح** — يجب أن تكون إضافة المتصفح الخاصة بـ وولف فيش مثبتة ومتصلة، مع إمكانية الوصول إلى Product Hunt (مسجَّل الدخول أو قابل للتصفح). الإضافة هي كيف يقرأ وولف فيش صفحات Product Hunt.
+
+### موصى به بشدة
+
+- **[مفتاح Brave Search API](https://brave.com/search/api/)** — مُعد في الإعدادات > الخدمات > Brave Search. بحث الشركات/المؤسسين/التمويل يطلق عمليات بحث كثيرة لكل منتج؛ وسيصطدم البحث الافتراضي بحدّ المعدّل في منتصف أسبوع كامل من المنتجات المتصدّرة. مع مفتاح Brave، يجري البحث نظيفاً. الباقة المجانية تكفي.
+
+### اختياري
+
+- **`filesystem`** — لسجل تدقيق أنظف عند كتابة HTML وحفظ الـ PDF (مسار `shell` يعمل بدونه).
+- **متصفح headless** — يثبّت وولف فيش Playwright/Puppeteer عند أول استخدام إن لم يكن أيٌّ منهما موجوداً. وجود `npm`/`npx` في مسار PATH يجعل ذلك فورياً.
+
+## ما الذي يتتبّعه الصيّاد
+
+لكل منتج متصدّر من الأسبوع الماضي، يجمع الصيّاد:
+
+| نقطة البيانات | المصدر | لماذا تهم |
+|--------------|--------|-----------|
+| **الترتيب والتصويتات** | لوحة متصدّري Product Hunt | من فاز بالأسبوع، رقمياً |
+| **عدد التعليقات** | صفحة المنتج على Product Hunt | إشارة تفاعل تتجاوز التصويتات |
+| **الفئة** | وسوم / وصف Product Hunt | تنظيم الـ PDF حسب المجال |
+| **الشعار والوصف** | صفحة المنتج على Product Hunt | ما يفعله فعلاً |
+| **رابط الموقع** | صفحة المنتج على Product Hunt | اذهب وجرّبه بنفسك |
+| **YouTube / فيديو عرض** | صفحة Product Hunt + بحث ويب | شاهده وهو يعمل |
+| **أبرز 5 تعليقات** | موضوع تعليقات Product Hunt | الإشارة الحقيقية من المجتمع |
+| **الإجماع العام** | مُستخلَص من التعليقات | الحُكم في سطر واحد |
+| **الشركة والصفحة الرئيسية** | بحث ويب | من يقف وراءه |
+| **المؤسسون وسِيَرهم** | بحث ويب (LinkedIn، Crunchbase، صفحات "عنّا") | تتبّع من يبني ماذا |
+| **تاريخ التمويل** | بحث ويب (Crunchbase، TechCrunch، بيانات صحفية) | ممُوَّل أم ذاتي التمويل — وبكم |
+
+## الأمر
+
+أرسل هذا إلى وولف فيش عند الطلب، أو ضعه على الـ heartbeat (راجع قسم **الأتمتة عبر heartbeat**). هو طويل لأن «مرتَّب ومبحوث ومُنسَّق بجمال» عقدٌ حقيقي — كل كتلة أدناه تستحق مكانها.
+
+```
+You are my Product Hunter. Your job: track every top
+product launch on Product Hunt from the past week, research
+the company and people behind each one, read the community
+verdict, and hand me ONE clean, modern, ranked PDF I can
+read in ten minutes. Miss nothing in the top launches;
+cut nothing from the research.
+
+FIRST, fix the window. Run `date +%F` to get today. The
+window is the last 7 days through today.
+
+=== STEP 1: BROWSE PRODUCT HUNT (use the browser) ===
+Open producthunt.com in the browser via the extension.
+You are already logged in — just navigate.
+
+Go to the weekly leaderboard / top products. Collect the
+top launches from the past 7 days. For EACH product on
+the leaderboard, open its product page and grab:
+- Product name and tagline
+- Rank position (by upvotes for that day/week)
+- Upvote count
+- Comment count
+- Maker(s) / hunter name(s)
+- Category tags (AI, Developer Tools, Design, Productivity,
+  SaaS, Fintech, Health, Education, etc.)
+- Direct link to the Product Hunt page
+- Website URL (from the product page)
+- YouTube or demo video link if listed on the page
+- The product description / pitch
+
+Then open the COMMENTS section for each product and:
+- Read through the comment thread
+- Extract the TOP 5 most substantive comments (not "great
+  product!" — real feedback, questions, or insights)
+- Write a ONE-LINE general consensus: what does the
+  community actually think? Positive, mixed, or negative,
+  and WHY. Be honest — if the comments are thin or mostly
+  from the makers, say so.
+
+=== STEP 2: RESEARCH EACH PRODUCT (use web search) ===
+For EACH product collected above, run web searches to find:
+
+COMPANY:
+- Official company name (may differ from product name)
+- Company website / landing page (visit it with web_fetch)
+- What the company does beyond this product (if anything)
+- Headquarters / location
+- Year founded
+- Company size (approximate employees)
+
+FOUNDERS:
+- Founder name(s) and role(s) (CEO, CTO, etc.)
+- Brief background — previous companies, notable roles,
+  education if readily available
+- LinkedIn profile link(s) if findable
+- Twitter/X handle(s) if findable
+
+FUNDING:
+- Search for ANY funding — past rounds, new announcements,
+  or nothing at all
+- If funded: round type (pre-seed, seed, Series A, etc.),
+  amount, date, lead investors
+- If bootstrapped or no funding found, say so clearly
+- Source the funding info (Crunchbase, TechCrunch, press
+  release, etc.)
+- Check for RECENT funding news around the launch — a
+  Product Hunt launch often coincides with an announcement
+
+Use Crunchbase, LinkedIn, TechCrunch, company about pages,
+press releases, AngelList / Wellfound, Twitter/X. Grab what
+is readily available — do NOT rabbit-hole on any single
+product. If something isn't findable, leave it blank and
+move on.
+
+=== STEP 3: BUILD THE PDF ===
+Write it as styled HTML, then render to PDF with a headless
+browser. Save to the workspace as
+product-hunter-YYYY-MM-DD.pdf (today's date).
+
+Design: clean, modern, minimal, COLOR-CODED by category,
+skimmable in ten minutes. Let stats, badges, and layout
+carry the load — not prose.
+
+Structure, in this order:
+
+1. MASTHEAD — "PRODUCT HUNTER" large, the date window
+   ("Week of <start> – <today>"), total products tracked,
+   and a one-line tagline.
+
+2. EXECUTIVE SUMMARY — the 5 most important launches of
+   the week, one tight line each with rank number, category
+   badge, and upvote count. If I read only this, I know
+   what won the week.
+
+3. WEEK AT A GLANCE — a compact dashboard:
+   - Total products tracked, total upvotes across all,
+     total comments across all
+   - Bar chart: products per category (inline SVG or CSS
+     bars — NO external chart libraries or CDNs)
+   - Top 5 by upvotes (horizontal bar chart)
+   - Funding breakdown: how many funded vs bootstrapped vs
+     unknown
+
+4. PRODUCT CARDS — one per product, NUMBERED by rank
+   (highest upvotes first). Each card contains:
+   - Rank number (large), product name, tagline
+   - Category badge (color-coded)
+   - Stats row: upvotes | comments | maker(s)
+   - One-paragraph description (from Product Hunt)
+   - Links row: [Website] [Product Hunt] [YouTube/Demo]
+     (if available) — as clickable URLs
+   - COMMUNITY VERDICT: the one-line consensus + top 5
+     comments (quoted, with commenter name)
+   - COMPANY PROFILE: company name, website, HQ, founded,
+     size, what they do
+   - FOUNDER SPOTLIGHT: name(s), role(s), background,
+     links
+   - FUNDING STATUS: badge (Funded / Bootstrapped /
+     Unknown) + details if funded (round, amount, date,
+     investors). If recent funding news found, highlight it
+
+   Use category colors to accent each card. Make cards
+   visually distinct and scannable — someone should be able
+   to flip through and get the gist of each product in
+   15 seconds.
+
+5. CATEGORY BREAKDOWN — one section per category that had
+   products this week, listing which products fell under
+   it with their rank numbers. Quick cross-reference.
+
+6. METHODOLOGY — short: the exact window, how products
+   were collected (Product Hunt leaderboard via browser
+   extension), what was researched via web search, that
+   funding info comes from public sources and may be
+   incomplete, and that comment consensus is synthesized
+   from the thread (not every comment).
+
+Footer on every page: "Generated by Wolffish" left,
+"Page X of Y" right.
+
+=== WHEN DONE ===
+Tell me three things: the #1 product of the week and why
+it won, the most interesting company story (funding,
+founder background, or pivot), and any product where the
+community consensus was notably negative or skeptical —
+so I know the full picture.
+```
+
+<Tip>
+الأمر مصمَّم للعمل كما هو — الشيء الوحيد الذي قد تغيّره هو النافذة الزمنية (`the last 7 days`). قصّرها إلى `last 24 hours` لنبض يومي، أو مدّدها إلى `last 30 days` لتعمّق شهري. كل ما عداه — عمق البحث، وتحليل التعليقات، وتخطيط الـ PDF — يبقى كما هو تماماً.
+</Tip>
+
+### خصّصه
+
+غيّر أيّاً من هذه لتجعل الصيّاد صيّادك:
+
+| ماذا | أين في الأمر | أفكار |
+|------|--------------|-------|
+| **النافذة الزمنية** | `the last 7 days` | `last 24 hours` لإطلاقات اليوم فقط، `last 30 days` لتجميعة شهرية |
+| **عمق البحث** | كتل الشركة/المؤسسين/التمويل | احذف بحث التمويل لتشغيل أسرع، أو وسّعه ليشمل تحليل المنافسين |
+| **عمق التعليقات** | `TOP 5 most substantive comments` | زِد إلى 10 لصورة أوفى، أو أنقِص إلى 3 للسرعة |
+| **تركيز الفئة** | أضِف سطر فلترة | `Only track products tagged AI or Developer Tools` لتضييق المسح |
+| **اللغة** | أضِف سطراً في النهاية | `Write the entire PDF in Arabic` — مسار متصفح headless يصيّر RTL بنظافة |
+| **لوحة الألوان** | قواعد الألوان | اربط الفئات بألوان علامتك التجارية |
+
+## كيف يعمل
+
+يقود الأمر خط أنابيب من ثلاث مراحل. يحمّل Prefrontal قدرات `computer-use` و`web-search` و`shell` إلى السياق، ويثبّت النموذج تاريخ اليوم، ثم يشغّل:
+
+| المرحلة | ما يحدث | المُخرَج |
+|---------|---------|---------|
+| **1 — التصفّح** | يفتح Product Hunt عبر إضافة المتصفح، ويتنقّل في لوحة المتصدّرين الأسبوعية، ويفتح كل صفحة منتج، ويقرأ الأوصاف والإحصائيات ومواضيع التعليقات كاملة | بيانات المنتجات الخام: أسماء، إحصائيات، تعليقات، روابط |
+| **2 — البحث** | لكل منتج، يجد `web_search` و`web_fetch` موقع الشركة، والمؤسسين، وملفات LinkedIn/Twitter، وسجلات Crunchbase، وتاريخ التمويل، وعروض YouTube | ملفات الشركات، سِيَر المؤسسين، بطاقات التمويل |
+| **3 — التصميم والتصيير** | HTML منسَّق ومرمَّز بألوان الفئات مع ملخص تنفيذي ورسوم لوحة المعلومات وبطاقات منتجات مرتَّبة وتصنيف فئوي ← يُطبَع إلى PDF عبر متصفح headless | `product-hunter-YYYY-MM-DD.pdf` |
+
+يسجّل Hippocampus التشغيل كحلقة، ويسجّل Basalganglia النتيجة، فيُحفَظ كل موجز للرجوع إليه — مفيد حين تريد تتبّع منتج لاحظته قبل ثلاثة أسابيع أو مقارنة اتجاهات الإطلاقات عبر الزمن.
+
+### ما الذي يحويه الـ PDF
+
+المُخرَج مصمَّم ليُقرأ من الأعلى إلى الأسفل في عشر دقائق، أو يُتصفَّح حسب الترتيب في دقيقتين:
+
+| القسم | ما يعطيك | لماذا هو موجود |
+|-------|----------|----------------|
+| **الترويسة** | العنوان + النافذة الزمنية الدقيقة + عدد المنتجات | تعرف بدقة الفترة وعدد المنتجات التي يغطّيها |
+| **الملخص التنفيذي** | أبرز 5 إطلاقات للأسبوع، سطر لكلٍّ، مرتَّبة | تلحق في 60 ثانية إن كان هذا كل ما تقرأ |
+| **الأسبوع في لمحة** | أعداد المنتجات، توزيع الفئات، متصدّرو التصويتات، توزيع التمويل + رسوم | شكل الأسبوع في لمحة — بلا قراءة |
+| **بطاقات المنتجات** | كل منتج: مرتَّب، مصنَّف، إحصائيات، روابط، تعليقات، شركة، مؤسسون، تمويل | الجوهر — كل ما تحتاجه لتقييم كل إطلاق |
+| **تصنيف الفئات** | المنتجات مجمَّعة حسب المجال مع مراجع ترتيب متبادلة | اعثر على ما يخصّ مجالك فوراً |
+| **المنهجية** | النافذة، طريقة الجمع، مصادر البحث، التحذيرات | تعرف كيف صُنع الموجز — وحدوده |
+
+## مثال تشغيل
+
+هذا شكل موجز منتهٍ. هذا **مثال توضيحي** للتخطيط والنبرة — تشغيلك الفعلي يسحب بيانات حيّة من لوحة المتصدّرين الفعلية. لاحظ كيف تعطيك كل بطاقة منتج الصورة الكاملة — إحصائيات، إجماع، شركة، مؤسسون، وتمويل — في تنسيق قابل للمسح.
+
+<Accordion title="موجز مثال (تخطيط توضيحي)">
+
+---
+
+**PRODUCT HUNTER**
+*أسبوع 11–18 يونيو 2026 — 24 إطلاقاً متصدّراً مُتتبَّعاً*
+
+---
+
+**الملخص التنفيذي**
+
+1. 🟦 **ذكاء اصطناعي** — **CodePilot 2.0** (2,847 ▲) — مبرمج مساعد بالذكاء الاصطناعي يولّد مجموعات اختبار كاملة من اللغة الطبيعية؛ المجتمع يسمّيه «أول أداة توفّر الوقت فعلاً»
+2. 🟩 **أدوات مطورين** — **StackForge** (2,103 ▲) — منصة نشر full-stack بنقرة واحدة؛ مُشاد بها لنهج بلا إعداد
+3. 🟪 **تصميم** — **PixelMind** (1,892 ▲) — مولّد نظام تصميم بالذكاء الاصطناعي؛ استقبال مختلط حول جودة المُخرَجات
+4. 🟧 **إنتاجية** — **FlowState** (1,654 ▲) — مؤقت تركيز مع تغذية راجعة حيوية عبر Apple Watch؛ إجماع إيجابي قوي
+5. 🟥 **تكنولوجيا مالية** — **SplitLedger** (1,441 ▲) — تقسيم مصروفات لحظي للفِرق؛ المجتمع أشار إلى مخاوف حول التسعير
+
+---
+
+**الأسبوع في لمحة**
+
+| المنتجات المُتتبَّعة | إجمالي التصويتات | إجمالي التعليقات |
+|:---:|:---:|:---:|
+| 24 | 18,432 | 2,891 |
+
+*المنتجات لكل فئة*
+
+| الفئة | العدد |
+|-------|:---:|
+| ذكاء اصطناعي | 8 |
+| أدوات مطورين | 6 |
+| تصميم | 4 |
+| إنتاجية | 3 |
+| تكنولوجيا مالية | 2 |
+| صحة | 1 |
+
+*حالة التمويل* — 💰 ممُوَّل 9 · 🏗️ ذاتي التمويل 11 · ❓ غير معروف 4
+
+---
+
+**رقم 1 — CodePilot 2.0**
+🟦 ذكاء اصطناعي · 2,847 ▲ · 342 تعليقاً · صُنع بواسطة @sarah_chen
+
+*مبرمج مساعد بالذكاء الاصطناعي يولّد مجموعات اختبار كاملة من أوصاف السلوك المتوقّع بلغة طبيعية.*
+
+🔗 [الموقع](https://codepilot.dev) · [Product Hunt](https://producthunt.com/posts/codepilot-2) · [عرض YouTube](https://youtube.com/watch?v=xxx)
+
+**حُكم المجتمع:** إيجابي بشكل ساحق — المعلّقون يبرزون جودة توليد الاختبارات وتوفير الوقت؛ القليل من المخاوف حول التسعير للمطورين المستقلين.
+
+**أبرز التعليقات:**
+1. *"أخيراً أداة تفهم فعلاً ما أريد اختباره، ليس مجرد إكمال تلقائي."* — @devmike
+2. *"استخدمتها على قاعدة كود حقيقية لأسبوع. وفّرت لي ~3 ساعات يومياً في كتابة الاختبارات."* — @janedoe
+3. *"مسار اللغة الطبيعية ← اختبار أفضل حقاً من Copilot لهذه الحالة بالذات."* — @testguru
+4. *"التسعير يبدو مرتفعاً للمطورين المستقلين. هل من خطط لباقة مجانية؟"* — @solofounder
+5. *"التكامل مع CI/CD جاهز من الصندوق إضافة كبيرة."* — @ops_lead
+
+**الشركة:** CodePilot Inc. · سان فرانسيسكو، كاليفورنيا · تأسست 2024 · ~25 موظفاً
+**المؤسسون:** Sarah Chen (رئيسة تنفيذية) — سابقاً في Google DeepMind، دكتوراه علوم حاسب من ستانفورد · James Liu (رئيس تقني) — سابقاً في Stripe، بنى إطار الاختبار الداخلي لديهم
+**التمويل:** 💰 Series A — $18M (مارس 2026)، بقيادة Sequoia Capital. سبقتها جولة seed بقيمة $4M من Y Combinator (2024). *(المصدر: Crunchbase، TechCrunch)*
+
+---
+
+**رقم 3 — PixelMind**
+🟪 تصميم · 1,892 ▲ · 287 تعليقاً · صُنع بواسطة @alex_design
+
+*مولّد نظام تصميم بالذكاء الاصطناعي — صِف علامتك التجارية واحصل على مكتبة مكوّنات كاملة.*
+
+🔗 [الموقع](https://pixelmind.ai) · [Product Hunt](https://producthunt.com/posts/pixelmind)
+
+**حُكم المجتمع:** مختلط — المصممون يُشيدون بالفكرة لكن عدة منهم يلاحظ أن جودة المُخرَجات لا تُضاهي الأنظمة المصنوعة يدوياً؛ الصانعون يردّون بنشاط على الملاحظات.
+
+**أبرز التعليقات:**
+1. *"أحب الفكرة لكن المكوّنات المولَّدة تبدو عامة. تحتاج مزيداً من التخصيص."* — @uxlead
+2. *"مثالية لـ MVPs والهاكاثونات. ليست جاهزة لأنظمة تصميم الإنتاج."* — @designer_j
+3. *"توليد لوحة الألوان ممتاز فعلاً. المكوّنات تحتاج عملاً."* — @brandsmith
+4. *"جرّبتها على علامتنا التجارية. 60% قابلة للاستخدام من الصندوق، وهذا مثير للإعجاب للإصدار الأول."* — @startup_cto
+5. *"المؤسسون يردّون بنشاط في التعليقات — علامة جيدة لمستقبل المنتج."* — @phhunter
+
+**الشركة:** PixelMind Labs · برلين، ألمانيا · تأسست 2025 · ~8 موظفين
+**المؤسسون:** Alex Müller (رئيس تنفيذي) — سابقاً في Figma، أسّس سابقاً وكالة تصميم · Nina Petrova (رئيسة تقنية) — سابقاً في Vercel
+**التمويل:** 🏗️ ذاتي التمويل — لم يُعثَر على تمويل. الشركة تبدو ذاتية التمويل.
+
+---
+
+*(…بطاقة لكل منتج مُتتبَّع، مرتَّبة حسب التصويتات)*
+
+---
+
+**تصنيف الفئات**
+
+**🟦 ذكاء اصطناعي** — رقم 1 CodePilot 2.0، رقم 6 SynthVoice، رقم 8 DataWeave، رقم 11 PromptKit...
+**🟩 أدوات مطورين** — رقم 2 StackForge، رقم 7 GitRadar، رقم 12 APIForge...
+**🟪 تصميم** — رقم 3 PixelMind، رقم 9 FontFlow، رقم 14 ColorSpace...
+
+---
+
+**المنهجية**
+
+النافذة: 11–18 يونيو 2026 (آخر 7 أيام بما فيها اليوم). 24 منتجاً جُمعت من لوحة المتصدّرين الأسبوعية على Product Hunt عبر إضافة المتصفح. بيانات الشركات والمؤسسين والتمويل بُحثت عبر بحث الويب (Crunchbase، LinkedIn، TechCrunch، مواقع الشركات، بيانات صحفية). معلومات التمويل تأتي من مصادر عامة وقد تكون ناقصة أو متقادمة. إجماع التعليقات مُستخلَص من الموضوع كاملاً — ليس كل تعليق مقتبَساً.
+
+*Generated by Wolffish — Page 1 of 8*
+
+</Accordion>
+
+<Note>
+المثال أعلاه يستخدم منتجات وشركات وهمية — تشغيلك يسحب بيانات حيّة من لوحة المتصدّرين الفعلية. لاحظ بند **PixelMind**: بدل أن يصبغ الاستقبال المختلط بصبغة إيجابية، يذكر الصيّاد حُكم المجتمع الصادق ويشير إلى الانتقاد المحدد. هذه الأمانة هي الميزة.
+</Note>
+
+## القيود
+
+- **لوحة متصدّري Product Hunt هي مصدر الحقيقة لـ «الإطلاقات المتصدّرة».** يتتبّع الصيّاد ما يُبرزه Product Hunt — إذا أُطلق منتج ولم يصل إلى لوحة المتصدّرين، لن يظهر. الإطلاقات الجديدة جداً (الساعة الأخيرة) قد لا تكون قد استقرّت في ترتيبها النهائي.
+- **بحث الشركات يعتمد على التوفّر العام.** بعض الشركات الناشئة في وضع التخفّي أو ما قبل الإطلاق مع حضور ضئيل على الويب — يأخذ الصيّاد ما هو متاح ويترك فراغات حين لا يمكن العثور على المعلومة. لا تفترض أن الفراغ = غير موجود.
+- **بيانات التمويل لحظة زمنية محددة.** قد تتأخّر Crunchbase والتغطية الصحفية عن الجولات الفعلية. تسمية «ذاتي التمويل» تعني أنه لم يُعثَر على تمويل، لا بالضرورة أنه غير موجود. تعامَل مع بطاقات التمويل كإرشادية.
+- **إجماع التعليقات مُستخلَص، لا مستطلَع.** الحُكم بسطر واحد هو قراءة النموذج للموضوع — يلتقط المزاج السائد لكن قد يفوّت الدقائق في المناقشات الطويلة جداً أو المستقطبة.
+- **الوصول عبر إضافة المتصفح مطلوب.** يقرأ وولف فيش Product Hunt عبر إضافة المتصفح على جلستك المسجَّل دخولها. إذا لم تكن الإضافة متصلة أو Product Hunt غير متاح، ستفشل مرحلة التصفّح.
+- **تصيير الـ PDF يحتاج متصفح headless.** يستخدم وولف فيش Playwright أو Puppeteer؛ وإن لم يكن أيٌّ منهما مثبتاً سيحاول تثبيت أحدهما، وهو ما ينجح عادةً لكنه يحتاج `npm`/`npx` في مسار PATH.
+
+## التكلفة ودليل النماذج
+
+أثقل من قائمة بسيطة — بحث الشركات والمؤسسين والتمويل لكل منتج يعني عمليات بحث وجلب كثيرة. ومع ذلك غير مكلف على النموذج الموصى به.
+
+### التكلفة التقريبية لكل تشغيل
+
+| النموذج | التكلفة التقديرية لكل تشغيل | ملاحظات |
+|---------|----------------------------|---------|
+| **DeepSeek V4 Pro (وضع Max)** | ~$0.10–0.35 | **موصى به.** تصفّح وكيلي قوي + بحث معمَّق بجزء يسير من السعر |
+| DeepSeek V4 Flash | ~$0.04–0.12 | أرخص وأسرع؛ أسطح في بحث المؤسسين/التمويل — مناسب لنظرة سريعة |
+| Qwen 3.7 Max | ~$0.20–0.50 | بديل متين |
+| Claude Sonnet 4.x | ~$0.50–1.20 | نثر مصقول؛ بحث معمَّق |
+| Claude Opus | ~$2.00–4.50 | الأكثر دقة في مرحلة البحث؛ مبالغة للاستخدام الأسبوعي |
+
+### ميزانية الرموز
+
+~300٬000–700٬000 رمز لكل تشغيل. يهيمن تصفّح Product Hunt (فتح كل صفحة منتج وقراءة التعليقات)؛ ويضيف بحث الويب لكل منتج الباقي. مفتاح **Brave Search** المُعد يمنع البحث من التعثّر بسبب حدود المعدّل. نحو 40–80 نداء للنموذج (تنقّل المتصفح، قراءات الصفحات، عمليات البحث والجلب، وتصيير HTML).
+
+## الأتمتة عبر heartbeat
+
+هذا مرشح قوي للـ heartbeat: يقرأ Product Hunt عبر إضافة المتصفح (بلا نشر، بلا تصويت، بلا تعليق) ويكتب ملفاً واحداً. الاعتبار الوحيد هو أن **heartbeat الـ computer-use يتطلب اتصال إضافة المتصفح** حين يشتغل الـ heartbeat — تأكّد أن الإضافة تبقى مربوطة. (للقاعدة العامة حول ما يَأمَن أتمتته، راجع [ماذا تجدوِل](/ar/configuration/what-to-schedule).)
+
+افتح **الإعدادات > heartbeat**، الصق الكتلة أدناه، وسيكون موجز إطلاقات جديد بانتظارك في مساحة عملك كل صباح اثنين.
+
+```markdown
+## Product Hunter | Weekly (Monday 08:00)
+
+You are my Product Hunter. Track every top product launch
+on Product Hunt from the past 7 days, research each one,
+and deliver ONE clean, ranked PDF I can read in ten
+minutes.
+
+Run `date +%F` for today; window is the last 7 days.
+
+Browse producthunt.com via the browser extension (already
+logged in). Collect the top launches from the weekly
+leaderboard. For EACH product, open its page and grab:
+name, tagline, rank, upvotes, comments, makers, category
+tags, website URL, YouTube/demo link, description. Read
+the comments — extract the top 5 substantive comments and
+write a one-line consensus.
+
+Then web search each product: company name + website +
+HQ + founded + size; founders + roles + backgrounds +
+LinkedIn/Twitter; funding (round, amount, date, investors)
+or "bootstrapped" if none found. Source: Crunchbase,
+LinkedIn, TechCrunch, company pages, press releases. Grab
+what's there, don't rabbit-hole.
+
+Build the PDF as styled HTML then render via headless
+browser; save as product-hunter-YYYY-MM-DD.pdf. Sections:
+masthead (title, window, product count); executive summary
+(top 5, one line each, ranked); week-at-a-glance dashboard
+with inline-SVG/CSS charts (products per category, top 5
+by upvotes, funding breakdown — no external chart libs);
+ranked product cards (rank number, name, tagline, category
+badge, stats, links, community verdict + top 5 comments,
+company profile, founder spotlight, funding status);
+category breakdown; short methodology + caveats. Footer:
+"Generated by Wolffish" / "Page X of Y".
+```
+
+<Tip>
+‏`Weekly (Monday 08:00)` يمنحك إطلاقات أسبوع كامل كل اثنين. لنبض يومي، استخدم `Daily (08:00)` وغيّر النافذة إلى "last 24 hours" — ستحصل على إطلاقات الأمس المتصدّرة كل صباح. لتعمّق شهري، استخدم `Monthly (1st 08:00)` مع نافذة "last 30 days".
+</Tip>
+
+## اصنع صيّادك
+
+النمط يعمّم على أي مهمة «تتبّع ما يُطلَق ومن يقف وراءه»:
+
+- **رادار Indie Hackers** — تتبّع الإطلاقات على Indie Hackers بدلاً من ذلك، مع التركيز على قصص الإيرادات الشهرية المتكررة وتكتيكات النمو للمشاريع ذاتية التمويل.
+- **كشّاف App Store** — أبرز التطبيقات الجديدة على App Store أو Google Play، بنفس عمق بحث الشركة/المؤسسين/التمويل.
+- **متتبّع دفعات Y Combinator** — إطلاقات يوم العرض لكل دفعة YC، مع متابعات التمويل والجذب.
+- **مراقبة إطلاقات المنافسين** — ضيّق فلتر Product Hunt إلى فئتك وتتبّع المنافسين والمنتجات المجاورة فقط.
+
+الانضباط واحد في كل مرة: **كل إطلاق متصدّر مُتتبَّع، كل شركة مبحوثة، كل حُكم مجتمعي مُلتقَط.** غيّر المصدر؛ وأبقِ الصيّاد.

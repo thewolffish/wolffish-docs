@@ -1,0 +1,474 @@
+---
+title: "Product Hunter"
+description: "A weekly Product Hunt intelligence briefing in one prompt — Wolffish browses Product Hunt through your logged-in extension, tracks every top launch from the past week, researches the company, founders, and funding behind each one, reads the community consensus, and delivers a clean, ranked, categorized PDF with stats, links, top comments, and an executive summary"
+---
+
+# Your Weekly Launch Radar
+
+The best products ship every day on Product Hunt — but nobody has time to check every day, read every comment thread, research every founder, and figure out which launches actually matter. You open the site on Friday and the week's winners are already buried under today's.
+
+That's this use case. You give Wolffish one prompt and it does the full job: **browses Product Hunt through your logged-in browser extension**, collects every top launch from the past week, then **goes deep on each one** — the company behind it, the founders, any funding history, the landing page, a YouTube demo if one exists, the community's verdict from the comment section, and the raw stats. The result is one **clean, ranked, categorized PDF** with an executive summary up top, every product numbered by rank with full stats, and just enough commentary to know what's worth your attention.
+
+The point is that **you shouldn't have to scroll Product Hunt at all.** Open the PDF, read the executive summary, skim the categories, and you know exactly what launched, who built it, whether it's funded, and what the community thinks — all in one place.
+
+<Note>
+This is a **read-and-browse workflow** — Product Hunt browsing via the extension, web search for company research, and file generation. It doesn't post, vote, comment, or modify anything on your behalf. That also makes it a solid [heartbeat](#automating-with-heartbeat) candidate: a fresh launch briefing waiting for you every Monday morning.
+</Note>
+
+## What Makes This a Hunter, Not a Scroll
+
+Three things separate this from skimming the Product Hunt homepage:
+
+<CardGroup cols={1}>
+  <Card title="Full-depth research on every launch" icon="building">
+    It doesn't just list the product — it finds the company behind it, the founders and their backgrounds, any funding rounds (past or new), the landing page, and a YouTube demo link if one exists. You get the full picture, not just a tagline.
+  </Card>
+  <Card title="Community consensus, not just upvotes" icon="comments">
+    Upvotes tell you popularity. This tells you *why* — it reads the actual comment threads, extracts the general sentiment, and pulls the top 5 most valuable comments for each product so you hear the real signal.
+  </Card>
+  <Card title="Ranked, categorized, and numbered" icon="ranking-star">
+    Every product is numbered by rank, slotted into its category (AI, Developer Tools, Design, Productivity, etc.), and laid out with full launch stats — upvotes, comments, makers. No guesswork about what won the week.
+  </Card>
+</CardGroup>
+
+It all lands in one PDF, designed to be read in ten minutes, not a wall of product cards you'll never finish.
+
+## Capabilities Required
+
+- `computer-use` — the primary data source. Wolffish uses the **browser extension** to browse Product Hunt through your already-logged-in session — navigating the leaderboard, opening each product page, reading descriptions, stats, and comment threads. Product Hunt is already linked and accessible via the extension.
+- `web-search` — the research engine. For each product, `web_search` and `web_fetch` find the company website, founder bios, Crunchbase/LinkedIn profiles, funding history, and YouTube demo videos. This is where the depth comes from.
+- `shell` — renders the finished briefing. The agent writes styled HTML and prints it to PDF through a headless browser (Playwright/Puppeteer via `npx`) — the same pipeline behind [PDFs Everywhere](/use-cases/pdfs-everywhere) and [CV Tailor](/use-cases/cv-tailor).
+
+## Setup
+
+Read the general [Setting Up for Success](/use-cases/setting-up-for-success) guide first — what's below is specific to this workflow.
+
+### Recommended Model
+
+**What matters here is agentic reliability and research depth.** The hard part is navigating Product Hunt cleanly, then running a thorough research sweep on each product — finding the real company, the actual founders, separating genuine funding announcements from press speculation, and distilling dozens of comments into a useful consensus. You want a model that's methodical.
+
+- **DeepSeek V4 Pro on Max reasoning mode** — the recommendation. Frontier-class agentic tool use and reasoning at a fraction of the cost. **Max** mode gives it the full reasoning budget for the research calls — finding the real Crunchbase page, not a similarly-named company, and distinguishing a seed round from a press rumor. Set the reasoning effort to **Max** in Settings > Models. See [DeepSeek configuration](/configuration/deepseek).
+- **Claude Opus / Sonnet 4.x** — strong alternatives if you're on Anthropic; Opus is the most thorough at the founder/funding research stage, at 10–20× the price.
+- **Avoid low-effort configs** — DeepSeek **Flash**, any model on **None** reasoning mode, or Haiku. They can browse Product Hunt fine, but the company research and comment synthesis is where a model that doesn't deliberate will hallucinate funding rounds or conflate similarly-named companies.
+
+### Required
+
+- **Wolffish installed and running** — the desktop app with a configured brain workspace.
+- **A capable cloud API key** — DeepSeek (V4 Pro) recommended, or Anthropic (Claude); configured in Settings > Models.
+- **Product Hunt accessible via the browser extension** — Wolffish's browser extension must be installed and connected, with Product Hunt already accessible (logged in or publicly browsable). The extension is how Wolffish reads Product Hunt pages.
+
+### Strongly Recommended
+
+- **[Brave Search API key](https://brave.com/search/api/)** — configured in Settings > Services > Brave Search. The company/founder/funding research fires many searches per product; the default search will rate-limit partway through a full week's worth of top products. With a Brave key, the research runs clean. The free tier is plenty.
+
+### Optional
+
+- **`filesystem`** — for a cleaner audit trail when writing the HTML and saving the PDF (the `shell` pipeline works without it).
+- **A headless browser** — Wolffish installs Playwright/Puppeteer on first use if neither is present. Having `npm`/`npx` on your PATH makes that instant.
+
+## What the Hunter Tracks
+
+For every top product from the past week, the hunter collects:
+
+| Data point | Where it comes from | Why it matters |
+|-----------|--------------------|----|
+| **Rank & upvotes** | Product Hunt leaderboard | Who won the week, numerically |
+| **Comments count** | Product Hunt product page | Engagement signal beyond upvotes |
+| **Category** | Product Hunt tags / description | Organize the PDF by domain |
+| **Tagline & description** | Product Hunt product page | What it actually does |
+| **Website link** | Product Hunt product page | Go try it yourself |
+| **YouTube / demo video** | Product Hunt page + web search | See it in action |
+| **Top 5 comments** | Product Hunt comment thread | The community's real signal |
+| **General consensus** | Synthesized from comments | The verdict in one line |
+| **Company & landing page** | Web search | Who's behind it |
+| **Founders & bios** | Web search (LinkedIn, Crunchbase, about pages) | Track who's building what |
+| **Funding history** | Web search (Crunchbase, TechCrunch, press) | Bootstrapped vs. backed — and how much |
+
+## The Prompt
+
+Send this to Wolffish on-demand, or put it on your [heartbeat](#automating-with-heartbeat). It's long because "ranked, researched, and beautifully laid out" is a real contract — every block below earns its place.
+
+```
+You are my Product Hunter. Your job: track every top
+product launch on Product Hunt from the past week, research
+the company and people behind each one, read the community
+verdict, and hand me ONE clean, modern, ranked PDF I can
+read in ten minutes. Miss nothing in the top launches;
+cut nothing from the research.
+
+FIRST, fix the window. Run `date +%F` to get today. The
+window is the last 7 days through today.
+
+=== STEP 1: BROWSE PRODUCT HUNT (use the browser) ===
+Open producthunt.com in the browser via the extension.
+You are already logged in — just navigate.
+
+Go to the weekly leaderboard / top products. Collect the
+top launches from the past 7 days. For EACH product on
+the leaderboard, open its product page and grab:
+- Product name and tagline
+- Rank position (by upvotes for that day/week)
+- Upvote count
+- Comment count
+- Maker(s) / hunter name(s)
+- Category tags (AI, Developer Tools, Design, Productivity,
+  SaaS, Fintech, Health, Education, etc.)
+- Direct link to the Product Hunt page
+- Website URL (from the product page)
+- YouTube or demo video link if listed on the page
+- The product description / pitch
+
+Then open the COMMENTS section for each product and:
+- Read through the comment thread
+- Extract the TOP 5 most substantive comments (not "great
+  product!" — real feedback, questions, or insights)
+- Write a ONE-LINE general consensus: what does the
+  community actually think? Positive, mixed, or negative,
+  and WHY. Be honest — if the comments are thin or mostly
+  from the makers, say so.
+
+=== STEP 2: RESEARCH EACH PRODUCT (use web search) ===
+For EACH product collected above, run web searches to find:
+
+COMPANY:
+- Official company name (may differ from product name)
+- Company website / landing page (visit it with web_fetch)
+- What the company does beyond this product (if anything)
+- Headquarters / location
+- Year founded
+- Company size (approximate employees)
+
+FOUNDERS:
+- Founder name(s) and role(s) (CEO, CTO, etc.)
+- Brief background — previous companies, notable roles,
+  education if readily available
+- LinkedIn profile link(s) if findable
+- Twitter/X handle(s) if findable
+
+FUNDING:
+- Search for ANY funding — past rounds, new announcements,
+  or nothing at all
+- If funded: round type (pre-seed, seed, Series A, etc.),
+  amount, date, lead investors
+- If bootstrapped or no funding found, say so clearly
+- Source the funding info (Crunchbase, TechCrunch, press
+  release, etc.)
+- Check for RECENT funding news around the launch — a
+  Product Hunt launch often coincides with an announcement
+
+Use Crunchbase, LinkedIn, TechCrunch, company about pages,
+press releases, AngelList / Wellfound, Twitter/X. Grab what
+is readily available — do NOT rabbit-hole on any single
+product. If something isn't findable, leave it blank and
+move on.
+
+=== STEP 3: BUILD THE PDF ===
+Write it as styled HTML, then render to PDF with a headless
+browser. Save to the workspace as
+product-hunter-YYYY-MM-DD.pdf (today's date).
+
+Design: clean, modern, minimal, COLOR-CODED by category,
+skimmable in ten minutes. Let stats, badges, and layout
+carry the load — not prose.
+
+Structure, in this order:
+
+1. MASTHEAD — "PRODUCT HUNTER" large, the date window
+   ("Week of <start> – <today>"), total products tracked,
+   and a one-line tagline.
+
+2. EXECUTIVE SUMMARY — the 5 most important launches of
+   the week, one tight line each with rank number, category
+   badge, and upvote count. If I read only this, I know
+   what won the week.
+
+3. WEEK AT A GLANCE — a compact dashboard:
+   - Total products tracked, total upvotes across all,
+     total comments across all
+   - Bar chart: products per category (inline SVG or CSS
+     bars — NO external chart libraries or CDNs)
+   - Top 5 by upvotes (horizontal bar chart)
+   - Funding breakdown: how many funded vs bootstrapped vs
+     unknown
+
+4. PRODUCT CARDS — one per product, NUMBERED by rank
+   (highest upvotes first). Each card contains:
+   - Rank number (large), product name, tagline
+   - Category badge (color-coded)
+   - Stats row: upvotes | comments | maker(s)
+   - One-paragraph description (from Product Hunt)
+   - Links row: [Website] [Product Hunt] [YouTube/Demo]
+     (if available) — as clickable URLs
+   - COMMUNITY VERDICT: the one-line consensus + top 5
+     comments (quoted, with commenter name)
+   - COMPANY PROFILE: company name, website, HQ, founded,
+     size, what they do
+   - FOUNDER SPOTLIGHT: name(s), role(s), background,
+     links
+   - FUNDING STATUS: badge (Funded / Bootstrapped /
+     Unknown) + details if funded (round, amount, date,
+     investors). If recent funding news found, highlight it
+
+   Use category colors to accent each card. Make cards
+   visually distinct and scannable — someone should be able
+   to flip through and get the gist of each product in
+   15 seconds.
+
+5. CATEGORY BREAKDOWN — one section per category that had
+   products this week, listing which products fell under
+   it with their rank numbers. Quick cross-reference.
+
+6. METHODOLOGY — short: the exact window, how products
+   were collected (Product Hunt leaderboard via browser
+   extension), what was researched via web search, that
+   funding info comes from public sources and may be
+   incomplete, and that comment consensus is synthesized
+   from the thread (not every comment).
+
+Footer on every page: "Generated by Wolffish" left,
+"Page X of Y" right.
+
+=== WHEN DONE ===
+Tell me three things: the #1 product of the week and why
+it won, the most interesting company story (funding,
+founder background, or pivot), and any product where the
+community consensus was notably negative or skeptical —
+so I know the full picture.
+```
+
+<Tip>
+The prompt is designed to work as-is — the only thing you might change is the time window (`the last 7 days`). Shorten to `last 24 hours` for a daily pulse, or extend to `last 30 days` for a monthly deep-dive. Everything else — the research depth, the comment analysis, the PDF layout — stays exactly as-is.
+</Tip>
+
+### Customize It
+
+Change any of these to make the hunter yours:
+
+| What | Where in the prompt | Ideas |
+|------|--------------------|-------|
+| **Time window** | `the last 7 days` | `last 24 hours` for today's launches only, `last 30 days` for a monthly round-up |
+| **Research depth** | The company/founder/funding blocks | Strip funding research for a faster run, or expand to include competitor analysis |
+| **Comment depth** | `TOP 5 most substantive comments` | Increase to 10 for a fuller picture, or drop to 3 for speed |
+| **Category focus** | Add a filter line | `Only track products tagged AI or Developer Tools` to narrow the sweep |
+| **Language** | Add a line at the end | `Write the entire PDF in Arabic` — the headless-browser pipeline renders RTL cleanly |
+| **Accent palette** | The color rules | Map categories to your brand colors |
+
+## How It Works
+
+The prompt drives a three-stage pipeline. Prefrontal loads the `computer-use`, `web-search`, and `shell` capabilities into context, the model fixes today's date, and runs:
+
+| Stage | What happens | Output |
+|-------|--------------|--------|
+| **1 — Browse** | Opens Product Hunt via the browser extension, navigates the weekly leaderboard, opens each product page, reads descriptions, stats, and full comment threads | Raw product data: names, stats, comments, links |
+| **2 — Research** | For each product, `web_search` and `web_fetch` find the company website, founders, LinkedIn/Twitter profiles, Crunchbase entries, funding history, and YouTube demos | Company profiles, founder bios, funding cards |
+| **3 — Design & render** | Styled, category-color-coded HTML with executive summary, dashboard charts, ranked product cards, and category breakdown → printed to PDF via headless browser | `product-hunter-YYYY-MM-DD.pdf` |
+
+Hippocampus logs the run as an episode and Basalganglia records the outcome, so each briefing is kept for reference — handy when you want to track a product you spotted three weeks ago or compare launch trends over time.
+
+### What's in the PDF
+
+The output is engineered to be read top-to-bottom in ten minutes, or skimmed by rank in two:
+
+| Section | What it gives you | Why it's there |
+|---------|-------------------|----------------|
+| **Masthead** | Title + the exact week window + product count | You know precisely what period and how many products this covers |
+| **Executive Summary** | The week's top 5 launches, one line each, ranked | Caught up in 60 seconds if that's all you read |
+| **Week at a Glance** | Product counts, category split, upvote leaders, funding breakdown + charts | The shape of the week at a glance — no reading required |
+| **Product Cards** | Every product: ranked, categorized, stats, links, comments, company, founders, funding | The substance — everything you need to evaluate each launch |
+| **Category Breakdown** | Products grouped by domain with rank cross-references | Find what's relevant to your field instantly |
+| **Methodology** | Window, collection method, research sources, caveats | Know how the sausage was made — and its limits |
+
+## Example Run
+
+Here's the shape of a finished briefing. This is an **illustrative example** of the layout and tone — your real run pulls live data from the actual week. Note how each product card gives you the full picture — stats, consensus, company, founders, and funding — in a scannable format.
+
+<Accordion title="Example Briefing (illustrative layout)">
+
+---
+
+**PRODUCT HUNTER**
+*Week of 11–18 June 2026 — 24 top launches tracked*
+
+---
+
+**EXECUTIVE SUMMARY**
+
+1. 🟦 **AI** — **CodePilot 2.0** (2,847 ▲) — AI pair programmer that generates full test suites from natural language; community calls it "the first tool that actually saves time"
+2. 🟩 **Developer Tools** — **StackForge** (2,103 ▲) — One-click full-stack deployment platform; praised for zero-config approach
+3. 🟪 **Design** — **PixelMind** (1,892 ▲) — AI design system generator; mixed reception on output quality
+4. 🟧 **Productivity** — **FlowState** (1,654 ▲) — Focus timer with biometric feedback via Apple Watch; strong positive consensus
+5. 🟥 **Fintech** — **SplitLedger** (1,441 ▲) — Real-time expense splitting for teams; community flagged pricing concerns
+
+---
+
+**WEEK AT A GLANCE**
+
+| 24 | 18,432 | 2,891 |
+|----|--------|-------|
+| products tracked | total upvotes | total comments |
+
+*Products per category*
+`AI                ████████ 8`
+`Developer Tools   ██████ 6`
+`Design            ████ 4`
+`Productivity      ███ 3`
+`Fintech           ██ 2`
+`Health            █ 1`
+
+*Funding status* — 💰 Funded 9 · 🏗️ Bootstrapped 11 · ❓ Unknown 4
+
+---
+
+**#1 — CodePilot 2.0**
+🟦 AI · 2,847 ▲ · 342 comments · Made by @sarah_chen
+
+*AI pair programmer that generates complete test suites from natural language descriptions of expected behavior.*
+
+🔗 [Website](https://codepilot.dev) · [Product Hunt](https://producthunt.com/posts/codepilot-2) · [YouTube Demo](https://youtube.com/watch?v=xxx)
+
+**Community Verdict:** Overwhelmingly positive — commenters highlight the test generation quality and time savings; the few concerns are about pricing for solo developers.
+
+**Top Comments:**
+1. *"Finally a tool that actually understands what I want to test, not just autocomplete."* — @devmike
+2. *"Used it on a real codebase for a week. Saved me ~3 hours per day on test writing."* — @janedoe
+3. *"The natural language → test pipeline is genuinely better than Copilot for this specific use case."* — @testguru
+4. *"Pricing seems steep for indie devs. Any plans for a free tier?"* — @solofounder
+5. *"Integration with CI/CD pipelines out of the box is a huge plus."* — @ops_lead
+
+**Company:** CodePilot Inc. · San Francisco, CA · Founded 2024 · ~25 employees
+**Founders:** Sarah Chen (CEO) — ex-Google DeepMind, Stanford CS PhD · James Liu (CTO) — ex-Stripe, built their internal testing framework
+**Funding:** 💰 Series A — $18M (March 2026), led by Sequoia Capital. Previously raised $4M seed from Y Combinator (2024). *(Source: Crunchbase, TechCrunch)*
+
+---
+
+**#3 — PixelMind**
+🟪 Design · 1,892 ▲ · 287 comments · Made by @alex_design
+
+*AI-powered design system generator — describe your brand and get a complete component library.*
+
+🔗 [Website](https://pixelmind.ai) · [Product Hunt](https://producthunt.com/posts/pixelmind)
+
+**Community Verdict:** Mixed — designers praise the concept but several note output quality doesn't match hand-crafted systems; makers are actively responding to feedback.
+
+**Top Comments:**
+1. *"Love the idea but the generated components feel generic. Needs more customization."* — @uxlead
+2. *"Perfect for MVPs and hackathons. Not ready for production design systems."* — @designer_j
+3. *"The color palette generation is actually excellent. Components need work."* — @brandsmith
+4. *"Tried it on our brand. 60% usable out of the box, which is impressive for v1."* — @startup_cto
+5. *"Founders are super responsive in comments — good sign for the product's future."* — @phhunter
+
+**Company:** PixelMind Labs · Berlin, Germany · Founded 2025 · ~8 employees
+**Founders:** Alex Müller (CEO) — ex-Figma, previously founded a design agency · Nina Petrova (CTO) — ex-Vercel
+**Funding:** 🏗️ Bootstrapped — no funding found. Company appears to be self-funded.
+
+---
+
+*(…one card per tracked product, ranked by upvotes)*
+
+---
+
+**CATEGORY BREAKDOWN**
+
+**🟦 AI** — #1 CodePilot 2.0, #6 SynthVoice, #8 DataWeave, #11 PromptKit...
+**🟩 Developer Tools** — #2 StackForge, #7 GitRadar, #12 APIForge...
+**🟪 Design** — #3 PixelMind, #9 FontFlow, #14 ColorSpace...
+
+---
+
+**METHODOLOGY**
+
+Window: 11–18 June 2026 (last 7 days incl. today). 24 products collected from Product Hunt weekly leaderboard via the browser extension. Company, founder, and funding data researched via web search (Crunchbase, LinkedIn, TechCrunch, company websites, press releases). Funding information comes from public sources and may be incomplete or outdated. Comment consensus is synthesized from the full thread — not every comment is quoted.
+
+*Generated by Wolffish — Page 1 of 8*
+
+</Accordion>
+
+<Note>
+The example above uses fictional products and companies — your real run pulls live data from the actual Product Hunt leaderboard. Notice the **PixelMind** entry: rather than spin a mixed reception as positive, the hunter reports the community's honest verdict and notes the specific criticism. That honesty is the feature.
+</Note>
+
+## Limits
+
+- **Product Hunt's leaderboard is the source of truth for "top launches."** The hunter tracks what Product Hunt surfaces — if a product launched but didn't make the leaderboard, it won't appear. Very new launches (last hour) may not have settled into their final rank.
+- **Company research depends on public availability.** Some startups are stealth or pre-launch with minimal web presence — the hunter grabs what's there and leaves blanks when information isn't findable. Don't assume blank = nonexistent.
+- **Funding data is point-in-time.** Crunchbase and press coverage may lag actual rounds. A "bootstrapped" label means no funding was *found*, not necessarily that none exists. Treat funding cards as directional.
+- **Comment consensus is synthesized, not polled.** The one-line verdict is the model's reading of the thread — it captures the dominant sentiment but may miss nuance in very long or polarized discussions.
+- **Browser extension access is required.** Wolffish reads Product Hunt through the browser extension on your already-logged-in session. If the extension isn't connected or Product Hunt isn't accessible, the browse stage will fail.
+- **PDF rendering needs a headless browser.** Wolffish uses Playwright or Puppeteer; if neither is installed it will try to install one, which usually works but needs `npm`/`npx` on your PATH.
+
+## Cost & Model Guide
+
+Heavier than a simple list — the per-product company research, founder lookups, and funding searches mean many searches and fetches. Still inexpensive on the recommended model.
+
+### Approximate Cost Per Run
+
+| Model | Est. Cost Per Run | Notes |
+|-------|-------------------|-------|
+| **DeepSeek V4 Pro (Max mode)** | ~$0.10–0.35 | **Recommended.** Strong agentic browsing + thorough research at a fraction of the price |
+| DeepSeek V4 Flash | ~$0.04–0.12 | Cheaper and faster; shallower on founder/funding research — fine for a quick overview |
+| Qwen 3.7 Max | ~$0.20–0.50 | Solid alternative |
+| Claude Sonnet 4.x | ~$0.50–1.20 | Polished prose; thorough research |
+| Claude Opus | ~$2.00–4.50 | Most thorough at the research stage; overkill for weekly use |
+
+### Token Budget
+
+~300,000–700,000 tokens per run. The Product Hunt browsing (opening each product page and reading comments) dominates; the per-product web research adds the rest. A configured **Brave Search key** keeps the research from stalling on rate limits. Roughly 40–80 LLM calls (browser navigation, page reads, searches, fetches, and the HTML render).
+
+## Automating with Heartbeat
+
+This is a strong heartbeat candidate: it reads Product Hunt through the browser extension (no posting, no voting, no commenting) and writes a single file. The only consideration is that **computer-use heartbeats require the browser extension to be connected** when the heartbeat fires — make sure the extension stays linked. (For the general rule on what's safe to automate, see [What to Schedule](/configuration/what-to-schedule).)
+
+Open **Settings > Heartbeat**, paste the block below, and a fresh launch briefing will be waiting in your workspace every Monday morning.
+
+```markdown
+## Product Hunter | Weekly (Monday 08:00)
+
+You are my Product Hunter. Track every top product launch
+on Product Hunt from the past 7 days, research each one,
+and deliver ONE clean, ranked PDF I can read in ten
+minutes.
+
+Run `date +%F` for today; window is the last 7 days.
+
+Browse producthunt.com via the browser extension (already
+logged in). Collect the top launches from the weekly
+leaderboard. For EACH product, open its page and grab:
+name, tagline, rank, upvotes, comments, makers, category
+tags, website URL, YouTube/demo link, description. Read
+the comments — extract the top 5 substantive comments and
+write a one-line consensus.
+
+Then web search each product: company name + website +
+HQ + founded + size; founders + roles + backgrounds +
+LinkedIn/Twitter; funding (round, amount, date, investors)
+or "bootstrapped" if none found. Source: Crunchbase,
+LinkedIn, TechCrunch, company pages, press releases. Grab
+what's there, don't rabbit-hole.
+
+Build the PDF as styled HTML then render via headless
+browser; save as product-hunter-YYYY-MM-DD.pdf. Sections:
+masthead (title, window, product count); executive summary
+(top 5, one line each, ranked); week-at-a-glance dashboard
+with inline-SVG/CSS charts (products per category, top 5
+by upvotes, funding breakdown — no external chart libs);
+ranked product cards (rank number, name, tagline, category
+badge, stats, links, community verdict + top 5 comments,
+company profile, founder spotlight, funding status);
+category breakdown; short methodology + caveats. Footer:
+"Generated by Wolffish" / "Page X of Y".
+```
+
+<Tip>
+`Weekly (Monday 08:00)` gives you a full week's launches every Monday. For a daily pulse, use `Daily (08:00)` and change the window to "last 24 hours" — you'll get yesterday's top launches each morning. For a monthly deep-dive, use `Monthly (1st 08:00)` with a "last 30 days" window.
+</Tip>
+
+## Make Your Own
+
+The pattern generalizes to any "track what's launching and who's behind it" job:
+
+- **Indie Hackers radar** — track launches on Indie Hackers instead, focus on bootstrapped MRR stories and growth tactics.
+- **App Store scout** — top new apps on the App Store or Google Play, with the same company/founder/funding research depth.
+- **Y Combinator batch tracker** — each YC batch's demo day launches, with funding and traction follow-ups.
+- **Competitor launch watch** — narrow the Product Hunt filter to your category and track only competitors and adjacent products.
+
+The discipline stays the same every time: **every top launch tracked, every company researched, every community verdict captured.** Change the source; keep the hunter.
