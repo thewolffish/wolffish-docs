@@ -31,6 +31,24 @@ To remove an imported capability, click the **trash icon** next to it and confir
   Prefer the terminal? Create the folder by hand instead — the steps below show exactly that. After editing files manually, click **Resync** in the Cellebrum panel (or restart Wolffish) to pick up the changes. The rules in [Packaging for Import and Sharing](#packaging-for-import-and-sharing) are worth following either way — they're what keep a capability clean and portable.
 </Tip>
 
+## Try It Now: Example Capabilities
+
+Want to see the import flow before building your own? Download this bundle of three tiny, ready-to-run capabilities, then **drop the `.zip` onto Settings → Cellebrum**. All three import at once — validated and loaded on the spot, no terminal and no code to write.
+
+<Card title="Download example capabilities (.zip)" icon="download" href="https://cdn.wolffi.sh/general/wolffish-extensibility-examples.zip">
+  `coin-flip`, `dice-roller`, and `color-mixer` — three self-contained capabilities you can import in a single drop and see live in action.
+</Card>
+
+Each is a complete capability (SKILL.md + plugin), so once imported you can trigger them straight from chat:
+
+| Capability | What it does | Try saying |
+|---|---|---|
+| `coin-flip` | Flips a fair coin | *"Flip a coin"* |
+| `dice-roller` | Rolls dice with any number of sides | *"Roll 2d20"* |
+| `color-mixer` | Converts colors between formats | *"Convert #ff5733 to RGB"* |
+
+They appear tagged **Unknown** (they're yours, not bundled) and can be removed any time with the trash icon. Open them up in `brain/cerebellum/` to see exactly how a small capability is wired — they're the same shape as the [weather example below](#a-real-working-example-a-weather-capability).
+
 ## Step 1: Create the Folder
 
 ```bash
