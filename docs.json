@@ -79,8 +79,8 @@
                 "expanded": true,
                 "pages": [
                   "introduction/overview",
-                  "introduction/philosophy",
                   "getting-started/installation",
+                  "introduction/philosophy",
                   "getting-started/first-launch",
                   "getting-started/quickstart"
                 ]
@@ -252,8 +252,8 @@
                 "expanded": true,
                 "pages": [
                   "ar/introduction/overview",
-                  "ar/introduction/philosophy",
                   "ar/getting-started/installation",
+                  "ar/introduction/philosophy",
                   "ar/getting-started/first-launch",
                   "ar/getting-started/quickstart"
                 ]
