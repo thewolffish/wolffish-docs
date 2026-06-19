@@ -52,14 +52,14 @@ description: "تدقيق أمني عند الطلب — يفحص المنافذ 
 ## الجدول الزمني
 
 ```
-الساعة 6:00 صباحاً كل أحد
+الساعة 6:00 صباحاً كل يوم
 ```
 
-أسبوعياً يكفي لمعظم الأشخاص. اضبط جدول الـ heartbeat ليتناسب مع درجة تحمّلك للمخاطر.
+يومياً يكفي لمعظم الأشخاص. اضبط جدول الـ heartbeat ليتناسب مع درجة تحمّلك للمخاطر.
 
 ## الأمر
 
-أرسل هذا إلى وولف فيش عند الطلب، أو أضفه إلى heartbeat لتشغيلات أسبوعية مؤتمتة. عند الإرسال مباشرة، تذهب الرسالة مباشرة إلى نموذج اللغة مع القدرات المتاحة لديك — دون تدخل من brainstem أو heartbeat.
+أرسل هذا إلى وولف فيش عند الطلب، أو أضفه إلى heartbeat لتشغيلات يومية مؤتمتة. عند الإرسال مباشرة، تذهب الرسالة مباشرة إلى نموذج اللغة مع القدرات المتاحة لديك — دون تدخل من brainstem أو heartbeat.
 
 ```
 ابدأ بالبحث على الويب عن ثغرات CVE المعروفة الحديثة والتحذيرات
@@ -264,18 +264,19 @@ Host yat-server
 
 ## الأتمتة باستخدام Heartbeat
 
-أضف الأمر إلى `brain/brainstem/heartbeat.md` تحت جدول أسبوعي:
+أضف الأمر إلى `brain/brainstem/heartbeat.md` تحت جدول يومي:
 
 ```markdown
-## أسبوعياً — الأحد 6:00 صباحاً
+## Daily(6:00)
 
-ابدأ بالبحث على الويب عن ثغرات CVE المعروفة الحديثة والتحذيرات
-الأمنية المتعلقة بنظام تشغيلي والبرامج الشائعة. ثم اكتشف نظام
-التشغيل وشغّل الأوامر المناسبة. افحص المنافذ المفتوحة وما يستمع
-عليها، وحالة الجدار الناري، والخدمات والعمليات الخفية قيد التشغيل،
-وإعدادات SSH، وحالة تشفير القرص، وميزات الأمان على مستوى نظام
-التشغيل، وأي برامج قديمة. قارن ما تجده محلياً مع ثغرات CVE من
-بحثك. أبرِز أي شيء مقلق مع مستوى المخاطرة وأخبرني بالضبط كيف أصلحه.
+Start by searching the web for known recent CVEs and security
+advisories relevant to my OS and common software. Then detect my
+OS and run the appropriate commands. Check open ports and what's
+listening on them, firewall status, running services and daemons,
+SSH config, disk encryption status, OS-level security features,
+and any outdated software. Cross-reference what you find locally
+against the CVEs from your search. Flag anything concerning with
+risk level and tell me exactly how to fix it.
 ```
 
-يعمل التدقيق كل صباح أحد. تتراكم التقارير التاريخية في Hippocampus، فيمكنك تتبّع كيف يتغير وضعك الأمني مع الوقت — هل أصلحت فعلاً تحذيرات الأسبوع الماضي؟ هل تُدخل الحزم الجديدة CVEs جديدة؟
+يعمل التدقيق كل صباح الساعة 6. تتراكم التقارير التاريخية في Hippocampus، فيمكنك تتبّع كيف يتغير وضعك الأمني مع الوقت — هل أصلحت فعلاً تحذيرات الأمس؟ هل تُدخل الحزم الجديدة CVEs جديدة؟

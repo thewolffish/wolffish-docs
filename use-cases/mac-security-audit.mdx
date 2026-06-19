@@ -52,14 +52,14 @@ This use case uses `shell` and `web-search` — both need a cloud LLM to work. R
 ## Schedule
 
 ```
-6:00 AM every Sunday
+6:00 AM every day
 ```
 
-Weekly is enough for most people. Adjust the heartbeat schedule to match your risk tolerance.
+Daily is enough for most people. Adjust the heartbeat schedule to match your risk tolerance.
 
 ## The Prompt
 
-Send this to Wolffish on-demand, or add it to your heartbeat for automated weekly runs. When sent directly, the message goes straight to the LLM with your available capabilities — no brainstem or heartbeat involved.
+Send this to Wolffish on-demand, or add it to your heartbeat for automated daily runs. When sent directly, the message goes straight to the LLM with your available capabilities — no brainstem or heartbeat involved.
 
 ```
 Start by searching the web for known recent CVEs and security
@@ -265,10 +265,10 @@ The agent can also apply fixes directly if you approve — running package upgra
 
 ## Automating with Heartbeat
 
-Add the prompt to `brain/brainstem/heartbeat.md` under a weekly schedule:
+Add the prompt to `brain/brainstem/heartbeat.md` under a daily schedule:
 
 ```markdown
-## Weekly — Sunday 6:00 AM
+## Daily(6:00)
 
 Start by searching the web for known recent CVEs and security
 advisories relevant to my OS and common software. Then detect my
@@ -280,4 +280,4 @@ against the CVEs from your search. Flag anything concerning with
 risk level and tell me exactly how to fix it.
 ```
 
-The audit runs every Sunday morning. Historical reports accumulate in Hippocampus, so you can track how your security posture changes over time — did you actually fix last week's warnings? Are new packages introducing new CVEs?
+The audit runs every morning at 6 AM. Historical reports accumulate in Hippocampus, so you can track how your security posture changes over time — did you actually fix yesterday's warnings? Are new packages introducing new CVEs?
