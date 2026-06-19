@@ -96,6 +96,7 @@
                     "group": "Use Cases",
                     "expanded": true,
                     "pages": [
+                      "use-cases/world-cup-on-top",
                       "use-cases/product-hunter",
                       "use-cases/news-butler",
                       "use-cases/nuke-adobe",
@@ -268,6 +269,7 @@
                     "group": "حالات الاستخدام",
                     "expanded": true,
                     "pages": [
+                      "ar/use-cases/world-cup-on-top",
                       "ar/use-cases/product-hunter",
                       "ar/use-cases/news-butler",
                       "ar/use-cases/nuke-adobe",

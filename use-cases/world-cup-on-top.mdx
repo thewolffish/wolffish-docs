@@ -1,0 +1,531 @@
+---
+title: "World Cup On Top"
+description: "A living World Cup 2026 command center in one prompt — Wolffish exhaustively researches every team, player, match result, goal, penalty, foul, and stat from the currently running tournament, calculates each team's percentage chance of winning, and builds a beautiful, minimal Notion page you can glance at daily and update as the tournament unfolds"
+---
+
+# Your World Cup Command Center
+
+The World Cup is on and you're drowning in tabs. One site for group standings, another for top scorers, a third for match schedules, a fourth for odds — and none of them talk to each other. By the time you've pieced together the full picture, two more matches have kicked off.
+
+That's this use case. You give Wolffish one prompt and it does the full job: **exhaustively researches every detail of the currently running FIFA World Cup 2026** — every team and their group, every player on every squad, every match result with goals, penalties, fouls, cards, possession stats, and each team's calculated percentage chance of lifting the trophy — then builds a **beautiful, minimal, easy-to-update Notion page** titled "World Cup On Top" that gives you the complete picture at a glance. Tables, callouts, toggles, dividers, color — every Notion element earns its place.
+
+The point is that **you shouldn't have to open any other tab.** Open your Notion page, glance at the dashboard, and you know exactly where the tournament stands — who's in, who's out, who's scoring, and who's likely to win it all.
+
+<Note>
+This is a **research-and-create workflow** — web search for stats and the Notion integration for building the page. It doesn't post to social media, send messages, or touch your system. It reads the public web and writes to your connected Notion workspace. That also makes it a solid [heartbeat](#automating-with-heartbeat) candidate: a fresh stats update waiting for you every match day.
+</Note>
+
+## What Makes This a Command Center, Not a Spreadsheet
+
+Three things separate this from pasting scores into a table:
+
+<CardGroup cols={1}>
+  <Card title="Exhaustive stats, not just scores" icon="futbol">
+    It doesn't stop at who won — it pulls goals, assists, penalties scored and missed, fouls committed, yellow and red cards, possession percentages, shots on target, and pass accuracy. You get the full statistical fingerprint of every team and every player who matters.
+  </Card>
+  <Card title="Winning probability, not just standings" icon="chart-line">
+    Raw standings tell you who's leading their group. This tells you who's **likely to win the tournament** — a calculated percentage chance for each remaining team based on current form, goal difference, strength of schedule, and historical performance. A number you can quote, not a gut feeling.
+  </Card>
+  <Card title="A living Notion page, not a dead PDF" icon="pen-to-square">
+    PDFs are snapshots. This builds a structured Notion page you can **come back to and update** — run the prompt again after a match day and the stats refresh in place. Tables you can sort, toggles you can collapse, callouts that highlight what changed. Minimal but alive.
+  </Card>
+</CardGroup>
+
+It all lives in one Notion page, designed to be glanced at in two minutes and deep-dived when a match is about to kick off.
+
+## Capabilities Required
+
+- `web-search` — the primary research engine. `web_search` runs the exhaustive sweep for tournament data — standings, results, squad lists, player stats, match details, host city info, odds and projections. `web_fetch` opens the actual sources — FIFA's official pages, major sports outlets, stats databases — so numbers are pulled from full pages, not search snippets.
+- `computer-use` — **optional but powerful.** If the browser extension is connected, Wolffish can browse the web like a real user — navigating FIFA.com, ESPN, Transfermarkt, or any live stats site directly through your logged-in browser session. This is especially useful for data behind interactive dashboards, live match centers, or stats pages that don't render well with `web_fetch`. Think of it as the difference between reading a printout and actually sitting at the computer. If the extension isn't connected, `web-search` alone handles everything — the extension just gives Wolffish more eyes.
+- `notion` — the output canvas. Wolffish uses the Notion integration to create and populate the "World Cup On Top" page directly in your workspace — tables, headings, callouts, toggles, dividers, and all. No copy-pasting, no exporting.
+
+**No shell, no PDF rendering.** Everything is web research flowing straight into your Notion workspace. All capabilities ship with Wolffish.
+
+## Setup
+
+Read the general [Setting Up for Success](/use-cases/setting-up-for-success) guide first — what's below is specific to this workflow.
+
+### Recommended Model
+
+**What matters here is thoroughness and structured output.** The hard part isn't finding a score — it's pulling *every* stat for *every* team and *every* relevant player, cross-referencing numbers that differ between sources, calculating meaningful win probabilities, and then organizing all of it into clean, well-structured Notion blocks that aren't a cluttered mess. You want a model that's methodical and doesn't cut corners on the last ten teams because it got lazy.
+
+- **DeepSeek V4 Pro on Max reasoning mode** — the recommendation. Frontier-class agentic reasoning and tool-use reliability at a fraction of the cost. **Max** mode gives it the full budget to be exhaustive across all 48 teams, reconcile stats that differ between FIFA's official site and third-party trackers, and calculate win percentages that actually make sense. Set the reasoning effort to **Max** in Settings > Models. See [DeepSeek configuration](/configuration/deepseek).
+- **Claude Opus / Sonnet 4.x** — strong alternatives if you're on Anthropic; Opus is the most thorough at the "don't skip any team" stage, at 10–20x the price.
+- **Avoid low-effort configs** — DeepSeek **Flash**, any model on **None** reasoning mode, or Haiku. They'll get you the group standings and top scorers but will quietly drop the bottom teams' stats and give you rounded guesses instead of calculated probabilities.
+
+### Required
+
+- **Wolffish installed and running** — the desktop app with a configured brain workspace.
+- **A capable cloud API key** — DeepSeek (V4 Pro) recommended, or Anthropic (Claude); configured in Settings > Models.
+- **Notion connected** — the Notion integration must be set up and your target workspace shared with it. See [Notion Integration](/integrations/notion) for the full setup — create an integration at [notion.so/my-integrations](https://www.notion.so/my-integrations), copy the token, paste it in Settings > Integrations > Notion, then share the parent page (or workspace) where you want the "World Cup On Top" page created. **The integration can only write to pages it's been explicitly connected to** — if it can't create the page, that's almost always a missing connection.
+
+### Strongly Recommended
+
+- **[Brave Search API key](https://brave.com/search/api/)** — configured in Settings > Services > Brave Search. This workflow fires dozens of searches for 48 teams, hundreds of players, and match-by-match stats. The default search will rate-limit before it gets through all the groups. With a Brave key, the sweep runs clean. The free tier is plenty.
+
+### Optional
+
+- **`filesystem`** — useful if you also want the raw data saved locally as JSON or markdown alongside the Notion page, for your own analysis.
+
+## What the Command Center Tracks
+
+The prompt collects everything you need to understand the tournament — from the big picture down to individual player stats.
+
+| Data point | What it covers | Why it matters |
+|-----------|---------------|----------------|
+| **Tournament info** | Host country/countries, host cities, stadiums, format, total teams, dates | Know the stage before the players |
+| **Group standings** | All groups with W/D/L, GF/GA, GD, points | Who's advancing, who's on the edge |
+| **Match results** | Every completed match — score, scorers, minute of each goal, penalties if applicable | The record of what actually happened |
+| **Team stats** | Goals scored/conceded, clean sheets, possession avg, pass accuracy, fouls, cards | The statistical fingerprint of each team |
+| **Player stats** | Top scorers, top assisters, most cards, penalty records, key players per team | Who's carrying their team |
+| **Upcoming matches** | Next fixtures with date, time, city, stadium | What's next and when |
+| **Win probability** | Percentage chance of winning the tournament per remaining team | The bottom line — who's likely to lift it |
+
+## Notion: The Living Canvas
+
+This use case writes to **Notion** instead of generating a PDF, and there's a reason: the World Cup is a **tournament in motion**. A PDF is dead the moment a match ends. A Notion page is alive — run the prompt again after a match day and the stats update in place. You get a living document you can:
+
+- **Sort tables** by any column — goals, cards, win probability, alphabetically
+- **Collapse toggles** to hide detail you don't need right now
+- **Glance at callouts** that highlight what changed since the last update
+- **Share with friends** by sharing the Notion page — no file attachments, no version confusion
+
+The prompt is specific about **minimal but not pale.** It uses Notion's full toolkit — tables, callouts with emoji, toggles, dividers, headings, bold accents — but every element earns its place. No decorative filler. No rainbow overload. Clean, structured, easy on the eyes, easy to scan.
+
+<Tip>
+If Notion isn't connected yet, the setup takes two minutes. Go to [notion.so/my-integrations](https://www.notion.so/my-integrations), create an integration, copy the token, paste it in Wolffish's Settings > Integrations > Notion, then share your target page with the integration. Full walkthrough: [Notion Integration](/integrations/notion).
+</Tip>
+
+## The Prompt
+
+Send this to Wolffish on-demand, or put it on your [heartbeat](#automating-with-heartbeat). It's long because "exhaustive stats across 48 teams, calculated probabilities, and a beautifully structured Notion page" is a real contract — every block below earns its place.
+
+```
+You are my World Cup analyst. Your job: exhaustively
+research EVERYTHING about the currently running FIFA World
+Cup 2026 — every team, every player, every match, every
+stat — and build me ONE clean, beautiful, minimal Notion
+page titled "World Cup On Top" that gives me the complete
+picture at a glance. Miss nothing. Make it beautiful.
+
+FIRST, fix the facts. Run `date +%F` to get today. Search
+for the current state of the FIFA World Cup 2026 — confirm
+it's currently running, which stage we're in (group stage,
+round of 16, quarter-finals, etc.), and what has been
+played so far.
+
+=== STEP 1: RESEARCH EVERYTHING (exhaustive) ===
+
+TOURNAMENT INFO:
+- Host country/countries and all host cities
+- Stadiums being used (name, city, capacity)
+- Tournament format (number of groups, teams per group,
+  advancement rules, knockout structure)
+- Total number of teams
+- Tournament start and end dates
+- Current stage of the tournament
+
+GROUPS AND STANDINGS (for EVERY group):
+- All teams in each group
+- Current standings: played, won, drawn, lost, goals for,
+  goals against, goal difference, points
+- Which teams have qualified for the next round, which are
+  eliminated, which are still in contention
+
+MATCH RESULTS (EVERY match played so far):
+- Date, kickoff time, city, stadium
+- Teams and final score (including extra time / penalties
+  if applicable)
+- Goal scorers with minute of each goal
+- Penalty shootout details if applicable
+- Yellow and red cards issued (player names)
+- Key match stats: possession %, shots on target, fouls,
+  corners, pass accuracy for each team
+
+PLAYER STATS (tournament-wide):
+- Top 10 goal scorers (player, team, goals, penalties
+  scored, minutes played)
+- Top 10 assist providers (player, team, assists)
+- Most yellow cards, most red cards
+- Players who have missed penalties
+- Key player for each team still in contention (name,
+  position, why they're the key)
+
+TEAM STATS (for EVERY team):
+- Total goals scored and conceded
+- Clean sheets
+- Average possession %
+- Pass accuracy %
+- Total fouls committed
+- Total yellow and red cards
+- Penalty record (scored, missed)
+
+UPCOMING MATCHES:
+- All scheduled matches not yet played
+- Date, time, city, stadium, teams
+
+WIN PROBABILITY:
+- For every team still in contention, calculate a
+  PERCENTAGE CHANCE of winning the tournament
+- Base this on: current form (results so far), goal
+  difference, quality of opponents faced, historical World
+  Cup performance, any available bookmaker odds you find
+- Show your reasoning briefly — this should be a
+  defensible number, not a guess
+- Present as a clear ranking: #1 most likely to #N least
+  likely, with the percentage
+
+Use official sources first: FIFA.com, the tournament's
+official site, and official team pages. Then major sports
+outlets: ESPN, BBC Sport, The Guardian (sport), Reuters
+(sport), AP, Goal.com, Transfermarkt, FBref,
+WhoScored. Cross-check key numbers (especially goal
+scorers and standings) against at least two sources. If
+sources disagree, prefer FIFA's official figures.
+
+If the browser extension is available, USE IT — browse
+FIFA.com, ESPN match centers, Transfermarkt, or any live
+stats dashboard directly like a real user. Interactive
+stat pages, live scoreboards, and data behind JavaScript
+renders are often richer than what web_fetch returns. Surf
+freely, click into match pages, open stat breakdowns,
+navigate standings tables. You're a logged-in user with a
+real browser — use it. Fall back to web_search / web_fetch
+for everything the browser can't reach or when the
+extension isn't connected.
+
+=== STEP 2: BUILD THE NOTION PAGE ===
+
+Create a Notion page titled "World Cup On Top" in my
+connected workspace. Place it at the ROOT of the workspace
+— not nested inside another page — unless I specifically
+tell you to put it somewhere else. Use Notion's full block toolkit —
+tables, callouts, toggles, headings, dividers, bold — but
+make EVERY element earn its place. The design principles:
+
+MINIMAL BUT NOT PALE — clean structure, confident use of
+space, but not boring or washed out. Use emoji in callouts
+strategically (⚽ 🏆 🟡 🔴 📊 🏟️ 📅) to add energy
+without clutter. Bold key numbers. Let tables breathe.
+
+EASY TO SCAN — someone should get the gist in 2 minutes
+by reading only the headings and the dashboard callout.
+
+EASY TO UPDATE — structured so that running this prompt
+again replaces stats cleanly without breaking the layout.
+
+Structure the Notion page in this order:
+
+1. TITLE AND HEADER
+   - Page title: "World Cup On Top"
+   - A callout block (🏆 emoji) with: the tournament name,
+     host country/countries, current stage, today's date,
+     and total teams. One bold line that says where we are
+     right now. This is the first thing anyone reads.
+
+2. TOURNAMENT SNAPSHOT
+   - A callout block (📊 emoji) with key numbers in bold:
+     matches played, total goals, avg goals per match,
+     most goals in a single match, current top scorer
+     (name + goals), number of teams remaining
+   - This is the "dashboard" — the entire tournament in
+     six numbers
+
+3. HOST CITIES & STADIUMS
+   - A toggle block — collapsed by default, opens to a
+     clean table: City | Stadium | Capacity | Country
+   - Keep it tucked away — it's reference, not daily reading
+
+4. GROUP STANDINGS
+   - One table per group (Group A, Group B, etc.)
+   - Columns: Team | P | W | D | L | GF | GA | GD | Pts
+   - Bold the teams that have qualified; strikethrough
+     eliminated teams (if applicable at this stage)
+   - If we're past the group stage, put this whole section
+     in a toggle labeled "Group Stage (completed)" so it
+     doesn't dominate the page
+
+5. KNOCKOUT BRACKET (if applicable)
+   - If the tournament has reached the knockout stage,
+     show the bracket: Round of 16 → Quarter-finals →
+     Semi-finals → Final
+   - Use a clean text representation — teams and scores,
+     winners in bold
+   - If still in group stage, skip this section entirely
+
+6. MATCH RESULTS
+   - A toggle for each match day or round
+   - Inside each toggle: a table with Date | Match |
+     Score | Scorers | Stadium | City
+   - Recent matches first (reverse chronological)
+   - Keep it organized but collapsed — this is the archive
+
+7. TOP SCORERS
+   - A table: Rank | Player | Team | Goals | Penalties |
+     Assists | Minutes Played
+   - Top 15 or all players with 2+ goals, whichever is
+     more
+   - Bold the current Golden Boot leader
+
+8. TEAM STATS
+   - A table with ALL teams: Team | GP | GF | GA | GD |
+     Clean Sheets | Possession % | Pass Acc % | Fouls |
+     Yellows | Reds
+   - Sorted by points (or by goals scored if past group
+     stage)
+
+9. WIN PROBABILITY RANKING
+   - This is the headline section — make it prominent
+   - A callout block (🏆 emoji) with the top 3 favorites
+     and their percentages, in bold
+   - Then a full table: Rank | Team | Win % | Current
+     Stage | Form (W/D/L last 3) | Key Player
+   - Only teams still in contention
+   - Add a short note at the bottom: what the percentage
+     is based on (form, GD, historical, odds) — one line
+
+10. UPCOMING MATCHES
+    - A table: Date | Time | Match | City | Stadium | Stage
+    - Only the next round of fixtures (not the entire
+      remaining calendar)
+    - A callout (📅 emoji) above the table with the next
+      match highlighted: "Next up: [Team A] vs [Team B],
+      [Date], [City]"
+
+11. METHODOLOGY NOTE
+    - A toggle (collapsed) with one short paragraph:
+      sources used, date of data, that win probabilities
+      are calculated estimates not guarantees, that stats
+      are cross-checked against FIFA's official records
+
+Use dividers between major sections. Use heading_2 for
+section titles. Keep paragraph text to an absolute
+minimum — let tables, callouts, and bold numbers do the
+talking. The page should feel like a dashboard, not an
+essay.
+
+=== WHEN DONE ===
+Tell me three things: who is currently leading the
+tournament (or who won), the biggest surprise so far
+(upset result or underdog performance), and which team has
+the highest calculated chance of winning it all — with
+the percentage.
+```
+
+<Tip>
+The prompt works as-is for the 2026 World Cup. Once the tournament ends, swap the last line of the research section to "research the completed tournament" and you get a permanent historical record in Notion instead of a live tracker.
+</Tip>
+
+### Customize It
+
+Change any of these to make the command center yours:
+
+| What | Where in the prompt | Ideas |
+|------|--------------------|-------|
+| **Stat depth** | The player/team stats blocks | Add expected goals (xG), key passes, saves for goalkeepers, or heatmap descriptions per player |
+| **Win probability model** | The win probability section | Weight bookmaker odds more heavily, or drop them and go pure form-based |
+| **Page structure** | The Notion layout section | Add a "Players to Watch" callout, a "VAR Decisions" tracker, or a "Manager of the Tournament" pick |
+| **Scope** | The research section | Narrow to one group or one team if you only care about your country's path |
+| **Language** | Add a line at the end | `Write the entire Notion page in Arabic` — Notion handles RTL natively |
+| **Update frequency** | The heartbeat config | After every match day, daily, or weekly — however closely you're following |
+
+## How It Works
+
+The prompt drives a two-stage pipeline. Prefrontal loads the `web-search`, `computer-use` (if the browser extension is connected), and `notion` capabilities into context, the model fixes today's date, and runs:
+
+| Stage | What happens | Output |
+|-------|--------------|--------|
+| **1 — Research** | Exhaustive multi-query sweep for every tournament detail via `web_search` — standings, results, player stats, team stats, host info, odds. `web_fetch` opens FIFA's official site, ESPN, BBC Sport, Transfermarkt, and other sports databases for full-page data. If the browser extension is connected, Wolffish also **browses live stats pages directly** — navigating interactive match centers, clicking into stat breakdowns, and reading data that JavaScript renders but `web_fetch` can't reach. Key numbers cross-checked across at least two sources | Complete, verified tournament dataset |
+| **2 — Build** | Creates the "World Cup On Top" page in Notion via the integration — structured with tables, callouts, toggles, headings, and dividers. Every section laid out in order, every table populated, every callout styled with emoji and bold numbers | A living Notion page ready to glance at |
+
+Hippocampus logs the run as an episode and Basalganglia records the outcome, so each update is kept for reference — handy when you want to see how the win probabilities shifted from group stage to knockouts.
+
+### What's on the Notion Page
+
+The page is engineered to be glanced at in two minutes or deep-dived section by section:
+
+| Section | What it gives you | Why it's there |
+|---------|-------------------|----------------|
+| **Header callout** | Tournament name, host, current stage, date | You know exactly where we are right now |
+| **Tournament snapshot** | Six key numbers in bold | The entire tournament in a glance — no reading required |
+| **Host cities & stadiums** | Reference table in a toggle | Context when you need it, hidden when you don't |
+| **Group standings** | Every group, fully sortable | Who's through, who's fighting, who's out |
+| **Knockout bracket** | The path to the final | The picture that matters once groups end |
+| **Match results** | Every match, collapsed by day | The full archive — open what you want |
+| **Top scorers** | Golden Boot race in a table | Who's hot, who's scoring |
+| **Team stats** | Full statistical profile of every team | The numbers behind the narrative |
+| **Win probability** | Ranked percentage chance per team | The bottom line — who's lifting the trophy |
+| **Upcoming matches** | Next fixtures with the next match highlighted | What to watch and when |
+
+## Example Run
+
+Here's the shape of a finished page. This is an **illustrative example** of the layout and tone — your real run pulls live data from the actual tournament. Note how tables carry the information and text is almost nonexistent.
+
+<Accordion title="Example Notion Page (illustrative layout)">
+
+---
+
+**World Cup On Top**
+
+> 🏆 **FIFA World Cup 2026** — USA, Mexico & Canada — **Group Stage, Matchday 3** — 19 June 2026 — 48 teams
+
+> 📊 **36** matches played · **98** total goals · **2.7** avg per match · **7-1** biggest win · **Kane (5)** top scorer · **48** teams remaining
+
+---
+
+**Group Standings**
+
+*Group A*
+
+| Team | P | W | D | L | GF | GA | GD | Pts |
+|------|---|---|---|---|----|----|-----|-----|
+| **USA** | 2 | 2 | 0 | 0 | 5 | 1 | +4 | **6** |
+| **Mexico** | 2 | 1 | 1 | 0 | 3 | 1 | +2 | **4** |
+| Colombia | 2 | 0 | 1 | 1 | 1 | 3 | -2 | 1 |
+| Morocco | 2 | 0 | 0 | 2 | 0 | 4 | -4 | 0 |
+
+*(…one table per group)*
+
+---
+
+**Top Scorers**
+
+| # | Player | Team | Goals | Pen | Assists | Min |
+|---|--------|------|-------|-----|---------|-----|
+| 1 | **Kane** | England | 5 | 1 | 2 | 180 |
+| 2 | Mbappé | France | 4 | 0 | 1 | 180 |
+| 3 | Vinicius Jr | Brazil | 3 | 0 | 3 | 170 |
+
+*(…top 15)*
+
+---
+
+**Win Probability**
+
+> 🏆 **Top 3:** France **18%** · Brazil **15%** · England **12%**
+
+| # | Team | Win % | Stage | Form | Key Player |
+|---|------|-------|-------|------|------------|
+| 1 | France | 18% | Group (qualified) | W W D | Mbappé |
+| 2 | Brazil | 15% | Group (qualified) | W W W | Vinicius Jr |
+| 3 | England | 12% | Group (qualified) | W W L | Kane |
+| 4 | Argentina | 11% | Group (2nd) | W D W | Messi |
+| 5 | Germany | 8% | Group (qualified) | W W D | Musiala |
+
+*(…all remaining teams)*
+
+*Based on: current form, goal difference, opponent strength, historical WC record, and aggregated bookmaker odds as of 19 June 2026.*
+
+---
+
+**Upcoming Matches**
+
+> 📅 **Next up:** Argentina vs Saudi Arabia — 20 June 2026, 18:00 — Lusail Stadium, New York
+
+| Date | Time | Match | City | Stadium | Stage |
+|------|------|-------|------|---------|-------|
+| 20 Jun | 18:00 | Argentina vs Saudi Arabia | New York | MetLife Stadium | Group C, MD3 |
+| 20 Jun | 21:00 | France vs Denmark | Los Angeles | SoFi Stadium | Group D, MD3 |
+
+---
+
+*Methodology: Data from FIFA.com, ESPN, BBC Sport, Transfermarkt, FBref. Win probabilities are calculated estimates based on form, GD, historical performance, and bookmaker consensus — not predictions. Stats cross-checked against FIFA official records. Data as of 19 June 2026.*
+
+</Accordion>
+
+<Note>
+The example above uses illustrative data — your real run pulls live stats from the actual tournament. Notice how the page is almost entirely tables and callouts — minimal prose, maximum information. That density is the feature.
+</Note>
+
+## Limits
+
+- **Stats are as current as the public web.** Match results and stats are typically indexed within hours, but a match that just ended minutes ago may not be fully reflected yet. The prompt anchors to today's date and pulls the latest available.
+- **Win probabilities are calculated estimates, not predictions.** They blend current form, goal difference, historical performance, and publicly available odds into a defensible number — but football is football. Use them as context, not bets.
+- **48 teams is a lot of data.** The exhaustive sweep across all teams, all players, and all matches means this is a heavier-than-average run — especially early in the tournament when there are more matches to log. The model needs a full reasoning budget (Max mode) to stay thorough through the last group.
+- **Notion integration must be connected.** If Wolffish can't find your workspace or can't create the page, the issue is almost always that the target page or workspace hasn't been shared with the integration. Check Connections in Notion. See [Notion Integration](/integrations/notion).
+- **Cross-source discrepancies.** FIFA's official stats and third-party trackers (ESPN, Transfermarkt) occasionally differ on assist counts, possession splits, or pass accuracy. The prompt prefers FIFA's figures when they conflict — but minor stat differences are normal.
+- **Page updates replace, not append.** Running the prompt again creates or updates the page — it replaces the content with the latest stats. Previous versions aren't kept in Notion (but Hippocampus keeps the episode log for reference).
+
+## Cost & Model Guide
+
+Heavier than a simple lookup — the exhaustive sweep across 48 teams, player stats, match-by-match detail, and tournament metadata means many searches and many fetches. Still inexpensive on the recommended model.
+
+### Approximate Cost Per Run
+
+| Model | Est. Cost Per Run | Notes |
+|-------|-------------------|-------|
+| **DeepSeek V4 Pro (Max mode)** | ~$0.10–0.30 | **Recommended.** Full-depth research + structured Notion output at a fraction of the price |
+| DeepSeek V4 Flash | ~$0.04–0.10 | Faster but shallower — will skip bottom teams and give rough probability guesses |
+| Qwen 3.7 Max | ~$0.15–0.45 | Solid alternative |
+| Claude Sonnet 4.x | ~$0.45–1.00 | Thorough research; polished output |
+| Claude Opus | ~$1.80–4.00 | Most exhaustive; overkill for daily updates |
+
+### Token Budget
+
+~250,000–600,000 tokens per run. The multi-team research sweep and match-by-match stat collection dominate; the Notion page creation is relatively lightweight by comparison. A configured **Brave Search key** keeps the research from stalling on rate limits. Roughly 30–70 LLM calls (searches, fetches, and Notion block creation).
+
+## Automating with Heartbeat
+
+This is a strong heartbeat candidate: it reads the public web and writes to Notion — no posting, no sending, no destructive commands. The Notion integration uses a token, not a browser session, so it works headlessly without any extra setup. (For the general rule on what's safe to automate, see [What to Schedule](/configuration/what-to-schedule).)
+
+Open **Settings > Heartbeat**, paste the block below, and your Notion page updates automatically after every match day.
+
+```markdown
+## World Cup On Top | Daily (22:00)
+
+You are my World Cup analyst. Exhaustively research
+EVERYTHING about the currently running FIFA World Cup 2026
+and update the Notion page "World Cup On Top" in my
+connected workspace with the latest data.
+
+Run `date +%F` for today.
+
+Research: current tournament stage, all group standings
+(P/W/D/L/GF/GA/GD/Pts), every match result played so far
+(score, scorers with minutes, cards, key stats: possession,
+shots on target, fouls, corners, pass accuracy), top 15
+scorers (goals, penalties, assists, minutes), team stats
+for all teams (GF/GA/clean sheets/possession/pass
+accuracy/fouls/cards), all upcoming fixtures, and win
+probability for every team still in contention (based on
+form, GD, strength of schedule, historical record,
+bookmaker odds — show reasoning).
+
+Sources: FIFA.com first, then ESPN, BBC Sport, The
+Guardian, Transfermarkt, FBref, WhoScored. Cross-check
+scorers and standings across two sources. Prefer FIFA
+when sources conflict. If the browser extension is
+available, browse live stats pages directly for richer
+data — interactive match centers, stat dashboards,
+standings tables.
+
+Build/update the Notion page "World Cup On Top" —
+structure: header callout (🏆 tournament, host, stage,
+date, team count); snapshot callout (📊 matches played,
+total goals, avg/match, biggest win, top scorer, teams
+remaining); host cities + stadiums (toggle with table);
+group standings (table per group, bold qualifiers); knockout
+bracket if applicable; match results (toggle per day,
+table); top scorers table; team stats table (all teams);
+win probability (callout with top 3 + full ranked table);
+upcoming matches (callout + table with next match
+highlighted); methodology toggle.
+
+Minimal text. Let tables, callouts, and bold numbers carry
+it. Every element earns its place — clean, not pale.
+```
+
+<Tip>
+`Daily (22:00)` catches the end of most match days — your page is fresh by morning. During the knockout stage, you can switch to running it after each specific match for real-time updates. If your time zone is different, adjust the hour to catch post-match stats.
+</Tip>
+
+## Make Your Own
+
+The pattern generalizes to any "track a live event exhaustively in Notion" job:
+
+- **Champions League tracker** — same structure, narrowed to UCL matches, with club-level stats and coefficient context.
+- **Olympics command center** — medal tables, event schedules, country breakdowns, athlete spotlights — all in a living Notion page.
+- **Fantasy league dashboard** — your fantasy team's performance, player values, transfer targets, and league standings — updated weekly.
+- **Tennis Grand Slam tracker** — draw brackets, match results, player stats, upset alerts — structured for a two-week tournament.
+
+The discipline stays the same every time: **exhaustive stats, calculated probabilities, minimal but beautiful Notion output.** Change the sport; keep the command center.

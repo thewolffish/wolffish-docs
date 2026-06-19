@@ -1,0 +1,531 @@
+---
+title: "كأس العالم فوق الجميع"
+description: "مركز قيادة حيّ لكأس العالم 2026 في أمر واحد — يبحث وولف فيش بشكل استقصائي عن كل فريق ولاعب ونتيجة مباراة وهدف وركلة جزاء وإحصائية من البطولة الجارية حالياً، ويحسب نسبة فوز كل فريق، ويبني صفحة Notion جميلة وبسيطة يمكنك الاطلاع عليها يومياً وتحديثها مع تقدّم البطولة"
+---
+
+# مركز قيادة كأس العالم
+
+كأس العالم قائم وأنت غارق في التبويبات. موقع للترتيب، وآخر لأفضل الهدّافين، وثالث لجدول المباريات، ورابع للاحتمالات — ولا واحد منها يتكلم مع الآخر. بحلول الوقت الذي تجمع فيه الصورة الكاملة، تكون مباراتان جديدتان قد انطلقتا.
+
+هذه هي هذه الحالة. تعطي وولف فيش أمراً واحداً فيقوم بالمهمة كاملة: **يبحث بشكل استقصائي عن كل تفصيلة في كأس العالم FIFA 2026 الجاري حالياً** — كل فريق ومجموعته، كل لاعب في كل تشكيلة، كل نتيجة مباراة مع الأهداف والركلات الجزائية والأخطاء والبطاقات وإحصائيات الاستحواذ، ونسبة فوز كل فريق محسوبة — ثم يبني **صفحة Notion جميلة وبسيطة وسهلة التحديث** بعنوان "World Cup On Top" تعطيك الصورة الكاملة بلمحة واحدة. جداول، إشعارات، أقسام قابلة للطي، فواصل، ألوان — كل عنصر في Notion يحتلّ مكانه المستحق.
+
+والمقصد أنك **يجب ألّا تحتاج لفتح أي تبويب آخر.** افتح صفحة Notion، ألقِ نظرة على لوحة المعلومات، وستعرف بالضبط أين تقف البطولة — من تأهّل، من أُقصي، من يسجّل، ومن الأرجح أن يرفع الكأس.
+
+<Note>
+هذا سير عمل **بحثي وإنشائي** — بحث على الويب للإحصائيات وتكامل Notion لبناء الصفحة. لا ينشر على وسائل التواصل، ولا يرسل رسائل، ولا يمسّ نظامك. يقرأ الويب العام ويكتب في مساحة عمل Notion المتصلة. وهذا أيضاً ما يجعله مرشحاً ممتازاً للـ [heartbeat](#الأتمتة-عبر-heartbeat): تحديث إحصائي جاهز لك بعد كل يوم مباريات.
+</Note>
+
+## لماذا هو مركز قيادة لا جدول بيانات
+
+ثلاثة أمور تميّز هذا عن لصق النتائج في جدول:
+
+<CardGroup cols={1}>
+  <Card title="إحصائيات شاملة، لا مجرد نتائج" icon="futbol">
+    لا يتوقف عند من فاز — يسحب الأهداف والتمريرات الحاسمة والركلات الجزائية المسجّلة والضائعة والأخطاء المرتكبة والبطاقات الصفراء والحمراء ونسب الاستحواذ والتسديدات على المرمى ودقة التمرير. تحصل على البصمة الإحصائية الكاملة لكل فريق وكل لاعب مهم.
+  </Card>
+  <Card title="احتمال الفوز، لا مجرد الترتيب" icon="chart-line">
+    الترتيب الخام يخبرك من يتصدّر مجموعته. هذا يخبرك من **الأرجح أن يفوز بالبطولة** — نسبة مئوية محسوبة لكل فريق لا يزال في المنافسة بناءً على الأداء الحالي وفارق الأهداف وقوة المنافسين والأداء التاريخي. رقم يمكنك الاستشهاد به، لا مجرد حدس.
+  </Card>
+  <Card title="صفحة Notion حيّة، لا PDF ميت" icon="pen-to-square">
+    ملفات PDF لقطات ثابتة. هذا يبني صفحة Notion منظمة يمكنك **العودة إليها وتحديثها** — شغّل الأمر مرة أخرى بعد يوم مباريات وتتحدّث الإحصائيات في مكانها. جداول يمكنك فرزها، أقسام قابلة للطي، إشعارات تبرز ما تغيّر. بسيط لكن حيّ.
+  </Card>
+</CardGroup>
+
+كل ذلك يعيش في صفحة Notion واحدة، مصمّمة لتُلقي عليها نظرة في دقيقتين وتتعمّق فيها حين تقترب مباراة من الانطلاق.
+
+## القدرات المطلوبة
+
+- `web-search` — محرّك البحث الأساسي. يشغّل `web_search` المسح الاستقصائي لبيانات البطولة — الترتيب، النتائج، قوائم اللاعبين، الإحصائيات، تفاصيل المباريات، معلومات المدن المستضيفة، الاحتمالات والتوقعات. ويفتح `web_fetch` المصادر الفعلية — موقع FIFA الرسمي، كبريات المنافذ الرياضية، قواعد بيانات الإحصائيات — كي تُسحب الأرقام من الصفحات الكاملة لا مقتطفات البحث.
+- `computer-use` — **اختياري لكن قوي.** إن كانت إضافة المتصفح متصلة، يمكن لوولف فيش تصفّح الويب كمستخدم حقيقي — التنقّل في FIFA.com وESPN وTransfermarkt أو أي موقع إحصائيات مباشر عبر جلسة متصفحك المسجَّل دخولها. هذا مفيد بشكل خاص للبيانات وراء لوحات المعلومات التفاعلية ومراكز المباريات المباشرة وصفحات الإحصائيات التي لا تعرض جيداً مع `web_fetch`. فكّر فيه كالفرق بين قراءة مطبوعة والجلوس فعلاً أمام الحاسوب. إن لم تكن الإضافة متصلة، يتولّى `web-search` وحده كل شيء — الإضافة تمنح وولف فيش أعيناً إضافية فحسب.
+- `notion` — لوحة الإخراج. يستخدم وولف فيش تكامل Notion لإنشاء صفحة "World Cup On Top" وملئها مباشرة في مساحة عملك — جداول، عناوين، إشعارات، أقسام قابلة للطي، فواصل، وغيرها. بلا نسخ ولصق، بلا تصدير.
+
+**بلا shell، بلا تصيير PDF.** كل شيء بحث على الويب ينساب مباشرة إلى مساحة عمل Notion. كل القدرات تأتي مع وولف فيش.
+
+## الإعداد
+
+اقرأ دليل [التهيئة للنجاح](/ar/use-cases/setting-up-for-success) العام أولاً — وما يلي خاص بهذا السير.
+
+### النموذج الموصى به
+
+**ما يهم هنا هو الشمول والإخراج المنظم.** الجزء الصعب ليس إيجاد نتيجة — بل سحب *كل* إحصائية لـ *كل* فريق وكل لاعب مهم، ومطابقة الأرقام التي تختلف بين المصادر، وحساب احتمالات فوز معقولة، ثم تنظيم كل ذلك في كتل Notion نظيفة ومنظمة ليست فوضى. تريد نموذجاً منهجياً لا يتكاسل عند الفرق العشر الأخيرة.
+
+- **DeepSeek V4 Pro على وضع الاستدلال Max** — التوصية. استدلال وكيلي من الطراز الأول وموثوقية في استخدام الأدوات بجزء يسير من التكلفة. يمنحه وضع **Max** كامل الميزانية ليكون استقصائياً عبر كل الـ 48 فريقاً، ويُصالح الإحصائيات المتباينة بين موقع FIFA الرسمي والمتتبّعين الخارجيين، ويحسب نسب فوز منطقية فعلاً. اضبط جهد الاستدلال على **Max** في الإعدادات > النماذج. راجع [إعداد DeepSeek](/ar/configuration/deepseek).
+- **Claude Opus / Sonnet 4.x** — بدائل قوية إن كنت على Anthropic؛ وOpus الأكثر شمولاً في مرحلة «لا تتخطّ أي فريق»، بسعر أعلى بـ 10–20 ضعفاً.
+- **تجنّب إعدادات الجهد المنخفض** — DeepSeek **Flash**، أو أي نموذج على وضع **None**، أو Haiku. ستحصل على ترتيب المجموعات وأفضل الهدّافين لكنها ستُسقط إحصائيات الفرق الأضعف بهدوء وتعطيك تخمينات مقرّبة بدل احتمالات محسوبة.
+
+### المتطلبات
+
+- **وولف فيش مثبت ويعمل** — تطبيق سطح المكتب مع مساحة عمل دماغية مُعدّة.
+- **مفتاح API سحابي قوي** — يُنصح بـ DeepSeek (V4 Pro) أو Anthropic (Claude)، مُعد في الإعدادات > النماذج.
+- **Notion متصل** — يجب إعداد تكامل Notion ومشاركة مساحة العمل المستهدفة معه. راجع [تكامل Notion](/ar/integrations/notion) للإعداد الكامل — أنشئ تكاملاً في [notion.so/my-integrations](https://www.notion.so/my-integrations)، انسخ الرمز، الصقه في إعدادات وولف فيش > التكاملات > Notion، ثم شارك الصفحة الأم (أو مساحة العمل) حيث تريد إنشاء صفحة "World Cup On Top". **لا يمكن للتكامل الكتابة إلا في الصفحات التي شُوركت معه صراحةً** — إن لم يتمكن من إنشاء الصفحة، فالسبب غالباً اتصال مفقود.
+
+### موصى به بشدة
+
+- **[مفتاح Brave Search API](https://brave.com/search/api/)** — مُعد في الإعدادات > الخدمات > Brave Search. يطلق هذا السير عشرات عمليات البحث عن 48 فريقاً ومئات اللاعبين وإحصائيات مباراة بمباراة. سيصطدم البحث الافتراضي بحدّ المعدّل قبل أن ينتهي من كل المجموعات. مع مفتاح Brave، يجري المسح نظيفاً. الباقة المجانية تكفي.
+
+### اختياري
+
+- **`filesystem`** — مفيد إن أردت أيضاً حفظ البيانات الخام محلياً كـ JSON أو markdown إلى جانب صفحة Notion، لتحليلك الخاص.
+
+## ما يتتبعه مركز القيادة
+
+يجمع الأمر كل ما تحتاجه لفهم البطولة — من الصورة الكبيرة وصولاً إلى إحصائيات اللاعبين الفرديين.
+
+| البيان | ما يغطيه | لماذا يهم |
+|--------|----------|-----------|
+| **معلومات البطولة** | الدول المستضيفة، المدن، الملاعب، النظام، عدد الفرق، التواريخ | اعرف المسرح قبل اللاعبين |
+| **ترتيب المجموعات** | كل المجموعات مع فاز/تعادل/خسر، أهداف له/عليه، فارق، نقاط | من يتأهل، من على الحافة |
+| **نتائج المباريات** | كل مباراة تمت — النتيجة، الهدّافون، دقيقة كل هدف، الركلات الترجيحية | سجل ما حدث فعلاً |
+| **إحصائيات الفرق** | أهداف مسجّلة/مستقبَلة، شباك نظيفة، متوسط استحواذ، دقة تمرير، أخطاء، بطاقات | البصمة الإحصائية لكل فريق |
+| **إحصائيات اللاعبين** | أفضل الهدّافين، صانعي الأهداف، أكثر البطاقات، سجل الركلات الجزائية | من يحمل فريقه |
+| **المباريات القادمة** | المباريات التالية مع التاريخ والوقت والمدينة والملعب | ما التالي ومتى |
+| **احتمال الفوز** | نسبة فوز بالبطولة لكل فريق لا يزال في المنافسة | الخلاصة — من سيرفع الكأس |
+
+## Notion: اللوحة الحيّة
+
+تكتب هذه الحالة إلى **Notion** بدل توليد PDF، ولسبب وجيه: كأس العالم **بطولة متحركة**. ملف PDF يموت لحظة انتهاء مباراة. صفحة Notion حيّة — شغّل الأمر مرة أخرى بعد يوم مباريات وتتحدّث الإحصائيات في مكانها. تحصل على وثيقة حيّة يمكنك:
+
+- **فرز الجداول** بأي عمود — أهداف، بطاقات، احتمال فوز، أبجدياً
+- **طي الأقسام** لإخفاء التفاصيل التي لا تحتاجها الآن
+- **إلقاء نظرة على الإشعارات** التي تبرز ما تغيّر منذ آخر تحديث
+- **مشاركتها مع الأصدقاء** بمشاركة صفحة Notion — بلا مرفقات ملفات ولا ارتباك في الإصدارات
+
+الأمر واضح بشأن **بسيط لكن ليس باهتاً.** يستخدم أدوات Notion الكاملة — جداول، إشعارات بإيموجي، أقسام قابلة للطي، فواصل، عناوين، نص عريض — لكن كل عنصر يستحق مكانه. بلا حشو تزييني. بلا فيض من الألوان. نظيف، منظم، مريح للعين، سهل المسح.
+
+<Tip>
+إن لم يكن Notion متصلاً بعد، الإعداد يستغرق دقيقتين. اذهب إلى [notion.so/my-integrations](https://www.notion.so/my-integrations)، أنشئ تكاملاً، انسخ الرمز، الصقه في إعدادات وولف فيش > التكاملات > Notion، ثم شارك صفحتك المستهدفة مع التكامل. الشرح الكامل: [تكامل Notion](/ar/integrations/notion).
+</Tip>
+
+## الأمر
+
+أرسل هذا إلى وولف فيش عند الطلب أو ضعه في [heartbeat](#الأتمتة-عبر-heartbeat). هو طويل لأن "إحصائيات استقصائية عبر 48 فريقاً واحتمالات محسوبة وصفحة Notion منظمة بجمال" عقد حقيقي — كل كتلة أدناه تحتلّ مكانها.
+
+```
+You are my World Cup analyst. Your job: exhaustively
+research EVERYTHING about the currently running FIFA World
+Cup 2026 — every team, every player, every match, every
+stat — and build me ONE clean, beautiful, minimal Notion
+page titled "World Cup On Top" that gives me the complete
+picture at a glance. Miss nothing. Make it beautiful.
+
+FIRST, fix the facts. Run `date +%F` to get today. Search
+for the current state of the FIFA World Cup 2026 — confirm
+it's currently running, which stage we're in (group stage,
+round of 16, quarter-finals, etc.), and what has been
+played so far.
+
+=== STEP 1: RESEARCH EVERYTHING (exhaustive) ===
+
+TOURNAMENT INFO:
+- Host country/countries and all host cities
+- Stadiums being used (name, city, capacity)
+- Tournament format (number of groups, teams per group,
+  advancement rules, knockout structure)
+- Total number of teams
+- Tournament start and end dates
+- Current stage of the tournament
+
+GROUPS AND STANDINGS (for EVERY group):
+- All teams in each group
+- Current standings: played, won, drawn, lost, goals for,
+  goals against, goal difference, points
+- Which teams have qualified for the next round, which are
+  eliminated, which are still in contention
+
+MATCH RESULTS (EVERY match played so far):
+- Date, kickoff time, city, stadium
+- Teams and final score (including extra time / penalties
+  if applicable)
+- Goal scorers with minute of each goal
+- Penalty shootout details if applicable
+- Yellow and red cards issued (player names)
+- Key match stats: possession %, shots on target, fouls,
+  corners, pass accuracy for each team
+
+PLAYER STATS (tournament-wide):
+- Top 10 goal scorers (player, team, goals, penalties
+  scored, minutes played)
+- Top 10 assist providers (player, team, assists)
+- Most yellow cards, most red cards
+- Players who have missed penalties
+- Key player for each team still in contention (name,
+  position, why they're the key)
+
+TEAM STATS (for EVERY team):
+- Total goals scored and conceded
+- Clean sheets
+- Average possession %
+- Pass accuracy %
+- Total fouls committed
+- Total yellow and red cards
+- Penalty record (scored, missed)
+
+UPCOMING MATCHES:
+- All scheduled matches not yet played
+- Date, time, city, stadium, teams
+
+WIN PROBABILITY:
+- For every team still in contention, calculate a
+  PERCENTAGE CHANCE of winning the tournament
+- Base this on: current form (results so far), goal
+  difference, quality of opponents faced, historical World
+  Cup performance, any available bookmaker odds you find
+- Show your reasoning briefly — this should be a
+  defensible number, not a guess
+- Present as a clear ranking: #1 most likely to #N least
+  likely, with the percentage
+
+Use official sources first: FIFA.com, the tournament's
+official site, and official team pages. Then major sports
+outlets: ESPN, BBC Sport, The Guardian (sport), Reuters
+(sport), AP, Goal.com, Transfermarkt, FBref,
+WhoScored. Cross-check key numbers (especially goal
+scorers and standings) against at least two sources. If
+sources disagree, prefer FIFA's official figures.
+
+If the browser extension is available, USE IT — browse
+FIFA.com, ESPN match centers, Transfermarkt, or any live
+stats dashboard directly like a real user. Interactive
+stat pages, live scoreboards, and data behind JavaScript
+renders are often richer than what web_fetch returns. Surf
+freely, click into match pages, open stat breakdowns,
+navigate standings tables. You're a logged-in user with a
+real browser — use it. Fall back to web_search / web_fetch
+for everything the browser can't reach or when the
+extension isn't connected.
+
+=== STEP 2: BUILD THE NOTION PAGE ===
+
+Create a Notion page titled "World Cup On Top" in my
+connected workspace. Place it at the ROOT of the workspace
+— not nested inside another page — unless I specifically
+tell you to put it somewhere else. Use Notion's full block toolkit —
+tables, callouts, toggles, headings, dividers, bold — but
+make EVERY element earn its place. The design principles:
+
+MINIMAL BUT NOT PALE — clean structure, confident use of
+space, but not boring or washed out. Use emoji in callouts
+strategically (⚽ 🏆 🟡 🔴 📊 🏟️ 📅) to add energy
+without clutter. Bold key numbers. Let tables breathe.
+
+EASY TO SCAN — someone should get the gist in 2 minutes
+by reading only the headings and the dashboard callout.
+
+EASY TO UPDATE — structured so that running this prompt
+again replaces stats cleanly without breaking the layout.
+
+Structure the Notion page in this order:
+
+1. TITLE AND HEADER
+   - Page title: "World Cup On Top"
+   - A callout block (🏆 emoji) with: the tournament name,
+     host country/countries, current stage, today's date,
+     and total teams. One bold line that says where we are
+     right now. This is the first thing anyone reads.
+
+2. TOURNAMENT SNAPSHOT
+   - A callout block (📊 emoji) with key numbers in bold:
+     matches played, total goals, avg goals per match,
+     most goals in a single match, current top scorer
+     (name + goals), number of teams remaining
+   - This is the "dashboard" — the entire tournament in
+     six numbers
+
+3. HOST CITIES & STADIUMS
+   - A toggle block — collapsed by default, opens to a
+     clean table: City | Stadium | Capacity | Country
+   - Keep it tucked away — it's reference, not daily reading
+
+4. GROUP STANDINGS
+   - One table per group (Group A, Group B, etc.)
+   - Columns: Team | P | W | D | L | GF | GA | GD | Pts
+   - Bold the teams that have qualified; strikethrough
+     eliminated teams (if applicable at this stage)
+   - If we're past the group stage, put this whole section
+     in a toggle labeled "Group Stage (completed)" so it
+     doesn't dominate the page
+
+5. KNOCKOUT BRACKET (if applicable)
+   - If the tournament has reached the knockout stage,
+     show the bracket: Round of 16 → Quarter-finals →
+     Semi-finals → Final
+   - Use a clean text representation — teams and scores,
+     winners in bold
+   - If still in group stage, skip this section entirely
+
+6. MATCH RESULTS
+   - A toggle for each match day or round
+   - Inside each toggle: a table with Date | Match |
+     Score | Scorers | Stadium | City
+   - Recent matches first (reverse chronological)
+   - Keep it organized but collapsed — this is the archive
+
+7. TOP SCORERS
+   - A table: Rank | Player | Team | Goals | Penalties |
+     Assists | Minutes Played
+   - Top 15 or all players with 2+ goals, whichever is
+     more
+   - Bold the current Golden Boot leader
+
+8. TEAM STATS
+   - A table with ALL teams: Team | GP | GF | GA | GD |
+     Clean Sheets | Possession % | Pass Acc % | Fouls |
+     Yellows | Reds
+   - Sorted by points (or by goals scored if past group
+     stage)
+
+9. WIN PROBABILITY RANKING
+   - This is the headline section — make it prominent
+   - A callout block (🏆 emoji) with the top 3 favorites
+     and their percentages, in bold
+   - Then a full table: Rank | Team | Win % | Current
+     Stage | Form (W/D/L last 3) | Key Player
+   - Only teams still in contention
+   - Add a short note at the bottom: what the percentage
+     is based on (form, GD, historical, odds) — one line
+
+10. UPCOMING MATCHES
+    - A table: Date | Time | Match | City | Stadium | Stage
+    - Only the next round of fixtures (not the entire
+      remaining calendar)
+    - A callout (📅 emoji) above the table with the next
+      match highlighted: "Next up: [Team A] vs [Team B],
+      [Date], [City]"
+
+11. METHODOLOGY NOTE
+    - A toggle (collapsed) with one short paragraph:
+      sources used, date of data, that win probabilities
+      are calculated estimates not guarantees, that stats
+      are cross-checked against FIFA's official records
+
+Use dividers between major sections. Use heading_2 for
+section titles. Keep paragraph text to an absolute
+minimum — let tables, callouts, and bold numbers do the
+talking. The page should feel like a dashboard, not an
+essay.
+
+=== WHEN DONE ===
+Tell me three things: who is currently leading the
+tournament (or who won), the biggest surprise so far
+(upset result or underdog performance), and which team has
+the highest calculated chance of winning it all — with
+the percentage.
+```
+
+<Tip>
+الأمر يعمل كما هو لكأس العالم 2026. بمجرد انتهاء البطولة، بدّل السطر الأخير من قسم البحث إلى "research the completed tournament" وستحصل على سجل تاريخي دائم في Notion بدل متتبّع مباشر.
+</Tip>
+
+### خصّصه
+
+غيّر أياً من هذه لتجعل مركز القيادة يناسبك:
+
+| ماذا | أين في الأمر | أفكار |
+|------|-------------|-------|
+| **عمق الإحصائيات** | كتل إحصائيات اللاعبين/الفرق | أضف الأهداف المتوقعة (xG)، التمريرات المفتاحية، تصدّيات حراس المرمى |
+| **نموذج احتمال الفوز** | قسم احتمال الفوز | أعطِ وزناً أكبر لاحتمالات المراهنين، أو اعتمد فقط على الأداء الحالي |
+| **هيكل الصفحة** | قسم تصميم Notion | أضف إشعار "لاعبون يستحقون المتابعة" أو متتبّع "قرارات VAR" |
+| **النطاق** | قسم البحث | ضيّقه إلى مجموعة واحدة أو فريق واحد إن كنت تهتم فقط بمسار بلدك |
+| **اللغة** | أضف سطراً في النهاية | `Write the entire Notion page in Arabic` — يتعامل Notion مع RTL بشكل أصيل |
+| **تكرار التحديث** | إعداد heartbeat | بعد كل يوم مباريات، يومياً، أو أسبوعياً — حسب متابعتك |
+
+## كيف يعمل
+
+يشغّل الأمر مسار عمل من مرحلتين. يحمّل Prefrontal قدرات `web-search` و`computer-use` (إن كانت إضافة المتصفح متصلة) و`notion` في السياق، يحدّد النموذج تاريخ اليوم، وينطلق:
+
+| المرحلة | ما يحدث | المخرج |
+|---------|---------|--------|
+| **1 — البحث** | مسح استقصائي متعدد الاستعلامات لكل تفصيلة في البطولة عبر `web_search` — الترتيب، النتائج، إحصائيات اللاعبين، إحصائيات الفرق، معلومات المستضيف، الاحتمالات. يفتح `web_fetch` موقع FIFA الرسمي، ESPN، BBC Sport، Transfermarkt وقواعد بيانات رياضية أخرى للبيانات من الصفحات الكاملة. إن كانت إضافة المتصفح متصلة، يتصفّح وولف فيش أيضاً **صفحات الإحصائيات المباشرة مباشرةً** — يتنقّل في مراكز المباريات التفاعلية، وينقر على تفاصيل الإحصائيات، ويقرأ البيانات التي يعرضها JavaScript ولا يصل إليها `web_fetch`. الأرقام الرئيسية تُقاطَع من مصدرين على الأقل | مجموعة بيانات بطولة كاملة ومُتحقَّق منها |
+| **2 — البناء** | ينشئ صفحة "World Cup On Top" في Notion عبر التكامل — منظمة بجداول وإشعارات وأقسام قابلة للطي وعناوين وفواصل. كل قسم مرتَّب، كل جدول مملوء، كل إشعار مُنسَّق بإيموجي ونص عريض | صفحة Notion حيّة جاهزة للاطلاع |
+
+يسجّل Hippocampus التشغيل كحلقة ويسجّل Basalganglia النتيجة، فيُحتفظ بكل تحديث كمرجع — مفيد حين تريد رؤية كيف تغيّرت احتمالات الفوز من دور المجموعات إلى الأدوار الإقصائية.
+
+### ما في صفحة Notion
+
+الصفحة مهندسة لتُلقي عليها نظرة في دقيقتين أو تتعمّق قسماً بقسم:
+
+| القسم | ماذا يعطيك | لماذا هو هنا |
+|-------|-----------|--------------|
+| **إشعار العنوان** | اسم البطولة، المستضيف، المرحلة الحالية، التاريخ | تعرف بالضبط أين نحن الآن |
+| **لقطة البطولة** | ستة أرقام رئيسية بخط عريض | البطولة كاملة في لمحة — بلا قراءة |
+| **المدن المستضيفة والملاعب** | جدول مرجعي في قسم قابل للطي | سياق حين تحتاجه، مخفي حين لا تحتاجه |
+| **ترتيب المجموعات** | كل مجموعة، قابلة للفرز بالكامل | من تأهّل، من يقاتل، من أُقصي |
+| **شجرة الأدوار الإقصائية** | المسار إلى النهائي | الصورة المهمة بعد انتهاء المجموعات |
+| **نتائج المباريات** | كل مباراة، مطوية حسب اليوم | الأرشيف الكامل — افتح ما تريد |
+| **أفضل الهدّافين** | سباق الحذاء الذهبي في جدول | من يشتعل، من يسجّل |
+| **إحصائيات الفرق** | ملف إحصائي كامل لكل فريق | الأرقام وراء الرواية |
+| **احتمال الفوز** | نسبة مئوية مرتَّبة لكل فريق | الخلاصة — من سيرفع الكأس |
+| **المباريات القادمة** | المباريات التالية مع إبراز المباراة القادمة | ماذا تشاهد ومتى |
+
+## مثال تشغيل
+
+هذا شكل الصفحة المكتملة. هذا **مثال توضيحي** للتصميم والنبرة — تشغيلك الحقيقي يسحب بيانات حيّة من البطولة الفعلية. لاحظ كيف تحمل الجداول المعلومات والنصوص شبه معدومة.
+
+<Accordion title="مثال صفحة Notion (تصميم توضيحي)">
+
+---
+
+**World Cup On Top**
+
+> 🏆 **كأس العالم FIFA 2026** — الولايات المتحدة، المكسيك وكندا — **دور المجموعات، يوم المباريات 3** — 19 يونيو 2026 — 48 فريقاً
+
+> 📊 **36** مباراة أُقيمت · **98** هدف إجمالي · **2.7** معدّل لكل مباراة · **7-1** أكبر فوز · **كين (5)** أفضل هدّاف · **48** فريقاً متبقياً
+
+---
+
+**ترتيب المجموعات**
+
+*المجموعة A*
+
+| الفريق | لعب | فاز | تعادل | خسر | له | عليه | الفارق | النقاط |
+|--------|-----|-----|-------|-----|----|------|--------|--------|
+| **الولايات المتحدة** | 2 | 2 | 0 | 0 | 5 | 1 | +4 | **6** |
+| **المكسيك** | 2 | 1 | 1 | 0 | 3 | 1 | +2 | **4** |
+| كولومبيا | 2 | 0 | 1 | 1 | 1 | 3 | -2 | 1 |
+| المغرب | 2 | 0 | 0 | 2 | 0 | 4 | -4 | 0 |
+
+*(…جدول لكل مجموعة)*
+
+---
+
+**أفضل الهدّافين**
+
+| # | اللاعب | الفريق | الأهداف | جزائية | تمريرات | الدقائق |
+|---|--------|--------|---------|--------|---------|---------|
+| 1 | **كين** | إنجلترا | 5 | 1 | 2 | 180 |
+| 2 | مبابي | فرنسا | 4 | 0 | 1 | 180 |
+| 3 | فينيسيوس جونيور | البرازيل | 3 | 0 | 3 | 170 |
+
+*(…أفضل 15)*
+
+---
+
+**احتمال الفوز**
+
+> 🏆 **أبرز 3:** فرنسا **18%** · البرازيل **15%** · إنجلترا **12%**
+
+| # | الفريق | نسبة الفوز | المرحلة | الأداء | اللاعب الأساسي |
+|---|--------|-----------|---------|--------|----------------|
+| 1 | فرنسا | 18% | مجموعات (تأهّل) | ف ف ت | مبابي |
+| 2 | البرازيل | 15% | مجموعات (تأهّل) | ف ف ف | فينيسيوس جونيور |
+| 3 | إنجلترا | 12% | مجموعات (تأهّل) | ف ف خ | كين |
+| 4 | الأرجنتين | 11% | مجموعات (ثاني) | ف ت ف | ميسي |
+| 5 | ألمانيا | 8% | مجموعات (تأهّل) | ف ف ت | موسيالا |
+
+*(…كل الفرق المتبقية)*
+
+*مبني على: الأداء الحالي، فارق الأهداف، قوة المنافسين، السجل التاريخي في كأس العالم، وإجماع احتمالات المراهنين حتى 19 يونيو 2026.*
+
+---
+
+**المباريات القادمة**
+
+> 📅 **التالي:** الأرجنتين ضد السعودية — 20 يونيو 2026، 18:00 — ملعب ميتلايف، نيويورك
+
+| التاريخ | الوقت | المباراة | المدينة | الملعب | المرحلة |
+|---------|-------|---------|---------|--------|---------|
+| 20 يونيو | 18:00 | الأرجنتين ضد السعودية | نيويورك | ملعب ميتلايف | المجموعة C، يوم 3 |
+| 20 يونيو | 21:00 | فرنسا ضد الدنمارك | لوس أنجلوس | ملعب SoFi | المجموعة D، يوم 3 |
+
+---
+
+*المنهجية: البيانات من FIFA.com، ESPN، BBC Sport، Transfermarkt، FBref. احتمالات الفوز تقديرات محسوبة بناءً على الأداء وفارق الأهداف والسجل التاريخي وإجماع المراهنين — وليست تنبؤات. الإحصائيات مُقاطعة مع سجلات FIFA الرسمية. البيانات حتى 19 يونيو 2026.*
+
+</Accordion>
+
+<Note>
+المثال أعلاه يستخدم بيانات توضيحية — تشغيلك الحقيقي يسحب إحصائيات حيّة من البطولة الفعلية. لاحظ كيف أن الصفحة جداول وإشعارات بالكامل تقريباً — نصوص شبه معدومة، معلومات في أقصى كثافتها. تلك الكثافة هي الميزة.
+</Note>
+
+## القيود
+
+- **الإحصائيات حديثة بقدر حداثة الويب العام.** نتائج المباريات والإحصائيات تُفهرس عادةً خلال ساعات، لكن مباراة انتهت قبل دقائق قد لا تنعكس بالكامل بعد. يرتبط الأمر بتاريخ اليوم ويسحب أحدث ما هو متاح.
+- **احتمالات الفوز تقديرات محسوبة، لا تنبؤات.** تمزج الأداء الحالي وفارق الأهداف والأداء التاريخي والاحتمالات المتاحة في رقم يمكن الدفاع عنه — لكن كرة القدم هي كرة القدم. استخدمها كسياق، لا كرهانات.
+- **48 فريقاً كمّية كبيرة من البيانات.** المسح الاستقصائي عبر كل الفرق واللاعبين والمباريات يعني تشغيلاً أثقل من المعتاد — خاصة مبكراً في البطولة حين يكون هناك مباريات أكثر لتسجيلها. يحتاج النموذج إلى كامل ميزانية الاستدلال (وضع Max) ليبقى شاملاً حتى آخر مجموعة.
+- **يجب أن يكون تكامل Notion متصلاً.** إن لم يجد وولف فيش مساحة عملك أو لم يتمكن من إنشاء الصفحة، فالمشكلة غالباً أن الصفحة أو مساحة العمل المستهدفة لم تُشارَك مع التكامل. تحقق من الاتصالات في Notion. راجع [تكامل Notion](/ar/integrations/notion).
+- **تباينات بين المصادر.** إحصائيات FIFA الرسمية والمتتبّعون الخارجيون (ESPN، Transfermarkt) يختلفون أحياناً في عدد التمريرات الحاسمة أو الاستحواذ أو دقة التمرير. يفضّل الأمر أرقام FIFA عند التعارض — لكن الفروقات الطفيفة طبيعية.
+- **التحديثات تستبدل، لا تُضاف.** تشغيل الأمر مجدداً ينشئ أو يحدّث الصفحة — يستبدل المحتوى بأحدث الإحصائيات. الإصدارات السابقة لا تُحفظ في Notion (لكن Hippocampus يحتفظ بسجل الحلقات كمرجع).
+
+## التكلفة ودليل النموذج
+
+أثقل من بحث بسيط — المسح الاستقصائي عبر 48 فريقاً وإحصائيات اللاعبين وتفاصيل مباراة بمباراة وبيانات البطولة الوصفية يعني عمليات بحث وجلب كثيرة. لا يزال رخيصاً على النموذج الموصى به.
+
+### التكلفة التقريبية لكل تشغيل
+
+| النموذج | التكلفة التقديرية | ملاحظات |
+|---------|-------------------|---------|
+| **DeepSeek V4 Pro (وضع Max)** | ~$0.10–0.30 | **الموصى به.** بحث عميق + إخراج Notion منظم بجزء يسير من التكلفة |
+| DeepSeek V4 Flash | ~$0.04–0.10 | أسرع لكن أسطح — سيتخطى الفرق الأضعف ويعطي تخمينات احتمالات تقريبية |
+| Qwen 3.7 Max | ~$0.15–0.45 | بديل متين |
+| Claude Sonnet 4.x | ~$0.45–1.00 | بحث شامل؛ إخراج مصقول |
+| Claude Opus | ~$1.80–4.00 | الأكثر شمولاً؛ مبالغ فيه للتحديثات اليومية |
+
+### ميزانية الرموز
+
+~250,000–600,000 رمز لكل تشغيل. يهيمن المسح البحثي متعدد الفرق وجمع الإحصائيات مباراة بمباراة؛ إنشاء صفحة Notion خفيف نسبياً بالمقارنة. مفتاح **Brave Search** المُعد يمنع البحث من التوقف عند حدود المعدّل. تقريباً 30–70 استدعاء LLM (عمليات بحث، جلب، وإنشاء كتل Notion).
+
+## الأتمتة عبر Heartbeat
+
+هذا مرشح قوي لـ heartbeat: يقرأ الويب العام ويكتب في Notion — بلا نشر، بلا إرسال، بلا أوامر مدمِّرة. يستخدم تكامل Notion رمزاً، لا جلسة متصفح، فيعمل بلا واجهة دون أي إعداد إضافي. (للقاعدة العامة حول ما يمكن أتمتته بأمان، راجع [ما ينبغي جدولته](/ar/configuration/what-to-schedule).)
+
+افتح **الإعدادات > Heartbeat**، الصق الكتلة أدناه، وستتحدّث صفحة Notion تلقائياً بعد كل يوم مباريات.
+
+```markdown
+## World Cup On Top | Daily (22:00)
+
+You are my World Cup analyst. Exhaustively research
+EVERYTHING about the currently running FIFA World Cup 2026
+and update the Notion page "World Cup On Top" in my
+connected workspace with the latest data.
+
+Run `date +%F` for today.
+
+Research: current tournament stage, all group standings
+(P/W/D/L/GF/GA/GD/Pts), every match result played so far
+(score, scorers with minutes, cards, key stats: possession,
+shots on target, fouls, corners, pass accuracy), top 15
+scorers (goals, penalties, assists, minutes), team stats
+for all teams (GF/GA/clean sheets/possession/pass
+accuracy/fouls/cards), all upcoming fixtures, and win
+probability for every team still in contention (based on
+form, GD, strength of schedule, historical record,
+bookmaker odds — show reasoning).
+
+Sources: FIFA.com first, then ESPN, BBC Sport, The
+Guardian, Transfermarkt, FBref, WhoScored. Cross-check
+scorers and standings across two sources. Prefer FIFA
+when sources conflict. If the browser extension is
+available, browse live stats pages directly for richer
+data — interactive match centers, stat dashboards,
+standings tables.
+
+Build/update the Notion page "World Cup On Top" —
+structure: header callout (🏆 tournament, host, stage,
+date, team count); snapshot callout (📊 matches played,
+total goals, avg/match, biggest win, top scorer, teams
+remaining); host cities + stadiums (toggle with table);
+group standings (table per group, bold qualifiers); knockout
+bracket if applicable; match results (toggle per day,
+table); top scorers table; team stats table (all teams);
+win probability (callout with top 3 + full ranked table);
+upcoming matches (callout + table with next match
+highlighted); methodology toggle.
+
+Minimal text. Let tables, callouts, and bold numbers carry
+it. Every element earns its place — clean, not pale.
+```
+
+<Tip>
+`Daily (22:00)` يلتقط نهاية معظم أيام المباريات — صفحتك جاهزة بالصباح. خلال الأدوار الإقصائية، يمكنك التبديل إلى التشغيل بعد كل مباراة محددة للتحديثات اللحظية. إن كانت منطقتك الزمنية مختلفة، عدّل الساعة لتلتقط إحصائيات ما بعد المباراة.
+</Tip>
+
+## اصنع حالتك الخاصة
+
+النمط يتعمّم إلى أي مهمة "تتبّع حدث مباشر بشكل استقصائي في Notion":
+
+- **متتبّع دوري الأبطال** — نفس الهيكل، مُضيَّق إلى مباريات UCL، مع إحصائيات على مستوى الأندية وسياق المعامل.
+- **مركز قيادة الأولمبياد** — جداول الميداليات، جداول الفعاليات، تفاصيل الدول، أضواء على الرياضيين — كلها في صفحة Notion حيّة.
+- **لوحة الدوري الخيالي** — أداء فريقك الخيالي، قيم اللاعبين، أهداف الانتقالات، ترتيب الدوري — محدَّثة أسبوعياً.
+- **متتبّع بطولة تنس كبرى** — شجرة القرعة، نتائج المباريات، إحصائيات اللاعبين، تنبيهات المفاجآت — منظم لبطولة أسبوعين.
+
+الانضباط يبقى ذاته في كل مرة: **إحصائيات استقصائية، احتمالات محسوبة، إخراج Notion بسيط لكن جميل.** غيّر الرياضة؛ وأبقِ مركز القيادة.
