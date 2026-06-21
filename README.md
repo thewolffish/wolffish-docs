@@ -216,7 +216,7 @@ To add a new page:
 - **Live docs** — [docs.wolffi.sh](https://docs.wolffi.sh/)
 - **App repo** — [wolffish-app](https://github.com/thewolffish)
 - **Website** — [wolffi.sh](https://wolffi.sh)
-- **Discord** — [Join](https://discord.com/invite/F5Ue36PzQ)
+- **Discord** — [Join](https://discord.gg/zWJpD3SgTt)
 - **X** — [@younesbites](https://x.com/younesbites)
 - **Reddit** — [u/younesbites](https://www.reddit.com/user/younesbites)
 
