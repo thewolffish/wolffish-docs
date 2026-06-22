@@ -21,6 +21,10 @@ Fully bilingual (English + Arabic). Covers everything from first launch to writi
       <br /><b>Demo walkthrough</b>
     </td>
     <td align="center">
+      <a href="https://www.youtube.com/watch?v=XZdBttn-99E"><img src="https://cdn.wolffi.sh/general/wolffish.jpg" width="360" alt="Cinematic launch" /></a>
+      <br /><b>Cinematic launch</b>
+    </td>
+    <td align="center">
       <a href="https://www.youtube.com/watch?v=TKdTWd6BXR8"><img src="https://cdn.wolffi.sh/general/Cinematic%20reveal.png" width="360" alt="Cinematic reveal" /></a>
       <br /><b>Cinematic reveal</b>
     </td>
