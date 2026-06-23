@@ -17,7 +17,7 @@ Fully bilingual (English + Arabic). Covers everything from first launch to writi
 <table>
   <tr>
     <td align="center">
-      <a href="https://www.youtube.com/watch?v=MA6KkeZyFF4"><img src="https://cdn.wolffi.sh/general/Demo%20walkthrough.png" width="360" alt="Demo walkthrough" /></a>
+      <a href="https://www.youtube.com/watch?v=oog1q7T8H-s"><img src="https://cdn.wolffi.sh/general/Demo%20walkthrough.png" width="360" alt="Demo walkthrough" /></a>
       <br /><b>Demo walkthrough</b>
     </td>
     <td align="center">
