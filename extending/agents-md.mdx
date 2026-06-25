@@ -158,7 +158,7 @@ Built by Younes Alturkey. Tagline: *Wolffish. Bite through anything.* 🐺
 | LLM providers | Pure `fetch()`, no vendor SDKs — Anthropic (Claude), OpenAI (GPT), DeepSeek & other OpenAI-compatible clouds, Ollama (local) |
 | Messaging channels | `grammy` (Telegram), Baileys (WhatsApp) |
 | File processing | Sharp (images), pdf-parse, mammoth (docx), xlsx |
-| Speech | Whisper (speech-to-text), neural TTS (text-to-speech) |
+| Speech | faster-whisper (speech-to-text), Kokoro neural TTS (text-to-speech) |
 | i18n | i18next — English + Arabic (full RTL) |
 | Logging | Pino |
 | Scheduling | node-cron (driven by `heartbeat.md`) |
@@ -418,8 +418,8 @@ so hidden — `ls -a` to see them). Drop a folder in, and the agent learns a ski
 | | `.pdf` | `pdf_read/create/merge/split/modify/form/secure/compress` |
 | | `.spreadsheet` | xlsx/csv — `spreadsheet_read/create/modify/formula/chart/pivot/analyze` |
 | **Media** | `.ffmpeg` | Audio/video — `ffmpeg_run` |
-| | `.speech-to-text` | Whisper, offline — `stt_transcribe`, `stt_transcribe_voice_memo` |
-| | `.text-to-speech` | Neural TTS — `voice_generate`, `voice_respond` |
+| | `.speech-to-text` | faster-whisper, offline — `stt_transcribe`, `stt_transcribe_voice_memo` |
+| | `.text-to-speech` | Kokoro neural TTS — `voice_generate`, `voice_respond` |
 | | `.memes` | `meme_generate`, `meme_templates`, `gif_search`, `gif_trending` |
 | **Code / services** | `.git` | Git conventions on top of `.shell` (pure skill) |
 | | `.github` | GitHub API — ~60 `github_*` tools (repos, issues, PRs, Actions, releases, gists, …) |

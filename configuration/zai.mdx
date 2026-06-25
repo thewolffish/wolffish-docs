@@ -1,0 +1,41 @@
+---
+title: "Z.ai"
+description: "Set up Z.ai — Zhipu's GLM models with toggleable thinking and a 1M-context flagship"
+---
+
+# Z.ai (Zhipu GLM)
+
+```
+POST https://api.z.ai/api/paas/v4/chat/completions
+```
+
+OpenAI-compatible SSE streaming with tool-calling. Reasoning streams as `reasoning_content`, thinking is toggled with `thinking: { type }`, and prompt-cache hits are reported under `usage.prompt_tokens_details.cached_tokens` — the same wire format as Kimi.
+
+**GLM thinking is binary** — on or off, with no effort levels. Any thinking mode other than *none* enables reasoning; *none* disables it. GLM-5.2 also offers a **1M-token context window**, the largest in Z.ai's lineup.
+
+Best for: Cost-efficient agentic work, long-context workflows (GLM-5.2), and vision-capable tasks. GLM models are strong all-rounders for tool chains and code at budget-tier pricing.
+
+## Getting an API Key
+
+1. Go to [z.ai](https://z.ai)
+2. Sign up or log in
+3. Open **API Keys** and create a new key
+4. Paste it into Wolffish → Settings → Models → Z.ai
+
+## Models
+
+| Model | Context | Max Output | Modes | Input / Output (per MTok) | Notes |
+|-------|---------|------------|-------|--------------------------|-------|
+| **glm-4.6** | 200K | 64K | Thinking on/off | $0.60 / $2.20 | Recommended. Cost-efficient agentic workhorse. |
+| glm-4.5-air | 128K | 64K | Thinking on/off | $0.20 / $1.10 | Cheapest. Lightweight and fast. |
+| glm-5.2 | 1M | 64K | Thinking on/off | $1.40 / $4.40 | Flagship. Largest context (1M). |
+
+Wolffish lists every GLM chat model your key can access (`glm-4.5`, `glm-4.5-air`, `glm-4.6`, `glm-4.7`, `glm-5`, `glm-5-turbo`, `glm-5.1`, `glm-5.2`) — pick any from the model picker.
+
+<Note>
+  Thinking is **all-or-nothing** on GLM — Wolffish maps every non-*none* thinking mode to enabled and *none* to disabled. There are no low/medium/high effort levels. Tool calling is supported with no hard tool-count limit.
+</Note>
+
+<Note>
+  Output is capped per model (glm-4.5/4.5-air at ~98K, glm-4.6+ at ~131K); Wolffish requests a uniform 64K completion budget to leave room for the conversation in context.
+</Note>

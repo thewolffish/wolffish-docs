@@ -88,6 +88,25 @@ All channels share the same brain state:
   You can start a long-running task in the desktop UI, leave your desk, and check on progress or continue the conversation from Telegram on your phone.
 </Tip>
 
+## Verbose Task Results
+
+Each channel has a **Verbose task results** toggle that controls how much of the agent's step-by-step work you see. It is **off by default**, which keeps a clean feed:
+
+- **Off (clean feed)** — only what you care about: the agent's replies, any files it produces or sends, and errors. Routine tool calls, successful tool results, and compaction notices are hidden. In the desktop UI the active-model chip is also kept.
+- **On (verbose)** — every tool call, tool result, and activity card is surfaced, the way the turn ran step by step.
+
+The toggle lives in each channel's own settings, all under **Settings → Channels**:
+
+| Channel | Where | What the toggle affects |
+|---|---|---|
+| In-App | Settings → Channels → In-App | What the desktop feed **displays** |
+| Telegram | Settings → Channels → Telegram | What is **relayed** to the chat |
+| WhatsApp | Settings → Channels → WhatsApp | What is **relayed** to the chat |
+
+<Note>
+  Verbose only changes what is **shown** or **relayed** — never what the agent does. Every segment is still saved to history and memory in full, so flipping the toggle simply re-renders the feed; nothing is lost when it is off.
+</Note>
+
 ## Channel Comparison
 
 | Feature | Electron UI | Telegram | WhatsApp |
@@ -98,6 +117,7 @@ All channels share the same brain state:
 | Files | Drag and drop | Attachments | Media messages |
 | Voice | N/A | Voice notes | Voice notes |
 | Reconnection | Always on | Persistent | Auto-reconnect |
+| Verbose feed | Display toggle, off by default | Relay toggle, off by default | Relay toggle, off by default |
 
 <CardGroup cols={2}>
   <Card title="Telegram Channel" icon="paper-plane" href="/channels/telegram">

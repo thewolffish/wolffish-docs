@@ -124,6 +124,19 @@ and I'll get to it when I'm done.
 
 The message enters the TurnRunner queue and processes in order once the current turn completes.
 
+## Verbose Task Results
+
+By default, WhatsApp receives a **clean feed** — the agent's replies, any files or voice it produces, and errors. Routine tool steps stay in the desktop UI.
+
+Toggle this in **Settings → Channels → WhatsApp → Verbose task results**:
+
+- **Off (default)** — agent messages, file-bearing results, and errors only.
+- **On** — every tool call, result, and activity is relayed to the chat.
+
+<Note>
+  Verbose changes only what is **sent** to WhatsApp. The full turn is still saved to history and memory regardless of the setting.
+</Note>
+
 ## Conversation Mapping
 
 Each WhatsApp JID (phone number identifier) maps to a Wolffish conversation. In practice:

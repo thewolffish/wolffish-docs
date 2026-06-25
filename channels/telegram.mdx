@@ -106,6 +106,19 @@ Wolffish formats responses using Telegram's HTML subset:
 
 Long responses are split at logical boundaries (paragraph breaks, list items) to stay within Telegram's message length limits. Code blocks are preserved intact where possible.
 
+## Verbose Task Results
+
+By default, Telegram receives a **clean feed** — the agent's replies, any files it produces, and errors. The step-by-step tool activity stays in the desktop UI so your chat doesn't fill up with internal steps.
+
+Toggle this in **Settings → Channels → Telegram → Verbose task results**:
+
+- **Off (default)** — agent messages, file-bearing results, and errors only.
+- **On** — every tool call, result, and activity is relayed to the chat as it happens.
+
+<Note>
+  Verbose changes only what is **sent** to Telegram. The full turn — every tool call and result — is still saved to history and memory regardless of the setting.
+</Note>
+
 ## Under the Hood
 
 The Telegram channel is built on the [grammy](https://grammy.dev/) library — a modern, TypeScript-first framework for building Telegram bots. Grammy handles:

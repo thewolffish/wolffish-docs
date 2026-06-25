@@ -3,6 +3,24 @@ title: "Changelog"
 description: "Product updates and improvements to Wolffish"
 ---
 
+<Update label="June 25, 2026" description="v1.0.186">
+
+## New features
+
+- **Fully local voice.** Text-to-speech now runs on [Kokoro](/capabilities/built-in-capabilities) and speech-to-text on faster-whisper — both entirely on-device, with no cloud, no API keys, and no Microsoft servers. Voice memos work fully offline after a one-time setup. The default voice is `af_bella` (English, US); voices are English-only (American `af_`/`am_`, British `bf_`/`bm_`).
+- **Install voice engines on demand.** Settings → Text-to-Speech and Speech-to-Text now offer an **Install** button with a live progress bar. The voice and model pickers stay disabled until the engine is ready, and the **Preview** button plays the *actual* selected Kokoro voice — not a browser stand-in.
+- **Managed Python runtime.** The voice engines provision into an isolated, app-managed Python runtime automatically — no system Python or developer tools required on the machine.
+- **Z.ai (GLM) provider support.** You can now run Wolffish on [Z.ai](/configuration/zai) — Zhipu's GLM models with toggleable thinking and a 1M-token context flagship (GLM-5.2). OpenAI-compatible streaming and tool-calling at budget-tier pricing; bring your own API key.
+- **Verbose task results toggle.** Each channel now has a **Verbose task results** switch — off by default — that controls how much of the agent's step-by-step work you see. Off keeps a [clean feed](/channels/overview) (replies, files, and errors only); on surfaces every tool call, result, and activity card as the turn runs.
+
+## Updates
+
+- **Install progress survives navigation.** Starting an install — or a Google Workspace setup/update — then switching tabs or reloading the window no longer resets the progress; it resumes exactly where the real work is.
+- **One voice memo per reply.** Sending a voice note now returns exactly one voice memo across Desktop, Telegram, and WhatsApp — no duplicate memos and no echo of your own recording. Multi-step requests run normally first, then close with a single spoken reply.
+- **Verbose changes display only.** Flipping the verbose toggle re-renders the feed without changing what the agent does — every tool call and result is still saved to history and memory in full, so nothing is lost when it's off.
+
+</Update>
+
 <Update label="June 9, 2026" description="v1.0.126 – v1.0.129">
 
 ## New features
