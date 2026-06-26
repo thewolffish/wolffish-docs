@@ -312,6 +312,46 @@ These capabilities are included in the default workspace when Wolffish creates `
   </Accordion>
 </AccordionGroup>
 
+## Interaction
+
+<AccordionGroup>
+  <Accordion title="ask — Ask the user with multiple-choice cards">
+    **Type:** Plugin
+
+    **Triggers:** ask the user, ask me, which option, let me choose, give me options, clarify, confirm with me, multiple choice, quiz me
+
+    Lets Wolffish put a decision back to you with concrete choices instead of guessing. It pauses the turn, renders an interactive question card — the question, 2–5 numbered options each with a short description, and (unless disabled) a free-text box to type your own instructions — then resumes the moment you answer.
+
+    **Tools:**
+    - `ask_user` — Pose a multiple-choice question and wait for the answer. Returns the option you picked or the custom instructions you typed.
+
+    Works on every channel: the desktop UI shows the card; on Telegram and WhatsApp you reply with the option number (or your own text). If the run is stopped without an answer, Wolffish falls back to a sensible default instead of re-asking in a loop.
+  </Accordion>
+</AccordionGroup>
+
+## Self-Management
+
+<AccordionGroup>
+  <Accordion title="skills — Manage and author its own capabilities">
+    **Type:** Plugin
+
+    **Triggers:** skill, skills, capability, create a skill, new skill, teach yourself, add a tool, list skills, disable skill, enable skill, delete skill, what can you do, extend yourself
+
+    Lets Wolffish manage — and write — its own capabilities at runtime. It can list and search what it has, read a skill's source to learn the pattern, toggle skills on and off (built-ins included, e.g. "turn off the browser"), delete ones you created, and author brand-new skills from a request like "do this every time."
+
+    **Tools:**
+    - `skill_list` — List every skill: name, description, enabled/official status, tool count
+    - `skill_search` — Search skills by keyword across name, description, triggers, and tool names
+    - `skill_read_source` — Read a skill's SKILL.md and plugin code before amending it or learning from it
+    - `skill_enable` / `skill_disable` — Toggle any skill on or off (reversible; only the `skills` capability itself can't be disabled)
+    - `skill_delete` — Permanently remove a skill you created (official/built-in skills are protected)
+    - `skill_create` — Author a new pure skill or plugin capability from scratch
+    - `skill_reload` — Re-scan the workspace so changes take effect
+
+    Changes persist and take effect on the next turn. This is how Wolffish extends itself without a code change — see [Creating Capabilities](/capabilities/creating-capabilities).
+  </Accordion>
+</AccordionGroup>
+
 ## Fun
 
 <AccordionGroup>
@@ -340,11 +380,12 @@ These capabilities are included in the default workspace when Wolffish creates `
     Lets Wolffish answer questions about its own state by reading its workspace files.
 
     **Tools:**
-    - `wolffish_status` — Uptime, active provider, loaded capabilities, system health
+    - `wolffish_status` — Uptime, active provider, loaded capabilities, channel connectivity, and system health
+    - `channel_status` — Whether each messaging channel (Telegram, WhatsApp, in-app) is connected, and the exact steps to reconnect one that isn't
     - `wolffish_performance` — Task success rates, most used tools, error rates
     - `wolffish_memory` — Recent conversation topics and knowledge areas
 
-    Read-only — never modifies the workspace. Ask "how are you doing?" for real data, not pleasantries.
+    Read-only — never modifies the workspace. Ask "how are you doing?" for real data, not pleasantries. Wolffish checks `channel_status` before sending you an out-of-band message — Telegram and WhatsApp are connected channels reached through their own tools, never desktop apps to launch.
   </Accordion>
 </AccordionGroup>
 

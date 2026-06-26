@@ -107,6 +107,12 @@ The toggle lives in each channel's own settings, all under **Settings → Channe
   Verbose only changes what is **shown** or **relayed** — never what the agent does. Every segment is still saved to history and memory in full, so flipping the toggle simply re-renders the feed; nothing is lost when it is off.
 </Note>
 
+## Channels Are Connections, Not Apps
+
+Telegram and WhatsApp are **connections** Wolffish talks to you through — not desktop apps installed on your machine. Wolffish reaches them only through their own tools (`telegram_send`, `whatsapp_send`, …), never by launching or clicking a "Telegram"/"WhatsApp" window. A channel's send tools exist only while it's connected, so their presence is itself the signal that the channel is live.
+
+When Wolffish needs to message you out-of-band — a finished background task, a scheduled job — it first checks `channel_status` (or `wolffish_status`, which lists connectivity). If the channel is down it won't guess or retry; it tells you the channel is disconnected and relays the exact reconnect steps (Telegram → bot token from @BotFather; WhatsApp → scan the QR code).
+
 ## Channel Comparison
 
 | Feature | Electron UI | Telegram | WhatsApp |

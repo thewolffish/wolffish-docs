@@ -7,6 +7,10 @@ description: "Step-by-step guide to building a new Wolffish capability"
 
 This guide walks through creating a new capability from scratch. By the end, you'll have a working capability that Wolffish discovers, loads, and makes available to the LLM.
 
+<Note>
+  **Wolffish can do all of this itself.** The built-in [`skills`](/capabilities/built-in-capabilities) capability lets Wolffish list, search, toggle, delete, and **author** its own capabilities at runtime — so "do this every time" can become a reusable skill without you touching the filesystem. This guide is for when you'd rather build one by hand.
+</Note>
+
 ## Installing a Capability
 
 You don't have to touch the filesystem. The quickest way to add a capability is to **drop it onto Settings → Cellebrum** — or click the import field to browse. Three shapes are accepted:

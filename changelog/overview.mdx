@@ -3,6 +3,25 @@ title: "Changelog"
 description: "Product updates and improvements to Wolffish"
 ---
 
+<Update label="June 26, 2026" description="v1.0.191">
+
+## New features
+
+- **Ask cards.** When a decision is genuinely yours to make, Wolffish poses it as an interactive [multiple-choice card](/capabilities/built-in-capabilities) — a question, 2–5 options, and a free-text "something else" box — and waits for your pick instead of guessing. On Telegram and WhatsApp you reply with the option number.
+- **Self-managed skills.** A new [`skills`](/capabilities/built-in-capabilities) capability lets Wolffish list, search, enable, disable, delete, and even **author** its own capabilities at runtime — turning "do this every time" into a reusable skill, or "turn off the browser" into a disabled one.
+- **Channel status.** A new `channel_status` tool reports which messaging channels are connected and how to reconnect any that aren't.
+
+## Updates
+
+- **Channels aren't apps.** Asked to message you on [Telegram or WhatsApp](/channels/overview), Wolffish no longer tries to launch a phantom desktop app that doesn't exist — it reaches channels only through their own send tools and fails gracefully with reconnect steps when one is down.
+- **Openable path cards.** File and folder paths Wolffish mentions in a reply now render as a card with a one-click "open in file manager" button — shown only for paths that actually exist on disk.
+
+## Bug fixes
+
+- **`grep -c` zero counts.** A `grep -c` that finds no matches exits with code 1 and prints "0" — that's now read as the valid zero-count it is, not a failed command, so it no longer triggers needless retries.
+
+</Update>
+
 <Update label="June 25, 2026" description="v1.0.186">
 
 ## New features
