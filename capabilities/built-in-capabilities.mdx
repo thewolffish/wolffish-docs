@@ -11,6 +11,50 @@ These capabilities are included in the default workspace when Wolffish creates `
 **No artificial guardrails.** Wolffish is built for smarter, more capable models. We've removed hard-coded timeouts, result caps, and arbitrary limits from all capability plugins. The LLM decides when to set a timeout and how many results to request. Commands run until they finish naturally. The only limits that remain are OOM-protection caps (100MB for documents, 500MB for audio, 100KB output buffer) — these protect memory, not restrict functionality.
 </Note>
 
+## Self-Management
+
+Wolffish can read, manage, and **write its own capabilities** at runtime — no code change, no restart. This is the heart of what makes it extensible: a workflow you do often can become a permanent tool just by asking.
+
+<AccordionGroup>
+  <Accordion title="skills — Manage and author its own capabilities" defaultOpen>
+    **Type:** Plugin
+
+    **Triggers:** skill, skills, capability, create a skill, new skill, teach yourself, add a tool, list skills, disable skill, enable skill, delete skill, what can you do, extend yourself
+
+    Lets Wolffish manage — and write — its own capabilities at runtime. It can list and search what it has, read a skill's source to learn the pattern, toggle skills on and off (built-ins included, e.g. "turn off the browser"), delete ones you created, and author brand-new skills from a request like "do this every time."
+
+    **Tools:**
+    - `skill_list` — List every skill: name, description, enabled/official status, tool count
+    - `skill_search` — Search skills by keyword across name, description, triggers, and tool names
+    - `skill_read_source` — Read a skill's SKILL.md and plugin code before amending it or learning from it
+    - `skill_enable` / `skill_disable` — Toggle any skill on or off (reversible; only the `skills` capability itself can't be disabled)
+    - `skill_delete` — Permanently remove a skill you created (official/built-in skills are protected)
+    - `skill_create` — Author a new pure skill or plugin capability from scratch
+    - `skill_reload` — Re-scan the workspace so changes take effect
+
+    Changes persist and take effect on the next turn. This is how Wolffish extends itself without a code change — see [Creating Capabilities](/capabilities/creating-capabilities).
+  </Accordion>
+</AccordionGroup>
+
+### Asking Wolffish to build a skill for itself
+
+You don't write any code — you describe the ability in plain language and Wolffish authors the capability for you. The clearest requests signal a **recurring** need:
+
+- *"From now on, whenever I send you a CSV, clean it up and reply with a summary table."*
+- *"Make yourself a skill that posts a daily standup to our Slack channel."*
+- *"You keep doing this resize-and-watermark dance by hand — turn it into a reusable tool."*
+- *"Teach yourself to look up parcel tracking from a tracking number."*
+
+When you ask, Wolffish:
+
+1. **Picks the kind of skill** — a *pure skill* (a written procedure it follows with tools it already has), a *plugin skill* (a real new tool backed by JavaScript), or a plugin with npm dependencies — choosing the smallest that does the job.
+2. **Writes the files** via `skill_create` — the `SKILL.md` (name, description, triggers) plus `plugin/index.mjs` and a `package.json` only when a real new tool is needed.
+3. **Loads and tests it live**, then it's available from your next message — triggered automatically whenever your wording matches what the skill is for.
+
+<Tip>
+  Be specific about the **trigger** ("whenever I…", "every time a…") and the **outcome** you want. Wolffish builds reusable skills, not one-offs — for a single task it just does the work directly instead of creating a skill. You can always say "list your skills" to see what it has, or "delete that skill" to remove one it made.
+</Tip>
+
 ## Core System
 
 <AccordionGroup>
@@ -326,29 +370,6 @@ These capabilities are included in the default workspace when Wolffish creates `
     - `ask_user` — Pose a multiple-choice question and wait for the answer. Returns the option you picked or the custom instructions you typed.
 
     Works on every channel: the desktop UI shows the card; on Telegram and WhatsApp you reply with the option number (or your own text). If the run is stopped without an answer, Wolffish falls back to a sensible default instead of re-asking in a loop.
-  </Accordion>
-</AccordionGroup>
-
-## Self-Management
-
-<AccordionGroup>
-  <Accordion title="skills — Manage and author its own capabilities">
-    **Type:** Plugin
-
-    **Triggers:** skill, skills, capability, create a skill, new skill, teach yourself, add a tool, list skills, disable skill, enable skill, delete skill, what can you do, extend yourself
-
-    Lets Wolffish manage — and write — its own capabilities at runtime. It can list and search what it has, read a skill's source to learn the pattern, toggle skills on and off (built-ins included, e.g. "turn off the browser"), delete ones you created, and author brand-new skills from a request like "do this every time."
-
-    **Tools:**
-    - `skill_list` — List every skill: name, description, enabled/official status, tool count
-    - `skill_search` — Search skills by keyword across name, description, triggers, and tool names
-    - `skill_read_source` — Read a skill's SKILL.md and plugin code before amending it or learning from it
-    - `skill_enable` / `skill_disable` — Toggle any skill on or off (reversible; only the `skills` capability itself can't be disabled)
-    - `skill_delete` — Permanently remove a skill you created (official/built-in skills are protected)
-    - `skill_create` — Author a new pure skill or plugin capability from scratch
-    - `skill_reload` — Re-scan the workspace so changes take effect
-
-    Changes persist and take effect on the next turn. This is how Wolffish extends itself without a code change — see [Creating Capabilities](/capabilities/creating-capabilities).
   </Accordion>
 </AccordionGroup>
 
