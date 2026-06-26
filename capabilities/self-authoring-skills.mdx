@@ -1,6 +1,6 @@
 ---
-title: "Self Skilling"
-description: "How Wolffish authors, tests, edits, and deletes its own capabilities at runtime — from a plain-language request"
+title: "Self-Authoring Skills"
+description: "How Wolffish authors its own skills — writing, testing, editing, and deleting its own capabilities at runtime from a plain-language request"
 ---
 
 The fastest way to add a capability is not to write one — it's to **ask Wolffish to write it for itself**. The built-in [`skills`](/capabilities/built-in-capabilities) capability gives Wolffish the tools to author, load, **test**, edit, and delete its own capabilities at runtime. You describe the ability in plain language; Wolffish produces a working skill and verifies it before handing back — no filesystem, no code, no restart.
@@ -9,7 +9,7 @@ The fastest way to add a capability is not to write one — it's to **ask Wolffi
   This page is the **let-Wolffish-do-it** path. If you'd rather build a capability by hand in the filesystem, see [Creating Capabilities](/capabilities/creating-capabilities).
 </Note>
 
-## When it self-skills
+## When it self-authors a skill
 
 Wolffish promotes work into a reusable capability when it's **recurring, complex, and worth keeping** — a "do this every time" request, a multi-step dance you've watched it repeat by hand, or a real tool it doesn't have yet. It picks the smallest shape that fits:
 
@@ -21,7 +21,7 @@ For a one-off it just does the work directly — a skill is for abilities it wil
 
 ## The tools it uses
 
-Self-skilling is powered by the `skills` capability. You never call these yourself; Wolffish does, on your behalf:
+Self-authoring is powered by the `skills` capability. You never call these yourself; Wolffish does, on your behalf:
 
 | Tool | What it does |
 |---|---|
@@ -58,9 +58,11 @@ It's deliberately **forgiving about how the plugin is written** — it accepts t
 
 ## A complete example: build, exercise, and delete a skill in one turn
 
-You can drive the whole lifecycle from a single message. This prompt has Wolffish create a tiny `coinflip` skill, use it, edit it, toggle it, and remove it — exercising every part of self-skilling end to end:
+You can drive the whole lifecycle from a single message. Copy this prompt and paste it into chat — it has Wolffish create a tiny `coinflip` skill, use it, edit it, toggle it, and remove it, exercising every part of self-authoring end to end:
 
-> First call `skill_reload`. Then in one turn: `skill_search "coinflip"` and `skill_list` to confirm it doesn't exist; create a `coinflip` skill with a `coinflip_do` tool that returns "heads" or "tails"; call `coinflip_do` to prove it works in the same turn; `skill_read_source`, then edit it to also allow "edge" (`file_write` into the printed folder path, then `skill_reload`), and call `coinflip_do` again; `skill_disable` then `skill_enable`; finally `skill_delete` and `skill_list` to confirm it's gone.
+```text Coin-flip lifecycle prompt
+First call skill_reload. Then in one turn: skill_search "coinflip" and skill_list to confirm it doesn't exist; create a coinflip skill with a coinflip_do tool that returns "heads" or "tails"; call coinflip_do to prove it works in the same turn; skill_read_source, then edit it to also allow "edge" (file_write into the printed folder path, then skill_reload), and call coinflip_do again; skill_disable then skill_enable; finally skill_delete and skill_list to confirm it's gone.
+```
 
 What Wolffish does, step by step:
 
@@ -79,7 +81,7 @@ What Wolffish does, step by step:
   In real use you'd just say *"make yourself a coin-flip tool"* and stop there — Wolffish writes and tests it in one turn. The lifecycle prompt above is for **watching the full machinery at once**.
 </Tip>
 
-## Everyday self-skilling requests
+## Everyday self-authoring requests
 
 You rarely spell out the steps. The clearest requests name a **recurring trigger** and the **outcome** you want:
 
