@@ -22,14 +22,66 @@ Best for: General-purpose tasks, broad knowledge, fast responses.
 
 ## Models
 
-| Model | Context | Max Output | Modes | Input / Output (per MTok) | Notes |
-|-------|---------|------------|-------|--------------------------|-------|
-| gpt-5.5-pro | 1M | 64K | None, High, Max | $30.00 / $180.00 | Most capable. Frontier reasoning. |
-| **gpt-5.5** | 1M | 64K | None, High, Max | $5.00 / $30.00 | Flagship. Strong reasoning. Cached: $0.50/MTok. |
-| gpt-5.4 | 1M | 64K | None, High, Max | $2.50 / $15.00 | Previous gen. Cached: $0.25/MTok. |
-| gpt-5.4-mini | 1M | 64K | None, High, Max | $0.75 / $4.50 | Fast reasoning. Cached: $0.08/MTok. |
-| gpt-5.4-nano | 1M | 64K | None, High, Max | $0.20 / $1.25 | Ultra-cheap reasoning. Cached: $0.02/MTok. |
+### GPT-5 family (reasoning)
 
-<Note>
-  **Modes** control reasoning depth via `reasoning_effort`. *None* disables reasoning for fast responses. *High* enables standard reasoning. *Max* enables deep reasoning. All models support tool calling with no hard tool-count limit. Note: reasoning is stripped when tools are present on older o-series models.
-</Note>
+| Model | Context | Modes | Input / Output (per MTok) | Notes |
+|-------|---------|-------|--------------------------|-------|
+| **gpt-5.5** | 1M | Off, High, Max | $5.00 / $30.00 | Flagship. Frontier reasoning. Cached: $0.50/MTok. |
+| gpt-5.4 | 1M | Off, High, Max | $2.50 / $15.00 | Cached: $0.25/MTok. |
+| gpt-5.4-mini | 1M | Off, High, Max | $0.75 / $4.50 | Fast reasoning. Cached: $0.08/MTok. |
+| gpt-5.4-nano | 1M | Off, High, Max | $0.20 / $1.25 | Ultra-cheap reasoning. Cached: $0.02/MTok. |
+| gpt-5.2 | 1M | Off, High, Max | — / — | Pricing TBD. |
+| gpt-5.1 | 1M | Off, High, Max | — / — | Pricing TBD. |
+| gpt-5 | 1M | Off, High, Max | $2.50 / $10.00 | Cached: $1.25/MTok. |
+| gpt-5-mini | 1M | Off, High, Max | $0.25 / $2.00 | Fast reasoning. Cached: $0.03/MTok. |
+| gpt-5-nano | 1M | Off, High, Max | $0.05 / $0.40 | Fast reasoning. Cached: $0.01/MTok. |
+
+### o-series (reasoning)
+
+| Model | Context | Modes | Input / Output (per MTok) | Notes |
+|-------|---------|-------|--------------------------|-------|
+| o3 | 200K | Off, High, Max | $10.00 / $40.00 | Cached: $5.00/MTok. |
+| o4-mini | 200K | Off, High, Max | $1.10 / $4.40 | Fast reasoning. Cached: $0.55/MTok. |
+| o3-mini | 200K | Off, High, Max | $1.10 / $4.40 | Fast reasoning. Cached: $0.55/MTok. |
+| o1 | 200K | Off, High, Max | $15.00 / $60.00 | Cached: $7.50/MTok. |
+
+### GPT-4 family (non-reasoning)
+
+| Model | Context | Modes | Input / Output (per MTok) | Notes |
+|-------|---------|-------|--------------------------|-------|
+| gpt-4.1 | 1M | — | $2.00 / $8.00 | Cached: $0.50/MTok. |
+| gpt-4.1-mini | 1M | — | $0.40 / $1.60 | Fast. Cached: $0.10/MTok. |
+| gpt-4.1-nano | 1M | — | $0.10 / $0.40 | Fast. Cached: $0.03/MTok. |
+| gpt-4o | 128K | — | $2.50 / $10.00 | Cached: $1.25/MTok. |
+| gpt-4o-mini | 128K | — | $0.15 / $0.60 | Fast. Cached: $0.08/MTok. |
+| gpt-4-turbo | 128K | — | $10.00 / $30.00 | |
+| gpt-4 | 8K | — | $30.00 / $60.00 | |
+
+## Reasoning modes
+
+The **brain icon** next to the message box controls how this model reasons. Click it to cycle through the modes the selected model supports. Two separate ideas combine here:
+
+### Thinking — *whether* the model reasons
+
+- **Off** — the model answers immediately. Fastest and cheapest; ideal for simple, direct tasks.
+- **On** — the model first works through the problem in a dedicated reasoning pass before replying. Slower and uses more tokens, but markedly more accurate on multi-step, logical, or ambiguous tasks.
+
+### Effort — *how hard* it thinks
+
+Only effort-capable models expose this; it applies once thinking is on.
+
+- **High** — standard reasoning depth. The right default for most agentic work.
+- **Max** — the model reasons longer and deeper for the hardest problems. More tokens and latency in exchange for higher quality on complex work.
+
+### Button states
+
+| State | Colour | Meaning |
+|-------|--------|---------|
+| Off | gray | Thinking off — direct answer |
+| On | blue | Thinking on — no effort control |
+| High | purple | Thinking on, standard effort |
+| Max | orange | Thinking on, maximum effort |
+
+Each model shows only the states it genuinely supports. If a model always reasons (can't be turned off) or has no effort control, the button reflects that and locks where there's nothing to change. Wolffish remembers your choice per model.
+
+**On OpenAI:** GPT-5 and o-series models support Off / High / Max (Max maps to OpenAI's `xhigh` effort). Note: OpenAI's chat API can't combine reasoning effort with tool calls, so during tool-using turns Wolffish drops the effort and the model reasons at its default.

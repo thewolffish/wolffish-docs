@@ -113,6 +113,26 @@ The sweet spot for local-only agentic use:
 
 For everyone else, we recommend: **cloud providers for complex agentic tasks, Ollama for privacy-sensitive conversations and offline fallback.**
 
+## Reasoning modes
+
+The **brain icon** next to the message box controls whether this model reasons. Click it to toggle reasoning on or off for models that support it.
+
+### Thinking — *whether* the model reasons
+
+- **Off** — the model answers immediately. Fastest; ideal for simple, direct tasks.
+- **On** — the model first works through the problem in a dedicated reasoning pass before replying. Slower and uses more tokens, but markedly more accurate on multi-step, logical, or ambiguous tasks.
+
+### Button states
+
+| State | Colour | Meaning |
+|-------|--------|---------|
+| Off | gray | Thinking off — direct answer |
+| On | blue | Thinking on |
+
+Each model shows only the states it genuinely supports. If a model can't reason, the button locks where there's nothing to change. Wolffish remembers your choice per model.
+
+**On Ollama:** Reasoning is detected per pulled model from Ollama's capabilities — models that advertise a thinking capability (e.g. qwen3, deepseek-r1, gpt-oss) reason, others don't. It's a simple on/off with no effort tiers, and no API key or cost since it runs locally.
+
 ## Local-Only Mode
 
 Wolffish includes a "Local Only" toggle that restricts all inference to Ollama — no data ever touches a cloud API, regardless of cascade settings. Enable it in the chat sidebar when you need absolute privacy for a sensitive task.

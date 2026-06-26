@@ -26,17 +26,42 @@ Best for: Reasoning-heavy workloads, code generation, agentic workflows.
 
 ## Models
 
-| Model | Context | Max Output | Modes | Input / Output (per MTok) | Notes |
-|-------|---------|------------|-------|--------------------------|-------|
-| **MiniMax-M3** | 1M | 64K | None, High | $0.30 / $1.20 | Latest flagship. Strong reasoning. Cached: $0.06/MTok. |
-| MiniMax-M2.7 | 200K | 32K | — | $0.30 / $1.20 | Previous gen flagship. Cached: $0.06/MTok. |
-| MiniMax-M2.7-highspeed | 200K | 32K | — | $0.60 / $2.40 | Faster inference, 2× price. Cached: $0.06/MTok. |
-| MiniMax-M2.5 | 200K | 32K | — | $0.30 / $1.20 | Code-optimized. Cached: $0.03/MTok. |
-| MiniMax-M2.5-highspeed | 200K | 32K | — | $0.60 / $2.40 | Code-optimized, faster. Cached: $0.03/MTok. |
-| MiniMax-M2.1 | 200K | 32K | — | $0.30 / $1.20 | Reasoning. Cached: $0.03/MTok. |
-| MiniMax-M2.1-highspeed | 200K | 32K | — | $0.60 / $2.40 | Reasoning, faster. Cached: $0.03/MTok. |
-| MiniMax-M2 | 200K | 32K | — | $0.30 / $1.20 | Base model. Cached: $0.03/MTok. |
+| Model | Context | Modes | Input / Output (per MTok) | Notes |
+|-------|---------|-------|--------------------------|-------|
+| **MiniMax-M3** | 1M | Off, On | $0.30 / $1.20 | Latest flagship. Strong reasoning. Cached: $0.06/MTok. |
+| MiniMax-M2.7 | 200K | On | $0.30 / $1.20 | Previous gen flagship. Cached: $0.06/MTok. |
+| MiniMax-M2.7-highspeed | 200K | On | $0.60 / $2.40 | Faster inference, 2× price. Cached: $0.06/MTok. |
+| MiniMax-M2.5 | 200K | On | $0.30 / $1.20 | Code-optimized. Cached: $0.03/MTok. |
+| MiniMax-M2.5-highspeed | 200K | On | $0.60 / $2.40 | Code-optimized, faster. Cached: $0.03/MTok. |
+| MiniMax-M2.1 | 200K | On | $0.30 / $1.20 | Reasoning. Cached: $0.03/MTok. |
+| MiniMax-M2.1-highspeed | 200K | On | $0.60 / $2.40 | Reasoning, faster. Cached: $0.03/MTok. |
+| MiniMax-M2 | 200K | On | $0.30 / $1.20 | Base model. Cached: $0.03/MTok. |
 
-<Note>
-  **Modes** control reasoning depth. *None* disables thinking for fast responses. *High* enables standard reasoning. Only M3 supports mode switching — M2.x models always reason (thinking is embedded in their output). All models support tool calling with no hard tool-count limit.
-</Note>
+## Reasoning modes
+
+The **brain icon** next to the message box controls how this model reasons. Click it to cycle through the modes the selected model supports. Two separate ideas combine here:
+
+### Thinking — *whether* the model reasons
+
+- **Off** — the model answers immediately. Fastest and cheapest; ideal for simple, direct tasks.
+- **On** — the model first works through the problem in a dedicated reasoning pass before replying. Slower and uses more tokens, but markedly more accurate on multi-step, logical, or ambiguous tasks.
+
+### Effort — *how hard* it thinks
+
+Only effort-capable models expose this; it applies once thinking is on.
+
+- **High** — standard reasoning depth. The right default for most agentic work.
+- **Max** — the model reasons longer and deeper for the hardest problems. More tokens and latency in exchange for higher quality on complex work.
+
+### Button states
+
+| State | Colour | Meaning |
+|-------|--------|---------|
+| Off | gray | Thinking off — direct answer |
+| On | blue | Thinking on — no effort control |
+| High | purple | Thinking on, standard effort |
+| Max | orange | Thinking on, maximum effort |
+
+Each model shows only the states it genuinely supports. If a model always reasons (can't be turned off) or has no effort control, the button reflects that and locks where there's nothing to change. Wolffish remembers your choice per model.
+
+**On MiniMax:** MiniMax-M3 is On / Off. The M2.x models reason always-on, so the button is locked on.

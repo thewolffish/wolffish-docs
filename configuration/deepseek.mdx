@@ -28,14 +28,39 @@ Best for: Agentic multi-step workflows, tool calling, research chains, cost-effi
 
 ## Models
 
-| Model | Context | Max Output | Modes | Input / Output (per MTok) | Notes |
-|-------|---------|------------|-------|--------------------------|-------|
-| **deepseek-v4-pro** | 1M | 32K | None, High, Max | $0.44 / $0.87 | Recommended default. Frontier agentic performance. Cached: $0.01/MTok. |
-| deepseek-v4-flash | 1M | 32K | None, High, Max | $0.14 / $0.28 | Fast and cheap. Cached: $0.003/MTok. |
+| Model | Context | Modes | Input / Output (per MTok) | Notes |
+|-------|---------|-------|--------------------------|-------|
+| **deepseek-v4-pro** | 1M | Off, High, Max | $0.44 / $0.87 | Recommended default. Frontier agentic performance. Cached: $0.01/MTok. |
+| deepseek-v4-flash | 1M | Off, High, Max | $0.14 / $0.28 | Fast and cheap. Cached: $0.003/MTok. |
 
-<Note>
-  **Modes** control reasoning depth. *None* disables thinking for fast responses. *High* enables standard reasoning. *Max* enables deep reasoning for complex tasks. All models support tool calling with no hard tool-count limit.
-</Note>
+## Reasoning modes
+
+The **brain icon** next to the message box controls how this model reasons. Click it to cycle through the modes the selected model supports. Two separate ideas combine here:
+
+### Thinking — *whether* the model reasons
+
+- **Off** — the model answers immediately. Fastest and cheapest; ideal for simple, direct tasks.
+- **On** — the model first works through the problem in a dedicated reasoning pass before replying. Slower and uses more tokens, but markedly more accurate on multi-step, logical, or ambiguous tasks.
+
+### Effort — *how hard* it thinks
+
+Only effort-capable models expose this; it applies once thinking is on.
+
+- **High** — standard reasoning depth. The right default for most agentic work.
+- **Max** — the model reasons longer and deeper for the hardest problems. More tokens and latency in exchange for higher quality on complex work.
+
+### Button states
+
+| State | Colour | Meaning |
+|-------|--------|---------|
+| Off | gray | Thinking off — direct answer |
+| On | blue | Thinking on — no effort control |
+| High | purple | Thinking on, standard effort |
+| Max | orange | Thinking on, maximum effort |
+
+Each model shows only the states it genuinely supports. If a model always reasons (can't be turned off) or has no effort control, the button reflects that and locks where there's nothing to change. Wolffish remembers your choice per model.
+
+**On DeepSeek:** Both V4 models support Off / High / Max. In current testing High and Max produce similar depth, but Max is exposed so it benefits automatically if DeepSeek differentiates the tiers later.
 
 ---
 

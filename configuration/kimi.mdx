@@ -22,21 +22,45 @@ Best for: Agentic workflows, long-context tasks, reasoning-heavy workloads, and 
 
 ## Models
 
-| Model | Context | Max Output | Modes | Input / Output (per MTok) | Notes |
-|-------|---------|------------|-------|--------------------------|-------|
-| **kimi-k2.6** | 256K | 64K | None, High | $0.95 / $4.00 | Latest flagship. Vision + reasoning. Cached: $0.16/MTok. |
-| kimi-k2.5 | 256K | 64K | None, High | $0.60 / $3.00 | Vision + reasoning. Cached: $0.10/MTok. |
-| moonshot-v1-auto | 128K | 16K | — | $1.00 / $3.00 | Auto-selects context tier. |
-| moonshot-v1-128k-vision | 128K | 16K | — | $2.00 / $5.00 | Long-context with vision. |
-| moonshot-v1-128k | 128K | 16K | — | $2.00 / $5.00 | Long-context. |
-| moonshot-v1-32k-vision | 32K | 8K | — | $1.00 / $3.00 | Mid-context with vision. |
-| moonshot-v1-32k | 32K | 8K | — | $1.00 / $3.00 | Mid-context. |
-| moonshot-v1-8k-vision | 8K | 4K | — | $0.20 / $2.00 | Short-context with vision. |
-| moonshot-v1-8k | 8K | 4K | — | $0.20 / $2.00 | Short-context, cheapest. |
+| Model | Context | Modes | Input / Output (per MTok) | Cached | Notes |
+|-------|---------|-------|--------------------------|--------|-------|
+| **kimi-k2.6** | 256K | Off, On | $0.95 / $4.00 | $0.16 | Latest flagship. Vision + reasoning. |
+| kimi-k2.5 | 256K | Off, On | $0.60 / $3.00 | $0.10 | Vision + reasoning. |
+| kimi-k2.7-code | 256K | On | — / — | — | Code-focused. Reasoning always on. |
+| kimi-k2.7-code-highspeed | 256K | On | — / — | — | Fast code variant. Reasoning always on. |
+| moonshot-v1-auto | 128K | — | $1.00 / $3.00 | — | Auto-selects context tier. |
+| moonshot-v1-128k | 128K | — | $2.00 / $5.00 | — | Long-context. |
+| moonshot-v1-32k | 32K | — | $1.00 / $3.00 | — | Mid-context. |
+| moonshot-v1-8k | 8K | — | $0.20 / $2.00 | — | Short-context, cheapest. |
 
-<Note>
-  **Modes** control reasoning depth. *None* disables thinking for fast responses. *High* enables standard reasoning. Only K2 models support reasoning modes — Moonshot V1 models run in standard chat mode only. All models support tool calling with no hard tool-count limit.
-</Note>
+## Reasoning modes
+
+The **brain icon** next to the message box controls how this model reasons. Click it to cycle through the modes the selected model supports. Two separate ideas combine here:
+
+### Thinking — *whether* the model reasons
+
+- **Off** — the model answers immediately. Fastest and cheapest; ideal for simple, direct tasks.
+- **On** — the model first works through the problem in a dedicated reasoning pass before replying. Slower and uses more tokens, but markedly more accurate on multi-step, logical, or ambiguous tasks.
+
+### Effort — *how hard* it thinks
+
+Only effort-capable models expose this; it applies once thinking is on.
+
+- **High** — standard reasoning depth. The right default for most agentic work.
+- **Max** — the model reasons longer and deeper for the hardest problems. More tokens and latency in exchange for higher quality on complex work.
+
+### Button states
+
+| State | Colour | Meaning |
+|-------|--------|---------|
+| Off | gray | Thinking off — direct answer |
+| On | blue | Thinking on — no effort control |
+| High | purple | Thinking on, standard effort |
+| Max | orange | Thinking on, maximum effort |
+
+Each model shows only the states it genuinely supports. If a model always reasons (can't be turned off) or has no effort control, the button reflects that and locks where there's nothing to change. Wolffish remembers your choice per model.
+
+**On Kimi:** k2.x models are On / Off. The k2.x-code variants reason always-on (locked on). The older moonshot-v1 models don't reason.
 
 <Note>
   Kimi K2.6 sits between the budget Chinese providers (DeepSeek, MiMo) and the premium Western providers (Anthropic, OpenAI) on price — offering strong reasoning at a mid-range cost. See [Choosing a Provider](/configuration/providers#choosing-a-provider) for guidance on when to use which tier.

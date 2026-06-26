@@ -24,17 +24,41 @@ Best for: Reasoning-heavy workflows, code generation, vision tasks, and agentic 
 
 ## Models
 
-| Model | Context | Max Output | Modes | Input / Output (per MTok) | Notes |
-|-------|---------|------------|-------|--------------------------|-------|
-| **grok-4.3** | 1M | 64K | None, High, Max | $1.25 / $2.50 | Flagship. Vision + reasoning. |
-| grok-build-0.1 | 256K | 32K | None, High, Max | $1.00 / $2.00 | Purpose-built for code. |
-| grok-4 | 256K | 32K | None, High | $3.00 / $15.00 | Previous gen flagship. |
-| grok-3 | 131K | 32K | None, High | $2.00 / $10.00 | Strong reasoning. |
-| grok-3-mini | 131K | 32K | None, High | $0.30 / $0.50 | Fast and cheap reasoning. |
+| Model | Modes | Context | Input / Output (per MTok) | Cached |
+|-------|-------|---------|---------------------------|--------|
+| **grok-4.3** | Off, High | 1M | $1.25 / $2.50 | — |
+| grok-4.20-0309-reasoning | On | 256K | $1.25 / $2.50 | — |
+| grok-4.20-0309-non-reasoning | — | 256K | $1.25 / $2.50 | — |
+| grok-build-0.1 | On | 256K | $1.00 / $2.00 | — |
 
-<Note>
-  **Modes** control reasoning depth. *None* disables thinking for fast responses. *High* enables standard reasoning. *Max* enables deep reasoning for complex tasks. All Grok models support tool calling with no hard tool-count limit.
-</Note>
+## Reasoning modes
+
+The **brain icon** next to the message box controls how this model reasons. Click it to cycle through the modes the selected model supports. Two separate ideas combine here:
+
+### Thinking — *whether* the model reasons
+
+- **Off** — the model answers immediately. Fastest and cheapest; ideal for simple, direct tasks.
+- **On** — the model first works through the problem in a dedicated reasoning pass before replying. Slower and uses more tokens, but markedly more accurate on multi-step, logical, or ambiguous tasks.
+
+### Effort — *how hard* it thinks
+
+Only effort-capable models expose this; it applies once thinking is on.
+
+- **High** — standard reasoning depth. The right default for most agentic work.
+- **Max** — the model reasons longer and deeper for the hardest problems. More tokens and latency in exchange for higher quality on complex work.
+
+### Button states
+
+| State | Colour | Meaning |
+|-------|--------|---------|
+| Off | gray | Thinking off — direct answer |
+| On | blue | Thinking on — no effort control |
+| High | purple | Thinking on, standard effort |
+| Max | orange | Thinking on, maximum effort |
+
+Each model shows only the states it genuinely supports. If a model always reasons (can't be turned off) or has no effort control, the button reflects that and locks where there's nothing to change. Wolffish remembers your choice per model.
+
+**On xAI:** grok-4.3 supports Off / High. grok-4.x and grok-build reason always-on, so the button stays locked on; non-reasoning grok variants have no control.
 
 <Tip>
   Grok 4.3 is competitively priced against Anthropic and OpenAI while offering 1M context and vision. If you need a mid-tier provider with strong reasoning that's cheaper than Claude or GPT, xAI is a solid choice.

@@ -28,22 +28,52 @@ Best for: Cost-efficient agentic workflows, code generation, multilingual tasks,
 
 ## Models
 
-| Model | Context | Max Output | Modes | Input / Output (per MTok) | Notes |
-|-------|---------|------------|-------|--------------------------|-------|
-| **qwen3.7-max** | 1M | 64K | None, High, Max | $2.50 / $7.50 | Flagship. Frontier reasoning. Cached: $0.25/MTok. |
-| qwen3.7-plus | 1M | 64K | None, High, Max | $0.40 / $1.60 | Strong reasoning at mid-range price. Cached: $0.064/MTok. |
-| qwen3.6-plus | 1M | 64K | None, High, Max | $0.40 / $1.60 | Previous gen plus. Cached: $0.04/MTok. |
-| qwen3.6-flash | 1M | 64K | None, High, Max | $0.25 / $1.50 | Fast reasoning. Cached: $0.025/MTok. |
-| qwen3.5-plus | 1M | 64K | None, High, Max | $0.40 / $1.60 | Balanced quality and cost. Cached: $0.04/MTok. |
-| qwen3.5-flash | 1M | 64K | None, High, Max | $0.06 / $0.24 | Ultra-cheap reasoning. Cached: $0.006/MTok. |
-| qwen3-max | 131K | 32K | None, High, Max | $1.60 / $6.40 | Strong reasoning, smaller context. Cached: $0.40/MTok. |
-| qwen3-coder-plus | 131K | 32K | None, High, Max | $0.40 / $1.60 | Code-optimized. Cached: $0.04/MTok. |
-| qwen-max | 131K | 8K | — | $1.60 / $6.40 | Legacy. No reasoning modes. Cached: $0.16/MTok. |
-| qwen-plus | 131K | 32K | — | $0.40 / $1.60 | Legacy. Fast, no reasoning. Cached: $0.04/MTok. |
+| Model | Context | Modes | Input / Output (per MTok) | Cached | Notes |
+|-------|---------|-------|--------------------------|--------|-------|
+| **qwen3.7-max** | 1M | Off, High, Max | $2.50 / $7.50 | $0.25 | Flagship. Frontier reasoning. |
+| qwen3.7-plus | 1M | Off, High, Max | $0.40 / $1.60 | $0.064 | Strong reasoning at mid-range price. |
+| qwen3.6-plus | 1M | Off, High, Max | $0.40 / $1.60 | $0.04 | Previous-gen plus. |
+| qwen3.6-flash | 1M | Off, High, Max | $0.25 / $1.50 | $0.025 | Fast reasoning. |
+| qwen3.5-plus | 1M | Off, High, Max | $0.40 / $1.60 | $0.04 | Balanced quality and cost. |
+| qwen3.5-flash | 1M | Off, High, Max | $0.06 / $0.24 | $0.006 | Ultra-cheap reasoning. |
+| qwen3-max | 131K | Off, High, Max | $1.60 / $6.40 | $0.40 | Strong reasoning, smaller context. |
+| qwen3-coder-plus | 131K | Off, High, Max | $0.40 / $1.60 | $0.04 | Code-optimized. |
+| qwen3-coder-flash | 131K | Off, High, Max | $0.40 / $1.60 | $0.04 | Fast code-optimized. |
+| qwq-plus | 131K | On | $0.40 / $1.60 | $0.04 | Reasoning-only (always thinks). |
+| qvq-max | 131K | On | $1.60 / $6.40 | $0.16 | Vision reasoning (always thinks). |
+| qwen-max | 131K | — | $1.60 / $6.40 | $0.16 | Legacy. No reasoning. |
+| qwen-plus | 131K | — | $0.40 / $1.60 | $0.04 | Legacy. Fast, no reasoning. |
+| qwen-turbo | 1M | — | $0.30 / $0.60 | $0.03 | Legacy. Fast, no reasoning. |
+| qwen-flash | 1M | — | $0.06 / $0.24 | $0.006 | Legacy. Ultra-cheap, no reasoning. |
 
-<Note>
-  **Modes** control reasoning depth. *None* disables thinking for fast responses. *High* enables standard reasoning. *Max* enables deep reasoning for complex tasks. Legacy models (qwen-max, qwen-plus) don't support reasoning modes. All models support tool calling with no hard tool-count limit.
-</Note>
+## Reasoning modes
+
+The **brain icon** next to the message box controls how this model reasons. Click it to cycle through the modes the selected model supports. Two separate ideas combine here:
+
+### Thinking — *whether* the model reasons
+
+- **Off** — the model answers immediately. Fastest and cheapest; ideal for simple, direct tasks.
+- **On** — the model first works through the problem in a dedicated reasoning pass before replying. Slower and uses more tokens, but markedly more accurate on multi-step, logical, or ambiguous tasks.
+
+### Effort — *how hard* it thinks
+
+Only effort-capable models expose this; it applies once thinking is on.
+
+- **High** — standard reasoning depth. The right default for most agentic work.
+- **Max** — the model reasons longer and deeper for the hardest problems. More tokens and latency in exchange for higher quality on complex work.
+
+### Button states
+
+| State | Colour | Meaning |
+|-------|--------|---------|
+| Off | gray | Thinking off — direct answer |
+| On | blue | Thinking on — no effort control |
+| High | purple | Thinking on, standard effort |
+| Max | orange | Thinking on, maximum effort |
+
+Each model shows only the states it genuinely supports. If a model always reasons (can't be turned off) or has no effort control, the button reflects that and locks where there's nothing to change. Wolffish remembers your choice per model.
+
+**On Qwen:** qwen3.x models support Off / High / Max (effort via a thinking-token budget). qwq and qvq reason always-on (locked on). Legacy qwen-max/plus/turbo/flash don't reason.
 
 ## Cost Comparison
 

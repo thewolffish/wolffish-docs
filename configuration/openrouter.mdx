@@ -28,26 +28,35 @@ Best for: Experimenting with models you haven't set up directly, unified billing
 3. Navigate to **Keys** and create a new key
 4. Paste it into Wolffish → Settings → Models → OpenRouter
 
-## Supported Models
+## Models
 
-OpenRouter supports hundreds of models. Wolffish normalizes output caps to match each provider's native limits to prevent context overflow errors:
+OpenRouter routes to hundreds of models across dozens of providers. The table below is a curated top-20 of the most popular models — the picker exposes many more once your key is connected:
 
-| Model (via OpenRouter) | Max Output | Notes |
-|------------------------|-----------|-------|
-| anthropic/claude-opus-*, anthropic/claude-sonnet-* | 32K | Matches native Anthropic caps. |
-| openai/gpt-5* | 64K | Matches native OpenAI caps. |
-| openai/gpt-4.1* | 32K | Previous gen OpenAI. |
-| openai/gpt-4o* | 16K | Chat-optimized. |
-| openai/o3*, openai/o4* | 64K | Reasoning models. |
-| deepseek/* | 32K | Matches native DeepSeek caps. |
-| x-ai/grok-* | 32K | Matches native xAI caps. |
-| google/gemini-* | 64K | Google Gemini models. |
-| meta-llama/* | 16K | Meta Llama models. |
-| qwen/* | 32K | Matches native Qwen caps. |
-| mistralai/* | 32K | Mistral models. |
+| Model | Context | Modes | Input / Output (per MTok) | Cached |
+|-------|---------|-------|---------------------------|--------|
+| **anthropic/claude-opus-4.1** | 200K | Off, High | $15.00 / $75.00 | — |
+| anthropic/claude-sonnet-4.5 | 1M | Off, High | $3.00 / $15.00 | — |
+| openai/gpt-5 | 400K | Off, High | $1.25 / $10.00 | — |
+| openai/gpt-5-mini | 400K | Off, High | $0.25 / $2.00 | — |
+| openai/o3 | 200K | Off, High | $2.00 / $8.00 | — |
+| openai/o4-mini | 200K | Off, High | $1.10 / $4.40 | — |
+| openai/gpt-4o | 128K | — | $2.50 / $10.00 | — |
+| openai/gpt-4.1 | 1M | — | $2.00 / $8.00 | — |
+| google/gemini-2.5-pro | 1M | Off, High | $1.25 / $10.00 | — |
+| google/gemini-2.5-flash | 1M | Off, High | $0.30 / $2.50 | — |
+| deepseek/deepseek-r1 | 164K | Off, High | $0.70 / $2.50 | — |
+| deepseek/deepseek-chat-v3.1 | 164K | Off, High | $0.21 / $0.79 | — |
+| x-ai/grok-4.3 | 1M | Off, High | $1.25 / $2.50 | — |
+| qwen/qwen3-235b-a22b | 131K | Off, High | $0.45 / $1.82 | — |
+| z-ai/glm-4.6 | 203K | Off, High | $0.43 / $1.74 | — |
+| meta-llama/llama-4-maverick | 1M | — | $0.15 / $0.60 | — |
+| meta-llama/llama-3.3-70b-instruct | 131K | — | $0.10 / $0.32 | — |
+| mistralai/mistral-large | 128K | — | $2.00 / $6.00 | — |
+| mistralai/mistral-medium-3 | 131K | — | $0.40 / $2.00 | — |
+| moonshotai/kimi-k2 | 131K | — | $0.57 / $2.30 | — |
 
 <Note>
-  Output caps are set conservatively to ensure the model always has sufficient context budget for input tokens. These match the caps used by the corresponding native provider integrations — you get the same behavior whether you access a model directly or through OpenRouter.
+  This is a curated shortlist, not the full catalogue. OpenRouter exposes hundreds of models through one key — the picker lists many more than the popular ones shown here. Wolffish doesn't track per-token cache discounts for routed models, so the Cached column is unavailable across the board.
 </Note>
 
 ## Direct Integration vs. OpenRouter
@@ -79,15 +88,34 @@ OpenRouter supports hundreds of models. Wolffish normalizes output caps to match
   If you're already using DeepSeek, Anthropic, or any other natively supported provider, keep that direct connection. Add OpenRouter only for models you can't access directly. Wolffish's cascade handles fallback automatically — direct providers are tried first, OpenRouter comes after.
 </Tip>
 
-## Reasoning Models via OpenRouter
+## Reasoning modes
 
-OpenRouter supports reasoning models from multiple providers. Wolffish automatically detects reasoning models and sends the appropriate parameters:
+The **brain icon** next to the message box controls how this model reasons. Click it to cycle through the modes the selected model supports. Two separate ideas combine here:
 
-- **OpenAI o-series and GPT-5**: `reasoning_effort` parameter
-- **Anthropic Claude Opus**: `reasoning` object with effort level
-- **DeepSeek R-series**: `reasoning_effort` parameter
+### Thinking — *whether* the model reasons
 
-The reasoning mode (None, High, Max) you set in Wolffish's UI is translated to the correct format for each provider automatically.
+- **Off** — the model answers immediately. Fastest and cheapest; ideal for simple, direct tasks.
+- **On** — the model first works through the problem in a dedicated reasoning pass before replying. Slower and uses more tokens, but markedly more accurate on multi-step, logical, or ambiguous tasks.
+
+### Effort — *how hard* it thinks
+
+Only effort-capable models expose this; it applies once thinking is on.
+
+- **High** — standard reasoning depth. The right default for most agentic work.
+- **Max** — the model reasons longer and deeper for the hardest problems. More tokens and latency in exchange for higher quality on complex work.
+
+### Button states
+
+| State | Colour | Meaning |
+|-------|--------|---------|
+| Off | gray | Thinking off — direct answer |
+| On | blue | Thinking on — no effort control |
+| High | purple | Thinking on, standard effort |
+| Max | orange | Thinking on, maximum effort |
+
+Each model shows only the states it genuinely supports. If a model always reasons (can't be turned off) or has no effort control, the button reflects that and locks where there's nothing to change. Wolffish remembers your choice per model.
+
+**On OpenRouter:** Reasoning depends on the routed model. Reasoning-capable models show Off / High; non-reasoning models have no control. OpenRouter caps effort at High, and some endpoints (e.g. GPT-5, DeepSeek-R) reason mandatorily — there 'Off' falls back to minimal reasoning.
 
 ## Provider Cascade
 
