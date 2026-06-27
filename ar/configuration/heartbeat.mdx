@@ -5,31 +5,44 @@ description: "إعداد المهام المجدولة المستقلة باست
 
 # مهام مستقلة على مؤقّت
 
-ملف النبض يُحدّد المهام المجدولة التي يُشغِّلها وولف فيش بشكل مستقل. يقع في `brain/brainstem/heartbeat.md`، وتُحلّله وحدة brainstem عند بدء التشغيل وتُسجّله كمهام cron متكررة.
+النبض هو الطريقة التي يُنجز بها وولف فيش الأمور من تلقاء نفسه — إحاطة صباحية الساعة 8، مسح لصندوق البريد كل 15 دقيقة، تذكير لمرة واحدة بعد يومين. المهام تقع في `brain/brainstem/heartbeat.md`، وتُحلّلها وحدة brainstem وتُشغّلها عبر خط الأنابيب الكامل للوكيل عند حلول موعدها.
+
+نادراً ما تُحرّر هذا الملف يدوياً. فقط اطلب من وولف فيش — *"كل صباح، لخّص رسائلي غير المقروءة"* أو *"بعد يومين ذكّرني بتجديد نطاقي"* — وسيُنشئ المهام ويُعدّلها ويحذفها نيابةً عنك عبر قدرة **`automations`** (‏`automation_list`، `automation_create`، `automation_edit`، `automation_delete`، `automation_check`، `automation_run`). التحرير اليدوي يعمل أيضاً، والصيغة موضّحة أدناه.
 
 ## كيف يعمل
 
-كل عنوان `##` في `heartbeat.md` يُحدّد مهمة. نص العنوان هو اسم المهمة، ونص المحتوى هو التعليمة التي تُرسَل إلى الوكيل كرسالة مستخدم في الوقت المجدول.
+كل عنوان `##` في `heartbeat.md` يُحدّد مهمة. **العنوان نفسه هو الجدول** (مثلاً `## Daily (08:00)`) — لا يوجد اسم منفصل للمهمة. النص أسفله هو التعليمة، وتُرسَل إلى الوكيل كرسالة مستخدم عند حلول الموعد.
 
 ```markdown
-## Morning Summary | Daily (08:00)
+## Daily (08:00)
 
 Summarize my unread emails and calendar events for today.
 List any GitHub notifications. Keep it brief.
 
-## PR Monitor | Every (30m)
+## Every (30m)
 
 Check my open pull requests on GitHub. If any have new
 reviews or comments, give me a one-line summary of each.
 ```
 
-يُحلّل brainstem الجدول من العنوان (بعد فاصل `|`) ويُسجِّل المهمة. عندما يحين وقت الجدول، يُرسَل نص المحتوى إلى الوكيل كما لو كتبه المستخدم.
-
 ## صيغ الجدولة
+
+جميع الأوقات تستخدم المنطقة الزمنية المحلية لنظامك بتنسيق 24 ساعة. لا يوجد تحويل إلى UTC — `Daily (09:00)` تعني الساعة 9 صباحاً أينما كنت.
+
+### لمرة واحدة (تعمل مرة ثم تحذف نفسها)
 
 | الصيغة | المعنى | مثال |
 |---|---|---|
-| `Startup` | يعمل مرة واحدة عند تهيئة brainstem | `Startup` |
+| `Once (YYYY-MM-DD HH:MM)` | مرة واحدة، في تاريخ ووقت محلي مطلق | `Once (2026-12-31 23:30)` |
+| `In (Nm)` / `In (Nh)` / `In (Nd)` | مرة واحدة، بعد N دقيقة / ساعة / يوم من الآن | `In (15m)` · `In (2h)` · `In (2d)` |
+
+بعد أن تعمل المهمة لمرة واحدة، **تُزيل مدخلها** من الملف. صيغة `In (...)` هي اختصار تستخدمه عند *الطلب* من وولف فيش — تُحوَّل إلى `Once (...)` مطلقة عند الإنشاء (لأن التأخير النسبي لا يمكن أن يبقى بعد إعادة التشغيل)، لذا ما يُكتَب في الملف دائماً هو `Once (...)`. كتابة `In (...)` يدوياً غير مدعومة؛ استخدم `Once (...)` لوقت محدد.
+
+### متكررة (تعمل حتى تحذفها)
+
+| الصيغة | المعنى | مثال |
+|---|---|---|
+| `Startup` | يعمل مرة واحدة في كل تهيئة لـ brainstem | `Startup` |
 | `Every (Nm)` | تكرار بفاصل دقائق | `Every (5m)` |
 | `Every (Nh)` | تكرار بفاصل ساعات | `Every (2h)` |
 | `Hourly (MM)` | مرة كل ساعة عند الدقيقة المحددة | `Hourly (30)` |
@@ -37,43 +50,65 @@ reviews or comments, give me a one-line summary of each.
 | `Nightly (HH:MM)` | مرة يومياً (اسم بديل لـ Daily) | `Nightly (23:00)` |
 | `Weekday (HH:MM)` | من الاثنين إلى الجمعة فقط | `Weekday (08:30)` |
 | `Weekly (Day HH:MM)` | مرة أسبوعياً في يوم محدد | `Weekly (Monday 09:00)` |
-| `Monthly (DD HH:MM)` | مرة شهرياً في يوم محدد | `Monthly (01 10:00)` |
+| `Monthly (DD HH:MM)` | مرة شهرياً في يوم محدد | `Monthly (1 10:00)` |
 | `Cron (expression)` | صيغة cron خام بخمسة حقول | `Cron (*/15 * * * *)` |
 
 <Info>
-  جميع الأوقات تستخدم المنطقة الزمنية المحلية لنظامك بتنسيق 24 ساعة. لا يوجد تحويل إلى UTC — `Daily (09:00)` تعني الساعة 9 صباحاً أينما كنت.
+  الجداول خارج النطاق تُرفَض فوراً — `Every (0m)` أو `Daily (99:99)` أو `Once (...)` في الماضي لن تُقبَل بصمت ثم لا تعمل أبداً. إذا حرّرت عنواناً غير صالح يدوياً، يظهر مُعلَّماً عندما يسرد وولف فيش مهامك.
 </Info>
 
 ## تنفيذ المهام
 
-مهام النبض تعمل عبر خط الأنابيب الكامل للوكيل — نفس الدماغ، نفس القدرات، نفس الذاكرة. الفرق الوحيد عن المحادثة العادية:
+مهام النبض تعمل عبر خط الأنابيب الكامل للوكيل — نفس الدماغ، نفس القدرات، نفس الذاكرة. ما يختلف عن المحادثة العادية:
 
-- **موافقة تلقائية**: استدعاءات الأدوات تتجاوز تأكيد amygdala (بدون نوافذ موافقة)
-- **محادثة مغلقة**: كل تشغيل مهمة يُنشئ محادثته الخاصة، مرئية في السجل
-- **بدون بث**: تُولَّد الاستجابات في الخلفية بدون مقاطعة واجهة المستخدم
+- **موافقة تلقائية**: استدعاءات الأدوات تتجاوز تأكيد amygdala (بدون نوافذ موافقة).
+- **محادثة مغلقة**: كل تشغيل يُنشئ محادثته الخاصة، مرئية في السجل.
+- **بدون بث**: تُولَّد الاستجابات في الخلفية بدون مقاطعة الواجهة.
 
 <Warning>
-  لأن مهام النبض توافق تلقائياً على استدعاءات الأدوات، كن حذراً في التعليمات التي تعطيها لها. مهمة تقول "احذف الملفات القديمة" ستُنفَّذ بدون سؤال. اكتب تعليمات دفاعية: "اعرض الملفات الأقدم من 30 يوماً وأخبرني بما ستحذفه" أأمن من "احذف الملفات الأقدم من 30 يوماً".
+  لأن مهام النبض توافق تلقائياً على كل استدعاء أداة، كن حذراً فيما تجدوله. مهمة تقول "احذف الملفات القديمة" ستُنفَّذ بدون سؤال. اكتب تعليمات دفاعية — "اعرض الملفات الأقدم من 30 يوماً وأخبرني بما ستحذفه" أفضل من "احذف الملفات الأقدم من 30 يوماً". راجع [ماذا تجدول](/ar/configuration/what-to-schedule) لطبقة قرارات الأمان الكاملة.
 </Warning>
 
-## تفعيل وتعطيل المهام
+### واحدة تلو الأخرى، في طابور — لا تُسقَط أبداً
 
-المهام تكون نشطة عندما يكون عنوانها ومحتواها غير مُعلَّقين. لتعطيل مهمة، علّقها بتعليقات HTML:
+المهام تعمل **واحدة في كل مرة**. إذا انطلقت مهمة بينما أخرى لا تزال تعمل، فإنها **تنتظر في الطابور** وتعمل تالياً بدل أن تُتجاهَل. الطابور مُدمَج لكل مهمة، فلا يمكن لمهمة بطيئة أن تُراكم تأخّراً من نبضاتها. لست بحاجة لتباعد المهام لتفادي التصادم.
+
+### المهام الفائتة تُستدرَك
+
+إذا كان وولف فيش مغلقاً عند موعد مهمة، فإنها تعمل مرة واحدة عند التشغيل التالي — **مُجمَّعةً**: مهمة متكررة فاتتها عدة مواعيد أثناء التوقف تعمل استدراكاً *واحداً*، لا واحداً لكل موعد فائت. تُعاد فقط الفائتات خلال آخر **24 ساعة**؛ وما هو أقدم يُسقَط. المهمة لمرة واحدة التي فات موعدها تعمل إن كانت ضمن تلك النافذة ثم تحذف نفسها؛ وإن كانت أقدم تُزال بهدوء دون تشغيل.
+
+## إدارة المهام
+
+### عبر وولف فيش (الأفضل)
+
+تحدّث إليه فقط:
+
+- *"ما المهام التلقائية التي لديّ؟"* ← يسردها مع جدولها وحالة آخر تشغيل
+- *"كل يوم عمل الساعة 7:45، أعطني إحاطة صباحية"* ← يُنشئ مهمة متكررة
+- *"بعد يومين، ذكّرني بتجديد نطاقي"* ← يُنشئ مهمة لمرة واحدة تحذف نفسها
+- *"غيّر الإحاطة الصباحية إلى الساعة 8"* / *"احذف مراقب طلبات السحب"* ← يُعدّل أو يحذف
+- *"شغّل فحص بريدي الآن"* ← يُشغّل مهمة فوراً لتجربتها
+
+التغييرات تُطبَّق مباشرةً — يُعيد brainstem تحميل الجدول بمجرد تغيّر الملف، دون إعادة تشغيل.
+
+### يدوياً
+
+حرّر `heartbeat.md` مباشرةً. **لتعطيل** مهمة دون حذفها، علّقها بتعليقات HTML:
 
 ```markdown
-## Morning Summary | Daily (08:00)
+## Daily (08:00)
 
 Summarize my unread emails and calendar events for today.
 
 <!--
-## Old Job I Don't Need | Every (1h)
+## Every (1h)
 
 This job is disabled and won't run.
 -->
 ```
 
 <Tip>
-  يُعيد brainstem قراءة `heartbeat.md` عند بدء التشغيل. بعد تعديل الملف، أعد تشغيل وولف فيش أو انتظر دورة تهيئة brainstem التالية.
+  يُراقب brainstem ملف `heartbeat.md` ويُعيد التحميل عند الحفظ، فتسري التعديلات اليدوية دون إعادة تشغيل. الأمثلة المُعلَّقة في الملف هي قائمة جاهزة — أزل التعليق عن أحدها لتفعيله.
 </Tip>
 
 ## أمثلة عملية
@@ -81,7 +116,7 @@ This job is disabled and won't run.
 ### إحاطة الصباح
 
 ```markdown
-## Morning Briefing | Weekday (07:45)
+## Weekday (07:45)
 
 Give me a morning briefing:
 1. Unread emails — summarize the important ones
@@ -95,7 +130,7 @@ Keep each section to 2-3 lines max.
 ### فرز البريد الإلكتروني
 
 ```markdown
-## Email Triage | Every (2h)
+## Every (2h)
 
 Check my email for anything urgent or time-sensitive.
 If you find something that needs immediate attention,
@@ -106,7 +141,7 @@ Ignore newsletters and marketing emails.
 ### مراقبة طلبات السحب
 
 ```markdown
-## PR Watch | Every (30m)
+## Every (30m)
 
 Check my open pull requests on GitHub.
 Report only PRs with new activity since your last check:
@@ -117,22 +152,20 @@ Report only PRs with new activity since your last check:
 If nothing changed, respond with "No PR updates."
 ```
 
-### ملخص نهاية اليوم
+### تذكير لمرة واحدة
 
 ```markdown
-## Daily Wrap-Up | Nightly (18:00)
+## Once (2026-12-31 23:30)
 
-Write a brief end-of-day summary:
-- What tasks were completed today (check conversation history)
-- Any pending items that need follow-up tomorrow
-- Save this as today's work log in knowledge
-
-Keep it concise — bullet points only.
+Wish me a happy new year and give me a short recap of my
+biggest wins this year, drawn from my episodes and knowledge.
 ```
+
+تنطلق هذه مرة واحدة الساعة 11:30 مساءً يوم 31 ديسمبر، ثم تُزيل نفسها من الملف.
 
 ## ضغط الذاكرة
 
-ضغط الذاكرة (تجميع hippocampus) هو عملية مجدولة منفصلة تُعدّ في **الإعدادات > الضغط**، وليس في `heartbeat.md`. يُشغِّل brainstem الضغط وفق جدوله الليلي الخاص، مستخدماً نموذج سحابي لجودة تلخيص أفضل.
+ضغط الذاكرة (تجميع hippocampus) هو عملية مجدولة منفصلة تُعدّ في **الإعدادات > Hippocampus > الضغط**، وليس في `heartbeat.md`. يُشغّله brainstem وفق جدوله اليومي/الأسبوعي الخاص، ولن يظهر عندما يسرد وولف فيش مهامك.
 
 <Info>
   الضغط يُجمِّع الأحداث اليومية في ملخصات أسبوعية ويُرقّي المعلومات المهمة إلى ملفات المعرفة. يعمل بشكل مستقل عن مهام النبض.
@@ -143,27 +176,34 @@ Keep it concise — bullet points only.
 ```markdown
 # Heartbeat
 
-Scheduled jobs for autonomous operation.
-
-## System Check | Startup
+## Startup
 
 Run a quick health check. Verify that all configured
 providers are reachable and report any issues.
 
-## Morning Briefing | Weekday (07:45)
+## Weekday (07:45)
 
 Give me a morning briefing:
 1. Unread emails — summarize the important ones
 2. Today's calendar — list meetings with times
 3. GitHub — any PRs that need my review
 
-## PR Watch | Every (30m)
+## Every (30m)
 
 Check my open pull requests on GitHub for new activity.
 Only report changes since last check.
 
-## Daily Wrap-Up | Nightly (18:00)
+## Nightly (18:00)
 
 Write a brief end-of-day summary of completed tasks
 and pending items for tomorrow.
+
+## Once (2026-12-31 23:30)
+
+Wish me a happy new year and recap my biggest wins this year.
 ```
+
+## انظر أيضاً
+
+- [ماذا تجدول](/ar/configuration/what-to-schedule) — أي مهام آمنة لتشغيلها تلقائياً، وكيف تجعل المهمة الخطرة آمنة
+- [القدرات المدمجة](/ar/capabilities/built-in-capabilities) — قدرة `automations` والإدارة الذاتية

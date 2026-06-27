@@ -34,6 +34,24 @@ Wolffish can read, manage, and **write its own capabilities** at runtime — no 
 
     Changes persist and take effect on the next turn. This is how Wolffish extends itself without a code change — see [Self-Authoring Skills](/capabilities/self-authoring-skills) for the full create → test → edit loop and a complete copy-paste example.
   </Accordion>
+
+  <Accordion title="automations — Manage its own scheduled heartbeat jobs">
+    **Type:** Plugin
+
+    **Triggers:** automation, automations, automate, schedule, scheduled, heartbeat, cron, recurring, every morning, every day, daily, weekly, remind me, run automatically, from now on
+
+    Lets Wolffish manage its own [heartbeat](/configuration/heartbeat) — the jobs that run autonomously on a schedule. Ask for something recurring ("every morning…") or one-time ("in 2 days remind me…") and it writes, edits, or removes the job for you, applied live without a restart. It picks **one-time vs recurring** from how you phrase it; one-time jobs (`In (15m)` / `Once (2026-...)`) fire once and delete themselves.
+
+    **Tools:**
+    - `automation_list` — List every automation: schedule, plain-English timing, instruction, and whether it's valid/running
+    - `automation_create` — Create a job (recurring or one-time) from a schedule + instruction
+    - `automation_edit` — Change a job's schedule and/or instruction
+    - `automation_delete` — Permanently remove a job (asks you to confirm)
+    - `automation_check` — Runtime status: what's running now and how recent runs went
+    - `automation_run` — Run a job immediately, to test it
+
+    Heartbeat jobs run with tool calls **auto-approved**, so it confirms anything recurring or consequential with you before scheduling it. Memory compaction is configured separately in Settings, not here.
+  </Accordion>
 </AccordionGroup>
 
 ### Asking Wolffish to build a skill for itself

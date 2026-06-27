@@ -3,6 +3,15 @@ title: "Changelog"
 description: "Product updates and improvements to Wolffish"
 ---
 
+<Update label="June 27, 2026" description="v1.0.193">
+
+## New features
+
+- **Automations.** Wolffish now manages its own scheduled jobs — its [heartbeat](/configuration/heartbeat) — entirely through conversation. Say "every morning brief me on my calendar," "in 2 days remind me to renew the lease," or "check the build every hour," and it creates the [automation](/capabilities/built-in-capabilities); ask it to list, change, delete, or test one and it does. One-time jobs fire once and remove themselves, recurring ones keep going, and jobs never overlap — one that comes due mid-run waits its turn instead of being dropped. Anything missed while the app was closed runs once, collapsed, on the next launch.
+- **Read a WhatsApp chat.** A new `whatsapp_read` tool catches Wolffish up on the latest messages in any [WhatsApp](/channels/overview) contact or group, returned oldest-first. It covers traffic seen while Wolffish is connected — not older history from before it started — and that buffer now survives restarts instead of resetting every launch.
+
+</Update>
+
 <Update label="June 26, 2026" description="v1.0.191">
 
 ## New features
