@@ -49,15 +49,13 @@ Located at `brain/config.json`, this file stores application-level settings. It'
 | `providers.ollama.host` | Ollama server URL (default: `http://localhost:11434`) |
 | `language` | UI language: `en` (English) or `ar` (Arabic) |
 
-## Provider Cascade
+## Model Selection
 
-When the active provider fails, Wolffish cascades through alternatives:
+Wolffish runs on an explicitly selected model — there is no automatic fallback. In Settings → Modes, you choose your **Brain** model (provider + model), and that's the model that runs. The model you pick is the one that answers; if it fails, the turn fails rather than silently routing to another provider.
 
-```
-DeepSeek → MiMo → Kimi → MiniMax → Claude → OpenAI → Ollama
-```
+Optionally, enable **orchestrator mode** to add a second **Worker** model the Brain can delegate parallel work to. See [Orchestrator Mode](/configuration/orchestrator-mode) for how that works. Even then there's no cascade — the Brain and Worker models you selected are the ones that run.
 
-Providers without configured API keys are skipped. Ollama is used as a fallback if it's installed and running. All providers are optional — you only need at least one configured.
+All providers are optional — you only need the one (or two) you actually select. To use Ollama, select it as your Brain model; there's no automatic fall-through to local.
 
 <Info>
   API keys are stored in plain text in config.json. This is by design — Wolffish is a local-first app and your workspace is your own. If you version-control your workspace with git, add `brain/config.json` to `.gitignore`.

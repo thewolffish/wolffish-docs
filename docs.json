@@ -164,6 +164,7 @@
                 "expanded": true,
                 "pages": [
                   "configuration/providers",
+                  "configuration/orchestrator-mode",
                   "configuration/deepseek",
                   "configuration/mimo",
                   "configuration/qwen",
@@ -338,6 +339,7 @@
                 "expanded": true,
                 "pages": [
                   "ar/configuration/providers",
+                  "ar/configuration/orchestrator-mode",
                   "ar/configuration/deepseek",
                   "ar/configuration/mimo",
                   "ar/configuration/qwen",

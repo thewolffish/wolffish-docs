@@ -46,8 +46,8 @@ This is the most important step. The prefrontal cortex:
 The assembled context goes to `thalamus.stream()`, which:
 
 1. Checks `net.isOnline()` for instant offline detection
-2. Tries the primary provider (DeepSeek, Claude, OpenAI, or Ollama based on config)
-3. If the primary fails, cascades to the next healthy provider
+2. Calls the **Brain** model — the one you explicitly selected in Settings → Modes (and, in orchestrator mode, resolves the Worker model for workers)
+3. On a transient error, retries the **same** cloud Brain on a backoff schedule; there's no automatic cascade to another provider
 4. Returns a unified `StreamChunk` async generator
 
 ### 4. Response Streaming (broca)

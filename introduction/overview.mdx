@@ -94,7 +94,7 @@ Or download the latest release directly from [wolffi.sh](https://wolffi.sh/).
 
 ## How It Works
 
-Wolffish talks to LLMs via nine cloud providers — DeepSeek, Xiaomi MiMo, Qwen (Alibaba Cloud), Kimi (Moonshot AI), MiniMax, xAI (Grok), Stepfun, Anthropic (Claude), OpenAI (GPT) — plus Ollama for local models. All are optional — configure any combination that suits you. When multiple are available, it cascades through them with automatic fallback — cloud first for quality, local as a reliable fallback that works offline. We recommend starting with DeepSeek or MiMo — they handle complex agentic tasks well at a fraction of the cost. Upgrade to Anthropic or OpenAI only if needed.
+Wolffish talks to LLMs via nine cloud providers — DeepSeek, Xiaomi MiMo, Qwen (Alibaba Cloud), Kimi (Moonshot AI), MiniMax, xAI (Grok), Stepfun, Anthropic (Claude), OpenAI (GPT) — plus Ollama for local models. All are optional. You explicitly select your **Brain** model in Settings — the one you choose is the one that runs. There's no automatic cascade or fallback. Optionally, turn on **orchestrator mode** to add a second **Worker** model for parallel work. We recommend starting with DeepSeek or MiMo — they handle complex agentic tasks well at a fraction of the cost. Switch to Anthropic or OpenAI only if needed.
 
 Everything lives in one folder: `~/.wolffish/`. Delete it and you're back to factory defaults. No system-level daemons, no crontabs, no registry entries, no scattered config files.
 

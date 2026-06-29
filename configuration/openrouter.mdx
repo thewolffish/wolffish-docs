@@ -85,7 +85,7 @@ OpenRouter routes to hundreds of models across dozens of providers. The table be
 - You're running high-volume production workloads where the proxy hop adds up
 
 <Tip>
-  If you're already using DeepSeek, Anthropic, or any other natively supported provider, keep that direct connection. Add OpenRouter only for models you can't access directly. Wolffish's cascade handles fallback automatically — direct providers are tried first, OpenRouter comes after.
+  If you're already using DeepSeek, Anthropic, or any other natively supported provider, keep that direct connection. Add OpenRouter only for models you can't access directly — then select an OpenRouter model as your Brain when you want to use it. There's no cascade; the model you select is the one that runs.
 </Tip>
 
 ## Reasoning modes
@@ -117,6 +117,6 @@ Each model shows only the states it genuinely supports. If a model always reason
 
 **On OpenRouter:** Reasoning depends on the routed model. Reasoning-capable models show Off / High; non-reasoning models have no control. OpenRouter caps effort at High, and some endpoints (e.g. GPT-5, DeepSeek-R) reason mandatorily — there 'Off' falls back to minimal reasoning.
 
-## Provider Cascade
+## Using OpenRouter as Your Model
 
-OpenRouter sits near the end of Wolffish's cascade: **DeepSeek → MiMo → Kimi → MiniMax → xAI → Qwen → Stepfun → Claude → OpenAI → OpenRouter → Ollama**. This means direct provider connections are always tried first. OpenRouter acts as a broad fallback — if your primary and secondary providers are down, OpenRouter can route to an alternative model automatically.
+There's no provider cascade and no priority order. To use an OpenRouter model, select it as your Brain in **Settings → Modes** (or as your Worker model in [orchestrator mode](/configuration/orchestrator-mode)). The model you select is the one that runs — OpenRouter is not an automatic fallback behind your other providers.

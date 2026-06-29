@@ -75,9 +75,9 @@ Ollama runs locally and has no caching layer.
 
 Three properties depend on the stateless design, and losing any of them would compromise the architecture.
 
-### Provider Cascade
+### Model Switching
 
-Thalamus falls back DeepSeek to Anthropic to OpenAI to Ollama on failure. If turn 5 fails on DeepSeek and routes to Anthropic, Anthropic needs the full history — which it has, because the app owns the message array. Thread-based APIs would make mid-conversation failover impossible.
+Thalamus calls whichever Brain model you selected — DeepSeek, Anthropic, OpenAI, or Ollama — and there's no automatic cascade between them. But because the app owns the full message array, switching your Brain model mid-conversation just works: the new model gets the complete history on its very next turn, with no thread to migrate. (Orchestrator mode leans on the same property — each worker is handed a complete, self-contained context.) Thread-based APIs would make that impossible.
 
 ### Privacy
 

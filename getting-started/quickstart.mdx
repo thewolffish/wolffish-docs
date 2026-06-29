@@ -45,10 +45,6 @@ Use Wolffish's built-in file viewer to open `brain/identity/soul.md` and edit it
 
 ## 5. Configure Providers
 
-In Settings, add API keys for cloud providers. The cascade order is:
+In Settings → Models, add API keys for the providers you want. Then, in Settings → Modes, select your **Brain** model (provider + model) — that's the one that runs. There's no automatic fallback to other providers: the model you pick is the model that answers. To run offline, select Ollama as your Brain.
 
-```
-DeepSeek → MiMo → Kimi → MiniMax → Claude → OpenAI → Ollama (local)
-```
-
-If the primary provider fails, Wolffish automatically falls back to the next one (skipping any that aren't configured). If you're offline and Ollama is set up, it goes straight to local inference.
+Want a second model for parallel work? Turn on [orchestrator mode](/configuration/orchestrator-mode) and assign a Worker model alongside your Brain.

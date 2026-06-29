@@ -366,7 +366,7 @@ place on disk. This is the mental model behind the folder layout.
 
 | Module | Job | On-disk home |
 |---|---|---|
-| **Thalamus** | Classify input, route to a provider (cascade) | — (talks to providers) |
+| **Thalamus** | Classify input, resolve & run the chosen Brain model | — (talks to providers) |
 | **RAS** | Score relevance, allocate the token budget | — (pure heuristic) |
 | **Prefrontal** | Assemble the system prompt + plan the approach | `brain/prefrontal/` |
 | **Cortex** | Fast full-text retrieval over all markdown | `brain/cortex.db` |
@@ -481,10 +481,15 @@ The model streams a response; tool calls are parsed out, safety-checked, execute
 with retries, and the result is streamed back. The turn is saved to an episode and
 the outcome recorded.
 
-**Provider cascade.** The thalamus tries cloud providers in the configured
-`cloudPriority` order (e.g. Claude → OpenAI → DeepSeek), falling back to local
-Ollama if enabled. Ollama is the floor: with no network and no keys, the agent
-still runs. Cloud models are upgrades, not requirements.
+**One Brain, no cascade.** You explicitly pick one model — the **Brain**
+(`config.llm.brain`) — in Settings → Modes, and that is the model that runs. There
+is no automatic cascade and no substitution between providers. On a transient error
+the thalamus retries the *same* cloud Brain on a backoff schedule (`net.isOnline()`
+gives instant offline detection); it does not fall through to another provider. To
+run offline, explicitly select Ollama as your Brain (or flip the chat "Local Only"
+toggle, `config.llm.localOnly`). Optionally enable **orchestrator mode**
+(`config.llm.orchestratorMode`) to add a second explicitly-chosen **Worker** model
+(`config.llm.workerModel`) that the Brain delegates parallel work to — still no cascade.
 
 **Three-tier memory.**
 - *Episodes* (`hippocampus/episodes/`) — appended every turn, zero-latency, no LLM.
@@ -538,9 +543,12 @@ Reading these confidently lets you answer almost any question about the agent.
     "providers": [
       { "id": "deepseek", "model": "deepseek-v4-pro", "apiKey": "***", "models": ["deepseek-v4-flash", "deepseek-v4-pro"] }
     ],
-    "allowLocalFallback": false,
+    "brain": { "providerId": "deepseek", "model": "deepseek-v4-pro" },   // the one model that runs (the Brain)
+    "orchestratorMode": "single",                                        // "single" or "orchestrator"
+    "workerModel": null,                                                 // Worker model, used in orchestrator mode
+    "greedy": false,                                                     // persist harder (more retries/approaches)
+    "autonomous": false,                                                 // high agency, ask the user less
     "restrictPowerfulModels": true,
-    "cloudPriority": ["deepseek"],          // provider cascade order
     "thinkingModes": { "deepseek-v4-pro": "max" }
   },
   "safety": { "bypassPermissions": true, "blockCredentials": false },
@@ -658,9 +666,11 @@ Delete `brain/cortex.db*` (the index rebuilds from markdown on launch). If a tur
 half-wrote something, the markdown files are still the truth — fix them directly.
 
 **"Switch model / add an API key / go fully offline."**
-Edit `config.json → llm`. Add a provider object (with `id`, `model`, `apiKey`),
-order the cascade in `cloudPriority`, or set `llm.local.enabled = true` and
-`allowLocalFallback = true` to lean on Ollama. **Redact keys when you echo this file.**
+Edit `config.json → llm`. Add a provider object (with `id`, `model`, `apiKey`) and
+set `llm.brain` to `{ providerId, model }` — that one model is the Brain that runs;
+there is no cascade. To go offline, point `llm.brain` at Ollama (set
+`llm.local.enabled = true`) or flip the chat "Local Only" toggle
+(`llm.localOnly = true`). **Redact keys when you echo this file.**
 
 **"Back up / move my agent to another machine."**
 Copy `~/.wolffish/workspace/`. Skip `runtime/` (disposable Chromium state) and

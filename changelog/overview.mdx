@@ -3,6 +3,25 @@ title: "Changelog"
 description: "Product updates and improvements to Wolffish"
 ---
 
+<Update label="June 29, 2026" description="v1.0.196">
+
+## New features
+
+- **Orchestrator mode.** The one agent you talk to can now become an [orchestrator](/configuration/orchestrator-mode) that spins up live parallel worker sessions on a second model, briefs and drives them, reviews their output against the goal, and folds everything into a single reply. It's opt-in and decides per turn whether to delegate — reaching for workers only when a task genuinely splits into independent parts. Single mode stays the default for quick, sequential work.
+- **A "Modes" settings page.** Model setup moved to its own [Modes page](/configuration/orchestrator-mode) — the first thing you land on in Settings. Pick one model (your **Brain**) by drag-and-drop or a click; switch on orchestrator mode to add a second **Worker** model in a slot beside it.
+- **Subagent transparency.** With **Verbose task results** on, each worker's text and tool calls render inline in the chat, tagged with the worker's label, so you can see exactly how the orchestrator split the work. Off — the default — shows only the final synthesized reply.
+- **Greedy & Autonomy toggles.** Two behavior switches on the Modes page tune how hard the agent works on every turn, regardless of mode — **Greedy effort** (persist harder: more retries, several approaches, keep going until the job is truly done) and **Autonomy** (act with high agency, ask you as little as possible). Both off by default.
+- **Run an automation now.** A **Run now** button on the [Heartbeat page](/configuration/heartbeat) fires any active scheduled job immediately, with a live overlay tracking its tool calls, results, and finish.
+- **Save a file to your computer.** Save a copy of any file Wolffish has read or written — wherever it lives on your machine — to a location you choose through a normal save dialog.
+
+## Updates
+
+- **One Brain, no provider cascade.** The old fallback-order / priority cascade is gone. You now select one [Brain model](/configuration/providers) explicitly — the one you choose is the one that runs, and you always know which. Existing setups migrate automatically: your top provider becomes the Brain and the dead settings are cleaned out. On a transient error the same model retries on a backoff; there's no silent switch to another provider. See [config.json](/configuration/config-json) for the updated `llm` shape.
+- **A default model on connect.** Connecting a provider for the first time auto-selects a sensible default model, so you're ready to go immediately — it never overrides a model you've already chosen.
+- **Crash-safe writes.** Config, conversations, and channel state now write through one ordered, atomic path — temporary file, flushed to disk, then swapped into place — so a crash or hard quit can never leave a half-written, corrupted file. You always get the complete old version or the complete new one.
+
+</Update>
+
 <Update label="June 27, 2026" description="v1.0.193">
 
 ## New features

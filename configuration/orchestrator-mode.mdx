@@ -1,0 +1,161 @@
+---
+title: "Orchestrator Mode"
+description: "Turn the one agent you talk to into a coordinator that drives live parallel workers"
+---
+
+# One Agent, Many Hands
+
+Most of the time Wolffish is one model doing one thing at a time. Orchestrator mode keeps that feel — you still talk to one agent — but lets it split a hard job into pieces and work them at once. The agent you message becomes an **orchestrator**: it spins up live worker sessions on a second model, writes each one a focused brief, runs them in parallel, reviews what comes back, pushes for fixes, and folds everything into a single reply.
+
+It's opt-in. By default Wolffish runs in **Single** mode — one model, the Brain, answering directly. Orchestrator mode adds a second **Worker** model and the machinery to coordinate many workers at once. You turn it on in **Settings → Modes**.
+
+## Orchestrator vs. Single Mode
+
+| | Single (default) | Orchestrator |
+|---|---|---|
+| Models | One — the Brain | Two — Brain (orchestrator) + Worker |
+| Work | The Brain does everything itself, in sequence | The orchestrator delegates independent pieces to parallel workers |
+| Cost | One model, one session | A second model plus several live sessions |
+| Best for | Quick chats, small or strictly sequential tasks | Complex tasks that split into independent parts |
+
+<Note>
+  Switching to Orchestrator mode doesn't force delegation. The agent decides, **per turn**, whether a task is worth splitting up. Most turns still run solo even with the mode on — it reaches for workers only when parallel work actually pays off.
+</Note>
+
+## How It Works
+
+In orchestrator mode your **Brain** model becomes the orchestrator and your **Worker** model runs the workers. The orchestrator is the only one you ever see. Workers run in the background and report back to it.
+
+```
+        You
+         │
+   ┌─────▼─────┐
+   │Orchestrator│   (your Brain model)
+   └─────┬─────┘
+   spawn │ collect / review / re-task
+   ┌─────┼─────┐
+   ▼     ▼     ▼
+Worker Worker Worker   (your Worker model, running in parallel)
+```
+
+A turn in orchestrator mode runs like this:
+
+1. **Compose.** The orchestrator breaks the goal into independent slices and writes each worker a complete, self-contained brief. A worker sees only what the orchestrator writes — it has no view of your chat thread or the other workers.
+2. **Spawn.** It starts the workers concurrently. The spawn calls return immediately with ids; the workers run in the background while the orchestrator keeps going.
+3. **Collect as they land.** It waits for results event-driven — the **first** worker to finish comes back first, and the orchestrator reacts to each one as it lands instead of stalling on the slowest.
+4. **Review.** This is the part that earns the cost: the orchestrator checks each result against the goal. Is it complete, correct, on-target? Weak or wrong work gets sent back for a fix or a redo, not papered over.
+5. **Iterate.** It re-engages idle workers with follow-ups (deeper passes, revisions), cancels off-track ones, and closes finished ones.
+6. **Synthesize.** Once the pieces genuinely hold up, the orchestrator writes **one reply** in its own voice. It never pastes raw worker output at you, and it leaves no worker running when it answers.
+
+### The delegation tools
+
+The orchestrator drives workers through a small, dedicated toolset. You don't call these — the orchestrator does, on its own.
+
+| Tool | What it does |
+|---|---|
+| `spawn_worker(prompt, label?, effort?)` | Start a new worker on an initial task. Returns an id immediately; the worker runs in the background. |
+| `send_to_worker(worker_id, prompt, effort?)` | Send a follow-up to an idle worker — it keeps its full prior context. Re-tunes effort per worker. |
+| `await_workers(worker_ids?)` | Block until the **next** worker lands (not all of them); returns on the first completion. |
+| `close_worker(worker_id)` | Close a worker for good once its work is done. Frees the slot. |
+| `cancel_worker(worker_id)` | Cancel a worker immediately, aborting any in-flight tool calls. For off-track or unneeded work. |
+
+<Note>
+  Delegation is **two levels only**. Workers are full agents with one exception each: they can't delegate (no workers of their own) and they can't message any channel. The orchestrator is the only one who can reach you. That keeps the structure flat and the single-voice promise intact.
+</Note>
+
+### Worker effort and retries
+
+The orchestrator owns each worker's effort and every retry decision.
+
+- **Effort.** Each worker's reasoning effort is set per task — `off` / `on` / `high` / `max` — matched to how hard that slice is. Mechanical work gets `off` or `on`; substantive work gets `high`; the genuinely hard gets `max`. The orchestrator sees exactly which efforts your Worker model supports and picks within that list (a higher value is automatically clamped down to the model's max).
+- **Retries.** Workers are **single-shot** — they don't retry on their own. Any failure surfaces straight to the orchestrator, which reads it and decides: re-run it, re-scope it, or report it to you only when it's genuinely unrecoverable. (The cloud Brain itself still gets a transient-error retry budget; workers don't.)
+
+## When to Use It
+
+<CardGroup cols={2}>
+  <Card title="Research several things" icon="magnifying-glass">
+    Look into multiple topics, sources, or options at once — one worker per thread — then have the orchestrator synthesize the findings.
+  </Card>
+  <Card title="Build or analyze in parallel" icon="layer-group">
+    Several independent components, files, or analyses that don't depend on each other. Each gets a worker's full, focused depth.
+  </Card>
+  <Card title="Batch work" icon="grip">
+    The same operation across many items. Fan it out across workers instead of grinding through serially.
+  </Card>
+  <Card title="Explore competing approaches" icon="code-branch">
+    Try more than one solution to the same problem in parallel, then keep the best.
+  </Card>
+</CardGroup>
+
+For a small, quick, or strictly **sequential** task — where each step needs the last one's result — stay in Single mode. It's cheaper and faster there, and there's nothing to parallelize.
+
+<Tip>
+  There's no threshold or formula. The good signal is **independence**: if a task splits into parts that can run without waiting on each other, orchestrator mode buys you speed (they run at once) and depth (each part gets full attention). If it doesn't split, it won't help.
+</Tip>
+
+## Benefits
+
+- **Parallel speed.** Independent pieces run concurrently instead of one long serial pass.
+- **Focused depth.** Each worker gets a clean, bounded brief and its full attention on one slice — no context bleed from the rest of the goal.
+- **A real quality gate.** The orchestrator reviews and verifies every result against the goal before trusting it, pushing back on thin or wrong work. The coordinator checks the parts, so the whole holds up.
+- **Markedly better results on hard tasks** — the combination of the three above is the point. It costs more, and on complex work it's worth it.
+
+## Configuring Orchestrator Mode
+
+Everything lives in **Settings → Modes**.
+
+<Steps>
+  <Step title="Flip the mode">
+    Set **Orchestrator mode** from Single to Orchestrator. The page swaps from one Brain slot to two slots side by side — **Orchestrator** and **Worker**.
+  </Step>
+  <Step title="Set the Orchestrator (Brain) model">
+    Drag a model card up onto the Orchestrator slot, or click a card to assign it. This is the same Brain model that powers Single mode.
+  </Step>
+  <Step title="Set the Worker model">
+    Assign a model to the Worker slot the same way. The Worker defaults to your Brain's model until you pick something else, so you can start the moment you switch modes. The Worker must be a **cloud** model.
+  </Step>
+</Steps>
+
+Clicking model cards in orchestrator mode alternates which slot fills — first click sets the Orchestrator, the next sets the Worker, and so on. Drag-and-drop is explicit: a card always fills the slot you drop it on.
+
+<Note>
+  Provider API keys live in **Settings → Models**, not on the Modes page. Connect a provider there first; its models then appear as cards to assign on the Modes page. The Worker model must be cloud — local models aren't available as workers.
+</Note>
+
+## Watching the Work
+
+By default you see only the orchestrator's final, synthesized reply — workers do their thing quietly in the background. That's the clean feed, and it's how every channel behaves.
+
+To watch the workers, turn on **Verbose task results** in **Settings → Channels → In-App Chat**:
+
+- **Off (default):** Only the orchestrator's reply, files, and errors. No worker chatter.
+- **On:** Each worker's text and tool calls render inline in the chat, tagged with the worker's label so you can tell who did what.
+
+Verbose affects **display only**, not execution. The workers run identically either way.
+
+<Tip>
+  Turn verbose on when you want to understand how the orchestrator split a task, or to see what a worker actually did when a result looks off. Turn it back off for everyday use to keep the feed clean.
+</Tip>
+
+## Related Knobs: Greedy & Autonomy
+
+The Modes page also carries two behavior toggles. They aren't part of orchestrator mode — they apply to **every turn regardless of mode** — but you'll find them here.
+
+- **Greedy effort.** Pushes the model to go the extra mile: retry many more times instead of stopping early, try several approaches instead of one, and keep going regardless of token count or elapsed time until the job is truly done. Off by default.
+- **Autonomy.** Tells the model to act with high agency — ask you as little as possible, make reasonable decisions on its own, and drive the task to the best outcome without waiting for input. Off by default.
+
+## Cost & Limitations
+
+<Warning>
+  Orchestrator mode is for **complex tasks, not quick conversations**. It runs a second model and several live sessions per turn, so it costs more than Single mode and adds coordination overhead. For fast, simple interactions, Single mode is cheaper and faster — keep it as your default and reach for Orchestrator when a task genuinely splits into parallel parts.
+</Warning>
+
+- **Cost.** Each worker is its own model session. Several workers running at once means several concurrent bills, on top of the orchestrator's own.
+- **Latency on simple work.** Composing briefs, spawning, collecting, and synthesizing adds overhead. For a one-line answer, that overhead isn't worth it — Single mode streams straight back.
+- **Two levels only.** Workers can't spawn their own workers or message any channel. All coordination and all contact with you go through the orchestrator.
+
+## See Also
+
+- [Choosing a Provider](/configuration/providers) — pick and connect the models behind your Brain and Worker slots
+- [config.json](/configuration/config-json) — how your model selection is stored
+- [The Pipeline](/architecture/pipeline) — how a turn flows through the brain modules

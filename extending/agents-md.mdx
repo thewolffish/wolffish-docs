@@ -34,7 +34,7 @@ The file is organized into twelve parts. Here's what each one teaches a reader:
 | 4 | **Where everything lives** | A "user wants X → edit this file" lookup table |
 | 5 | **The brain — 15 modules** | Each module's job and its home on disk, plus the pipeline |
 | 6 | **Available tools (capabilities)** | The full catalog of built-in capabilities + how they're structured |
-| 7 | **How things work** | Pipeline, provider cascade, 3-tier memory, safety, heartbeat, channels |
+| 7 | **How things work** | Pipeline, the Brain model, 3-tier memory, safety, heartbeat, channels |
 | 8 | **File-format reference** | The shape of `config.json`, conversations, episodes, tasks, logs, usage |
 | 9 | **Navigation recipes** | Step-by-step playbooks for the things users actually ask |
 | 10 | **Writing good prompts** | How to prompt an agent that has memory and tools (incl. autonomous runs) |
@@ -362,7 +362,7 @@ place on disk. This is the mental model behind the folder layout.
 
 | Module | Job | On-disk home |
 |---|---|---|
-| **Thalamus** | Classify input, route to a provider (cascade) | — (talks to providers) |
+| **Thalamus** | Resolve the selected Brain model and stream from it (no cascade) | — (talks to providers) |
 | **RAS** | Score relevance, allocate the token budget | — (pure heuristic) |
 | **Prefrontal** | Assemble the system prompt + plan the approach | `brain/prefrontal/` |
 | **Cortex** | Fast full-text retrieval over all markdown | `brain/cortex.db` |
@@ -477,10 +477,16 @@ The model streams a response; tool calls are parsed out, safety-checked, execute
 with retries, and the result is streamed back. The turn is saved to an episode and
 the outcome recorded.
 
-**Provider cascade.** The thalamus tries cloud providers in the configured
-`cloudPriority` order (e.g. Claude → OpenAI → DeepSeek), falling back to local
-Ollama if enabled. Ollama is the floor: with no network and no keys, the agent
-still runs. Cloud models are upgrades, not requirements.
+**The Brain model.** You explicitly select one model — the **Brain**
+(`config.llm.brain`, a `{ providerId, model }` pair) — in Settings → Modes, and
+that is the model the thalamus runs. There's no cascade and no automatic
+substitution between providers: on a transient error the thalamus retries the
+**same** Brain on a backoff schedule (using `net.isOnline()` for instant offline
+detection) rather than falling through to a different one. To run offline, pick
+Ollama as your Brain (or use the chat "Local Only" toggle / `llm.localOnly`).
+Orchestrator mode (`llm.orchestratorMode: "orchestrator"`) optionally adds a
+second explicitly-chosen model — the **Worker** (`llm.workerModel`) — that the
+Brain delegates parallel work to; both are explicit choices, still no cascade.
 
 **Three-tier memory.**
 - *Episodes* (`hippocampus/episodes/`) — appended every turn, zero-latency, no LLM.
@@ -534,9 +540,12 @@ Reading these confidently lets you answer almost any question about the agent.
     "providers": [
       { "id": "deepseek", "model": "deepseek-v4-pro", "apiKey": "***", "models": ["deepseek-v4-flash", "deepseek-v4-pro"] }
     ],
-    "allowLocalFallback": false,
+    "brain": { "providerId": "deepseek", "model": "deepseek-v4-pro" },   // the one model that runs (the Brain)
+    "orchestratorMode": "single",                                        // "single" or "orchestrator"
+    "workerModel": null,                                                 // Worker model, used in orchestrator mode
+    "greedy": false,                                                     // persist harder (more retries/approaches)
+    "autonomous": false,                                                 // high agency, ask the user less
     "restrictPowerfulModels": true,
-    "cloudPriority": ["deepseek"],          // provider cascade order
     "thinkingModes": { "deepseek-v4-pro": "max" }
   },
   "safety": { "bypassPermissions": true, "blockCredentials": false },
@@ -654,9 +663,12 @@ Delete `brain/cortex.db*` (the index rebuilds from markdown on launch). If a tur
 half-wrote something, the markdown files are still the truth — fix them directly.
 
 **"Switch model / add an API key / go fully offline."**
-Edit `config.json → llm`. Add a provider object (with `id`, `model`, `apiKey`),
-order the cascade in `cloudPriority`, or set `llm.local.enabled = true` and
-`allowLocalFallback = true` to lean on Ollama. **Redact keys when you echo this file.**
+Edit `config.json → llm`. Add a provider object (with `id`, `model`, `apiKey`) to
+`llm.providers`, then point `llm.brain` at the `{ providerId, model }` you want to
+run — that one model is the Brain. To go offline, select Ollama as your Brain (set
+`llm.local.enabled = true` and point `brain` at it), or flip `llm.localOnly = true`
+to force the local model regardless of the selected Brain. There's no `cloudPriority`
+or `allowLocalFallback` cascade anymore. **Redact keys when you echo this file.**
 
 **"Back up / move my agent to another machine."**
 Copy `~/.wolffish/workspace/`. Skip `runtime/` (disposable Chromium state) and

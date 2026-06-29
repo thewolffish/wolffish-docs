@@ -177,7 +177,7 @@ DATA: Key values — names, emails, dates, IDs, numbers, URLs, errors
 DECISIONS: Any decisions or confirmations made
 ```
 
-The call uses `thalamus.summarize()`, which routes through the same provider cascade as the main agent stream. If the content exceeds the summarization model's own context window, it's split into parts, each summarized separately, and the results merged.
+The call uses `thalamus.summarize()`, which routes through the same Brain model as the main agent stream. If the content exceeds the summarization model's own context window, it's split into parts, each summarized separately, and the results merged.
 
 The call retries up to 5 times with escalating backoff: 1s → 2s → 4s → 8s → 16s.
 

@@ -135,10 +135,10 @@ Each model shows only the states it genuinely supports. If a model can't reason,
 
 ## Local-Only Mode
 
-Wolffish includes a "Local Only" toggle that restricts all inference to Ollama — no data ever touches a cloud API, regardless of cascade settings. Enable it in the chat sidebar when you need absolute privacy for a sensitive task.
+Wolffish includes a "Local Only" toggle that restricts all inference to Ollama — no data ever touches a cloud API, no matter which Brain model is selected. Enable it in the chat sidebar when you need absolute privacy for a sensitive task.
 
 In local-only mode:
-- Provider cascade is disabled — only Ollama is used
+- Inference is forced to the local Ollama model regardless of which Brain you've selected
 - No network requests are made for LLM inference
 - Memory consolidation uses the local model
 - All other features (memory, tools, capabilities) work normally

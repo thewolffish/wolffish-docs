@@ -18,7 +18,7 @@ Wolffish is a self-contained Electron app. No Node.js, no Python, no Docker. Jus
     - **OpenAI (GPT)**: Get an API key at [platform.openai.com](https://platform.openai.com)
     - **Ollama (Local)**: Install from [ollama.com](https://ollama.com) for local model inference
 
-    You'll configure these in Wolffish's settings after installation. The LLM cascade tries cloud providers first, then falls back to Ollama if it's running. You can skip Ollama entirely and use only cloud providers, or skip cloud providers and run fully local.
+    You'll configure these in Wolffish's settings after installation. You explicitly select your Brain model — a cloud provider or local Ollama — and that's the one that runs. There's no automatic fallback between them. You can use only cloud providers, or run fully local by selecting Ollama as your Brain.
 
   </Accordion>
 

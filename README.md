@@ -109,7 +109,7 @@ Fully bilingual (English + Arabic). Covers everything from first launch to writi
 | [user.md](configuration/user-md.mdx)         | Your profile — name, role, stack, preferences      |
 | [agents.md](configuration/agents-md.mdx)     | Operational procedures and tool rules              |
 | [config.json](configuration/config-json.mdx) | App settings and provider configuration            |
-| [Providers](configuration/providers.mdx)     | DeepSeek, Claude, OpenAI, Ollama setup and cascade |
+| [Providers](configuration/providers.mdx)     | DeepSeek, Claude, OpenAI, Ollama setup and selection |
 | [Variables](configuration/variables.mdx)     | Secrets and environment-style values               |
 | [Heartbeat](configuration/heartbeat.mdx)     | Cron-like scheduling for autonomous jobs           |
 
@@ -168,7 +168,7 @@ The amygdala module gates every tool call against patterns defined in SKILL.md f
 
 ### Local-First, Cloud-Enhanced
 
-Can work 100% offline with Ollama, or cloud-only with no local models — your choice. All providers (DeepSeek, Xiaomi MiMo, Kimi, MiniMax, Anthropic, OpenAI, Ollama) are optional; configure any combination. Provider cascade: DeepSeek → MiMo → Kimi → MiniMax → Claude → OpenAI → Ollama (skipping unconfigured providers). We recommend starting with DeepSeek or MiMo — they handle complex agentic tasks well at a fraction of the cost. Upgrade to Anthropic or OpenAI only if execution isn't reliable enough for a specific workflow.
+Can work 100% offline with Ollama, or cloud-only with no local models — your choice. All providers (DeepSeek, Xiaomi MiMo, Kimi, MiniMax, Anthropic, OpenAI, Ollama) are optional; configure any combination. You explicitly select one **Brain** model — the one you choose is the one that runs. There's no automatic cascade or fallback between providers; to run offline, pick Ollama as your Brain. We recommend starting with DeepSeek or MiMo — they handle complex agentic tasks well at a fraction of the cost. Upgrade to Anthropic or OpenAI only if execution isn't reliable enough for a specific workflow.
 
 ---
 
