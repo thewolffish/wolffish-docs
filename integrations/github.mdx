@@ -17,9 +17,18 @@ The GitHub integration connects Wolffish to the GitHub API for managing reposito
     For full functionality, select at minimum: `repo` and `read:org`. See the scopes table below for details.
   </Step>
   <Step title="Configure in Wolffish">
-    Open Settings > Integrations > GitHub and paste your token.
+    Open Settings > Integrations > GitHub, click **Add**, give the connection a label (e.g., "Personal"), and paste your token. **Test** validates it and shows the account it resolves to.
   </Step>
 </Steps>
+
+## Multiple Accounts
+
+You can link any number of GitHub accounts, each as a labeled connection ("Personal," "Work"). Every `github_*` tool takes an optional `connection` parameter naming the label:
+
+- **One connection configured** — it's used automatically; you never need to pass anything.
+- **Several configured** — tools ask for the label when it's ambiguous, and a `github_connections` tool lists what's available. In chat, just say which account you mean: "create the issue on my work account."
+
+Existing single-token setups migrate to a labeled connection automatically.
 
 ### Required Token Scopes
 
@@ -149,27 +158,25 @@ gist, notification, star, fork, branch, compare
 
 ## Configuration Reference
 
-The GitHub token is stored as a Variable in Settings:
+Connections are stored in `config.json` as a labeled array:
 
 ```json
 {
-  "variables": {
-    "GITHUB_TOKEN": "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  "github": {
+    "connections": [
+      {
+        "id": "gh-a1b2c3",
+        "label": "Personal",
+        "token": "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "login": "your-login",
+        "name": "Your Name"
+      }
+    ]
   }
 }
 ```
 
-Alternatively, you can set it in `config.json`:
-
-```json
-{
-  "integrations": {
-    "github": {
-      "token": "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    }
-  }
-}
-```
+The `login` and `name` fields are resolved automatically when a token is tested. A legacy single-token shape (`{ "token": "…" }`) is migrated to a connection labeled "Default" on first save.
 
 <Warning>
   Never commit your GitHub PAT to version control. If you store your workspace in git, ensure `config.json` and any variables file are in `.gitignore`.

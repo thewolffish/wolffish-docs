@@ -52,6 +52,38 @@ Wolffish can read, manage, and **write its own capabilities** at runtime — no 
 
     Heartbeat jobs run with tool calls **auto-approved**, so it confirms anything recurring or consequential with you before scheduling it. Memory compaction is configured separately in Settings, not here.
   </Accordion>
+
+  <Accordion title="procedures — Manage saved prompts you run on demand">
+    **Type:** Plugin
+
+    **Triggers:** procedure, procedures, saved prompt, reusable prompt, prompt template, playbook, run my, save this as
+
+    Lets Wolffish manage the **Procedures page** — reusable prompts you run on demand with a Play button, as opposed to [automations](/configuration/heartbeat), which run on a schedule. Say "save this as a procedure" or "run my morning brief" and it creates, edits, or fires one for you. A run executes in the background as its own fresh conversation (visible in History with a Play icon) and never touches the chat you're in.
+
+    **Tools:**
+    - `procedure_list` — List every saved procedure: number, title, and a one-line prompt preview
+    - `procedure_view` — Show one procedure's full title and complete prompt
+    - `procedure_create` — Save a new procedure (title + self-contained prompt)
+    - `procedure_edit` — Change a procedure's title and/or prompt
+    - `procedure_delete` — Permanently remove a procedure
+    - `procedure_run` — Run a procedure now, in a fresh background conversation
+  </Accordion>
+
+  <Accordion title="mcp — Manage its own MCP server connections">
+    **Type:** Plugin
+
+    **Triggers:** mcp, model context protocol, mcp server, connect a server, add a server, tool server, external tools
+
+    Lets Wolffish manage its own [MCP server connections](/integrations/mcp) — the external tool servers whose tools it can call. Say "connect the tafsir MCP server", "which MCP servers are connected?", or "remove that one" and it does exactly what the Settings → MCP page does; changes reflect there live, and manual changes are visible to it. A newly added server's tools become callable on the next turn.
+
+    **Tools:**
+    - `mcp_list` — Every configured server: name, local/remote, live status, tool count
+    - `mcp_add` — Add and immediately connect a server (a command for local, an http(s) URL for remote; optional name and env vars)
+    - `mcp_test` — Verify a server now; kicks an offline one into reconnecting
+    - `mcp_enable` / `mcp_disable` — Pause or resume a server without deleting it
+    - `mcp_remove` — Permanently remove a server and its stored sign-in (asks you to confirm)
+    - `mcp_authorize` — Start the browser sign-in flow for a remote server that requires it
+  </Accordion>
 </AccordionGroup>
 
 ### Asking Wolffish to build a skill for itself

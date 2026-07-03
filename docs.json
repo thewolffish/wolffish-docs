@@ -184,6 +184,7 @@
                 "expanded": true,
                 "pages": [
                   "integrations/overview",
+                  "integrations/mcp",
                   "integrations/browser-extension",
                   "integrations/google-workspace",
                   "integrations/github",
@@ -359,6 +360,7 @@
                 "expanded": true,
                 "pages": [
                   "ar/integrations/overview",
+                  "ar/integrations/mcp",
                   "ar/integrations/browser-extension",
                   "ar/integrations/google-workspace",
                   "ar/integrations/github",

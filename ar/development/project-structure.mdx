@@ -107,7 +107,8 @@ src/main/runtime/
 ├── basalganglia/         Outcome recording
 ├── hypothalamus/         System health
 ├── brainstem/            Background tasks
-└── insula/               Status introspection
+├── insula/               Status introspection
+└── mcp/                  MCP server connections (manager, per-server lifecycle, OAuth)
 ```
 
 كل وحدة هي صنف بمُنشئ يقبل `{ workspaceRoot, corpus, ... }`. الوحدات لا تستورد بعضها أبدًا - تتواصل عبر أحداث corpus.

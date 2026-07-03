@@ -83,7 +83,14 @@ Integration tokens live in `config.json` under their respective integration sect
   <Card title="Brave Search" icon="magnifying-glass" href="/capabilities/built-in-capabilities">
     Web search via Brave Search API. Results are returned as structured data for the LLM to summarize.
   </Card>
+  <Card title="MCP Servers" icon="server" href="/integrations/mcp">
+    Connect any Model Context Protocol server — a local command or a remote URL — and its tools become Wolffish's tools on your next message.
+  </Card>
 </CardGroup>
+
+<Note>
+  **MCP servers are the open-ended integration.** The integrations above are built in and hand-tuned; MCP connections bring in the whole third-party tool-server ecosystem. Unlike the stateless integrations, an MCP connection is a live, managed link — Wolffish keeps it healthy in the background (silent reconnects, health checks, OAuth token refresh). See [MCP Servers](/integrations/mcp).
+</Note>
 
 ## Integration vs. Capability
 

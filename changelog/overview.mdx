@@ -3,6 +3,40 @@ title: "Changelog"
 description: "Product updates and improvements to Wolffish"
 ---
 
+<Update label="July 2, 2026" description="v1.0.202">
+
+## New features
+
+- **MCP servers.** Connect any [Model Context Protocol server](/integrations/mcp) from the new Settings → MCP page — paste a command for a local server (`uvx tafsir-mcp`) or an `http(s)://` URL for a remote one, and every tool it exposes is available to Wolffish on your next message, in normal chat and to orchestrator workers alike. No connect step, no restart. Remote servers that require sign-in get a one-click browser OAuth flow (tokens stored, refreshed silently, and revoked at the provider on removal). Crashed or offline servers reconnect silently in the background with their tools quietly stepping aside until they're back — one misbehaving server can never affect another or the app.
+- **Wolffish manages MCP by conversation.** A new `mcp` capability (`mcp_list` / `mcp_add` / `mcp_test` / `mcp_enable` / `mcp_disable` / `mcp_remove` / `mcp_authorize`) mirrors the settings page exactly — "connect the tafsir MCP server," "which servers are on?", "remove that one" — with every change reflected live in the UI.
+- **Network awareness.** A quiet toast when your connection drops and when it's back — real transitions only, silent on a normal launch. Background-run failures now state *why* in plain words ("no internet connection," "rate-limited," "invalid API key") instead of raw machine errors.
+
+</Update>
+
+<Update label="July 1, 2026" description="v1.0.201">
+
+## New features
+
+- **Procedures.** A new [Procedures page](/capabilities/built-in-capabilities) holds prompts you want to reuse — write one once, hit **Play**, and it runs in a fresh background conversation under a live overlay with a timer and activity log, then lands in History marked with a Play icon. Wolffish manages them by conversation too — "save this as a procedure," "run my morning brief" — through a new `procedures` capability (`procedure_list` / `procedure_view` / `procedure_create` / `procedure_edit` / `procedure_delete` / `procedure_run`).
+- **Multiple GitHub and Notion accounts.** The [GitHub](/integrations/github) and [Notion](/integrations/notion) panels now hold any number of connections, each with its own label ("Personal," "Work") and a per-connection **Test** button showing the account it resolves to. Every tool takes an optional `connection` label — picked automatically when only one is linked — and new `github_connections` / `notion_connections` tools list what's configured. Existing single-token setups migrate on their own.
+- **WhatsApp accepts any file.** Send a PDF, document, image, video, audio file, or sticker over [WhatsApp](/channels/whatsapp) and Wolffish downloads and reads it like an in-app attachment — previously only voice notes made it through. Files without a name or extension are typed from the media itself; Telegram gained the same nameless-file handling.
+- **Conversation files at a glance.** A new files button in the chat footer opens everything a conversation holds — your uploads and every file Wolffish produced — in a full-width grid. The timeline beside it now spans the whole conversation, with a collapsible divider per prompt.
+- **HTML attachments.** `.html` files can now be attached, rendering in the code viewer with a one-click toggle between the sandboxed page preview and the highlighted source.
+
+## Updates
+
+- **WhatsApp messages in WhatsApp's own formatting.** Replies no longer arrive as raw Markdown — the agent writes in WhatsApp's native style, and everything sent passes through a converter that translates leftover Markdown (headings, links, tables, task lists) into clean WhatsApp text.
+- **Chat stays live across navigation.** Visiting Settings or other pages no longer reloads the context meter or timeline; playing media pauses on the way out.
+- **Faster long conversations.** Feed rows re-render only when their message changes, and code highlighting no longer runs language detection on every block.
+
+## Bug fixes
+
+- **Background runs are isolated.** Procedures and automations can no longer skew the live chat's context meter, hijack its Stop button, or overwrite a conversation created in the same second.
+- **No double file delivery.** A file a tool already delivered isn't re-sent in the same turn — and the agent now reliably hands you every file it produces.
+- **No silent endings.** A turn can no longer end mid-task with no message and no tool calls.
+
+</Update>
+
 <Update label="June 29, 2026" description="v1.0.196">
 
 ## New features

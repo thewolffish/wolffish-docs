@@ -113,6 +113,14 @@ Set to `0` to disable stale message filtering and process everything regardless 
 
 Voice notes sent in WhatsApp are transcribed via Wolffish's STT (speech-to-text) capability and processed as regular text input. The transcription happens locally before the message enters the brain pipeline.
 
+## Sending Files to Wolffish
+
+Any file you send over WhatsApp — PDFs, documents (docx, xlsx, pptx), images, video, audio, even stickers — is downloaded and processed exactly like an attachment dropped into the desktop app: the content is extracted and enters the turn alongside your caption. Files that arrive without a name or extension are typed from the media itself, so nothing is silently dropped. Uploads are capped at 1 GB, matching the in-app limit.
+
+## Message Formatting
+
+Wolffish writes WhatsApp replies in WhatsApp's own text style — `*bold*`, `_italic_`, `~strikethrough~`, backtick code, and plain `-` lists — never raw Markdown. As a safety net, everything sent through the channel also passes through a converter that translates any leftover Markdown into WhatsApp text: headings become bold lines, `[label](url)` links become "label (url)", tables become `*Label:* value` lines, and task lists become ☐/☑ items. Code block contents are preserved verbatim.
+
 ## Busy Handling
 
 If a turn is already running when a new WhatsApp message arrives, Wolffish sends a brief acknowledgment:

@@ -107,7 +107,8 @@ src/main/runtime/
 ├── basalganglia/         Outcome recording
 ├── hypothalamus/         System health
 ├── brainstem/            Background tasks
-└── insula/               Status introspection
+├── insula/               Status introspection
+└── mcp/                  MCP server connections (manager, per-server lifecycle, OAuth)
 ```
 
 Each module is a class with a constructor that accepts `{ workspaceRoot, corpus, ... }`. Modules never import each other — they communicate through corpus events.
