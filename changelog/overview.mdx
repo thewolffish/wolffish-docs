@@ -3,6 +3,32 @@ title: "Changelog"
 description: "Product updates and improvements to Wolffish"
 ---
 
+<Update label="July 4, 2026" description="v1.0.203">
+
+## New features
+
+- **The lean context system.** The biggest internal rebuild Wolffish has ever had. A fresh request now costs **~9.4K tokens instead of ~94K — a 10× reduction** — because the prompt carries only the essentials plus two compact indexes: a [capability index](/capabilities/overview) of everything installed and a [memory map](/architecture/lean-context) of everything recallable. The memory dumps, episode dumps, and the 16K-token tool catalog are gone; the prompt prefix is byte-stable, so ~99% of it serves from the provider's cache. Measured live: the hourly automation dropped from 96,442 input tokens ($0.046) to a ~5.1K prompt ($0.019).
+- **Total recall, on demand.** Everything Wolffish has ever done, said, produced, or spent is now in one indexed store it searches in milliseconds — every conversation *including every tool call and its output*, daily activity, long-term knowledge, task runs, generated files, costs, and even incoming WhatsApp messages. A new [retrieval toolset](/memory/retrieval-tools) (`memory_search` / `memory_get` / `conversation_list` / `conversation_read` / `memory_save` / `usage_report`) reaches any of it surgically, and the operating contract teaches unprompted recall: "send me the flight plan" searches the past before doing anything else, whether it was yesterday or a month ago. "What did today cost?" finally has an answer.
+- **Tools that scale to thousands.** Instead of shipping 300+ tool definitions with every request, ~30 essentials stay loaded and the rest — including every [MCP server](/integrations/mcp) — load themselves mid-task via `tool_search`/`tool_activate`, usable the same turn. Activation is per-conversation (an automation loading a tool never disturbs your chat's cache), bounded by an invisible LRU, and tunable via `pinnedCapabilities` in [config.json](/configuration/config-json).
+- **Files, hand-delivered.** File delivery is now entirely the agent's own decision: nothing auto-attaches, and the operating contract requires it to `send_file` the result of any file-producing task the moment the work is done — rendered natively in-app and uploaded for real on [Telegram](/channels/telegram) and [WhatsApp](/channels/whatsapp). No more "saved to ~/some/path" dead ends, and no more surprise attachments it never chose to send.
+
+## Updates
+
+- **Endless conversations, one summary.** A conversation that outgrows verbatim replay now folds its early turns into one persisted rolling summary instead of re-paying a hidden summarization call on *every* message — and the folded turns stay on disk, indexed, retrievable verbatim via `conversation_read`. Conversations can never outgrow the [context window](/architecture/context-compaction), and the History view always shows the complete, untouched transcript.
+- **One system for every model.** The "Stateless local models" and "Restrict local models" settings are gone. [Local models](/configuration/ollama) run the exact same lean context, full toolset, and memory as cloud models — they'll say so honestly when a task is beyond them, but nothing is withheld. Models with very small context windows automatically get a slimmed bootstrap toolset.
+- **Instant everywhere.** The memory index no longer rebuilds from scratch at every launch (incremental, ~22ms; a full rebuild of a 2GB workspace takes ~1.3s and only runs on upgrades). The History page loads from the index — instant at any size. The context meter shows your model's full window and measures real provider-billed tokens.
+- **Memory hygiene.** Episode entries are tagged with their origin (`[heartbeat]`, `[worker]`, channels), knowledge promotion deduplicates, the weekly review writes a digest instead of pasting seven days of raw logs, automation runs are recorded durably (`run-history.md`), and prompt debug snapshots rotate at 50 instead of growing forever.
+
+## Bug fixes
+
+- **Task history was silently empty** — every indexed task record had NULL fields due to a parser/format mismatch; all 340+ tasks are now queryable.
+- **Memory search ranked backwards** — stronger matches scored *lower*; ranking is fixed across the index.
+- **MCP servers with hostname-derived names** no longer register as doubled `mcp-mcp-*` capabilities, and per-tool descriptions from servers are sanitized and capped so a server can't inject fake structure into the prompt.
+- **A ghost tool** (`channel_status`) the agent was told to call but couldn't reach is now properly routable.
+- **Cloud-provider PDFs** are no longer needlessly flattened to plain text on several providers — they arrive as native document blocks.
+
+</Update>
+
 <Update label="July 2, 2026" description="v1.0.202">
 
 ## New features

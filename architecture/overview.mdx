@@ -14,11 +14,11 @@ The module names aren't random — each maps to a real brain region that perform
 | Module | Brain Region | Function |
 |---|---|---|
 | `thalamus` | Sensory gateway | Routes input to LLM providers |
-| `prefrontal` | Executive function | Assembles context for the LLM |
-| `ras` | Reticular Activating System | Filters relevant content by attention |
-| `cortex` | Cerebral cortex | Fast retrieval index (SQLite FTS5) |
-| `hippocampus` | Memory center | Stores and retrieves conversation history |
-| `cerebellum` | Motor coordination | Discovers and loads capabilities |
+| `prefrontal` | Executive function | Assembles the lean system prompt |
+| `ras` | Reticular Activating System | Guards the context token budget |
+| `cortex` | Cerebral cortex | Records index over all memory sources (SQLite FTS5) |
+| `hippocampus` | Memory center | Writes episodes, weekly summaries, and knowledge |
+| `cerebellum` | Motor coordination | Loads core capabilities, discovers the rest on demand |
 | `wernicke` | Language comprehension | Parses LLM output and extracts tool calls |
 | `broca` | Language production | Streams responses to the UI |
 | `amygdala` | Threat detection | Safety gate for dangerous operations |
@@ -35,13 +35,13 @@ The pipeline is deterministic — the same input follows the same path through t
 
 ## Module Communication
 
-All modules communicate via `corpus` (the event bus), never by importing each other directly. This keeps dependencies clean and makes the system inspectable — every event is logged to daily markdown files.
+Modules broadcast "this happened" notifications via `corpus` (the event bus), never by importing each other directly; the few request/response paths (prefrontal asking cerebellum for the capability index) use references injected at startup. This keeps dependencies clean and makes the system inspectable — every event is logged to daily markdown files.
 
 ```
-corpus.emit('message.received', { content: '...' })
-corpus.emit('context.built', { tokens: 8000 })
-corpus.emit('tool.called', { name: 'shell_exec', args: {...} })
-corpus.emit('safety.blocked', { reason: '...' })
+corpus.emit('message.received', { content: '...', timestamp: '...' })
+corpus.emit('context.built', { tokenCount: 5012, tokenBudget: 200000, sectionsIncluded: [...] })
+corpus.emit('tool.called', { taskId: 'TASK-42', tool: 'shell_exec', args: {...} })
+corpus.emit('safety.blocked', { tool: '...', args: {...}, reason: '...' })
 ```
 
 ## Tech Stack

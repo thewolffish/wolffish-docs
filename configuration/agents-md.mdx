@@ -3,9 +3,20 @@ title: "agents.md"
 description: "Define agent procedures and tool usage rules"
 ---
 
-# The Agent's Operational Manual
+# Your Overrides on the Operating Manual
 
-Located at `brain/prefrontal/agents.md`, this file defines how the agent should approach tasks, use tools, and follow procedures. Think of it as the agent's operational manual.
+Located at `brain/prefrontal/agents.md`, this file holds **your** rules for how the agent should approach tasks, use tools, and follow procedures. It sits on top of the shipped operating contract and wins on any conflict — this is the file to edit when you want to change how Wolffish works.
+
+## Two Files, One Manual
+
+The prefrontal reads two files side by side on every turn:
+
+| File | Owner | What it is |
+|---|---|---|
+| `agents.core.md` | **Wolffish** — overwritten on every launch | The shipped operating contract (~1.4k tokens): memory & recall doctrine (search before claiming ignorance), tool discovery (`tool_search` before workarounds), loop discipline, file delivery ("you are the courier" — `send_file` every produced file), and conduct rules |
+| `agents.md` | **You** — never overwritten | Your additions and overrides. Explicitly wins on any conflict with the core contract |
+
+Don't edit `agents.core.md` — your changes are replaced on the next launch. Anything you want to stick belongs in `agents.md`.
 
 ## What to Include
 
@@ -13,6 +24,7 @@ Located at `brain/prefrontal/agents.md`, this file defines how the agent should 
 - **Procedures** — Step-by-step workflows for common tasks
 - **Constraints** — Things the agent should never do
 - **Decision frameworks** — How to choose between approaches
+- **Overrides** — Any core-contract behavior you want changed (e.g. "don't send me files I didn't ask for as attachments")
 
 ## Example
 
@@ -45,7 +57,7 @@ Located at `brain/prefrontal/agents.md`, this file defines how the agent should 
 
 ## How It's Used
 
-`agents.md` is included in the prefrontal section of the context window (10% budget allocation). It's read on every message and provides the LLM with operational guidelines.
+Both files are read into the `<prefrontal>` section of the system prompt on every message, alongside the learned-preferences digest. The whole section stays small by design — the system prompt carries the operating essentials, not manuals, so every line you add here is read on every single turn. Keep it tight.
 
 This is distinct from `soul.md` (personality) and SKILL.md files (capability-specific instructions). `agents.md` covers cross-cutting concerns that apply regardless of which capability is being used.
 

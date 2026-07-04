@@ -5,7 +5,7 @@ description: "How episodes compress into weekly summaries during nightly compact
 
 # The Nightly Compaction Pass
 
-Just like biological sleep consolidates memories, Wolffish runs a nightly compaction pass that compresses episode entries into thematic weekly summaries. This gives the agent access to longer-term context without burning through the token budget.
+Just like biological sleep consolidates memories, Wolffish runs a nightly compaction pass that distills each day's episode entries into a compact summary and promotes durable facts into knowledge files. This keeps long-term memory high-signal without ever touching the raw logs.
 
 ## Location
 
@@ -20,63 +20,79 @@ Files are named by ISO year and week number: `YYYY-WNN.md`.
 
 ## How It Works
 
+Two scheduled jobs share the consolidated file:
+
 ```
-brainstem scheduler triggers (default: 23:00 nightly)
-  → reads episode files from the consolidation window
-    → sends episodes to LLM with summarization prompt
-      → LLM extracts themes, patterns, recurring topics
-        → writes consolidated/YYYY-WNN.md
+Daily compaction (default 23:00)
+  → reads today's episode file
+    → LLM extracts durable facts (preferences, projects, people, decisions)
+      → facts promoted to knowledge/*.md   [deduplicated]
+      → daily summary appended to consolidated/YYYY-WNN.md
+
+Weekly consolidation (default Sunday 23:00)
+  → counts the week's logged turns and active days
+    → appends a one-line coverage digest to consolidated/YYYY-WNN.md
 ```
 
-### The Process in Detail
+### Daily Compaction in Detail
 
-1. **Trigger** — The brainstem's `node-cron` scheduler fires at the configured time
-2. **Gather** — Reads all episode entries from the past consolidation window (default: 7 days)
-3. **Summarize** — Sends the raw entries to an LLM with a structured prompt requesting thematic grouping
-4. **Write** — The summarized output is written to the weekly consolidated file
-5. **Index** — The cortex re-indexes the new file via the file watcher
+1. **Trigger** — The brainstem's cron scheduler fires at the configured hour
+2. **Gather** — Reads today's episode file; skips the run if it has fewer than 3 entries
+3. **Summarize** — Sends the entries to the LLM with a structured prompt asking for facts worth remembering beyond today, grouped by knowledge file
+4. **Promote** — Each extracted fact is appended to the matching knowledge file, with exact-line deduplication so re-derived facts never pile up as duplicate bullets
+5. **Record** — The LLM's summary is appended to the week's consolidated file under a `## Compaction for YYYY-MM-DD` heading
+6. **Index** — The cortex re-indexes the changed files via the file watcher
 
-<Info>
-  Consolidation uses the cloud provider when available (better summarization quality). If offline, it falls back to the local Ollama model. The result might be less polished with a local model, but the compression still works.
-</Info>
+If the day genuinely produced nothing durable, the LLM answers "Nothing to promote" and only the summary record is written.
+
+### The Weekly Coverage Digest
+
+The weekly pass used to re-append the raw 7-day episode concatenation on top of the daily summaries. That only polluted the file — and the search index — with one giant low-quality record. It now writes a compact coverage line instead:
+
+```markdown
+Week in review: 47 logged turns across 6 active days (2026-05-11 → 2026-05-16). Daily summaries above; full logs in episodes/.
+```
+
+The daily summaries carry the substance; the weekly line records the shape of the week and points back at the raw episodes.
 
 ## Example Consolidated File
 
 Here's what `2026-W20.md` might look like:
 
 ```markdown
-# Consolidated — Week 20, 2026
+# 2026-W20
 
-## Billing Service Project
-- Started building the billing service with Stripe integration
-- Chose event-driven architecture with domain events
-- Implemented webhook handler with idempotency keys
-- Resolved race condition in subscription upgrade flow
+## Compaction for 2026-05-14
 
-## React Patterns
-- Discussed Server Components streaming patterns multiple times
-- Generated several custom hooks: useServerAction, useOptimistic
-- Preference confirmed: always use error boundaries with Suspense
+### preferences.md
+- Prefers pnpm over npm for all projects
+- Uses conventional commits (feat:, fix:, chore:)
 
-## Personal
-- Planning trip to Riyadh (searched flights 3 times this week)
-- Prefers morning work sessions for deep coding tasks
+### projects.md
+- Started the billing service with Stripe integration, event-driven architecture
 
-## Decisions Made
-- Use pnpm over npm going forward
-- Conventional commits for all repositories
-- Always use Zod for runtime validation at API boundaries
+## Compaction for 2026-05-15
+
+### technical.md
+- Webhook handler uses idempotency keys to survive Stripe retries
+
+### decisions.md
+- Zod for runtime validation at all API boundaries
+
+## Compaction for 2026-05-16
+
+Nothing to promote.
+
+Week in review: 47 logged turns across 6 active days (2026-05-11 → 2026-05-16). Daily summaries above; full logs in episodes/.
 ```
 
 ## Why Consolidation Matters
 
-Episodes are verbose — a busy day might produce 20+ entries. Loading a week of raw episodes would consume a large chunk of the 30% memory token budget. Consolidated files compress a full week into a few paragraphs of thematic summary, giving the agent access to weeks of history without the token cost.
+Episodes are verbose — a busy day might produce 20+ entries, and every tool call adds a line. Consolidation isn't about squeezing memory into the prompt (nothing is injected anymore); it's about signal quality on the read side:
 
-| Time Range | Without Consolidation | With Consolidation |
-|---|---|---|
-| 1 week | ~100 episode lines | ~20 consolidated lines |
-| 1 month | ~400 episode lines | ~80 consolidated lines |
-| 3 months | ~1200 episode lines | ~240 consolidated lines |
+- **Durable facts graduate** into knowledge files, where the `<memory_map>` surfaces their topics and `memory_get` fetches them in one call.
+- **Consolidated summaries are high-signal search records.** `memory_search` with `sources: "consolidated"` hits a week of distilled themes instead of hundreds of raw turn blocks.
+- **Nothing is lost.** The raw episodes stay on disk and stay indexed — consolidation adds a compressed layer, it never replaces the original.
 
 ## Configuration
 
@@ -85,39 +101,33 @@ Compaction settings live in `config.json`:
 ```json
 {
   "compaction": {
-    "enabled": true,
-    "schedule": "0 23 * * *",
-    "windowDays": 7
+    "dailyHour": 23,
+    "weeklyDay": 0,
+    "weeklyHour": 23
   }
 }
 ```
 
 | Key | Default | Description |
 |---|---|---|
-| `enabled` | `true` | Toggle compaction on/off |
-| `schedule` | `"0 23 * * *"` | Cron expression (default: 23:00 daily) |
-| `windowDays` | `7` | How many days of episodes to consolidate per run |
+| `dailyHour` | `23` | Hour of day (0–23) for daily compaction |
+| `weeklyDay` | `0` | Day of week for weekly consolidation (0 = Sunday, 6 = Saturday) |
+| `weeklyHour` | `23` | Hour of day (0–23) for weekly consolidation |
 
-You can also configure these in **Settings > Compaction** in the UI.
+You can also configure these from the **Memory compaction** card in Settings, which shows the next scheduled run for each job in your local timezone.
 
-## Manual Trigger
+<Info>
+  Compaction jobs run through the brainstem's job queue — one job at a time, and an overlapping fire is queued rather than dropped. Summarization uses the same model your brain is configured with.
+</Info>
 
-You don't have to wait for the nightly schedule. The brainstem exposes compaction as a triggerable action:
+## Retrieval
 
-```
-corpus.emit('brainstem.compact.trigger')
-```
+Consolidated files are indexed by the cortex like everything else. They are never injected into the prompt — the model reaches them through the retrieval tools:
 
-Or ask Wolffish directly: "consolidate my recent episodes now."
-
-<Tip>
-  If you've had a particularly busy week and want to ensure important context is preserved in a compact form, trigger consolidation manually before the nightly run.
-</Tip>
-
-## Relevance Scoring
-
-Consolidated files pass through the RAS just like episodes and knowledge files. The RAS scores each consolidated entry against the current message, so asking about "Stripe webhooks" will pull in the billing service section from the consolidated file while ignoring the travel planning section.
+- `memory_search` with `sources: "consolidated"` for themed weekly context
+- `memory_get` on a `file:` ref to read a whole week
+- `wolffish_recall` with a date to land in the right week
 
 <Warning>
-  Consolidated files are LLM-generated summaries. They may occasionally miss nuance from the raw episodes. If you notice something important was lost in consolidation, add it to the appropriate knowledge file manually.
+  Consolidated summaries are LLM-generated and may occasionally miss nuance from the raw episodes. Nothing is lost when that happens — the episodes remain on disk and indexed. If something important deserves permanent status, save it explicitly with `memory_save` or add it to the appropriate knowledge file by hand.
 </Warning>

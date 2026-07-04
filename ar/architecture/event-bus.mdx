@@ -5,7 +5,7 @@ description: "كيف تتواصل وحدات الدماغ عبر أحداث مُ
 
 # كيف تتواصل الوحدات
 
-يربط corpus callosum جميع مناطق الدماغ. لا تستورد الوحدات بعضها البعض أبداً — بل تتواصل حصرياً عبر أحداث مُصنّفة على corpus. هذا يبقي النظام معيارياً وقابلاً للفحص وسهل التوسيع.
+يربط corpus callosum جميع مناطق الدماغ. تبث الوحدات إشعارات «هذا ما حدث» عبر أحداث مُصنّفة على corpus — لا تحتاج أي وحدة لمعرفة من يستمع. وعندما يتطلب الأمر طلبًا/استجابة مباشرين (مثل سؤال prefrontal لـ cerebellum عن فهرس القدرات، أو لـ cortex عن نتائج البحث)، فذلك يمر عبر مراجع وحدات تُحقن عند بدء التشغيل، لا عبر الناقل. هذا يبقي النظام معياريًا وقابلًا للفحص وسهل التوسيع.
 
 ## البنية المعمارية
 
@@ -14,146 +14,142 @@ description: "كيف تتواصل وحدات الدماغ عبر أحداث مُ
 ```typescript
 class MyModule {
   constructor(private corpus: Corpus) {
-    this.corpus.on('input.received', this.handleInput.bind(this))
+    this.corpus.on('message.received', this.handleInput.bind(this))
   }
 }
 ```
 
-يتم تهيئة corpus أولاً أثناء بدء التشغيل ويُمرَّر إلى جميع الوحدات الأخرى. لا تستورد أي وحدة وحدة أخرى مباشرة.
+يتم تهيئة corpus أولًا أثناء بدء التشغيل ويُمرَّر إلى جميع الوحدات الأخرى. الإشعارات تركب الناقل دائمًا؛ أما مسارات الطلب/الاستجابة المباشرة القليلة فهي مراجع تُسلَّم عند بدء التشغيل، وليست `import` بين الوحدات أبدًا.
 
 ## الاستخدام
 
 ```typescript
 // Emit an event
 corpus.emit('tool.called', {
-  name: 'shell_exec',
-  args: { command: 'ls -la' },
-  taskId: 'TASK-42'
+  taskId: 'TASK-42',
+  tool: 'shell_exec',
+  args: { command: 'ls -la' }
 })
 
 // Listen for an event
 corpus.on('tool.completed', (payload) => {
-  console.log(`${payload.name} finished in ${payload.duration}ms`)
-})
-
-// Listen for all events (wildcard)
-corpus.on('*', (type, payload) => {
-  log(`[${type}] ${JSON.stringify(payload)}`)
+  console.log(`${payload.tool} finished in ${payload.durationMs}ms`)
 })
 ```
 
 <Info>
-  مُعالج أحرف البدل هو ما يُنتج ملفات السجل اليومية. كل حدث يمر عبر corpus يتم التقاطه وكتابته على القرص.
+  يُثبّت corpus نفسه مُعالج أحرف بدل داخليًا عند إنشائه — كل حدث يمر عبره يُلتقط ويُخزَّن مؤقتًا ثم يُفرَّغ إلى ملفات السجل اليومية. الوحدات تحصل على التسجيل مجانًا.
 </Info>
 
 ## فئات الأحداث
 
-تم تعريف أكثر من 30 حدثاً مُصنّفاً في تعداد `CorpusEvent`. وهي تتجمع في هذه الفئات:
+تم تعريف أكثر من 80 حدثًا مُصنّفًا في خريطة الأنواع `CorpusEvents`. الفئات الرئيسية:
 
-### أحداث الإدخال
-
-| الحدث | صادر من | الحمولة |
-|---|---|---|
-| `input.received` | العملية الرئيسية | `{ content, channelId, conversationId }` |
-| `input.classified` | Prefrontal | `{ intent, confidence }` |
-| `input.routed` | Prefrontal | `{ provider, model }` |
-
-### أحداث السياق
+### أحداث الرسائل والسياق
 
 | الحدث | صادر من | الحمولة |
 |---|---|---|
-| `context.built` | Prefrontal | `{ tokens, sections }` |
-| `context.trimmed` | RAS | `{ before, after, dropped }` |
+| `message.received` | Agent | `{ content, timestamp }` |
+| `message.classified` | Agent | `{ type, complexity }` |
+| `context.built` | Prefrontal | `{ tokenCount, tokenBudget, sectionsIncluded }` |
+| `tools.filtered` | Agent | `{ total, kept, dropped }` |
+| `compaction.started` | Agent | `{ messagesCount, force? }` |
+| `compaction.applied` | Agent | `{ tokensSaved, targetsCount }` |
 
 ### أحداث LLM
 
 | الحدث | صادر من | الحمولة |
 |---|---|---|
-| `llm.response` | Thalamus | `{ provider, model, tokens }` |
-| `llm.error` | Thalamus | `{ provider, error, willRetry }` |
-| `llm.token` | Thalamus | `{ delta }` |
+| `llm.request` | Thalamus | `{ provider, model }` |
+| `llm.response` | Thalamus | `{ provider, inputTokens, outputTokens, cacheCreationTokens, cacheReadTokens, durationMs }` |
+| `llm.error` | Thalamus | `{ provider, error }` |
+| `llm.retry` | Thalamus | `{ provider, attempt, delayMs, errorClass }` |
+| `turn.usage` | Agent | `{ provider, model, iterations, toolCalls, inputTokens, outputTokens, cacheHitRate, cost, ... }` |
+| `usage.recorded` | دفتر الاستخدام | `{ provider, model, inputTokens, outputTokens, cost }` |
 
-### أحداث الأدوات
+`turn.usage` هو التجميع الكلي للدور بأكمله، مع تسعير شطر الذاكرة المخبأة على حدة حتى تكون مكاسب التخبئة قابلة للقياس مباشرة من سجل corpus.
+
+### أحداث الأدوات والمهام
 
 | الحدث | صادر من | الحمولة |
 |---|---|---|
-| `tool.called` | Motor | `{ name, args, taskId }` |
-| `tool.completed` | Motor | `{ name, output, duration, taskId }` |
-| `tool.failed` | Motor | `{ name, error, attempt, taskId }` |
-| `tool.parsed` | Wernicke | `{ calls }` |
+| `tool.called` | Motor | `{ taskId, tool, args }` |
+| `tool.completed` | Motor | `{ taskId, tool, durationMs }` |
+| `tool.failed` | Motor | `{ taskId, tool, error, attempt }` |
+| `task.created` | Motor | `{ taskId, name, stepsTotal }` |
+| `task.stepCompleted` | Motor | `{ taskId, step, total }` |
+| `task.completed` | Motor | `{ taskId, durationMs }` |
+| `task.failed` | Motor | `{ taskId, failedAt, error }` |
+| `task.stopped` | Motor | `{ taskId, stoppedAt }` |
 
 ### أحداث الأمان
 
 | الحدث | صادر من | الحمولة |
 |---|---|---|
-| `safety.allowed` | Amygdala | `{ toolName, classification }` |
-| `safety.blocked` | Amygdala | `{ toolName, reason }` |
-| `safety.approved` | Amygdala | `{ toolName, channelId }` |
-| `safety.denied` | Amygdala | `{ toolName, channelId }` |
+| `safety.allowed` | Amygdala | `{ tool, args }` |
+| `safety.blocked` | Amygdala | `{ tool, args, reason }` |
+| `safety.confirmNeeded` | Amygdala | `{ id, tool, args, reason }` |
+| `safety.approved` | Amygdala | `{ id }` |
+| `safety.denied` | Amygdala | `{ id }` |
+| `safety.autoApproved` | Amygdala | `{ id, tool, args, level, reason }` |
 
-### أحداث المهام
-
-| الحدث | صادر من | الحمولة |
-|---|---|---|
-| `task.created` | Motor | `{ taskId, toolName }` |
-| `task.started` | Motor | `{ taskId, attempt }` |
-| `task.stepCompleted` | Motor | `{ taskId, step, duration }` |
-| `task.completed` | Motor | `{ taskId, success, totalDuration }` |
-| `task.failed` | Motor | `{ taskId, error, attempts }` |
-| `task.stopped` | Motor | `{ taskId, reason }` |
-
-### أحداث الذاكرة
+### أحداث الذاكرة والتعلم
 
 | الحدث | صادر من | الحمولة |
 |---|---|---|
-| `memory.saved` | Hippocampus | `{ type, path }` |
-| `memory.consolidated` | Brainstem | `{ week, episodeCount }` |
-| `memory.promoted` | Brainstem | `{ topic, path }` |
+| `memory.episodeSaved` | Hippocampus | `{ date, section }` |
+| `memory.consolidated` | Brainstem | `{ week }` |
+| `memory.knowledgeUpdated` | Hippocampus | `{ file, fact }` |
+| `feedback.recorded` | Basal Ganglia | `{ action, outcome }` |
 
-### أحداث الصحة
-
-| الحدث | صادر من | الحمولة |
-|---|---|---|
-| `health.ok` | Hypothalamus | `{ metrics }` |
-| `health.warning` | Hypothalamus | `{ resource, value, threshold }` |
-| `health.critical` | Hypothalamus | `{ resource, value, threshold }` |
-| `resource.low.context` | Hypothalamus | `{ used, max }` |
-| `resource.low.memory` | Hypothalamus | `{ used, max }` |
-| `resource.low.disk` | Hypothalamus | `{ used, max }` |
-
-### أحداث التعلم
+### أحداث الصحة والفهرسة
 
 | الحدث | صادر من | الحمولة |
 |---|---|---|
-| `outcome.recorded` | Basal Ganglia | `{ type, toolName, args }` |
-| `preference.learned` | Basal Ganglia | `{ pattern, preference }` |
+| `health.warning` | Hypothalamus | `{ resource, usage, threshold }` |
+| `health.critical` | Hypothalamus | `{ resource, message }` |
+| `index.reindexStarted` | Cortex | `{ startedAt, total }` |
+| `index.reindexProgress` | Cortex | `{ done, total }` |
+| `index.reindexed` | Cortex | `{ filesCount, durationMs }` |
 
-### أحداث النظام
+### أحداث الجدولة
 
 | الحدث | صادر من | الحمولة |
 |---|---|---|
-| `scheduler.tick` | Brainstem | `{ jobName, schedule }` |
-| `watcher.changed` | Brainstem | `{ path, changeType }` |
-| `cortex.reindexed` | Cortex | `{ path, action }` |
+| `brainstem.jobStarted` | Brainstem | `{ job, type, label, timestamp }` |
+| `brainstem.jobCompleted` | Brainstem | `{ job, type, label, timestamp, durationMs }` |
+| `brainstem.jobFailed` | Brainstem | `{ job, type, label, timestamp, error }` |
+| `brainstem.jobSkipped` | Brainstem | `{ job, label, reason }` |
+| `brainstem.jobCatchup` | Brainstem | `{ job, label, missedAt }` |
+| `brainstem.schedulerReloaded` | Brainstem | `{ jobs, timestamp }` |
+
+وفيما وراء هذه، تغطي عائلات كاملة تثبيت التبعيات (`dependency.*`)، والقنوات (`telegram.*` و`whatsapp.*`)، والصوت والكلام (`voice.*` و`stt.*`)، ورفع الملفات (`upload.*`)، وتبديل المحادثات (`conversation.changed`). كلها تتبع النمط نفسه: حمولة مُصنّفة، وتسجيل تلقائي.
 
 ## تسجيل الأحداث
 
-يتم تسجيل كل حدث في ملفات Markdown يومية في `brain/corpus/YYYY-MM-DD.log.md`. يتم تجميع عمليات الكتابة في ذاكرة مؤقتة مدتها ثانيتان لتحسين الأداء:
+يتم تسجيل كل حدث في ملفات Markdown يومية في `brain/corpus/YYYY-MM-DD.log.md`. تُجمَّع عمليات الكتابة عبر تفريغ مخزن مؤقت مدته ثانيتان لتحسين الأداء — كل حدث يهبط ككتلة بطابع زمني:
 
 ```markdown
-## 2026-05-16
+## 09:15:02
+- message.received → {"content":"What PRs need review?","timestamp":"2026-07-03T09:15:02.114Z"}
 
-09:15:02 | input.received | {"content":"What PRs need review?","channelId":"desktop"}
-09:15:02 | context.built | {"tokens":7842,"sections":12}
-09:15:03 | input.routed | {"provider":"anthropic","model":"claude-sonnet-4-20250514"}
-09:15:04 | tool.called | {"name":"github_prs","args":{"state":"open"},"taskId":"TASK-89"}
-09:15:05 | safety.allowed | {"toolName":"github_prs","classification":"safe"}
-09:15:06 | tool.completed | {"name":"github_prs","duration":1204,"taskId":"TASK-89"}
-09:15:07 | llm.response | {"provider":"anthropic","tokens":342}
-09:15:07 | memory.saved | {"type":"episode","path":"episodes/2026-05-16.md"}
+## 09:15:02
+- context.built → {"tokenCount":5012,"tokenBudget":200000,"sectionsIncluded":["identity","device","prefrontal","capabilities","memory_map"]}
+
+## 09:15:04
+- tool.called → {"taskId":"TASK-89","tool":"github_prs","args":{"state":"open"}}
+
+## 09:15:05
+- safety.allowed → {"tool":"github_prs","args":{"state":"open"}}
+
+## 09:15:06
+- tool.completed → {"taskId":"TASK-89","tool":"github_prs","durationMs":1204}
+
+## 09:15:07
+- memory.episodeSaved → {"date":"2026-07-03","section":"09:15"}
 ```
 
-يتم تنظيف السجلات القديمة تلقائياً بعد 7 أيام لمنع النمو غير المحدود لاستخدام القرص.
+يتم تنظيف السجلات القديمة تلقائيًا بعد 7 أيام لمنع النمو غير المحدود لاستخدام القرص. هذا الحذف مقصود بالتصميم — كل ما يستحق الاحتفاظ به لمدة أطول محفوظ أصلًا في مكان آخر (الحلقات، والملخصات الأسبوعية، و`run-history.md`)، والسجلات نفسها يفهرسها cortex ما دامت موجودة.
 
 <Tip>
   اقرأ سجلات corpus عند تصحيح سلوك غير متوقع. تُظهر لك التسلسل الدقيق للأحداث التي وقعت — أي وحدة فعلت ماذا ومتى.
@@ -177,12 +173,11 @@ off()
 
 لإضافة نوع حدث جديد:
 
-1. أضفه إلى تعداد `CorpusEvent` في `src/main/runtime/corpus/corpus.ts`
-2. عرّف نوع حمولته في واجهة `CorpusEvents`
-3. أرسله من الوحدة المعنية
-4. اشترك فيه من أي وحدة تحتاج للتفاعل
+1. أضف اسم الحدث ونوع حمولته إلى خريطة الأنواع `CorpusEvents` في `src/main/runtime/corpus.ts`
+2. أرسله من الوحدة المعنية
+3. اشترك فيه من أي وحدة تحتاج للتفاعل
 
-يتم تسجيل الحدث تلقائياً بواسطة مُعالج أحرف البدل — لا حاجة لتوصيل إضافي.
+يتم تسجيل الحدث تلقائيًا بواسطة مُعالج أحرف البدل — لا حاجة لتوصيل إضافي.
 
 ## فوائد التصميم
 
@@ -191,7 +186,7 @@ off()
 - **استقلال الوحدات**: يمكن تطوير واختبار وتحديث الوحدات بشكل مستقل
 - **قابلية مراقبة كاملة**: كل تفاعل يتم تسجيله مع طابع زمني
 - **سهولة التوسيع**: الوحدات الجديدة تشترك في الأحداث الموجودة دون تعديل المُنتجين
-- **قابلية الاختبار**: استخدم corpus وهمي في الاختبارات وتحقق من إرسال الأحداث بشكل صحيح
+- **قابلية الاختبار**: استخدم corpus وهميًا في الاختبارات وتحقق من إرسال الأحداث بشكل صحيح
 
 ## مثال عملي: مراقبة صحة Hypothalamus
 
@@ -209,28 +204,28 @@ class Hypothalamus {
       if (this.failureCount > 5) {
         corpus.emit('health.warning', {
           resource: 'llm',
-          value: this.failureCount,
+          usage: this.failureCount,
           threshold: 5
         })
       }
     })
 
     corpus.on('context.built', (payload) => {
-      this.lastContextTokens = payload.tokens
-      if (payload.tokens > 180_000) {
-        corpus.emit('resource.low.context', {
-          used: payload.tokens,
-          max: 200_000
+      this.lastContextTokens = payload.tokenCount
+      if (payload.tokenCount > payload.tokenBudget * 0.9) {
+        corpus.emit('health.warning', {
+          resource: 'context',
+          usage: payload.tokenCount,
+          threshold: payload.tokenBudget
         })
       }
     })
 
     corpus.on('tool.failed', (payload) => {
       if (payload.attempt >= 3) {
-        corpus.emit('health.warning', {
+        corpus.emit('health.critical', {
           resource: 'tool',
-          value: payload.name,
-          threshold: 'max retries exceeded'
+          message: `${payload.tool}: max retries exceeded`
         })
       }
     })

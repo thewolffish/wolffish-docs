@@ -109,10 +109,14 @@ Integrations are plugin capabilities that require external credentials and make 
 
 ## Activation
 
-Integrations are selected by the `ras` (attention filter) just like any other capability. When your message matches an integration's triggers, its tools are included in the LLM context.
+Integrations are **discoverable capabilities**. Their tool schemas don't ship on every request — each integration costs one line in the system prompt's capability index (name, short description, tool count). When a task calls for one, the model activates it with `tool_search` (or by calling one of its tools directly, which auto-activates the capability) and its tools are callable the same turn.
 
-For example, saying "check my email" triggers the Google capability because "email" is in its trigger list. The LLM then decides which specific tool to call (`gmail_search`, `gmail_read`, etc.) based on your intent.
+For example, saying "check my email" leads the model to activate the Google capability and call the right tool (`gmail_search`, `gmail_read`, etc.) based on your intent. Activation is scoped to the conversation, so a background job loading GitHub never touches your live chat.
 
 <Tip>
-  If an integration's tools aren't appearing, make sure the credential is configured. Capabilities with missing credentials are deprioritized by `ras` since their tools would fail anyway.
+  Use an integration constantly? Add it to `pinnedCapabilities` in [config.json](/configuration/config-json) to ship its tools on every request alongside the built-in core set.
 </Tip>
+
+<Note>
+  Activation makes an integration's tools callable, but the plugin still reads its credential at call time — a missing token surfaces as a tool error, not a missing tool. If calls fail, check the credential in Settings first.
+</Note>

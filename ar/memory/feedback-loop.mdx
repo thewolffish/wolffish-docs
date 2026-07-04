@@ -5,7 +5,7 @@ description: "كيف يتعلم basalganglia من النتائج — الموا�
 
 # ما الذي نجح، لا ما الذي حدث فقط
 
-الذاكرة تُخبر وولف فيش بما حدث. حلقة التغذية الراجعة تُخبره بما *نجح*. وحدة basalganglia تُسجِّل نتيجة كل تفاعل — سواء نجحت استدعاءات الأدوات، أو وافقت أو رفضت عمليات مُعلَّمة، وما هي الأساليب التي أنتجت نتائج جيدة. بمرور الوقت، يُبني هذا تفضيلات سلوكية مُتعلَّمة بدون برمجة صريحة.
+الذاكرة تُخبر وولف فيش بما حدث. حلقة التغذية الراجعة تُخبره بما *نجح*. وحدة `basalganglia` تُسجِّل نتيجة كل استدعاء أداة — هل نجح، وهل وافقت على العمليات المُعلَّمة أو رفضتها، وما الذي حُظر تمامًا. بمرور الوقت، يبني هذا تفضيلات سلوكية مُتعلَّمة بدون برمجة صريحة.
 
 ## الموقع
 
@@ -13,111 +13,146 @@ description: "كيف يتعلم basalganglia من النتائج — الموا�
 ~/.wolffish/workspace/brain/basalganglia/YYYY-MM-DD.md
 ```
 
-تُكتب إدخالات التغذية الراجعة في ملف واحد لكل يوم، بالإلحاق فقط. نتائج كل يوم تتراكم في ملف ذلك اليوم، والملفات القديمة تُحفظ. عندما يحتاج الوكيل سياق التغذية الراجعة الأخيرة، يُجمّع آخر N يوم من الملفات.
+تُكتب إدخالات التغذية الراجعة في ملف واحد لكل يوم، بالإلحاق فقط. نتائج كل يوم تتراكم في ملف ذلك اليوم، والملفات القديمة تُحفظ. الملفات الخام لا تدخل الموجه أبدًا — بل تُغذّي خلاصة مُدمجة (أدناه) وتبقى قابلة للبحث بالكامل على القرص.
 
-## أربعة أنواع من النتائج
+## خمسة أنواع من النتائج
 
 | النتيجة | المُحفِّز | المعنى |
 |---|---|---|
 | `success` | استدعاء أداة اكتمل بدون خطأ | هذا الأسلوب نجح |
-| `failure` | استدعاء أداة أعاد خطأ أو حالة خطأ | هذا الأسلوب لم ينجح |
-| `approval` | المستخدم وافق على استدعاء أداة مُعلَّم (مستوى `confirm` في amygdala) | المستخدم يثق بهذه العملية |
-| `denial` | المستخدم رفض استدعاء أداة مُعلَّم | المستخدم لا يريد هذا |
+| `failed` | استدعاء أداة رمى خطأ أو أعاد حالة خطأ | هذا الأسلوب لم ينجح |
+| `approved` | المستخدم وافق على استدعاء أداة مُعلَّم (مستوى `confirm` في amygdala) | المستخدم يثق بهذه العملية |
+| `denied` | المستخدم رفض استدعاء أداة مُعلَّم | المستخدم لا يريد هذا |
+| `blocked` | رفضت amygdala الاستدعاء تمامًا | هذه العملية محظورة |
 
 ## كيف تُسجَّل التغذية الراجعة
 
-بعد كل دورة محادثة، تُلحق `basalganglia.recordOutcome()` إدخالاً:
+بعد كل استدعاء أداة، تُلحق `basalganglia.recordOutcome()` إدخالًا:
 
 ```typescript
 // Simplified from src/main/runtime/basalganglia.ts
 async recordOutcome(entry: FeedbackEntry): Promise<void> {
-  const line = [
-    `- ${format(new Date(), 'yyyy-MM-dd HH:mm')}`,
-    `| ${entry.outcome}`,
-    `| ${entry.toolName}`,
-    `| ${truncate(JSON.stringify(entry.args), 200)}`,
-    `| ${entry.context}`,
-  ].join(' ')
-
-  await appendFile(this.feedbackPath, line + '\n')
-  this.corpus.emit('feedback.recorded', entry)
+  const file = join(this.dir, `${formatDate(entry.timestamp)}.md`)
+  const lines = [`- ${formatTime(entry.timestamp)} | ${entry.tool} | ${entry.outcome}`]
+  lines.push(`  - Args: ${truncate(JSON.stringify(entry.args), 200)}`)
+  if (entry.outcome === 'denied' || entry.outcome === 'blocked') {
+    if (entry.reason) lines.push(`  - Reason: ${entry.reason}`)
+  } else if (entry.outcome === 'failed') {
+    if (entry.error) lines.push(`  - Error: ${truncate(entry.error, 200)}`)
+  } else if (entry.output) {
+    lines.push(`  - Output: ${truncate(entry.output, 200)}`)
+  }
+  await diskWriter.appendLine(file, lines.join('\n') + '\n\n')
+  this.corpus.emit('feedback.recorded', { action: entry.tool, outcome: entry.outcome })
 }
 ```
 
 كل إدخال يلتقط:
 - **الطابع الزمني** — متى حدث
-- **النتيجة** — نجاح، إخفاق، موافقة، أو رفض
-- **اسم الأداة** — أي قدرة تم استدعاؤها
-- **المعاملات المقتطعة** — ما تم تمريره (بحد أقصى ~200 حرف للقراءة)
-- **السياق** — وصف مختصر للمحادثة المحيطة
+- **اسم الأداة** — أي قدرة استُدعيت
+- **النتيجة** — success أو failed أو denied أو approved أو blocked
+- **المعاملات المقتطعة** — ما تم تمريره (بحد أقصى ~200 حرف؛ النسخة الكاملة تعيش في `brain/conversations/*.json`)
+- **التفصيل** — سبب الرفض، أو الخطأ، أو معاينة المخرج، بحسب النتيجة
 
 ## أمثلة على إدخالات التغذية الراجعة
 
 ```markdown
-# Feedback Log
+# 2026-05-15
 
-- 2026-05-14 09:12 | success | shell_exec | {"command":"pnpm test","cwd":"/Users/you/project"} | ran tests after implementing useServerAction hook
-- 2026-05-14 09:30 | approval | shell_exec | {"command":"git push origin feat/server-actions","cwd":"/Users/you/project"} | user approved push to feature branch
-- 2026-05-15 11:45 | denial | shell_exec | {"command":"rm -rf node_modules","cwd":"/Users/you/project"} | user denied recursive delete in project root
-- 2026-05-15 14:20 | failure | web_search | {"query":"site:internal.company.com deployment docs"} | search returned no results, internal site not indexed
-- 2026-05-16 08:55 | success | shell_exec | {"command":"git commit -m \"feat: add billing webhook handler\"","cwd":"/Users/you/billing"} | conventional commit format used
-- 2026-05-16 10:03 | approval | file_write | {"path":"/Users/you/billing/src/webhooks.ts","content":"..."} | user approved writing new file to project
+- 09:12 | shell_exec | success
+  - Args: `{"command":"pnpm test","cwd":"/Users/you/project"}`
+  - Output: `Test Files  14 passed (14) … Duration 6.2s`
+
+- 09:30 | shell_exec | approved
+  - Args: `{"command":"git push origin feat/server-actions"}`
+
+- 11:45 | shell_exec | denied
+  - Args: `{"command":"rm -rf node_modules","cwd":"/Users/you/project"}`
+  - Reason: user denied recursive delete in project root
+
+- 14:20 | web_search | failed
+  - Args: `{"query":"site:internal.company.com deployment docs"}`
+  - Error: search returned no results, internal site not indexed
 ```
 
 ## كيف تؤثر التغذية الراجعة على السلوك
 
-وحدة prefrontal تقرأ إدخالات التغذية الراجعة أثناء تجميع السياق. يرى LLM أنماطاً فيما نجح وما لم ينجح، ويُعدِّل أسلوبه وفقاً لذلك.
+كانت ملفات التغذية الراجعة الخام تُلصق في كل موجه — عشرات الآلاف من رموز النصوص، معظمها ضوضاء. هذا انتهى. `basalganglia.getPreferences()` الآن يطوي آخر 7 أيام في **خلاصة تفضيلات** محدودة الحجم (~500 رمز، بسقف صارم عند 2,400 حرف) من ثلاثة أجزاء مُقيَّدة الحجم:
+
+1. **سطر الموثوقية** — إجمالي استدعاءات الأدوات، معدل النجاح، الأدوات الأكثر استخدامًا
+2. **سطر المرفوضات الأخيرة** — الأدوات التي رفضتها (لا تُكرَّر إلا إذا طُلبت مجددًا)
+3. **التصحيحات الأخيرة** — أحدث الإخفاقات والرفضات مع سببها، حتى لا يدخل المُخطِّط طريقًا مسدودًا معروفًا (بحد أقصى 12، الأحدث أولًا)
+
+الاستدعاءات الناجحة عمدًا *لا* تُعدَّد — تلك كانت مصدر الفيضان. تنتهي الخلاصة بمؤشر: السجل الكامل خطوة بخطوة لأي يوم على بُعد استدعاء `wolffish_recall` واحد، و`memory_search` مع `sources: "feedback"` يبحث في كل إدخال سُجِّل على الإطلاق.
+
+```markdown
+## Learned preferences (last 7 days)
+
+- Reliability: 214 tool calls, 96% success. Most used: shell_exec (74), file_read (38), web_search (22), …
+- Recently denied (don't repeat unless the user asks again): shell_exec ×2.
+
+### Recent corrections & failures (avoid repeating)
+- 2026-05-15 shell_exec denied — user denied recursive delete in project root
+- 2026-05-14 web_search failed — search returned no results, internal site not indexed
+
+(Summary only. For the full step-by-step history of any day, use wolffish_recall.)
+```
+
+<Info>
+  الخلاصة هي واحدة من قطعتي ذاكرة محيطة فقط في موجه النظام — الأخرى هي كعب التغطية `<memory_map>`. كل شيء آخر يُسترجع عند الطلب. ملف اليوم مُستبعد من الخلاصة (أفعال اليوم مرئية أصلًا في الخيط الحي)، ما يُبقي الكتلة ثابتة البايتات عبر حلقة أدوات الدور الواحد، فيتمكن المزودون من إعادة استخدام بادئة الموجه المُخزَّنة مؤقتًا.
+</Info>
 
 ### الواجهة
 
-يُتيح basalganglia طريقتين لوحدة prefrontal:
+يُتيح `basalganglia` طريقتين:
 
 ```typescript
-// Get learned preferences from feedback history
-getPreferences(): FeedbackPreference[]
+// The bounded preference digest folded into every system prompt (~500 tokens)
+getPreferences(days?: number): Promise<string>
 
-// Score a proposed approach based on historical outcomes
-scoreApproach(toolName: string, argsPattern: string): ApproachScore
+// Aggregate stats — success rate, top tools, top denied — for the
+// insula ("how am I doing?") and the brain settings UI
+getFeedbackSummary(): Promise<FeedbackSummary>
 ```
 
-### ما يتعلمه LLM
+### ما يتعلمه نموذج اللغة
 
 بمرور الوقت، تظهر أنماط من التغذية الراجعة المتراكمة:
 
 <AccordionGroup>
   <Accordion title="تفضيلات أسلوب الالتزام">
-    بعد عدة نتائج `success` على التزامات بتنسيق conventional (`feat:`، `fix:`، `chore:`)، يتعلم LLM استخدام هذا التنسيق دائماً. إذا تم `denial` لالتزام غير conventional، فهذا يُعزز التفضيل.
+    بعد عدة نتائج `success` على التزامات بتنسيق conventional (`feat:`، `fix:`، `chore:`)، يتعلم نموذج اللغة استخدام هذا التنسيق دائمًا. إذا سبق أن رُفض (`denied`) التزام غير conventional، فذلك التصحيح يركب في الخلاصة.
   </Accordion>
   <Accordion title="العمليات الآمنة">
-    إذا وافق المستخدم باستمرار (`approves`) على دفع git إلى فروع الميزات، يتعلم وولف فيش أن هذه عمليات منخفضة المخاطر. إذا رفض المستخدم باستمرار (`denies`) الدفع القسري، يتعلم تجنب اقتراحها — أو تعليمها بشكل أبرز.
+    إذا وافقت باستمرار على دفع git إلى فروع الميزات، يتعلم وولف فيش أن هذه عمليات منخفضة المخاطر. إذا رفضت باستمرار الدفع القسري، يُعلِّمه سطر الأدوات المرفوضة تجنُّب اقتراحها — أو تعليمها بشكل أبرز.
   </Accordion>
   <Accordion title="التعافي من الأخطاء">
-    بعد `failure` من أسلوب معين (مثلاً: البحث في موقع داخلي غير مُفهرَس)، يتعلم LLM تجربة أساليب بديلة في المرة القادمة (مثلاً: سؤال المستخدم عن الرابط مباشرة).
+    بعد نتيجة `failed` من أسلوب معين (مثلاً: البحث في موقع داخلي غير مُفهرَس)، يُخبر التصحيح — بتفاصيل خطئه — نموذج اللغة بتجربة أساليب بديلة في المرة القادمة (مثلاً: سؤالك عن الرابط مباشرة).
   </Accordion>
   <Accordion title="تفضيلات الأدوات">
-    إذا نجحت أوامر `pnpm` دائماً لكن تم رفض أوامر `npm` مرة، يتعلم LLM تفضيل مدير الحزم الخاص بك من النتائج — وليس فقط من `preferences.md`.
+    إذا نجحت أوامر `pnpm` دائمًا لكن أمر `npm` رُفض مرة، يتعلم نموذج اللغة تفضيل مدير الحزم الخاص بك من النتائج — وليس فقط من `preferences.md`.
   </Accordion>
 </AccordionGroup>
 
 ## ينمو معك
 
-هذه هي الآلية التي تجعل وولف فيش تكيفياً بمرور الوقت. إنه لا يتذكر الحقائق فقط (هذا ما تفعله ملفات المعرفة) — بل يتذكر ما *نجح عملياً*. هذا المزيج يُنشئ وكيلاً:
+هذه هي الآلية التي تجعل وولف فيش تكيفيًا بمرور الوقت. إنه لا يتذكر الحقائق فقط (هذا ما تفعله ملفات المعرفة) — بل يتذكر ما *نجح عمليًا*. هذا المزيج يُنشئ وكيلًا:
 
 1. **يعرف تفضيلاتك** (المعرفة) — ما قلت أنك تريده
-2. **يعرف ما ينجح فعلاً** (التغذية الراجعة) — ما أنتج نتائج جيدة
-3. **يتجنب الأخطاء السابقة** (سجلات الإخفاق) — ما لم ينجح سابقاً
+2. **يعرف ما ينجح فعلًا** (التغذية الراجعة) — ما أنتج نتائج جيدة
+3. **يتجنب الأخطاء السابقة** (التصحيحات) — ما الذي لم ينجح سابقًا
 
 <Tip>
-  حلقة التغذية الراجعة هي الأقوى لأنماط استخدام الأدوات. إذا وجدت وولف فيش يقترح أسلوباً لا تحبه باستمرار، ارفضه مرة صراحة واشرح السبب. الرفض + السياق يُسجَّل ويُشكِّل السلوك المستقبلي.
+  حلقة التغذية الراجعة هي الأقوى لأنماط استخدام الأدوات. إذا وجدت وولف فيش يقترح أسلوبًا لا تحبه باستمرار، ارفضه مرة صراحة واشرح السبب. الرفض + السبب يُسجَّل، ويظهر في قائمة التصحيحات، ويُشكِّل السلوك المستقبلي.
 </Tip>
 
 ## فحص وتعديل التغذية الراجعة
 
-ملف التغذية الراجعة هو Markdown عادي. يمكنك:
+ملفات التغذية الراجعة هي Markdown عادي. يمكنك:
 
-- **قراءته** لفهم لماذا يتصرف وولف فيش بطريقة معينة
+- **قراءتها** لفهم لماذا يتصرف وولف فيش بطريقة معينة
 - **حذف إدخالات** لـ "إلغاء تعلُّم" نمط (مثلاً: حذف رفضات قديمة لم تعد سارية)
-- **إضافة إدخالات** لتغذية السلوك (مثلاً: إضافة رفض لـ `rm -rf /` حتى لو لم يحدث أبداً)
+- **إضافة إدخالات** لتغذية السلوك (مثلاً: إضافة رفض لـ `rm -rf /` حتى لو لم يحدث أبدًا)
 
 ```bash
 # View today's feedback
@@ -128,7 +163,7 @@ ls -la ~/.wolffish/workspace/brain/basalganglia/
 ```
 
 <Warning>
-  حذف جميع الملفات في مجلد basalganglia يُعيد تعيين جميع التفضيلات السلوكية المُتعلَّمة. سيظل لدى وولف فيش ملفات المعرفة والأحداث، لكنه يفقد إحساسه بما نجح وما لم ينجح. هذه إعادة تعيين كاملة لنظام المكافآت فقط.
+  حذف جميع الملفات في مجلد basalganglia يُعيد تعيين جميع التفضيلات السلوكية المُتعلَّمة. سيظل لدى وولف فيش ملفات المعرفة والأحداث، لكنه يفقد إحساسه بما نجح وما لم ينجح. هذه صفحة بيضاء لنظام المكافآت فقط.
 </Warning>
 
 ## التغذية الراجعة مقابل المعرفة
@@ -136,7 +171,8 @@ ls -la ~/.wolffish/workspace/brain/basalganglia/
 | الجانب | ملفات المعرفة | حلقة التغذية الراجعة |
 |---|---|---|
 | تُخزِّن | حقائق وتفضيلات | نتائج وأنماط |
-| تُكتب بواسطة | ترقية LLM + كتابة مباشرة | تلقائياً بعد كل دورة محادثة |
-| تُجيب على | "ماذا يريد المستخدم؟" | "ما الذي ينجح فعلاً؟" |
-| مثال | "المستخدم يفضل pnpm" | "pnpm install نجح 47 مرة، npm رُفض مرة واحدة" |
-| التعديل | شائع ومُشجَّع | نادر، غالباً للتصحيحات |
+| تُكتب بواسطة | الترقية الليلية + `memory_save` | تلقائيًا بعد كل استدعاء أداة |
+| تُجيب على | "ماذا يريد المستخدم؟" | "ما الذي ينجح فعلًا؟" |
+| مثال | "المستخدم يفضل pnpm" | "214 استدعاء، نجاح 96%؛ rm -rf رُفض — لا تُكرِّره" |
+| في الموجه | العناوين فقط (عبر `<memory_map>`) | خلاصة محدودة الحجم (~500 رمز) |
+| التعديل | شائع ومُشجَّع | نادر، غالبًا للتصحيحات |

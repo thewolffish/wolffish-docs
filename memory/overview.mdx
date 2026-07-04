@@ -12,8 +12,8 @@ Wolffish's memory system mirrors the human hippocampus. Information flows throug
 | Tier | Location | Written By | LLM Required |
 |---|---|---|---|
 | Episodes | `hippocampus/episodes/YYYY-MM-DD.md` | Every turn (append) | No |
-| Consolidated | `hippocampus/consolidated/YYYY-WNN.md` | Nightly compaction | Yes |
-| Knowledge | `hippocampus/knowledge/*.md` | Promotion + direct writes | Yes |
+| Consolidated | `hippocampus/consolidated/YYYY-WNN.md` | Daily compaction + weekly digest | Yes |
+| Knowledge | `hippocampus/knowledge/*.md` | Nightly promotion + `memory_save` | Yes |
 
 All memory lives as markdown files inside your workspace:
 
@@ -38,28 +38,39 @@ All memory lives as markdown files inside your workspace:
 
 ```
 Message arrives
-  → hippocampus.appendEpisode()     [instant, no LLM]
-    → brainstem nightly compaction   [LLM summarizes episodes]
-      → knowledge promotion          [LLM extracts lasting facts]
+  → hippocampus.appendEpisode()      [instant, no LLM]
+    → brainstem daily compaction      [LLM summarizes the day's episodes]
+      → knowledge promotion           [LLM extracts lasting facts, deduplicated]
 ```
 
 <Info>
-  Episode logging is a simple file append — no LLM call, no latency cost. The expensive summarization work happens during nightly compaction when you're not waiting for a response.
+  Episode logging is a simple file append — no LLM call, no latency cost. The expensive summarization work happens during the nightly compaction pass when you're not waiting for a response.
 </Info>
 
-## How Memory Gets Into Context
+## How Memory Gets Read
 
-The `prefrontal` module assembles context before every LLM call. It pulls memory candidates from all three tiers, passes them through the **RAS** (Reticular Activating System) for relevance scoring, and includes only what matters for the current message.
+Memory is **not injected into the prompt**. The system prompt carries exactly two ambient memory pieces:
 
-The RAS uses keyword-based scoring with a 0.25 minimum threshold. A memory fragment about "React performance" won't appear in context when you're asking about "grocery list ideas."
+1. **The learned-preferences digest** — a bounded (~500 token) summary of recent tool outcomes from the [feedback loop](/memory/feedback-loop), so checking your preferences never costs a retrieval round-trip.
+2. **The `<memory_map>` coverage stub** — a byte-stable-per-day map of what exists: per-source record counts, date ranges, knowledge-file topics, conversation and file counts. It is a map of *what* is recallable, never the content itself.
 
-### Token Budget
+Everything else is retrieved on demand through the retrieval toolset (the `introspect` capability):
 
-Memory gets 30% of the total context window. Within that budget, the RAS allocates space based on relevance scores — not tier priority. A highly relevant episode from yesterday can outrank a less relevant knowledge file entry.
+| Tool | What it does |
+|---|---|
+| `memory_search` | Ranked full-text search across everything — episodes, knowledge, consolidated digests, conversations (including tool calls and outputs), tasks, feedback, usage, logs, generated files |
+| `memory_get` | Fetch the full content behind a search ref — a whole episode day, a knowledge file, a task transcript |
+| `conversation_list` | Enumerate past conversations by channel, date, or content |
+| `conversation_read` | Read a past conversation verbatim, paginated, including tool activity |
+| `memory_save` | Durably write a fact to the knowledge files (deduplicated) |
+| `usage_report` | Wolffish's own LLM spend from the usage ledger |
+| `wolffish_recall` | Stable alias over the same index (query/date/source filters) |
+
+The operating contract (`agents.core.md`) teaches Wolffish to recall from the *intent* of your message, unprompted: a definite reference ("send me *the* flight plan", "that file") triggers a search first; a repeat-task smell ("send an email to Sarah") triggers a check for prior patterns; preference questions go digest-then-search; pure-present tasks (weather, math) just act. It must run two differently-worded searches before ever claiming it doesn't remember something — a search miss is never evidence of absence.
 
 ## The Cortex Index
 
-All markdown files in `hippocampus/` are indexed by the `cortex` module (SQLite FTS5 with BM25 ranking). This means memory is full-text searchable without scanning files on disk. The index is fully disposable — delete `cortex.db` and it rebuilds automatically from the source markdown.
+Every memory file — and far more — is indexed by the `cortex` module (SQLite FTS5 with BM25 ranking). The hippocampus tiers are three of eleven indexed sources; conversations, tasks, feedback, usage, logs, and generated files are searchable through the same index. Startup is an incremental mtime/size diff (~22ms on a typical workspace); a full rebuild happens only when the index schema version changes (~1.3s for a 2GB workspace). The index is derived data — delete `cortex.db` and it rebuilds from the source files on the next launch.
 
 <Tip>
   You can manually edit any memory file at any time. Wolffish reads them as-is. The cortex will re-index changes automatically via the brainstem file watcher.

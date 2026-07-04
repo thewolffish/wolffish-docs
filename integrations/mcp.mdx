@@ -43,13 +43,17 @@ DATABASE_URL=postgres://…
 
 ## What You Get
 
-Each connected server registers as its own tool group, namespaced so two servers can never collide:
+Each connected server registers as its own capability, namespaced so two servers can never collide:
 
-- The group is named `mcp-<name>` (e.g. `mcp-tafsir-mcp`) in Wolffish's tool catalog.
-- Each tool is prefixed with the server's name: `tafsir_mcp_fetch_ayah`, `notion_mcp_search`, ….
-- The server's own **instructions** (usage guidance many servers publish) ride along in the catalog, so the model uses the tools the way the server intends.
+- The capability is named `mcp-<slug>` (e.g. `mcp-tafsir-mcp`).
+- Each tool is prefixed with the server's slug: `tafsir_mcp_fetch_ayah`, `notion_mcp_search`, ….
+- The server's own **instructions** (usage guidance many servers publish) ride along in the capability's description, so the model uses the tools the way the server intends.
 
-Tool availability is read fresh at the start of every turn — that's what makes "add a connection, use it next message" literally true. Orchestrator workers get the same tools through the same path; nothing is special-cased. Like channel tools, **presence is the connection signal**: the group is in the catalog while the server is connected and quietly disappears while it's offline.
+MCP servers are **discoverable**, like every non-core capability: a connected server costs one line in the system prompt's capability index (name, short description, tool count) until the model actually needs it. `tool_search` — or calling one of the server's tools directly — activates the capability, and its tools are callable the same turn. That's what makes "add a connection, use it next message" true without every connected server bloating every request. Orchestrator workers get the same tools through the same path; nothing is special-cased.
+
+Wolffish also defends its prompt against whatever a server ships: each tool's description is sanitized (markdown headings and XML-ish tags stripped, structure flattened to one line) and capped at 400 characters, so no server can forge prompt structure or reintroduce catalog bloat. Tool *schemas*, by contrast, pass through verbatim.
+
+Connection state is checked with `mcp_list`, never inferred from tool presence — a discoverable server's tools aren't in the request until activated, and a server can drop and reconnect between turns.
 
 If a server adds or removes tools at runtime, Wolffish picks the change up automatically (via MCP's `list_changed` notification, with a periodic check as backstop).
 
@@ -99,7 +103,7 @@ From then on it's silent forever: tokens are stored with your other credentials 
 
 ## Managing by Chat
 
-Wolffish manages its own MCP connections through the built-in [`mcp` capability](/capabilities/built-in-capabilities) — the same operations as the settings page, so whatever it does shows up there live, and whatever you do there is visible to it.
+Wolffish manages its own MCP connections through the built-in [`mcp` capability](/capabilities/built-in-capabilities) (discoverable like any other — the model finds it the moment you ask about MCP). It performs the same operations as the settings page, so whatever it does shows up there live, and whatever you do there is visible to it.
 
 | Tool | What it does |
 |---|---|
@@ -176,11 +180,11 @@ For contributors — the implementation lives in `src/main/runtime/mcp/` in the 
 | `manager.ts` | `McpManager` — one connection per configured server; the surface the IPC handlers, boot path, and the `mcp` capability's host bridge all call |
 | `connection.ts` | `McpConnection` — one server's full lifecycle state machine: connect, discover, register, reconnect with backoff, health checks, park, OAuth orchestration |
 | `auth.ts` | The SDK `OAuthClientProvider` implementation, the loopback callback server, and best-effort token revocation |
-| `capability.ts` | Converts an MCP tool list into a cerebellum capability: namespacing, JSON-Schema passthrough, result normalization (text/image/audio/resource/structured content) |
+| `capability.ts` | Converts an MCP tool list into a cerebellum capability: namespacing, JSON-Schema passthrough, per-tool description sanitization (heading/tag stripping, 400-char cap), result normalization (text/image/audio/resource/structured content) |
 | `naming.ts` | Pure helpers: slugs, tool-name namespacing (64-char provider cap with dedupe), quote-aware command tokenizing |
 | `types.ts` | Config + snapshot types (source of truth; the preload mirrors them) |
 
-The integration seam is deliberately boring: each connected server registers an **in-process cerebellum capability** via `registerInProcessCapability` — the exact mechanism [channel tools](/channels/overview) use. That single registration feeds the `<tools>` prompt catalog, the API tool definitions, worker tool selection, and execution routing, which is why MCP tools reach every mode of Wolffish with zero special-casing. Registration bumps the cerebellum's generation counter (so a mid-turn change re-pins the tool list), survives capability reloads, and passes each tool's JSON Schema through **verbatim** — unions, defaults, and nested shapes arrive at the model untouched.
+The integration seam is deliberately boring: each connected server registers an **in-process cerebellum capability** via `registerInProcessCapability` — the exact mechanism [channel tools](/channels/overview) use. That single registration feeds the capability index in the system prompt, tool discovery and activation, worker tool selection, and execution routing, which is why MCP tools reach every mode of Wolffish with zero special-casing. Registration bumps the cerebellum's generation counter (so a mid-turn change re-pins the tool list), survives capability reloads, and passes each tool's JSON Schema through **verbatim** — unions, defaults, and nested shapes arrive at the model untouched. Descriptions are the one thing that doesn't pass through raw: they're sanitized and length-capped before they can reach a request.
 
 Two hard-won lifecycle rules, for anyone touching this code: transient disconnects keep the capability registered (that's what makes mid-turn blips retryable and keeps the provider prompt cache stable), and the transport's close handler is attached only **after** a successful connect (a failed connect closes its own transport, and an early handler would misclassify auth failures as generic drops).
 

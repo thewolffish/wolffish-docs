@@ -33,6 +33,7 @@ Located at `brain/config.json`, this file stores application-level settings. It'
       "model": "gemma3:4b"
     }
   },
+  "pinnedCapabilities": ["github"],
   "language": "en"
 }
 ```
@@ -48,6 +49,7 @@ Located at `brain/config.json`, this file stores application-level settings. It'
 | `providers.openai.apiKey` | OpenAI API key |
 | `providers.ollama.host` | Ollama server URL (default: `http://localhost:11434`) |
 | `mcp.servers[]` | Connected [MCP servers](/integrations/mcp) — id, name, transport (`stdio`/`http`), command or URL, env vars, enabled flag, and OAuth tokens for signed-in remote servers. Managed by Settings → MCP and the `mcp_*` chat tools |
+| `pinnedCapabilities` | Extra capabilities whose tool schemas ship on **every** request, on top of the built-in core set. The tuning knob for the lean tool surface — everything else is one `tool_search` away. No UI; hand-edit this array (e.g. `["github", "google"]`) |
 | `language` | UI language: `en` (English) or `ar` (Arabic) |
 
 ## Model Selection

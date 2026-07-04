@@ -34,7 +34,7 @@ description: "دليل جاهز للّصق يعلّم أي مساعد ذكاء �
 | 4 | **أين يوجد كل شيء** | جدول بحث "المستخدم يريد كذا ← حرّر هذا الملف" |
 | 5 | **الدماغ — 15 وحدة** | مهمة كل وحدة وموقعها على القرص، إضافة إلى خط الأنابيب |
 | 6 | **الأدوات المتاحة (القدرات)** | الفهرس الكامل للقدرات المدمجة وكيفية بنائها |
-| 7 | **كيف تعمل الأمور** | خط الأنابيب، وتعاقب المزوّدين، والذاكرة ثلاثية الطبقات، والأمان، ونبضة القلب، والقنوات |
+| 7 | **كيف تعمل الأمور** | خط الأنابيب، ونموذج الدماغ، والذاكرة ثلاثية الطبقات، والأمان، ونبضة القلب، والقنوات |
 | 8 | **مرجع تنسيقات الملفات** | شكل `config.json` والمحادثات والحلقات والمهام والسجلات والاستخدام |
 | 9 | **وصفات التنقّل** | خطوات عملية للأمور التي يسألها المستخدمون فعلًا |
 | 10 | **كتابة موجّهات جيدة** | كيف توجّه وكيلًا يملك ذاكرة وأدوات (بما في ذلك التشغيل الذاتي) |
@@ -366,10 +366,10 @@ place on disk. This is the mental model behind the folder layout.
 
 | Module | Job | On-disk home |
 |---|---|---|
-| **Thalamus** | Classify input, resolve & run the chosen Brain model | — (talks to providers) |
+| **Thalamus** | Resolve the selected Brain model and stream from it (no cascade) | — (talks to providers) |
 | **RAS** | Score relevance, allocate the token budget | — (pure heuristic) |
 | **Prefrontal** | Assemble the system prompt + plan the approach | `brain/prefrontal/` |
-| **Cortex** | Fast full-text retrieval over all markdown | `brain/cortex.db` |
+| **Cortex** | Fast full-text retrieval over everything the agent has done | `brain/cortex.db` |
 | **Hippocampus** | 3-tier memory: episodes → consolidated → knowledge | `brain/hippocampus/` |
 | **Cerebellum** | Load & match capabilities (skills + plugins) | `brain/cerebellum/` |
 | **Wernicke** | Parse LLM output into text + tool calls | — (pure parser) |
@@ -406,14 +406,16 @@ so hidden — `ls -a` to see them). Drop a folder in, and the agent learns a ski
 - **Plugin capability** — `SKILL.md` **+** `plugin/index.mjs` exporting executable
   tools. Most capabilities are plugins.
 
-### The full catalog (24 capabilities)
+### The full catalog (29 capabilities)
 
 | Category | Capability | What it gives the agent (representative tools) |
 |---|---|---|
 | **System** | `.shell` | Run shell commands — `shell_exec` (auto-elevation via native password dialog; `background:true` for servers) |
 | | `.filesystem` | `file_read`, `file_write`, `file_patch` |
 | | `.node` | Node.js runtime + npm — `node_check`, `node_install` |
+| | `.python` | Hermetic uv-managed CPython for native Python plugins — `python_check`, `python_install` |
 | | `.package-manager` | Cross-platform packages (brew/winget/apt/dnf) — `pkg_install`, `pkg_check` |
+| | `.system` | Apps & power — `app_open`, `app_quit`, `app_list`, `open_path`, `system_power` |
 | **Web** | `.web-search` | `web_search` (Brave), `web_fetch` (read a page) |
 | | `.browser` | Headless Playwright automation — `browser_launch`, `browser_navigate`, `browser_click`, … |
 | | `.browser-extension` | Drive the user's **real, logged-in** Chrome/Brave via the extension — ~60 `ext_*` tools (`ext_navigate`, `ext_click`, `ext_set_value`, `ext_read_page`, `ext_query_selector`, `ext_get_url`, `ext_screenshot`, `ext_wait`, …) |
@@ -430,7 +432,12 @@ so hidden — `ls -a` to see them). Drop a folder in, and the agent learns a ski
 | | `.google` | Workspace — `google_gmail_*`, `google_drive_*`, `google_calendar_*`, `google_sheets_*`, contacts, tasks |
 | | `.notion` | Pages, databases, blocks — `notion_search/read_page/create_page/…` |
 | **Desktop** | `.computer-use` | Screen control — `computer_screenshot`, `computer_mouse_click`, `computer_keyboard_type`, … |
-| **Meta** | `.introspect` | The agent inspects itself — `wolffish_status`, `wolffish_performance`, `wolffish_memory` |
+| **Meta** | `.introspect` | The agent recalls & inspects itself — `memory_search`, `memory_get`, `conversation_list`, `conversation_read`, `memory_save`, `usage_report`, `wolffish_recall`, `wolffish_status`, `channel_status`, `wolffish_performance`, `wolffish_memory`, `wolffish_list_files` |
+| | `.skills` | The agent manages/authors its own capabilities — `skill_list`, `skill_search`, `skill_read_source`, `skill_enable`, `skill_disable`, `skill_delete`, `skill_create`, `skill_reload` |
+| | `.automations` | The agent manages its scheduled heartbeat jobs — `automation_list`, `automation_create`, `automation_edit`, `automation_delete`, `automation_check`, `automation_run` |
+| | `.secrets` | Save/list the user's variables & secrets — `add_secret`, `list_secrets` |
+| | `.ask` | Ask the user a multiple-choice question via an in-app card — `ask_user` |
+| | `.utilities` | Small built-ins — `send_file` (deliver a file to the user as an attachment) |
 | | `.planning` | Plan-before-acting discipline (pure skill) |
 
 > `.browser` vs `.browser-extension`: the **extension** acts inside the user's
@@ -444,7 +451,7 @@ so hidden — `ls -a` to see them). Drop a folder in, and the agent learns a ski
 ---
 name: shell
 description: Execute shell commands on the local system
-triggers:            # words in a message that surface this skill to the planner
+triggers:            # search terms tool_search matches to discover this skill
   - run
   - execute
   - terminal
@@ -466,30 +473,34 @@ confirm_patterns:    # amygdala asks the user first
 ```
 
 **To add a capability:** create `brain/cerebellum/.<name>/SKILL.md` (and, for code,
-`plugin/index.mjs`). On next launch the cerebellum loads it; its `triggers` make it
-discoverable and its `tools` become callable. No app rebuild needed — that's the
-markdown-as-truth payoff.
+`plugin/index.mjs`). On next launch the cerebellum loads it; it appears in the
+agent's capability index, `tool_search` finds it (matching its name, description,
+and `triggers`), and its `tools` become callable. No app rebuild needed — that's
+the markdown-as-truth payoff.
 
 ---
 
 ## 7. How things work
 
 **The agent loop.** A message (from the desktop UI, Telegram, or WhatsApp) enters
-the pipeline in §5. The prefrontal reads `soul.md`, `user.md`, the agent
-procedures, matched skills, and relevant memory, and assembles one system prompt.
-The model streams a response; tool calls are parsed out, safety-checked, executed
-with retries, and the result is streamed back. The turn is saved to an episode and
-the outcome recorded.
+the pipeline in §5. The prefrontal assembles one lean system prompt — `soul.md`,
+`user.md`, the agent procedures, a one-line-per-capability index, and a map of
+what memory exists on disk. Nothing is dumped in wholesale: the agent retrieves
+memory (`memory_search`) and loads tools (`tool_search`) on demand as the turn
+needs them. The model streams a response; tool calls are parsed out,
+safety-checked, executed with retries, and the result is streamed back. The turn
+is saved to an episode and the outcome recorded.
 
-**One Brain, no cascade.** You explicitly pick one model — the **Brain**
-(`config.llm.brain`) — in Settings → Modes, and that is the model that runs. There
-is no automatic cascade and no substitution between providers. On a transient error
-the thalamus retries the *same* cloud Brain on a backoff schedule (`net.isOnline()`
-gives instant offline detection); it does not fall through to another provider. To
-run offline, explicitly select Ollama as your Brain (or flip the chat "Local Only"
-toggle, `config.llm.localOnly`). Optionally enable **orchestrator mode**
-(`config.llm.orchestratorMode`) to add a second explicitly-chosen **Worker** model
-(`config.llm.workerModel`) that the Brain delegates parallel work to — still no cascade.
+**The Brain model.** You explicitly select one model — the **Brain**
+(`config.llm.brain`, a `{ providerId, model }` pair) — in Settings → Modes, and
+that is the model the thalamus runs. There's no cascade and no automatic
+substitution between providers: on a transient error the thalamus retries the
+**same** Brain on a backoff schedule (using `net.isOnline()` for instant offline
+detection) rather than falling through to a different one. To run offline, pick
+Ollama as your Brain (or use the chat "Local Only" toggle / `llm.localOnly`).
+Orchestrator mode (`llm.orchestratorMode: "orchestrator"`) optionally adds a
+second explicitly-chosen model — the **Worker** (`llm.workerModel`) — that the
+Brain delegates parallel work to; both are explicit choices, still no cascade.
 
 **Three-tier memory.**
 - *Episodes* (`hippocampus/episodes/`) — appended every turn, zero-latency, no LLM.
@@ -497,8 +508,9 @@ toggle, `config.llm.localOnly`). Optionally enable **orchestrator mode**
   nightly compaction (configured in Settings → Hippocampus → Compaction, not in
   `heartbeat.md`).
 - *Knowledge* (`hippocampus/knowledge/`) — durable facts, promoted from episodes or
-  written by hand. The prefrontal pulls candidates from all three and the RAS keeps
-  only what scores high enough for the current message.
+  written by hand. All three tiers are indexed by the cortex; none of it is injected
+  into the prompt. The prompt carries a coverage *map* of what exists, and the agent
+  retrieves what a turn needs with `memory_search` / `memory_get`.
 
 **Safety (amygdala).** Every tool call is classified using the `danger_patterns` /
 `confirm_patterns` in each `SKILL.md`: *safe* runs immediately, *confirm* needs user
@@ -666,11 +678,12 @@ Delete `brain/cortex.db*` (the index rebuilds from markdown on launch). If a tur
 half-wrote something, the markdown files are still the truth — fix them directly.
 
 **"Switch model / add an API key / go fully offline."**
-Edit `config.json → llm`. Add a provider object (with `id`, `model`, `apiKey`) and
-set `llm.brain` to `{ providerId, model }` — that one model is the Brain that runs;
-there is no cascade. To go offline, point `llm.brain` at Ollama (set
-`llm.local.enabled = true`) or flip the chat "Local Only" toggle
-(`llm.localOnly = true`). **Redact keys when you echo this file.**
+Edit `config.json → llm`. Add a provider object (with `id`, `model`, `apiKey`) to
+`llm.providers`, then point `llm.brain` at the `{ providerId, model }` you want to
+run — that one model is the Brain. To go offline, select Ollama as your Brain (set
+`llm.local.enabled = true` and point `brain` at it), or flip `llm.localOnly = true`
+to force the local model regardless of the selected Brain. There's no `cloudPriority`
+or `allowLocalFallback` cascade anymore. **Redact keys when you echo this file.**
 
 **"Back up / move my agent to another machine."**
 Copy `~/.wolffish/workspace/`. Skip `runtime/` (disposable Chromium state) and
@@ -686,9 +699,10 @@ Copy `~/.wolffish/workspace/`. Skip `runtime/` (disposable Chromium state) and
 Wolffish is an *agent with memory and tools*, not a stateless chatbot. Prompt it
 accordingly.
 
-**For everyday asks, just talk.** Natural language is enough — `triggers` route the
-request to the right capability ("summarize this PDF", "commit my changes", "what's
-on my calendar tomorrow"). Don't name tools; describe the outcome.
+**For everyday asks, just talk.** Natural language is enough — the agent discovers
+the right capability itself, via its capability index and `tool_search` ("summarize
+this PDF", "commit my changes", "what's on my calendar tomorrow"). Don't name
+tools; describe the outcome.
 
 **Teach once, in markdown — don't repeat yourself every chat.** A standing
 preference belongs in `soul.md` / `user.md` / `knowledge/*.md`, not re-pasted into

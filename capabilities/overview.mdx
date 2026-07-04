@@ -35,15 +35,34 @@ On startup, `cerebellum.ts` scans `brain/cerebellum/` and for each folder:
 2. Extracts tool definitions, danger patterns, confirm patterns, and triggers
 3. If a `plugin/` folder exists, dynamic-imports `plugin/index.mjs`
 4. Calls `init(context)` on the plugin, passing `pluginDir` and `workspaceRoot`
-5. Registers all tools with the agent's tool definitions
+5. Registers the tools in the cerebellum's registry — every capability becomes visible in the capability index, but only a subset of tool schemas ships to the model (see below)
 
-## How Capabilities Are Selected
+## How Capabilities Reach the Model
 
-**Plugin capabilities** (with tools) are always included in the `<tools>` section — the LLM needs to know what tools it can call regardless of the message topic.
+Registering a capability is not the same as sending its tools to the model. Wolffish separates **knowing a tool exists** from **carrying its schema** — that's what keeps the system prompt lean no matter how much you install.
 
-**Pure skills** (no tools) are injected into a `<skills>` section only when the user's message matches their trigger keywords. The cerebellum scores each skill by how many trigger keywords appear in the message and injects the top 3 matches.
+### The capability index
 
-A trigger of `"*"` (wildcard) makes a pure skill **always-on** — it's injected on every message without keyword matching and doesn't count against the top-3 limit. Use this for skills that define agent-wide behaviour like planning discipline or output formatting.
+Every system prompt contains a `<capabilities>` index: one line per capability — name, a short description (capped at 90 characters), and its tool count, with a `[loaded]` marker on the ones whose tools are callable right now. The whole index costs ~800 tokens, and past 60 capabilities the unloaded remainder collapses to a grouped count, so prompt cost stays flat in the number of installed capabilities. The model always knows what exists; it just doesn't pay for schemas it isn't using.
+
+### Core capabilities — always loaded
+
+A bootstrap set ships its full tool schemas with every request (~29–47 tools): `tool-discovery`, `introspect`, `filesystem`, `shell`, `ask`, `utilities`, `web-search`, `secrets`, `system`, plus `orchestrator` (role-gated) and the channel capabilities (`telegram`, `whatsapp`, `electron`) while connected. These are the keys to everything else — discovery, memory retrieval, files, and replying — and must never require a discovery hop.
+
+### Everything else — discoverable on demand
+
+GitHub, Google, Notion, the browsers, computer-use, the media and document tools, and every MCP server load when needed:
+
+- `tool_search(query)` — term search over capability names, descriptions, triggers, and tool names. The best match is auto-loaded and its tools are callable the **same turn**.
+- `tool_activate(capability)` — explicit load by exact name, from the index or a search result.
+
+Activation is **conversation-scoped**: each conversation keeps its own active set, so loading `github` in a heartbeat run never invalidates a live chat's prompt cache. At most 10 non-core capabilities stay loaded per conversation, evicted least-recently-used — and eviction is invisible, because calling an evicted tool auto-reactivates its capability and the call executes normally. The same courtesy applies to any known-but-unloaded tool called directly: it just works. Only a genuinely unknown tool name returns an error, and that error points at `tool_search`.
+
+To make extra capabilities always-loaded, add their names to `pinnedCapabilities` (a string array) in `config.json` — there's no UI for it; hand-edit the file.
+
+### Pure skills
+
+Pure skills (no tools) appear in the index as `(guide)` entries. `tool_search` finds them by name, description, or trigger keywords, and the model reads their instructions on demand with `skill_read_source`. There is no keyword-triggered injection of skill bodies into the prompt — the index line is all a skill costs until it's actually needed.
 
 ## Built-In Capabilities
 
@@ -51,10 +70,12 @@ Wolffish ships with these capabilities in the default workspace:
 
 | Capability | Type | Description |
 |---|---|---|
+| `tool-discovery` | Plugin | Find and load any capability on demand via `tool_search` / `tool_activate` |
 | `shell` | Plugin | Execute shell commands via `shell_exec` |
 | `filesystem` | Plugin | Read, write, and patch files |
 | `git` | Pure Skill | Git operations via shell commands |
-| `introspect` | Plugin | Self-awareness: status, channel connectivity, performance, memory |
+| `introspect` | Plugin | Memory retrieval and self-awareness: search everything Wolffish knows, read past conversations, check status and spend |
+| `utilities` | Plugin | `send_file` — deliver files to you as attachments (the only delivery path) |
 | `ask` | Plugin | Ask you a multiple-choice question and wait for your pick |
 | `skills` | Plugin | Manage and author Wolffish's own capabilities at runtime |
 

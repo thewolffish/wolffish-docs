@@ -11,6 +11,10 @@ These capabilities are included in the default workspace when Wolffish creates `
 **No artificial guardrails.** Wolffish is built for smarter, more capable models. We've removed hard-coded timeouts, result caps, and arbitrary limits from all capability plugins. The LLM decides when to set a timeout and how many results to request. Commands run until they finish naturally. The only limits that remain are OOM-protection caps (100MB for documents, 500MB for audio, 100KB output buffer) — these protect memory, not restrict functionality.
 </Note>
 
+<Note>
+**Not everything is in context at once.** Every capability below registers at startup and appears in the model's capability index, but only the **core set** ships full tool schemas on every request — `tool-discovery`, `introspect`, `filesystem`, `shell`, `ask`, `utilities`, `web-search`, `secrets`, `system`, plus the orchestrator and channel capabilities when active. Everything else (GitHub, Google, browsers, media, documents, MCP servers) loads on demand via `tool_search` / `tool_activate` and is callable the same turn. See [Capabilities Overview](/capabilities/overview) for how exposure works.
+</Note>
+
 ## Self-Management
 
 Wolffish can read, manage, and **write its own capabilities** at runtime — no code change, no restart. This is the heart of what makes it extensible: a workflow you do often can become a permanent tool just by asking.
@@ -99,7 +103,7 @@ When you ask, Wolffish:
 
 1. **Picks the kind of skill** — a *pure skill* (a written procedure it follows with tools it already has), a *plugin skill* (a real new tool backed by JavaScript), or a plugin with npm dependencies — choosing the smallest that does the job.
 2. **Writes the files** via `skill_create` — the `SKILL.md` (name, description, triggers) plus `plugin/index.mjs` and a `package.json` only when a real new tool is needed.
-3. **Loads and tests it live**, then it's available from your next message — triggered automatically whenever your wording matches what the skill is for.
+3. **Loads and tests it live**, then it's available from your next message — listed in the capability index and found by `tool_search` whenever your wording matches its triggers.
 
 <Tip>
   Be specific about the **trigger** ("whenever I…", "every time a…") and the **outcome** you want. Wolffish builds reusable skills, not one-offs — for a single task it just does the work directly instead of creating a skill. You can always say "list your skills" to see what it has, or "delete that skill" to remove one it made.
@@ -108,7 +112,19 @@ When you ask, Wolffish:
 ## Core System
 
 <AccordionGroup>
-  <Accordion title="shell — Execute shell commands" defaultOpen>
+  <Accordion title="tool-discovery — Find and load tools on demand" defaultOpen>
+    **Type:** Plugin (registered by the runtime itself, not a workspace folder)
+
+    Not every tool is preloaded into the model's context. The capability index in the system prompt lists everything that exists; these two tools make any of it callable:
+
+    **Tools:**
+    - `tool_search` — Search every installed capability (including MCP servers) by what you need to do. Matches capability names, descriptions, trigger keywords, and tool names; the best match is auto-loaded and its tools are callable the same turn.
+    - `tool_activate` — Load a specific capability by exact name, taken from the capability index or a `tool_search` result.
+
+    Activations are per-conversation and capped at 10 non-core capabilities, evicted least-recently-used. Eviction is invisible: calling an evicted (or never-activated) tool directly auto-reactivates its capability and the call executes normally. Always loaded.
+  </Accordion>
+
+  <Accordion title="shell — Execute shell commands">
     **Type:** Plugin
 
     **Triggers:** run, execute, command, terminal, shell, bash, npm, npx, git, pip, docker, curl
@@ -168,6 +184,25 @@ When you ask, Wolffish:
     - `node_install` — Install Node.js via system package manager
 
     Once installed, use `shell_exec` for `node`, `npm`, and `npx` commands.
+  </Accordion>
+</AccordionGroup>
+
+## File Delivery
+
+<AccordionGroup>
+  <Accordion title="utilities — Deliver files with send_file">
+    **Type:** Plugin
+
+    **Triggers:** send file, attach, attachment, deliver file, share file, upload file
+
+    Small always-loaded helpers that don't belong to a bigger capability — currently, delivering files.
+
+    **Tools:**
+    - `send_file` — Deliver any file (up to 50 MB, any type) to you as an attachment in the conversation you're in. Renders as a file card in the desktop app and uploads natively on Telegram and WhatsApp.
+
+    **This is the only way a file reaches you.** No generation tool auto-delivers its output — not `pdf_create`, not ffmpeg, not the browser, not a shell script. Wolffish treats delivery as part of the task: the moment a file-producing task finishes, `send_file` is the final tool call — even for tiny text files, even when the content was also shown in chat. Ending with "saved to ~/path" is not delivery. If you explicitly ask for a file to just be saved somewhere, that's respected — and when Wolffish is genuinely unsure, it asks rather than silently withholding. The runtime lists files already sent this turn, so you never receive the same file twice.
+
+    Paths can be absolute, `~/`-relative, or workspace-relative; files outside the workspace are copied into `files/` so the in-app viewer can load them. Files over 50 MB stay on disk and Wolffish tells you where to find them.
   </Accordion>
 </AccordionGroup>
 
@@ -423,6 +458,36 @@ When you ask, Wolffish:
   </Accordion>
 </AccordionGroup>
 
+## Memory & Self-Awareness
+
+<AccordionGroup>
+  <Accordion title="introspect — Memory retrieval and self-awareness">
+    **Type:** Plugin
+
+    **Triggers:** status, health, performance, how are you, what do you know, recall, remember when, search memory, list files, uptime, stats (and many more)
+
+    Wolffish's window into its own memory and state. The retrieval tools ride the cortex index — one full-text index over everything it has ever seen: every message and tool call of every past conversation, daily episodes, long-term knowledge, weekly digests, task runs, tool-outcome feedback, usage/cost records, event logs, app logs, and generated files. Always loaded.
+
+    **Retrieval tools:**
+    - `memory_search` — Ranked full-text search across all memory sources, filterable by source and date range. Returns snippets with refs to follow up on.
+    - `memory_get` — Fetch the full stored content behind a ref; `file:` refs return the actual file (workspace-confined)
+    - `conversation_list` — Enumerate past conversations: id, title, channel, dates, message count — optionally ranked by a content query
+    - `conversation_read` — Read a specific past conversation with pagination, including tool calls and results. Also recovers turns of the *current* conversation that were summarized out of context.
+    - `memory_save` — Durably save one self-contained fact to long-term knowledge (deduplicated), typed as projects, people, preferences, technical, or decisions
+    - `usage_report` — Wolffish's own LLM spend: requests, tokens, and cost, total and per model, for a chosen period
+    - `wolffish_recall` — Keyword-and-date recall, kept as a stable alias and now served from the index
+
+    **Status tools:**
+    - `wolffish_status` — Uptime, active provider, loaded capabilities, and system health
+    - `channel_status` — Whether each messaging channel (Telegram, WhatsApp, in-app) is connected, and the exact steps to reconnect one that isn't
+    - `wolffish_performance` — Task success rates, most used tools, error rates
+    - `wolffish_memory` — Recent conversation topics and knowledge areas at a glance
+    - `wolffish_list_files` — Structured file tree of the workspace (and only the workspace)
+
+    Read-only except `memory_save`. Wolffish uses these unprompted: a definite reference ("the flight plan", "that file") triggers a search before answering, and it tries two differently-worded searches before ever claiming it doesn't remember — a search miss is never treated as proof something didn't happen. It also checks `channel_status` before sending you an out-of-band message — Telegram and WhatsApp are connected channels reached through their own tools, never desktop apps to launch.
+  </Accordion>
+</AccordionGroup>
+
 ## Fun
 
 <AccordionGroup>
@@ -440,23 +505,7 @@ When you ask, Wolffish:
     - `gif_trending` — Get trending GIFs
     - `add_to_chat` — Insert the generated meme/GIF into the conversation
 
-    Uses memegen (zero-config) or imgflip (with credentials) as the backend.
-  </Accordion>
-
-  <Accordion title="introspect — Self-awareness">
-    **Type:** Plugin
-
-    **Triggers:** status, health, performance, how are you, what do you know, uptime, stats
-
-    Lets Wolffish answer questions about its own state by reading its workspace files.
-
-    **Tools:**
-    - `wolffish_status` — Uptime, active provider, loaded capabilities, channel connectivity, and system health
-    - `channel_status` — Whether each messaging channel (Telegram, WhatsApp, in-app) is connected, and the exact steps to reconnect one that isn't
-    - `wolffish_performance` — Task success rates, most used tools, error rates
-    - `wolffish_memory` — Recent conversation topics and knowledge areas
-
-    Read-only — never modifies the workspace. Ask "how are you doing?" for real data, not pleasantries. Wolffish checks `channel_status` before sending you an out-of-band message — Telegram and WhatsApp are connected channels reached through their own tools, never desktop apps to launch.
+    Uses memegen (zero-config) or imgflip (with credentials) as the backend. A meme reaches the chat only when `add_to_chat` is called — generation alone doesn't deliver it.
   </Accordion>
 </AccordionGroup>
 

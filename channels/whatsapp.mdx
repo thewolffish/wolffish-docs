@@ -117,6 +117,14 @@ Voice notes sent in WhatsApp are transcribed via Wolffish's STT (speech-to-text)
 
 Any file you send over WhatsApp — PDFs, documents (docx, xlsx, pptx), images, video, audio, even stickers — is downloaded and processed exactly like an attachment dropped into the desktop app: the content is extracted and enters the turn alongside your caption. Files that arrive without a name or extension are typed from the media itself, so nothing is silently dropped. Uploads are capped at 1 GB, matching the in-app limit.
 
+## Receiving Files from Wolffish
+
+When Wolffish produces a file for you, delivery is a deliberate act by the agent — its `send_file` tool — which arrives as a real WhatsApp upload: images, audio, and video as media messages, everything else as a document. Nothing auto-attaches: a tool merely writing a file to disk never sends it, so you'll never get unrequested intermediate files. The agent's operating contract requires it to `send_file` the result the moment a file-producing task is done.
+
+## Message History & Recall
+
+Inbound WhatsApp messages are kept in a rolling buffer (`whatsapp/read-history.json`) that survives restarts and is indexed by the cortex per chat. That makes them searchable like everything else: ask Wolffish about something someone messaged you and it can find it via `memory_search`, alongside its own conversations and files.
+
 ## Message Formatting
 
 Wolffish writes WhatsApp replies in WhatsApp's own text style — `*bold*`, `_italic_`, `~strikethrough~`, backtick code, and plain `-` lists — never raw Markdown. As a safety net, everything sent through the channel also passes through a converter that translates any leftover Markdown into WhatsApp text: headings become bold lines, `[label](url)` links become "label (url)", tables become `*Label:* value` lines, and task lists become ☐/☑ items. Code block contents are preserved verbatim.
@@ -134,11 +142,11 @@ The message enters the TurnRunner queue and processes in order once the current 
 
 ## Verbose Task Results
 
-By default, WhatsApp receives a **clean feed** — the agent's replies, any files or voice it produces, and errors. Routine tool steps stay in the desktop UI.
+By default, WhatsApp receives a **clean feed** — the agent's replies, any files or voice notes it sends, and errors. Routine tool steps stay in the desktop UI.
 
 Toggle this in **Settings → Channels → WhatsApp → Verbose task results**:
 
-- **Off (default)** — agent messages, file-bearing results, and errors only.
+- **Off (default)** — agent messages, files the agent sends, and errors only.
 - **On** — every tool call, result, and activity is relayed to the chat.
 
 <Note>

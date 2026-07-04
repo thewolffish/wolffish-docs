@@ -113,6 +113,28 @@ The sweet spot for local-only agentic use:
 
 For everyone else, we recommend: **cloud providers for complex agentic tasks, Ollama for privacy-sensitive conversations and offline fallback.**
 
+## One Unified Path
+
+Local models are not second-class citizens. A local model runs through exactly the same pipeline as a cloud model:
+
+- **Same lean context** — the same ~5k-token system prompt, capability index, and memory map that a cloud model gets. Nothing is stripped because the model runs on your hardware.
+- **Same core toolset** — the full always-loaded core tools, plus [tool discovery](/capabilities/overview) for everything else (`tool_search` works identically on local models).
+- **Same memory** — full access to search, recall, conversation history, and knowledge saving.
+
+The only local-specific artifact is a small self-qualifying prompt overlay: the model is told it's running locally and asked to be honest when a task exceeds what it can do reliably — say so plainly and suggest switching to a capable cloud model rather than hallucinating capability. But if you insist, it complies fully. It's a request for honesty, not a restriction; nothing is withheld.
+
+<Note>
+  Earlier versions had per-local-model context toggles ("stateless" and "restricted" local modes). Those are gone — there is one path now, and stale keys are stripped from existing configs on launch.
+</Note>
+
+### Small context windows
+
+Models with small context windows automatically get a slimmed **bootstrap toolset** — retrieval, discovery, files, and shell — so the prompt and tool schemas don't pin the window before the conversation starts. This is keyed on the *measured* context budget, never on provider identity: a small-window cloud model triggers it identically, and a local 128K-context model gets the full core set.
+
+### Hardware protection
+
+The **Restrict powerful local models** toggle (Settings → Wolffish, on by default) blocks the model picker from installing local models whose memory footprint exceeds what your system can handle comfortably (~55% of total RAM). This is an *installation* gate, not a context restriction — it exists to prevent swap thrashing, and you can turn it off to install anything regardless of hardware limits (not recommended).
+
 ## Reasoning modes
 
 The **brain icon** next to the message box controls whether this model reasons. Click it to toggle reasoning on or off for models that support it.
@@ -146,14 +168,14 @@ In local-only mode:
 ## Limitations
 
 - **Speed** — Local inference is slower than cloud APIs, especially on CPU-only machines. Expect 5–30 tokens/second depending on model size and hardware, versus 80–150 tokens/second from cloud providers.
-- **Context window** — Most local models support 4K–32K context. Cloud models offer 128K–200K. Long conversations or large documents may exceed local model limits.
+- **Context window** — Most local models support 4K–32K context. Cloud models offer 128K–200K. Wolffish automatically slims the toolset for small windows (see above), but long conversations or large documents may still exceed local model limits.
 - **Tool-call formatting** — Smaller models sometimes output malformed tool calls. Wolffish has retry logic, but repeated failures will end the turn.
-- **No computer-use** — Computer-use (screen interaction) requires vision capabilities that most local models lack. This capability currently requires Claude.
+- **Computer-use** — Screen interaction depends on vision capabilities that most local models lack. The capability isn't withheld — a vision-capable local model can use it — but expect poor results below the frontier.
 
 ## The Vision
 
 We built Ollama integration because we believe the future of personal AI is local. Today, the best models are cloud-hosted. But model sizes are shrinking while capabilities grow. The gap between a 70B local model and a cloud frontier model narrows with every release.
 
-Wolffish is built for that future — where a single machine runs a fully capable AI agent with no internet connection, no subscription, no data leaving your control. Every architectural decision (stateless model, markdown-first, local memory) is designed so that the day a 14B model can reliably execute 20-tool agentic chains, Wolffish is ready. No code changes needed — just swap the model.
+Wolffish is built for that future — where a single machine runs a fully capable AI agent with no internet connection, no subscription, no data leaving your control. Every architectural decision (model-agnostic design, markdown-first, local memory) is designed so that the day a 14B model can reliably execute 20-tool agentic chains, Wolffish is ready. No code changes needed — just swap the model: local models already run the exact same path as cloud ones.
 
 Until then, use cloud providers for the heavy lifting and Ollama for what it does best: private, offline, always-available local inference.

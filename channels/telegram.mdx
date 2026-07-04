@@ -92,6 +92,8 @@ The bot can receive and process:
 
 Send a file with or without a caption. If you include a caption, it becomes the user message with the file as context. If no caption, Wolffish infers intent from the file content.
 
+In the other direction, files Wolffish produces reach you as real Telegram uploads — sent deliberately by the agent via its `send_file` tool as a document, photo, audio, or video message. Nothing auto-attaches: a tool writing a file to disk never sends it by itself, and the agent's operating contract requires it to `send_file` the result of any file-producing task the moment the work is done.
+
 ## Response Formatting
 
 Wolffish formats responses using Telegram's HTML subset:
@@ -108,11 +110,11 @@ Long responses are split at logical boundaries (paragraph breaks, list items) to
 
 ## Verbose Task Results
 
-By default, Telegram receives a **clean feed** — the agent's replies, any files it produces, and errors. The step-by-step tool activity stays in the desktop UI so your chat doesn't fill up with internal steps.
+By default, Telegram receives a **clean feed** — the agent's replies, any files it sends, and errors. The step-by-step tool activity stays in the desktop UI so your chat doesn't fill up with internal steps.
 
 Toggle this in **Settings → Channels → Telegram → Verbose task results**:
 
-- **Off (default)** — agent messages, file-bearing results, and errors only.
+- **Off (default)** — agent messages, files the agent sends, and errors only.
 - **On** — every tool call, result, and activity is relayed to the chat as it happens.
 
 <Note>

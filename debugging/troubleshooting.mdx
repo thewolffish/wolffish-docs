@@ -32,16 +32,24 @@ Common problems and their solutions. Start with the issue that matches your symp
        ```bash
        tail -20 ~/.wolffish/workspace/brain/corpus/$(date +%Y-%m-%d).log.md
        ```
-       If you see `input.received` but no `llm.response`, the provider call is hanging or failing.
+       If you see `message.received` but no `llm.response`, the provider call is hanging or failing.
 
   </Accordion>
 
   <Accordion title="The agent doesn't use my capability">
     **Symptoms**: You've created a capability but Wolffish never uses it.
 
+    **How discovery works now**: a core set of capabilities is always loaded; everything else appears as one line in the prompt's `<capabilities>` index and loads on demand when the model calls `tool_search` (which matches capability names, descriptions, triggers, and tool names) or calls one of its tools directly.
+
     **Check these:**
 
-    1. **SKILL.md triggers** — Open your capability's SKILL.md and check the `triggers` field in the frontmatter. Triggers must match the kinds of messages you're sending. Example:
+    1. **It's in the index** — Send any message, then open the latest debug snapshot:
+       ```bash
+       ls -t brain/prefrontal/.debug/ | head -1
+       ```
+       Look in the `<capabilities>` section. If your capability isn't listed at all, its SKILL.md failed to parse — check the frontmatter (bad YAML, missing required fields).
+
+    2. **Make it findable** — `tool_search` is a term search. Give the SKILL.md a descriptive `name` and `description`, and add `triggers` covering the words you'd naturally use:
        ```yaml
        triggers:
          - "deploy"
@@ -49,19 +57,14 @@ Common problems and their solutions. Start with the issue that matches your symp
          - "release"
        ```
 
-    2. **Debug snapshot** — Send a message that should activate the capability, then check the latest debug snapshot:
-       ```bash
-       ls -t brain/prefrontal/.debug/ | head -1
-       ```
-       Open it and look in the `<skills>` section. Is your capability listed? If not, its relevance score was below the threshold.
+    3. **Ask for it explicitly** — Tell Wolffish "use tool_search to find a deployment capability". If that loads and runs it, the plugin is fine and only the descriptions need sharpening.
 
-    3. **Cerebellum loaded it** — Check the event log for `capability.loaded` or `capability.error`:
-       ```bash
-       grep "capability" brain/corpus/$(date +%Y-%m-%d).log.md
+    4. **Pin it** — If the capability should *always* be loaded (schemas shipped on every request), add it to `pinnedCapabilities` in `config.json`:
+       ```json
+       {
+         "pinnedCapabilities": ["my-capability"]
+       }
        ```
-       If you see `capability.error`, the SKILL.md has a parsing issue (bad frontmatter, missing required fields).
-
-    4. **Lower the threshold** — If the skill scores close but not above the default threshold, either add more triggers or lower `ras.threshold` in `config.json`.
 
   </Accordion>
 
@@ -97,20 +100,20 @@ Common problems and their solutions. Start with the issue that matches your symp
        grep -r "wrong information" brain/hippocampus/episodes/
        ```
 
-    2. **Edit or delete it** — Open the episode file and fix the content, or delete the file entirely. Episodes are just markdown — edit them like any other file.
+    2. **Edit or delete it** — Open the episode file and fix the content, or delete the file entirely. Episodes are just markdown — edit them like any other file. The same goes for the knowledge files under `brain/hippocampus/knowledge/` — durable facts often live there.
 
-    3. **Rebuild the index** — After editing episodes, the cortex index is stale. Delete it and Wolffish will rebuild on next restart:
+    3. **The index follows you** — No manual rebuild needed: the file watcher re-indexes edited files while Wolffish runs, and every launch does an incremental diff. If the index still looks wrong, force a full rebuild:
        ```bash
-       rm brain/cortex/cortex.db
+       rm ~/.wolffish/workspace/brain/cortex.db*
        ```
-       On the next startup, cortex re-indexes all episode files from scratch.
+       On the next startup, cortex re-indexes the whole workspace (about a second, even for gigabytes).
 
   </Accordion>
 
   <Accordion title="Context is too large / responses are slow">
     **Symptoms**: Wolffish takes a long time to respond, or you see token budget warnings.
 
-    **Check these:**
+    A fresh conversation's system prompt is ~5k tokens by design, and long conversations automatically fold into a rolling summary plus the recent verbatim tail — so a bloated context is the exception, not the norm. When it happens:
 
     1. **Hypothalamus warnings** — Look for health events:
        ```bash
@@ -118,18 +121,11 @@ Common problems and their solutions. Start with the issue that matches your symp
        ```
        Warnings about token usage mean the context window is nearly full.
 
-    2. **Reduce loaded skills** — If many capabilities match every message, their SKILL.md bodies consume tokens. Make triggers more specific so fewer skills load per turn.
+    2. **Check the debug snapshot header** — `estimated tokens` at the top of the latest snapshot shows the prompt's size. If it's far above ~5k, an oversized always-included file is the usual culprit: a huge `soul.md`, `user.md`, or `agents.md` lands in every prompt.
 
-    3. **Increase RAS threshold** — In `config.json`, raise `ras.threshold` (default 0.3) to be more selective about what gets included in context:
-       ```json
-       {
-         "ras": {
-           "threshold": 0.5
-         }
-       }
-       ```
+    3. **Watch the context meter** — In the chat header, the numerator is the provider-billed tokens of the last request and the denominator is the model's full context window. Big single tool results (a giant file read, a huge page fetch) inflate a turn temporarily; stale large tool results are replaced with recovery-pointer stubs on later turns.
 
-    4. **Check debug snapshot size** — The token budget comment at the top of each debug snapshot shows usage. If `<memory>` or `<skills>` dominate, reduce those sections.
+    4. **Pinned capabilities** — Every capability in `pinnedCapabilities` ships its full tool schemas on every request. Pin sparingly; `tool_search` loads the rest on demand (capped at 10 active non-core capabilities per conversation).
 
   </Accordion>
 
@@ -172,9 +168,9 @@ Common problems and their solutions. Start with the issue that matches your symp
 
     3. **Args match schema** — The JSON schema in SKILL.md must match what the plugin function expects. Type mismatches cause silent failures.
 
-    4. **Check the event log** — Look for `capability.error` events:
+    4. **Check the application log** — Capability load failures land in the app log:
        ```bash
-       grep "capability.error" brain/corpus/$(date +%Y-%m-%d).log.md
+       grep -i "skill\|capability\|plugin" ~/.wolffish/workspace/logs/$(date +%Y-%m-%d).log
        ```
        The error message usually points to the exact issue (missing export, syntax error, bad import).
 
@@ -183,15 +179,15 @@ Common problems and their solutions. Start with the issue that matches your symp
   <Accordion title="cortex.db is corrupted">
     **Symptoms**: Search doesn't work, memory retrieval fails, errors mentioning SQLite or FTS5.
 
-    **Fix**: Delete the database. Wolffish rebuilds it from the source markdown files on next startup:
+    **Fix**: Delete the database (and its `-shm`/`-wal` companions). Wolffish rebuilds it from the source files on next startup:
     ```bash
-    rm ~/.wolffish/workspace/brain/cortex/cortex.db
+    rm ~/.wolffish/workspace/brain/cortex.db*
     ```
 
-    Then restart Wolffish. The cortex re-indexes all episode files from `brain/hippocampus/episodes/` — this takes a few seconds depending on how many episodes you have.
+    Then restart Wolffish. The cortex re-indexes everything — episodes, knowledge, conversations, tasks, logs, usage, artifacts — in about a second, even for a multi-gigabyte workspace. A normal launch (no deletion) only runs an incremental diff, which takes milliseconds.
 
     <Info>
-    The `cortex.db` is a derived artifact — it's always rebuildable from the markdown files. You never lose data by deleting it.
+    The `cortex.db` is a derived artifact — it's always rebuildable from the files on disk. You never lose data by deleting it.
     </Info>
 
   </Accordion>
@@ -218,9 +214,9 @@ Common problems and their solutions. Start with the issue that matches your symp
        ls ~/.wolffish/workspace/brain/hippocampus/episodes/ | wc -l
        ```
 
-    4. **Debug snapshots** — Should auto-clean, but check:
+    4. **Debug snapshots** — Capped at the 50 most recent (older ones are rotated out automatically), but verify:
        ```bash
-       du -sh ~/.wolffish/workspace/brain/prefrontal/.debug/
+       ls ~/.wolffish/workspace/brain/prefrontal/.debug/ | wc -l
        ```
 
   </Accordion>
@@ -236,8 +232,8 @@ Common problems and their solutions. Start with the issue that matches your symp
     This deletes all configuration, memories, episodes, capabilities, and logs. Wolffish will run first-launch setup again. Only do this if you're prepared to lose everything.
     </Warning>
 
-    For a less destructive reset, delete only specific directories:
-    - `rm -rf ~/.wolffish/workspace/brain/cortex/` — rebuild search index only
+    For a less destructive reset, delete only specific pieces:
+    - `rm ~/.wolffish/workspace/brain/cortex.db*` — rebuild search index only
     - `rm -rf ~/.wolffish/workspace/brain/hippocampus/episodes/` — clear all memories
     - `rm -rf ~/.wolffish/workspace/brain/corpus/` — clear event logs
     - `rm -rf ~/.wolffish/workspace/brain/prefrontal/.debug/` — clear debug snapshots

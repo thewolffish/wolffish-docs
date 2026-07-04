@@ -88,11 +88,23 @@ All channels share the same brain state:
   You can start a long-running task in the desktop UI, leave your desk, and check on progress or continue the conversation from Telegram on your phone.
 </Tip>
 
+## File Delivery
+
+When Wolffish produces a file — a PDF, a converted video, a spreadsheet — delivering it is a deliberate act by the agent: its `send_file` tool. Nothing auto-delivers. A tool writing a file to disk never sends it by itself, and paths mentioned in tool output are never sniffed and auto-uploaded — if the agent doesn't send it, you don't receive it, and the agent's operating contract requires it to send the result the moment a file-producing task is done.
+
+`send_file` renders natively on every surface:
+
+| Channel | How a sent file arrives |
+|---|---|
+| Electron UI | File card in the chat (image, audio, video, document, or generic file) |
+| Telegram | Real upload — document, photo, audio, or video message |
+| WhatsApp | Real upload — media message or document |
+
 ## Verbose Task Results
 
 Each channel has a **Verbose task results** toggle that controls how much of the agent's step-by-step work you see. It is **off by default**, which keeps a clean feed:
 
-- **Off (clean feed)** — only what you care about: the agent's replies, any files it produces or sends, and errors. Routine tool calls, successful tool results, and compaction notices are hidden. In the desktop UI the active-model chip is also kept.
+- **Off (clean feed)** — only what you care about: the agent's replies, any files it sends, and errors. Routine tool calls, successful tool results, and compaction notices are hidden. In the desktop UI the active-model chip is also kept.
 - **On (verbose)** — every tool call, tool result, and activity card is surfaced, the way the turn ran step by step.
 
 The toggle lives in each channel's own settings, all under **Settings → Channels**:

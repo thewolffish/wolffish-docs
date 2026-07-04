@@ -132,6 +132,7 @@
                   "architecture/pipeline",
                   "architecture/stateless-model",
                   "architecture/context-compaction",
+                  "architecture/lean-context",
                   "architecture/brain-modules",
                   "architecture/workspace",
                   "architecture/event-bus"
@@ -196,6 +197,7 @@
                 "expanded": true,
                 "pages": [
                   "memory/overview",
+                  "memory/retrieval-tools",
                   "memory/episodes",
                   "memory/consolidation",
                   "memory/knowledge",
@@ -309,6 +311,7 @@
                   "ar/architecture/pipeline",
                   "ar/architecture/stateless-model",
                   "ar/architecture/context-compaction",
+                  "ar/architecture/lean-context",
                   "ar/architecture/brain-modules",
                   "ar/architecture/workspace",
                   "ar/architecture/event-bus"
@@ -372,6 +375,7 @@
                 "expanded": true,
                 "pages": [
                   "ar/memory/overview",
+                  "ar/memory/retrieval-tools",
                   "ar/memory/episodes",
                   "ar/memory/consolidation",
                   "ar/memory/knowledge",
@@ -422,6 +426,12 @@
                   "ar/development/adding-brain-modules"
                 ]
               }
+            ]
+          },
+          {
+            "tab": "Changelog",
+            "pages": [
+              "ar/changelog/overview"
             ]
           }
         ]

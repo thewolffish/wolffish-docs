@@ -5,7 +5,7 @@ description: "Long-term facts about people, projects, preferences, and decisions
 
 # The Agent's Permanent Memory
 
-Knowledge files are the agent's permanent memory — long-term facts that persist indefinitely and are always available in context. While episodes capture what happened and consolidation compresses the timeline, knowledge files store what Wolffish *knows* about you, your world, and your preferences.
+Knowledge files are the agent's permanent memory — long-term facts that persist indefinitely. While episodes capture what happened and consolidation compresses the timeline, knowledge files store what Wolffish *knows* about you, your world, and your preferences.
 
 ## Location
 
@@ -29,7 +29,7 @@ Knowledge files are the agent's permanent memory — long-term facts that persis
 | `decisions.md` | Decisions you've made — rationale, constraints, outcomes |
 
 <Info>
-  These five files are created during first launch. You can add more knowledge files — the agent reads everything in the `knowledge/` directory. Create `books.md`, `health.md`, or whatever categories make sense for your life.
+  These five files are created during first launch. You can add more knowledge files — everything in the `knowledge/` directory is indexed and searchable. Create `books.md`, `health.md`, or whatever categories make sense for your life.
 </Info>
 
 ## How Knowledge Gets Written
@@ -38,19 +38,37 @@ Knowledge enters the system through three paths:
 
 ### 1. Automatic Promotion (LLM-driven)
 
-During consolidation, the LLM identifies patterns that deserve permanent storage. If the same preference appears across multiple weeks, or a project keeps coming up, the consolidation process promotes it to the appropriate knowledge file.
+During the nightly compaction pass, the LLM identifies facts that deserve permanent storage — preferences learned, project details, decisions made, people referenced — and promotes them to the appropriate knowledge file. Promotion is **deduplicated**: the nightly pass tends to re-derive the same facts night after night, so an exact-line check prevents knowledge files from silently filling with duplicate bullets.
 
-### 2. Direct Agent Writes
+### 2. `memory_save` — The Model's Write Path
 
-When you say something like "remember that I prefer conventional commits" or "my manager's name is Sarah," the agent writes directly to the appropriate knowledge file during the conversation. The `agents.core.md` procedures instruct Wolffish to update knowledge whenever it learns a new long-term fact.
+When you say something like "remember that I prefer conventional commits" or "my manager's name is Sarah," the agent calls the `memory_save` tool:
+
+```
+memory_save(fact, { type: projects | people | preferences | technical | decisions })
+```
+
+The operating contract instructs Wolffish to save one self-contained sentence whenever it learns something durable — a preference, a decision, a project fact, a person detail — and never to hand-write memory files directly. `memory_save` is deduplicated the same way promotion is: saving a fact that's already on file is a no-op. The `type` defaults to `technical` when omitted.
 
 ### 3. Manual Editing
 
-Open any knowledge file in your editor and change it. The brainstem file watcher detects the change, the cortex re-indexes it, and the next conversation will use the updated information.
+Open any knowledge file in your editor and change it. The brainstem file watcher detects the change and the cortex re-indexes it immediately.
 
-## Context Priority
+## How Knowledge Gets Read
 
-Knowledge files have the highest memory priority after identity files (`soul.md`, `user.md`). They are **always** included in context assembly — unlike episodes and consolidated files, which pass through RAS scoring. The logic is simple: if you told the agent to remember something permanently, it should always be available.
+Knowledge files are **not injected into the prompt**. Instead, the `<memory_map>` stub lists the topics of the five curated files — their `##` section headers — so the model always knows what durable facts exist to be fetched:
+
+```
+- knowledge topics — preferences: Development, Communication, Workflow, Tools |
+  people: Sarah (Manager), Omar (Co-founder) (memory_get the file for details)
+```
+
+When a topic is relevant, the model retrieves it:
+
+- `memory_get` on `file:brain/hippocampus/knowledge/preferences.md` returns the whole file
+- `memory_search` with `sources: "knowledge"` finds individual facts across all knowledge files
+
+This is deliberate: a fact you saved in March costs zero tokens per turn until a conversation actually needs it — and the retrieval doctrine means a definite reference to it will trigger a search unprompted.
 
 ## Example: preferences.md After a Few Weeks
 
@@ -110,7 +128,7 @@ Knowledge files have the highest memory priority after identity files (`soul.md`
     - "Note that we decided to use PostgreSQL over MySQL for the new service"
     - "My flight to Riyadh is on June 3rd"
 
-    The agent will write to the appropriate knowledge file.
+    The agent saves each fact with `memory_save`, routed to the appropriate knowledge file.
   </Tab>
   <Tab title="Correcting Facts">
     If Wolffish has outdated information:
@@ -128,16 +146,16 @@ Knowledge files have the highest memory priority after identity files (`soul.md`
 </Tabs>
 
 <Tip>
-  Knowledge files work best when they're concise. Each entry should be a fact, not a story. If you find a knowledge file growing past 100 lines, consider splitting it into multiple topic files.
+  Knowledge files work best when they're concise. Each entry should be a fact, not a story — `memory_save` enforces this by design, taking one self-contained sentence at a time. Use `##` section headers to group facts: the headers are exactly what the `<memory_map>` surfaces to the model (up to 8 per file).
 </Tip>
 
 ## Custom Knowledge Files
 
-Create any `.md` file in the `knowledge/` directory and it becomes part of the agent's permanent memory:
+Create any `.md` file in the `knowledge/` directory and it becomes part of the agent's searchable memory:
 
 ```bash
 # Create a new knowledge file
 touch ~/.wolffish/workspace/brain/hippocampus/knowledge/health.md
 ```
 
-The brainstem file watcher will detect it, the cortex will index it, and prefrontal will include it in context assembly with the same priority as the default five files.
+The brainstem file watcher will detect it and the cortex will index it under the `knowledge` source, so `memory_search` finds its contents like any other memory. Two things stay reserved for the five default files: the `<memory_map>` topic lines only enumerate the curated five, and `memory_save` only writes to them — custom files are yours to maintain by hand.
