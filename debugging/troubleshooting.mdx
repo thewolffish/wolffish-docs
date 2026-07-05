@@ -123,7 +123,7 @@ Common problems and their solutions. Start with the issue that matches your symp
 
     2. **Check the debug snapshot header** — `estimated tokens` at the top of the latest snapshot shows the prompt's size. If it's far above ~5k, an oversized always-included file is the usual culprit: a huge `soul.md`, `user.md`, or `agents.md` lands in every prompt.
 
-    3. **Watch the context meter** — In the chat header, the numerator is the provider-billed tokens of the last request and the denominator is the model's full context window. Big single tool results (a giant file read, a huge page fetch) inflate a turn temporarily; stale large tool results are replaced with recovery-pointer stubs on later turns.
+    3. **Watch the context meter** — In the context meter beside the chat input, the numerator is the provider-billed tokens of the last request and the denominator is the model's full context window. Big single tool results (a giant file read, a huge page fetch) inflate a turn temporarily; stale large tool results are replaced with recovery-pointer stubs on later turns.
 
     4. **Pinned capabilities** — Every capability in `pinnedCapabilities` ships its full tool schemas on every request. Pin sparingly; `tool_search` loads the rest on demand (capped at 10 active non-core capabilities per conversation).
 

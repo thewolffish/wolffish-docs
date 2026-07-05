@@ -261,7 +261,7 @@ brain/
 │                              technical / decisions.md
 │
 ├── conversations/         One JSON per chat: conv-YYYY-MM-DD_HH-MM-SS.json
-│                          (messages, segments, timeline, contextMeter — see §8).
+│                          (messages, segments, timeline, stats — see §8).
 │
 ├── motor/                 EXECUTION.
 │   └── tasks/                 TASK-<id>.md (human transcript) + TASK-<id>-detail.log
@@ -525,7 +525,8 @@ install every example is commented out — uncomment a block to activate it.
 sends approval prompts back to whichever channel owns the active turn.
 
 **Conversations & the context meter.** Each conversation JSON carries a
-`contextMeter` (`contextTokens` vs `contextBudget`, e.g. 108 867 / 1 000 000) and a
+`stats` block (lifetime totals, the last turn's roll-up, and a `meter` of
+`contextTokens` vs `contextBudget`, e.g. 108 867 / 1 000 000) and a
 `timeline` of structured events (`context.built`, `llm.response`, `safety.allowed`,
 `segment.*`, `task.*`). Assistant messages are split into typed `segments`
 (`text`, `tool_call`, `tool_result`, `active_model`, `turn_end`).
@@ -561,7 +562,6 @@ Reading these confidently lets you answer almost any question about the agent.
   },
   "safety": { "bypassPermissions": true, "blockCredentials": false },
   "updates": { "enabled": true },
-  "showChatAnalytics": true,
   "weekStartsOn": 1,
   "locale": "en",                            // en | ar
   "theme": "light",                          // light | dark | system
@@ -575,7 +575,12 @@ Reading these confidently lets you answer almost any question about the agent.
 
 ### Conversation — `brain/conversations/conv-*.json`
 Top-level keys: `id`, `title`, `model`, `messages[]`, `createdAt`, `updatedAt`,
-`contextMeter {contextTokens, contextBudget}`, `timeline[]`.
+`stats { allTime, lastTurn, meter }`, `timeline[]`. `stats.allTime` holds the
+conversation's lifetime totals (processingMs, turns, apiCalls, toolCalls,
+token splits, cost); `stats.lastTurn` the previous turn's roll-up;
+`stats.meter {contextTokens, contextBudget, compactionAt, model}` the context
+meter reading. Older files may carry the legacy
+`contextMeter {contextTokens, contextBudget}` instead.
 - user message: `{ role, content, timestamp }`
 - assistant message: `{ role, content, segments[], toolTimings, stopReason, timestamp }`
 - segment kinds: `text`, `tool_call`, `tool_result`, `active_model`, `turn_end`.

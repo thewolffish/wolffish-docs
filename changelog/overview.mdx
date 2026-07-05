@@ -3,6 +3,21 @@ title: "Changelog"
 description: "Product updates and improvements to Wolffish"
 ---
 
+<Update label="July 5, 2026" description="v1.0.204">
+
+## New features
+
+- **Save any conversation as a PDF.** A new download button in the chat footer exports the conversation you're looking at to a PDF that mirrors the feed exactly — your messages, Wolffish's replies, tool cards, code blocks, and file attachments — laid out for print and offline reading.
+- **The usage meter, rebuilt.** The opt-in "Show in-chat analytics" strip (and its `showChatAnalytics` setting) is gone. In its place the context pill beside the chat input is always there and now *opens*: hover or pin it for the full picture — how much of the [context window](/architecture/context-compaction) is in use and exactly where auto-compaction triggers (drawn as a tick, so the visible percentage and the trigger are finally the same number), how much of that context arrived warm from cache versus freshly ingested, and a running ledger for this turn, last turn, and all time of input/output tokens, API calls, tool calls, and cost. In [orchestrator mode](/configuration/orchestrator-mode) its workers and background summaries get their own sub-totals.
+
+## Updates
+
+- **Send an image to any model.** The capability gate that rejected images on non-vision models is gone. Attach an image to any model on any surface — in-app, [Telegram](/channels/telegram), [WhatsApp](/channels/whatsapp) — and it goes through; a model that can't see the pixels receives the file's name, location, and the tools that can read it, and tells you plainly what it can and can't do instead of bouncing the upload.
+- **Workers narrate on Telegram and WhatsApp.** In [orchestrator mode](/configuration/orchestrator-mode) with verbose enabled, background workers now surface their own labeled thread on the channels — prose and tool cards, coalesced per worker so concurrent workers never scramble into one another — mirroring the subagent rail in the app. Verbose off still shows only the orchestrator's final reply.
+- **Offline, treated as a state.** The offline notice is now a sticky warning pinned to the top of the window with its own close button, swapped in place for a brief "connection restored" when you reconnect. Wolffish itself now knows when it's offline and leans on tools that work without a network (memory, files, shell) instead of burning turns on ones that don't. Every toast can now be dismissed with a click.
+
+</Update>
+
 <Update label="July 4, 2026" description="v1.0.203">
 
 ## New features
