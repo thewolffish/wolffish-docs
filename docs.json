@@ -214,7 +214,8 @@
                   "configuration/config-json",
                   "configuration/variables",
                   "configuration/heartbeat",
-                  "configuration/what-to-schedule"
+                  "configuration/what-to-schedule",
+                  "configuration/procedures"
                 ]
               },
               {
@@ -392,7 +393,8 @@
                   "ar/configuration/config-json",
                   "ar/configuration/variables",
                   "ar/configuration/heartbeat",
-                  "ar/configuration/what-to-schedule"
+                  "ar/configuration/what-to-schedule",
+                  "ar/configuration/procedures"
                 ]
               },
               {
