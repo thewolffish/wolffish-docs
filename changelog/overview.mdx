@@ -3,6 +3,24 @@ title: "Changelog"
 description: "Product updates and improvements to Wolffish"
 ---
 
+<Update label="July 6, 2026" description="v1.0.205">
+
+## New features
+
+- **Workflow mode.** [Orchestrator mode is gone, rebuilt as workflow mode](/configuration/workflow-mode): the agent you talk to becomes the **master** of a run it designs itself — it declares its phases (`workflow_plan`), spawns live parallel agents (`agent_spawn`), collects each report the moment it lands (`agents_await`), sends follow-ups (`agent_send`), and cancels dead ends (`agent_cancel`). The fixed "Worker model" slot is retired: the master picks **each agent's model individually** from every provider you've connected — it sees a catalog of your models with context windows, reasoning support, and vision, and matches frontier models to hard slices and cheap ones to mechanical sweeps. Agents are single-shot (the master owns every retry decision), can't reach you or spawn agents of their own, and each one's context is budgeted against its own model's window.
+- **The workflow card.** Every workflow run gets one collapsible card in the chat: the phase plan as chips moving from pending to active to done, a live table with a row per agent (name, task, model, phase, status, elapsed time, tokens, tool calls, cost), and run totals including the true whole-turn cost. Every number comes from harness telemetry — never from what the model claims — so the live card and the reloaded card are the same card. The chat's PDF export prints a finished run as a static table.
+- **Model and mode pickers in the composer.** The drag-and-drop Brain settings page is gone; choosing what runs your conversation moved to where the conversation happens. Beside the chat input: a **Local/Cloud model switch** that opens into a searchable catalog of every connected provider's models (capability badges, context sizes, one click to switch), a **mode pill** (Single / Workflow), and a redesigned **reasoning button** — hover for a card of every effort level the current model supports instead of blind-cycling. API keys stay in **Settings → Models**.
+- **Every job picks its own mode.** [Heartbeat jobs](/configuration/heartbeat) and [procedures](/configuration/procedures) each carry their own Single/Workflow toggle — under the hood an optional `mode: workflow` first line in the job's block, stripped before the instruction reaches the agent. `automation_create` / `automation_edit` / `procedure_create` / `procedure_edit` take an optional `mode`, so Wolffish can set it by conversation. Jobs without a marker follow the global mode.
+
+## Updates
+
+- **Workflows on the channels.** The old per-worker narration is retired. [Telegram](/channels/telegram) and [WhatsApp](/channels/whatsapp) now get deterministic progress from workflow runs — the phase plan at start, a line per completed phase, and a closing summary with totals — with verbose adding a landing line per agent (name, model, duration, tool calls). Verbose off keeps the clean feed: the master's reply, nothing else.
+- **Migration on first launch.** If you were running orchestrator mode you wake up in workflow mode (multi-agent intent preserved, not silently downgraded); the Worker-model slot, the **Greedy effort** and **Autonomy** toggles, and the old orchestrator capability are removed, and their leftovers are swept from deployed workspaces. `config.llm.mode` replaces `orchestratorMode` / `workerModel` / `greedy` / `autonomous` in [config.json](/configuration/config-json).
+- **GitHub and Notion tests that fail loudly.** A failed connection test in the [GitHub](/integrations/github) or [Notion](/integrations/notion) panel now leaves a persistent red alert with the reason on the connection card — cleared when you edit the token or a test passes, and translated live when you switch the app language.
+- **Small polish.** `.txt` attachments open in a line-numbered text viewer instead of a bare file card; the attachments grid got wider tiles and more spacing; the clocks on running procedure and heartbeat overlays follow your app language's time format; model names display compactly in the pickers; error messages are shorter and plainer.
+
+</Update>
+
 <Update label="July 5, 2026" description="v1.0.204">
 
 ## New features

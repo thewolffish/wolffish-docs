@@ -117,6 +117,8 @@ Toggle this in **Settings → Channels → Telegram → Verbose task results**:
 - **Off (default)** — agent messages, files the agent sends, and errors only.
 - **On** — every tool call, result, and activity is relayed to the chat as it happens.
 
+A [workflow-mode](/configuration/workflow-mode) run additionally reports deterministic progress regardless of verbose — its phase plan at start, each phase's completion, and a closing summary — with verbose adding a landing line per agent (name, model, duration, tool calls).
+
 <Note>
   Verbose changes only what is **sent** to Telegram. The full turn — every tool call and result — is still saved to history and memory regardless of the setting.
 </Note>

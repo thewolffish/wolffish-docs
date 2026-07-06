@@ -47,7 +47,7 @@ Every system prompt contains a `<capabilities>` index: one line per capability �
 
 ### Core capabilities — always loaded
 
-A bootstrap set ships its full tool schemas with every request (~29–47 tools): `tool-discovery`, `introspect`, `filesystem`, `shell`, `ask`, `utilities`, `web-search`, `secrets`, `system`, plus `orchestrator` (role-gated) and the channel capabilities (`telegram`, `whatsapp`, `electron`) while connected. These are the keys to everything else — discovery, memory retrieval, files, and replying — and must never require a discovery hop.
+A bootstrap set ships its full tool schemas with every request (~29–47 tools): `tool-discovery`, `introspect`, `filesystem`, `shell`, `ask`, `utilities`, `web-search`, `secrets`, `system`, plus `workflow` (gated to the [workflow](/configuration/workflow-mode) master — agents never see its tools) and the channel capabilities (`telegram`, `whatsapp`, `electron`) while connected. These are the keys to everything else — discovery, memory retrieval, files, and replying — and must never require a discovery hop.
 
 ### Everything else — discoverable on demand
 

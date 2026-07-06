@@ -35,7 +35,7 @@ This is the most important step — and it is lean by design. A fresh conversati
 4. `<capabilities>` — a one-line-per-capability index: name, a ≤90-character description, tool count, and a `[loaded]` marker on capabilities that are callable right now. ~800 tokens; past 60 installed capabilities the unloaded remainder collapses to grouped counts, so the cost is O(1) in how much you install
 5. `<memory_map>` — a coverage map of what exists to be recalled: per-source record counts (rounded to coarse buckets), date ranges, knowledge-file topics, conversation and artifact counts. It is a map, never content, and it is cached per calendar day so it never churns the provider prompt cache
 6. `<runtime>` — slimmed; the live loop counters ride a volatile tail at the very end of the outbound message array, not the prompt
-7. Conditional overlays: role (orchestrator/worker), greedy/autonomous, channel formatting (WhatsApp), and a `<local_model>` honesty overlay for locally-run models
+7. Conditional overlays: role (workflow master/agent — the master's overlay includes its `<workflow_models>` catalog of spawnable models), channel formatting (WhatsApp), and a `<local_model>` honesty overlay for locally-run models
 
 What is deliberately **not** in the prompt: no memory dumps, no episode history, no prose tool catalog, no skill bodies. All of that is indexed on disk and retrieved surgically when a turn actually needs it — `memory_search` for memory, `tool_search` for tools.
 
@@ -47,7 +47,7 @@ A debug snapshot of every assembled prompt is written to `brain/prefrontal/.debu
 
 ### 3. Tool Selection (cerebellum)
 
-Full JSON schemas ship only for the **core set** — roughly 29–47 tools depending on what's connected: tool-discovery, introspect, filesystem, shell, ask, utilities (`send_file`), web-search, secrets, system, orchestrator (role-gated), and the telegram/whatsapp/electron send tools while those channels are connected. That's ~4k tokens of schemas, bringing a fresh request to ≈9.4k tokens total (vs ~94k before the lean redesign).
+Full JSON schemas ship only for the **core set** — roughly 29–47 tools depending on what's connected: tool-discovery, introspect, filesystem, shell, ask, utilities (`send_file`), web-search, secrets, system, workflow (master-gated), and the telegram/whatsapp/electron send tools while those channels are connected. That's ~4k tokens of schemas, bringing a fresh request to ≈9.4k tokens total (vs ~94k before the lean redesign).
 
 Everything else — github, google, notion, browser, computer-use, media and document tools, all MCP servers — is discoverable:
 
@@ -64,7 +64,7 @@ The system prompt and tool schemas are **pinned at turn start** and reused acros
 The assembled context goes to `thalamus.stream()`, which:
 
 1. Checks `net.isOnline()` for instant offline detection
-2. Calls the **Brain** model — the one you explicitly selected in Settings → Modes (and, in orchestrator mode, resolves the Worker model for workers)
+2. Calls the **Brain** model — the one you explicitly selected from the chat composer's model switch (and, in [workflow mode](/configuration/workflow-mode), resolves each agent's master-chosen model)
 3. On a transient error, retries the **same** cloud Brain on a backoff schedule; there's no automatic cascade to another provider
 4. Returns a unified `StreamChunk` async generator
 

@@ -76,7 +76,7 @@ Three properties depend on the stateless design, and losing any of them would co
 
 ### Model Switching
 
-Thalamus calls whichever Brain model you selected — DeepSeek, Anthropic, OpenAI, or Ollama — and there's no automatic cascade between them. But because the app owns the full message array, switching your Brain model mid-conversation just works: the new model gets the complete context on its very next turn, with no thread to migrate. (Orchestrator mode leans on the same property — each worker is handed a complete, self-contained context.) Thread-based APIs would make that impossible.
+Thalamus calls whichever Brain model you selected — DeepSeek, Anthropic, OpenAI, or Ollama — and there's no automatic cascade between them. But because the app owns the full message array, switching your Brain model mid-conversation just works: the new model gets the complete context on its very next turn, with no thread to migrate. (Workflow mode leans on the same property — each agent is handed a complete, self-contained context, on whatever model the master picked for it.) Thread-based APIs would make that impossible.
 
 ### Privacy
 

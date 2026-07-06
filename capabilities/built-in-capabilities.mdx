@@ -12,7 +12,7 @@ These capabilities are included in the default workspace when Wolffish creates `
 </Note>
 
 <Note>
-**Not everything is in context at once.** Every capability below registers at startup and appears in the model's capability index, but only the **core set** ships full tool schemas on every request — `tool-discovery`, `introspect`, `filesystem`, `shell`, `ask`, `utilities`, `web-search`, `secrets`, `system`, plus the orchestrator and channel capabilities when active. Everything else (GitHub, Google, browsers, media, documents, MCP servers) loads on demand via `tool_search` / `tool_activate` and is callable the same turn. See [Capabilities Overview](/capabilities/overview) for how exposure works.
+**Not everything is in context at once.** Every capability below registers at startup and appears in the model's capability index, but only the **core set** ships full tool schemas on every request — `tool-discovery`, `introspect`, `filesystem`, `shell`, `ask`, `utilities`, `web-search`, `secrets`, `system`, plus the workflow and channel capabilities when active. Everything else (GitHub, Google, browsers, media, documents, MCP servers) loads on demand via `tool_search` / `tool_activate` and is callable the same turn. See [Capabilities Overview](/capabilities/overview) for how exposure works.
 </Note>
 
 ## Self-Management
@@ -48,8 +48,8 @@ Wolffish can read, manage, and **write its own capabilities** at runtime — no 
 
     **Tools:**
     - `automation_list` — List every automation: schedule, plain-English timing, instruction, and whether it's valid/running
-    - `automation_create` — Create a job (recurring or one-time) from a schedule + instruction
-    - `automation_edit` — Change a job's schedule and/or instruction
+    - `automation_create` — Create a job (recurring or one-time) from a schedule + instruction, with an optional `mode` ([single or workflow](/configuration/workflow-mode))
+    - `automation_edit` — Change a job's schedule, instruction, and/or mode
     - `automation_delete` — Permanently remove a job (asks you to confirm)
     - `automation_check` — Runtime status: what's running now and how recent runs went
     - `automation_run` — Run a job immediately, to test it
@@ -67,10 +67,23 @@ Wolffish can read, manage, and **write its own capabilities** at runtime — no 
     **Tools:**
     - `procedure_list` — List every saved procedure: number, title, and a one-line prompt preview
     - `procedure_view` — Show one procedure's full title and complete prompt
-    - `procedure_create` — Save a new procedure (title + self-contained prompt)
-    - `procedure_edit` — Change a procedure's title and/or prompt
+    - `procedure_create` — Save a new procedure (title + self-contained prompt, optional [single/workflow](/configuration/workflow-mode) mode)
+    - `procedure_edit` — Change a procedure's title, prompt, and/or mode
     - `procedure_delete` — Permanently remove a procedure
     - `procedure_run` — Run a procedure now, in a fresh background conversation
+  </Accordion>
+
+  <Accordion title="workflow — Design and drive a model-led multi-agent run">
+    **Type:** Plugin (master-gated — available only in [workflow mode](/configuration/workflow-mode), and only to the master; agents never see these tools)
+
+    Lets the workflow master architect a run: declare phases, fan independent slices out to live parallel agents on models it picks per slice, collect each report the moment it lands, steer or cancel agents mid-flight, and synthesize one answer. Everything renders on the chat's live workflow card, drawn from harness telemetry.
+
+    **Tools:**
+    - `workflow_plan` — Declare (or revise) the run's phases; they light up on the workflow card as their agents run and complete
+    - `agent_spawn` — Start a live background agent on a self-contained task, with an optional per-agent `model` (`provider/model-id`), reasoning `effort`, and `phase`
+    - `agent_send` — Send a follow-up to an idle agent; it runs again with its prior context intact
+    - `agents_await` — Block until the **next** agent lands and return its full report (first landing, not all)
+    - `agent_cancel` — Cancel an agent immediately, aborting its in-flight tool call
   </Accordion>
 
   <Accordion title="mcp — Manage its own MCP server connections">

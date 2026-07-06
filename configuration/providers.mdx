@@ -41,7 +41,7 @@ All supported cloud providers can handle agentic tasks — including complex mul
 Start with DeepSeek or MiMo. They handle complex agentic tasks — long tool chains, research pipelines, code generation, autonomous automations — at a fraction of the cost. Experiment with your actual workflows. If a specific task isn't executing reliably, switch to Anthropic or OpenAI for that task. Most users find they rarely need to.
 
 <Tip>
-  Select DeepSeek or MiMo as your Brain model in Settings → Modes. If a task isn't executing reliably on the cost-efficient tier, switch your Brain to Anthropic or OpenAI for that work. There's no automatic fallback — you control which model runs by your explicit choice.
+  Select DeepSeek or MiMo as your Brain model from the model switch beside the chat input. If a task isn't executing reliably on the cost-efficient tier, switch your Brain to Anthropic or OpenAI for that work. There's no automatic fallback — you control which model runs by your explicit choice.
 </Tip>
 
 ## DeepSeek (Recommended)
@@ -382,7 +382,7 @@ OpenRouter supports hundreds of models. Wolffish normalizes output caps to match
 - You're running high-volume production workloads where the proxy hop adds up
 
 <Tip>
-  If you're already using DeepSeek, Anthropic, or any other natively supported provider, keep that direct connection. Add OpenRouter only for models you can't access directly — then pick an OpenRouter model as your Brain (or Worker) when you want it. There's no cascade; the model you select is the one that runs.
+  If you're already using DeepSeek, Anthropic, or any other natively supported provider, keep that direct connection. Add OpenRouter only for models you can't access directly — then pick an OpenRouter model as your Brain when you want it, or let a [workflow](/configuration/workflow-mode) master spawn an agent on it. There's no cascade; the model you select is the one that runs.
 </Tip>
 
 ---
@@ -399,12 +399,12 @@ Best for: Privacy, offline use, zero-cost experimentation, always-available fall
 
 ## Retries & Health
 
-The selected Brain model runs every turn — there's no fallback to other providers. When a cloud Brain hits a transient error, `thalamus` retries the **same** model on a backoff schedule (it also checks `net.isOnline()` for instant offline detection). Workers in orchestrator mode are single-shot and don't retry on their own; any failure surfaces to the orchestrator, which owns the retry decision. Health tracking informs this retry logic and diagnostics — it does not route you to a different provider.
+The selected Brain model runs every turn — there's no fallback to other providers. When a cloud Brain hits a transient error, `thalamus` retries the **same** model on a backoff schedule (it also checks `net.isOnline()` for instant offline detection). Agents in [workflow mode](/configuration/workflow-mode) are single-shot and don't retry on their own; any failure surfaces to the master, which owns the retry decision. Health tracking informs this retry logic and diagnostics — it does not route you to a different provider.
 
 ## Choosing Your Brain Model
 
-Select your Brain model explicitly in **Settings → Modes** — one provider, one model. The model you choose is the one that runs; there's no fallback order and no "primary" with a chain behind it. Connect API keys in **Settings → Models**, then pick the model that powers Wolffish.
+Select your Brain model explicitly from the **model switch beside the chat input** — one provider, one model. The model you choose is the one that runs; there's no fallback order and no "primary" with a chain behind it. Connect API keys in **Settings → Models**, then pick the model that powers Wolffish.
 
-Want a second model for parallel work? Turn on [orchestrator mode](/configuration/orchestrator-mode) and assign a Worker model alongside your Brain. There's still no automatic cascade — both are explicit choices.
+Want parallel work across models? Switch the chat into [workflow mode](/configuration/workflow-mode) — the master spawns agents and picks each one's model from your connected providers. There's still no automatic cascade — every model that runs is an explicit choice, yours or the master's.
 
 All providers are optional — you only need the one (or two) you select. To run on Ollama, select it as your Brain model; for offline work, switch your Brain to Ollama before you go offline, since there's no automatic fall-through to local.

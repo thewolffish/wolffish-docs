@@ -7,7 +7,7 @@ description: "Save reusable prompts and run them on demand — the on-demand cou
 
 A **procedure** is a prompt you write once and run whenever you want — *"summarize my open PRs"*, *"draft my weekly update"*, *"triage my inbox"*. It's the on-demand twin of a [heartbeat job](/configuration/heartbeat): same execution machinery, but **no schedule**. A procedure never fires on its own — it sits on the Procedures page until you hit **Play** or ask Wolffish to run it.
 
-Saved procedures are plain data — a flat list of `{ title, prompt }` records in `brain/procedures.json`. You never hand-edit that file. Manage them on the Procedures page, or just talk to Wolffish through its **`procedures`** capability (`procedure_list`, `procedure_view`, `procedure_create`, `procedure_edit`, `procedure_delete`, `procedure_run`).
+Saved procedures are plain data — a flat list of `{ title, prompt, mode }` records in `brain/procedures.json`. You never hand-edit that file. Manage them on the Procedures page, or just talk to Wolffish through its **`procedures`** capability (`procedure_list`, `procedure_view`, `procedure_create`, `procedure_edit`, `procedure_delete`, `procedure_run`).
 
 ## Procedure or Automation?
 
@@ -33,6 +33,7 @@ Open **Procedures** from the app menu. Each saved procedure is a card showing it
 |---|---|
 | **New** | Creates a blank procedure and opens the editor. Abandon it without a title and it's discarded — no orphan card is left behind. |
 | **▶ Play** | Runs the procedure now (see [Running a procedure](#running-a-procedure)). Disabled until the prompt has content. |
+| **Single / Workflow** | Each card's own mode toggle, next to Play — whether its runs execute as a plain single-model turn or as a [workflow](/configuration/workflow-mode) that can plan phases and drive parallel agents. New procedures start with whatever the global chat mode was when you saved them. |
 | **Edit** | Opens the title + prompt editor. |
 | **Delete** | Removes it for good, after a confirmation. |
 
@@ -49,7 +50,7 @@ Start a run two ways:
 - **Play** on the card, or
 - **Ask Wolffish** — *"run my morning brief"* — which fires it with `procedure_run`.
 
-Either way, the prompt runs as a **fresh, self-contained background conversation** — never inside the chat you're in. That's the one rule that shapes every procedure prompt: a run carries **no memory of your current chat**, so the prompt has to stand on its own.
+Either way, the prompt runs as a **fresh, self-contained background conversation** — never inside the chat you're in — in the procedure's own mode (its Single/Workflow stamp, not whatever your chat happens to be set to). That's the one rule that shapes every procedure prompt: a run carries **no memory of your current chat**, so the prompt has to stand on its own.
 
 While it runs, a **live overlay** takes over the window with a running **timer** and an **activity log** of each step; the chat is paused until the run finishes. The completed run lands in your conversation **History** marked with a **Play** icon (origin tag `[procedure]`), so you can open it later to see exactly what happened.
 
@@ -75,8 +76,8 @@ Behind those phrasings is the **`procedures`** capability. You reference a proce
 
 - `procedure_list` — every procedure: number, title, one-line prompt preview
 - `procedure_view` — one procedure's full title and complete prompt
-- `procedure_create` — save a new one (title + self-contained prompt)
-- `procedure_edit` — change a title and/or prompt (omit whichever you keep)
+- `procedure_create` — save a new one (title + self-contained prompt, optional `mode`)
+- `procedure_edit` — change a title, prompt, and/or mode (omit whichever you keep)
 - `procedure_delete` — permanently remove one (asks you to confirm)
 - `procedure_run` — run one now, in a fresh background conversation
 
@@ -101,7 +102,7 @@ Append the digest to my daily log — don't message anyone.
 
 ## Where They Live
 
-Procedures are stored as a single JSON file at `brain/procedures.json` in your [workspace](/architecture/workspace) — a flat list, written atomically so it's never torn by a crash or a concurrent edit. Each record is `{ id, title, prompt, createdAt, updatedAt }`; the list shows the most-recently-edited first. Treat the file as managed data: create, edit, and delete through the page or through Wolffish rather than hand-editing it.
+Procedures are stored as a single JSON file at `brain/procedures.json` in your [workspace](/architecture/workspace) — a flat list, written atomically so it's never torn by a crash or a concurrent edit. Each record is `{ id, title, prompt, mode, createdAt, updatedAt }`; the list shows the most-recently-edited first. Treat the file as managed data: create, edit, and delete through the page or through Wolffish rather than hand-editing it.
 
 ## See Also
 

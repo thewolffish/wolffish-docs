@@ -152,7 +152,7 @@ Wolffish trades always-resident history for cheap requests plus deliberate retri
 
 Smaller changes that ride the same lifecycle:
 
-- **Worker segments don't double-replay.** In orchestrator mode, worker-tagged segments no longer replay into the orchestrator's next turn a second time.
+- **Agent segments don't double-replay.** In [workflow mode](/configuration/workflow-mode), agent-tagged segments never replay into the master's next turn a second time.
 - **Streaming deltas are coalesced at save.** A streamed reply used to persist as thousands of one-word text segments per message; they now collapse into one at save time, shrinking both the file and its replay weight.
 
 ## Observing It

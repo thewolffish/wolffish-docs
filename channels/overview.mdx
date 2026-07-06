@@ -119,6 +119,8 @@ The toggle lives in each channel's own settings, all under **Settings → Channe
   Verbose only changes what is **shown** or **relayed** — never what the agent does. Every segment is still saved to history and memory in full, so flipping the toggle simply re-renders the feed; nothing is lost when it is off.
 </Note>
 
+[Workflow-mode](/configuration/workflow-mode) runs are the one addition on top of this: on Telegram and WhatsApp they always report deterministic progress — the phase plan when the run starts, a line as each phase completes, and a closing summary with totals — while verbose adds a landing line per agent (name, model, duration, tool calls). In the app the same information lives on the workflow card.
+
 ## Channels Are Connections, Not Apps
 
 Telegram and WhatsApp are **connections** Wolffish talks to you through — not desktop apps installed on your machine. Wolffish reaches them only through their own tools (`telegram_send`, `whatsapp_send`, …), never by launching or clicking a "Telegram"/"WhatsApp" window. A channel's send tools exist only while it's connected, so their presence is itself the signal that the channel is live.

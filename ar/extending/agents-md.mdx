@@ -492,15 +492,16 @@ safety-checked, executed with retries, and the result is streamed back. The turn
 is saved to an episode and the outcome recorded.
 
 **The Brain model.** You explicitly select one model — the **Brain**
-(`config.llm.brain`, a `{ providerId, model }` pair) — in Settings → Modes, and
-that is the model the thalamus runs. There's no cascade and no automatic
-substitution between providers: on a transient error the thalamus retries the
-**same** Brain on a backoff schedule (using `net.isOnline()` for instant offline
-detection) rather than falling through to a different one. To run offline, pick
-Ollama as your Brain (or use the chat "Local Only" toggle / `llm.localOnly`).
-Orchestrator mode (`llm.orchestratorMode: "orchestrator"`) optionally adds a
-second explicitly-chosen model — the **Worker** (`llm.workerModel`) — that the
-Brain delegates parallel work to; both are explicit choices, still no cascade.
+(`config.llm.brain`, a `{ providerId, model }` pair) — from the chat composer's
+model switch, and that is the model the thalamus runs. There's no cascade and no
+automatic substitution between providers: on a transient error the thalamus
+retries the **same** Brain on a backoff schedule (using `net.isOnline()` for
+instant offline detection) rather than falling through to a different one. To
+run offline, flip the model switch to Local (`llm.localOnly`). Workflow mode
+(`llm.mode: "workflow"`, the composer's mode pill) lets each turn plan phases
+and spawn parallel agents, the master picking every agent's model from the
+connected providers at spawn time; every model that runs is an explicit choice,
+still no cascade.
 
 **Three-tier memory.**
 - *Episodes* (`hippocampus/episodes/`) — appended every turn, zero-latency, no LLM.
@@ -557,10 +558,7 @@ Reading these confidently lets you answer almost any question about the agent.
       { "id": "deepseek", "model": "deepseek-v4-pro", "apiKey": "***", "models": ["deepseek-v4-flash", "deepseek-v4-pro"] }
     ],
     "brain": { "providerId": "deepseek", "model": "deepseek-v4-pro" },   // the one model that runs (the Brain)
-    "orchestratorMode": "single",                                        // "single" or "orchestrator"
-    "workerModel": null,                                                 // Worker model, used in orchestrator mode
-    "greedy": false,                                                     // persist harder (more retries/approaches)
-    "autonomous": false,                                                 // high agency, ask the user less
+    "mode": "single",                                                    // chat mode: "single" or "workflow"
     "restrictPowerfulModels": true,
     "thinkingModes": { "deepseek-v4-pro": "max" }
   },

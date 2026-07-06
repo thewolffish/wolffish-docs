@@ -42,7 +42,7 @@ Each block captures the headline (capped at 80 characters), the user message (ca
 
 ### Origin Tags
 
-Turns that didn't come from you typing in the app carry an origin tag in the header — `[heartbeat]` for scheduled automation runs, `[worker]` for orchestrated worker tasks, `[telegram]` or `[whatsapp]` for channel messages, `[procedure]` for saved-prompt runs. In-app turns carry no tag. This keeps machine-generated activity distinguishable from real user activity, both for recall filtering and for the nightly consolidation.
+Turns that didn't come from you typing in the app carry an origin tag in the header — `[heartbeat]` for scheduled automation runs, `[worker]` for [workflow](/configuration/workflow-mode) agent tasks, `[telegram]` or `[whatsapp]` for channel messages, `[procedure]` for saved-prompt runs. In-app turns carry no tag. This keeps machine-generated activity distinguishable from real user activity, both for recall filtering and for the nightly consolidation.
 
 <Info>
   No LLM call is involved. The block is a deterministic extraction of what happened, not a generated summary. This keeps episode logging instant and free.

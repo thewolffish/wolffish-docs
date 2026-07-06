@@ -69,6 +69,21 @@ Heartbeat jobs run through the full agent pipeline — same brain, same capabili
   Because heartbeat jobs auto-approve every tool call, be careful what you schedule. A job that says "delete old files" will execute without asking. Write defensive instructions — "list files older than 30 days and tell me what you'd delete" beats "delete files older than 30 days." See [What to Schedule](/configuration/what-to-schedule) for the full safety decision layer.
 </Warning>
 
+### Per-job chat mode
+
+Every job can pick how it runs: **Single** (one model, direct) or **[Workflow](/configuration/workflow-mode)** (the run can plan phases and drive parallel agents). Toggle it per job on the Heartbeat page, or by hand with an optional **first body line** in the job's block:
+
+```markdown
+## Daily (08:00)
+
+mode: workflow
+
+Good morning routine. Summarize overnight messages, list today's
+calendar events, and highlight the top 3 priorities.
+```
+
+The `mode:` line is stripped before the instruction reaches the agent, so it never reads as part of the job. A job without a marker follows whatever chat mode is active when it fires. Wolffish sets the marker itself when you ask it to schedule something (`automation_create` / `automation_edit` take an optional `mode`).
+
 ### One at a time, queued — never dropped
 
 Jobs run **one at a time**. If a job fires while another is still running, it **queues** and runs next rather than being skipped. The queue is coalesced per job, so a slow job can't pile up a backlog of its own ticks. You don't need to spread jobs out to avoid collisions.

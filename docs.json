@@ -52,6 +52,16 @@
       "source": "/ar/use-cases/reddit-karma-farm",
       "destination": "/ar/use-cases/karma-farm",
       "permanent": true
+    },
+    {
+      "source": "/configuration/orchestrator-mode",
+      "destination": "/configuration/workflow-mode",
+      "permanent": true
+    },
+    {
+      "source": "/ar/configuration/orchestrator-mode",
+      "destination": "/ar/configuration/workflow-mode",
+      "permanent": true
     }
   ],
   "navigation": {
@@ -165,7 +175,7 @@
                 "expanded": true,
                 "pages": [
                   "configuration/providers",
-                  "configuration/orchestrator-mode",
+                  "configuration/workflow-mode",
                   "configuration/deepseek",
                   "configuration/mimo",
                   "configuration/qwen",
@@ -344,7 +354,7 @@
                 "expanded": true,
                 "pages": [
                   "ar/configuration/providers",
-                  "ar/configuration/orchestrator-mode",
+                  "ar/configuration/workflow-mode",
                   "ar/configuration/deepseek",
                   "ar/configuration/mimo",
                   "ar/configuration/qwen",

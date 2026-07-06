@@ -36,8 +36,7 @@ System prompt (~5K tokens, byte-stable)
 Conditional sections appear only when they apply:
 
 - `<variables>` — your user-defined variables from `config.json` (only when you've defined any)
-- **Role overlay** — orchestrator/worker instructions in [orchestrator mode](/configuration/orchestrator-mode)
-- **Greedy/autonomous overlay** — for heartbeat and background runs
+- **Role overlay** — master/agent instructions in [workflow mode](/configuration/workflow-mode), including the master's `<workflow_models>` catalog of spawnable models
 - `<channel>` — channel formatting rules (e.g. WhatsApp's no-Markdown overlay)
 - `<local_model>` — a small honesty overlay for local (Ollama) models: acknowledge when out of depth, suggest a more capable model, but comply fully if the user insists. Nothing is withheld — local models get the same lean context, full core toolset, memory map, and tool discovery as cloud models.
 

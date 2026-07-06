@@ -40,7 +40,7 @@ The prompt itself is built from these sections:
 | `<memory_map>` | A coverage map of everything recallable — per-source record counts, date ranges, knowledge topics. A **map** of what exists, never the content |
 | `<runtime>` | Live loop counters (when rendered in-prompt) |
 
-Conditional overlays are appended when active: role (`orchestrator`/`worker`), `<effort_mode>` (greedy), `<autonomy_mode>` (autonomous), `<channel>` formatting (WhatsApp), and `<local_model>` (the honesty overlay for locally-run models).
+Conditional overlays are appended when active: role (`<workflow_mode>` for the [workflow](/configuration/workflow-mode) master — including its `<workflow_models>` catalog of spawnable models — and `<workflow_agent>` for agents), `<channel>` formatting (WhatsApp), and `<local_model>` (the honesty overlay for locally-run models).
 
 Conversation history is **not** part of the system prompt — it travels in the messages array, and long conversations replay as a rolling summary plus the verbatim tail.
 

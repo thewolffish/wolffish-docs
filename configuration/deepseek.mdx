@@ -68,6 +68,6 @@ Each model shows only the states it genuinely supports. If a model always reason
 
 Wolffish communicates with LLMs via nine cloud providers plus a local option, all using pure `fetch()` — no SDKs. Each provider has its own streaming format and tool-calling convention, which `wernicke.ts` normalizes into a single interface.
 
-Select your Brain model explicitly in **Settings → Modes** — the model you choose is the one that runs. There's no cascade or fallback order; if you want a second model for parallel work, turn on [orchestrator mode](/configuration/orchestrator-mode) and assign a Worker model.
+Select your Brain model explicitly from the **model switch beside the chat input** — the model you choose is the one that runs. There's no cascade or fallback order; for parallel work, switch the chat into [workflow mode](/configuration/workflow-mode), where the master can run agents on any connected model, DeepSeek included.
 
 When a cloud Brain hits a transient error, `thalamus` retries the **same** model on a backoff schedule (it also uses `net.isOnline()` for instant offline detection). It does not route you to a different provider on failure.
