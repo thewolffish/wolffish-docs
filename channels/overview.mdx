@@ -49,18 +49,22 @@ The Electron UI renders `onSegment` as real-time streaming markdown. Telegram fo
 
 ## The TurnRunner
 
-The TurnRunner serializes turns across all channels. Only one turn runs at a time — if messages arrive from multiple channels simultaneously, they queue behind a Promise chain.
+The TurnRunner serializes turns **per conversation**, not globally. A single conversation is one ordered transcript — its own turns queue behind each other so they never interleave — but turns for *different* conversations run in parallel, whichever channel they arrive on. Each turn runs in its own isolated scope with its own per-turn state, so concurrent turns never corrupt each other.
 
 ```
-Turn from Telegram → [running]
-Turn from Electron → [queued]
-Turn from WhatsApp → [queued]
+Conversation A (Electron) → [running] ─┐
+Conversation B (Telegram) → [running] ─┼── in parallel
+Conversation C (WhatsApp) → [running] ─┘
+
+Conversation A, next message → [queued behind A's running turn]
 ```
 
-This prevents race conditions in memory writes, tool execution, and context assembly. The queue is FIFO — first message in, first message processed.
+A conversation's own second message waits for its first to finish (preserving transcript order and preventing races in that conversation's memory writes and context assembly), while an unrelated conversation on any channel proceeds immediately. Your morning WhatsApp thread and a long in-app task no longer block each other.
+
+Every turn also broadcasts its lifecycle — started, done, canceled, error — back to the desktop app, which is what drives the [conversations rail's](/channels/overview) live status chips for in-app, Telegram, and WhatsApp runs alike.
 
 <Note>
-  If a turn is already running and a new message arrives on a different channel, the sender receives a brief acknowledgment that their message is queued. They don't have to wait in silence.
+  A channel can still preempt **its own** conversation's in-flight turn — sending a new message aborts the previous one so the queued turn unwinds quickly. It never preempts a different conversation.
 </Note>
 
 ## The TurnRouter

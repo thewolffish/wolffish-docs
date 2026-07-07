@@ -176,21 +176,21 @@ myChannel.start() // Begin listening for incoming messages
 ```
 
 <Info>
-  The TurnRunner is shared across all channels. It serializes turns — only one runs at a time, regardless of which channel initiated it.
+  The TurnRunner is shared across all channels. It serializes turns **per conversation** — a conversation's own turns queue behind each other, but different conversations run in parallel regardless of which channel initiated them.
 </Info>
 
-## Cross-Channel Serialization
+## Per-Conversation Serialization
 
-The TurnRunner queues turns. If a message arrives on Telegram while the desktop UI is mid-turn, it waits until the current turn completes. This prevents race conditions in memory and context assembly.
+The TurnRunner keeps one queue per conversation (turns with no conversation id get a private lane keyed by their turn id). A second message in the same conversation waits for that conversation's current turn to finish — preserving transcript order and preventing races in its memory and context assembly — while a message for a *different* conversation runs immediately, in parallel.
 
 ```
-Desktop: "Summarize my emails" → [running]
-Telegram: "What's the weather?" → [queued]
-                                      → [running after desktop turn ends]
+Desktop conversation A: "Summarize my emails" → [running] ─┐
+Telegram conversation B: "What's the weather?" → [running] ─┴─ concurrently
+Desktop conversation A: "…and reply to Sam"    → [queued behind A's turn]
 ```
 
 <Warning>
-  Long-running turns (multi-step tasks with many tool calls) block other channels. If this is a concern, consider implementing a priority system or allowing cancellation from any channel.
+  A long-running turn only blocks *its own* conversation's next message — never other conversations or other channels. A channel can still preempt its own conversation's in-flight turn by aborting the previous controller before dispatching a new one.
 </Warning>
 
 ## Conversation Mapping

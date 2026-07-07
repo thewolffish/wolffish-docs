@@ -522,8 +522,10 @@ pipeline as if the user typed it. Schedule kinds: `Startup`, `Every (Nm)`,
 install every example is commented out — uncomment a block to activate it.
 
 **Channels.** The desktop app, Telegram, and WhatsApp all share one brain. A
-`TurnRunner` serializes turns (FIFO) so the channels don't collide; a `TurnRouter`
-sends approval prompts back to whichever channel owns the active turn.
+`TurnRunner` serializes turns **per conversation** (same conversation queues,
+different conversations run in parallel) so a transcript never interleaves while
+unrelated chats proceed concurrently; a `TurnRouter` sends approval prompts back
+to whichever channel owns each turn.
 
 **Conversations & the context meter.** Each conversation JSON carries a
 `stats` block (lifetime totals, the last turn's roll-up, and a `meter` of
