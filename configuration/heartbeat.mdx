@@ -34,9 +34,12 @@ All times use your system's local timezone, 24-hour format. There's no UTC conve
 | Format | Meaning | Example |
 |---|---|---|
 | `Once (YYYY-MM-DD HH:MM)` | Once, at an absolute local date-time | `Once (2026-12-31 23:30)` |
-| `In (Nm)` / `In (Nh)` / `In (Nd)` | Once, N minutes / hours / days from now | `In (15m)` · `In (2h)` · `In (2d)` |
 
-After a one-time job runs, it **removes its own entry** from the file. `In (...)` is shorthand you use when *asking* Wolffish — it's converted to an absolute `Once (...)` at creation (a relative delay can't survive a restart), so what lands in the file is always a `Once (...)`. Hand-writing `In (...)` directly isn't supported; use `Once (...)` for an exact time.
+After a one-time job runs, it **removes its own entry** from the file.
+
+<Info>
+  **`In (15m)` / `In (2h)` / `In (2d)` is not a heading format** — the brainstem never parses `In (...)` from `heartbeat.md`, so writing it as a `##` heading does nothing. It's shorthand you use when *asking* Wolffish (*"in 2 days, remind me to renew my domain"*): the `automations` capability resolves the relative delay to an absolute `Once (...)` at creation — a relative countdown couldn't survive a restart — so what actually lands in the file is always a `Once (...)`. To hand-write a one-time job, use `Once (...)`.
+</Info>
 
 ### Recurring (fires until you remove it)
 
