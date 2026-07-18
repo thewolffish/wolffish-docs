@@ -34,7 +34,7 @@ What grows from that lean floor is the conversation itself — which is what the
 
 ## The Rolling Prefix Summary
 
-After every persisted turn, a fire-and-forget summarizer (`conversation-summarizer.ts`) checks the conversation. When the **unsummarized** region of the transcript exceeds ~120,000 characters, it folds everything before a turn boundary into **one persisted summary**, stored inside the conversation file itself as `{summary, summarizedThroughMessage}`.
+After every persisted turn, a fire-and-forget summarizer (`conversation-summarizer.ts`) checks the conversation. When the **unsummarized** region of the transcript exceeds ~120,000 characters, it folds everything before a turn boundary into **one persisted summary**, stored inside the conversation file itself as `{summary, summarizedThroughMessage, summarizedThroughMessageId}` — the id pins the boundary to the exact first uncovered message, so a concurrent writer merging messages in ahead of it can't shift what the summary claims to cover.
 
 | Constant | Value | Purpose |
 |---|---|---|
@@ -160,4 +160,4 @@ Smaller changes that ride the same lifecycle:
 - **Compaction cards** in the chat UI: a pulsing `compaction_started` card while a crisis pass runs, replaced by a `compaction` card with targets, tokens saved, duration, and per-target details. If you rarely see one, the lifecycle is working.
 - **Corpus events**: `compaction.started` and `compaction.applied` land in the daily corpus log at `brain/corpus/YYYY-MM-DD.log.md`.
 - **Prompt snapshots** in `brain/prefrontal/.debug/` show each request's token count against the budget (capped at 50 snapshots with rotation).
-- **The summary itself** is visible in the conversation file (`summary` / `summarizedThroughMessage`) — and `conversation_read` on any old conversation proves nothing was lost.
+- **The summary itself** is visible in the conversation file (`summary` / `summarizedThroughMessage` / `summarizedThroughMessageId`) — and `conversation_read` on any old conversation proves nothing was lost.

@@ -81,7 +81,7 @@ Every workflow run gets one card in the chat. Collapsed, it's a single quiet hea
 - **A live table** with a row per agent — its name and task, the model it runs on, its phase, status, elapsed time, tokens, tool calls, and cost.
 - **Run totals** in the header: agents done, total tool calls, elapsed time, context tokens, and the true whole-turn cost (agents plus the master's own spend).
 
-Every number is drawn from the harness's own telemetry — statuses, tokens, timing — never from what the model claims, so the card you watch live and the card you reopen next week are the same card. It prints too: the chat's PDF export renders a finished run as a static table.
+Every number is drawn from the harness's own telemetry — statuses, tokens, timing — never from what the model claims, so the card you watch live and the card you reopen next week are the same card. It prints too: the chat's PDF export renders a finished run as a static table. The same telemetry feeds the **context pill's hover card**, which itemizes the run as its own Workflow section — one row per agent with live status, tokens, and cost, plus run totals — and restores alongside the rest of the meter when you reopen the conversation.
 
 ## When to Use It
 

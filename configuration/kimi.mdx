@@ -9,9 +9,9 @@ description: "Set up Kimi (Moonshot AI) — powerful reasoning with long-context
 POST https://api.moonshot.ai/v1/chat/completions
 ```
 
-Uses SSE streaming with OpenAI-compatible tool-calling format. Supports vision (base64 images) and reasoning content.
+Uses SSE streaming with OpenAI-compatible tool-calling format. Supports vision (base64 images) and reasoning content — everything from k2.5 onward is natively multimodal, no `-vision` variant needed.
 
-Best for: Agentic workflows, long-context tasks, reasoning-heavy workloads, and cost-efficient daily automations.
+Best for: Agentic workflows, long-context tasks (K3 runs a 1M-token window), reasoning-heavy workloads, and cost-efficient daily automations.
 
 ## Getting an API Key
 
@@ -24,7 +24,8 @@ Best for: Agentic workflows, long-context tasks, reasoning-heavy workloads, and 
 
 | Model | Context | Modes | Input / Output (per MTok) | Cached | Notes |
 |-------|---------|-------|--------------------------|--------|-------|
-| **kimi-k2.6** | 256K | Off, On | $0.95 / $4.00 | $0.16 | Latest flagship. Vision + reasoning. |
+| **kimi-k3** | 1M | Off, High, Max | $3.00 / $15.00 | $0.30 | Frontier flagship and the default. Vision + reasoning, 1M context. |
+| kimi-k2.6 | 256K | Off, On | $0.95 / $4.00 | $0.16 | Strong reasoning at mid-range cost. Vision + reasoning. |
 | kimi-k2.5 | 256K | Off, On | $0.60 / $3.00 | $0.10 | Vision + reasoning. |
 | kimi-k2.7-code | 256K | On | — / — | — | Code-focused. Reasoning always on. |
 | kimi-k2.7-code-highspeed | 256K | On | — / — | — | Fast code variant. Reasoning always on. |
@@ -60,8 +61,8 @@ Only effort-capable models expose this; it applies once thinking is on.
 
 Each model shows only the states it genuinely supports. If a model always reasons (can't be turned off) or has no effort control, the button reflects that and locks where there's nothing to change. Wolffish remembers your choice per model.
 
-**On Kimi:** k2.x models are On / Off. The k2.x-code variants reason always-on (locked on). The older moonshot-v1 models don't reason.
+**On Kimi:** K3 is effort-capable — Off / High / Max, driven by Moonshot's `reasoning_effort` dial, and Off genuinely disables thinking (verified against the live API; Moonshot currently ships one real effort level, so High and Max behave alike until lower efforts land). k2.x models are On / Off. The k2.x-code variants reason always-on (locked on). The older moonshot-v1 models don't reason.
 
 <Note>
-  Kimi K2.6 sits between the budget Chinese providers (DeepSeek, MiMo) and the premium Western providers (Anthropic, OpenAI) on price — offering strong reasoning at a mid-range cost. See [Choosing a Provider](/configuration/providers#choosing-a-provider) for guidance on when to use which tier.
+  Kimi K3 is Moonshot's frontier flagship, priced alongside the premium Western mid-tier ($3.00 / $15.00) with a 1M-token window. The k2.x line beneath it keeps Kimi's classic position — between the budget Chinese providers (DeepSeek, MiMo) and the premium Western providers (Anthropic, OpenAI) — offering strong reasoning at a mid-range cost. See [Choosing a Provider](/configuration/providers#choosing-a-provider) for guidance on when to use which tier.
 </Note>

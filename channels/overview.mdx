@@ -85,12 +85,23 @@ All channels share the same brain state:
 
 - **Memory** — same hippocampus episodes, same cortex index
 - **Knowledge** — same workspace markdown files
-- **Conversations** — a conversation started in Telegram can be resumed in the Electron UI or WhatsApp
+- **Conversations** — a conversation started anywhere can be continued anywhere (see below)
 - **Capabilities** — same loaded skills and plugins
 
 <Tip>
   You can start a long-running task in the desktop UI, leave your desk, and check on progress or continue the conversation from Telegram on your phone.
 </Tip>
+
+## Every Conversation Is Continuable Everywhere
+
+Conversations are fully two-way across channels — nothing is read-only:
+
+- **Phone → desktop.** A conversation that started on Telegram or WhatsApp opens in the app as a live chat: the composer works, and you continue it with a real keyboard. Messages that land on your phone while the same conversation is open on your desktop appear in place, and voice notes survive the round-trip untouched.
+- **Automations too.** A finished automation or procedure run isn't a sealed record — continue it in the app to ask the follow-up question, and it becomes a live conversation again.
+- **Desktop → phone.** `/resume` on either channel opens a numbered picker over **every conversation Wolffish has** — all channels, newest first, 25 to a page with `next`, each row tagged with its origin. Scheduled automation runs are hidden from it by default (a per-channel settings toggle), while staying in `/delete` and the app.
+- **Replies land where they belong.** When Wolffish messages a channel out of band — an automation reporting a finished job, an in-app conversation dropping you a note — that chat re-points itself at the sending conversation, so your reply continues exactly the conversation that messaged you.
+
+In the app, the conversations rail and History mark each conversation with a small **origin badge** — Telegram, WhatsApp, automation, or procedure run — so a mixed list stays legible. In-app chats carry no badge: the app is the default.
 
 ## File Delivery
 

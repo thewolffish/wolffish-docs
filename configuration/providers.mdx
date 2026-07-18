@@ -22,7 +22,7 @@ All supported cloud providers can handle agentic tasks — including complex mul
 | Cost-efficient | **DeepSeek** | deepseek-v4-pro | $0.44 / $0.87 | Default for most agentic tasks |
 | Cost-efficient | **MiMo** | mimo-v2.5-pro | $0.20 / $2.00 | Cheapest option, multilingual |
 | Cost-efficient | **Qwen** | qwen3.7-max | $2.50 / $7.50 | Wide model range, ultra-cheap flash |
-| Cost-efficient | **Kimi** | kimi-k2.6 | $0.95 / $4.00 | Strong reasoning, long context |
+| Cost-efficient | **Kimi** | kimi-k3 | $3.00 / $15.00 | Frontier reasoning, 1M context, vision |
 | Cost-efficient | **MiniMax** | MiniMax-M3 | $0.30 / $1.20 | Reasoning and code |
 | Cost-efficient | **Stepfun** | step-3.7-flash | $0.83 / $6.94 | Always-on reasoning |
 | Cost-efficient | **Z.ai** | glm-4.6 | $0.60 / $2.20 | GLM models, 1M-context flagship |
@@ -111,9 +111,9 @@ Best for: Cost-efficient agentic workflows, multilingual tasks, multi-step tool 
 POST https://api.moonshot.ai/v1/chat/completions
 ```
 
-Uses SSE streaming with OpenAI-compatible tool-calling format. Supports vision and reasoning content.
+Uses SSE streaming with OpenAI-compatible tool-calling format. Supports vision and reasoning content — the whole k2.5+ line (and K3) is natively multimodal.
 
-Best for: Agentic workflows, long-context tasks, reasoning-heavy workloads.
+Best for: Agentic workflows, long-context tasks, reasoning-heavy workloads — with K3 as a frontier option at a 1M-token window.
 
 ### Getting an API Key
 
@@ -126,7 +126,8 @@ Best for: Agentic workflows, long-context tasks, reasoning-heavy workloads.
 
 | Model | Context | Max Output | Input / Output (per MTok) | Notes |
 |-------|---------|------------|--------------------------|-------|
-| **kimi-k2.6** | 256K | 64K | $0.95 / $4.00 | Latest flagship. Strong reasoning. |
+| **kimi-k3** | 1M | 128K | $3.00 / $15.00 | Frontier flagship and the default. Vision + reasoning (Off / High / Max). |
+| kimi-k2.6 | 256K | 64K | $0.95 / $4.00 | Strong reasoning at mid-range cost. |
 | kimi-k2.5 | 256K | 64K | $0.60 / $3.00 | Good balance of cost and quality. |
 | moonshot-v1-128k | 128K | 16K | $2.00 / $5.00 | Long-context. |
 | moonshot-v1-32k | 32K | 8K | $1.00 / $3.00 | Mid-context. |

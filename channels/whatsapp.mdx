@@ -45,8 +45,8 @@ The same slash commands available in Telegram work in WhatsApp:
 |---|---|
 | `/stop` | Cancel the currently running task |
 | `/new` | Start a fresh conversation |
-| `/resume` | Continue the previous conversation |
-| `/delete` | Delete the current conversation |
+| `/resume` | Pick any conversation to continue — a numbered list of every conversation, from every channel, newest first (reply `next` for the following page) |
+| `/delete` | Pick a conversation to delete, from the same numbered list |
 | `/current` | Show which conversation is active |
 | `/status` | System report (model, memory usage, uptime) |
 | `/mode` | Switch chat mode: `/mode single` or `/mode workflow` |
@@ -129,7 +129,9 @@ Inbound WhatsApp messages are kept in a rolling buffer (`whatsapp/read-history.j
 
 ## Message Formatting
 
-Wolffish writes WhatsApp replies in WhatsApp's own text style — `*bold*`, `_italic_`, `~strikethrough~`, backtick code, and plain `-` lists — never raw Markdown. As a safety net, everything sent through the channel also passes through a converter that translates any leftover Markdown into WhatsApp text: headings become bold lines, `[label](url)` links become "label (url)", tables become `*Label:* value` lines, and task lists become ☐/☑ items. Code block contents are preserved verbatim.
+Wolffish writes WhatsApp replies in WhatsApp's own text style — `*bold*`, `_italic_`, `~strikethrough~`, backtick code, and plain `-` lists — never raw Markdown. A **format gate** validates every outgoing send: a message carrying markup WhatsApp would render as literal characters (a stray `<b>`, an `&amp;` entity, raw Markdown headings) is bounced back to the model to rewrite before it goes out. Drawn divider lines (`━━━━━` and friends) are rejected too — a phone's narrow chat bubble wraps them into several broken lines of stray characters — while code blocks keep their box-drawing untouched, since a CLI table inside a code block is content, not decoration.
+
+The gate can never lose a message: after two consecutive bounces for the same chat it stands aside and the message is delivered as composed — worst case you see raw markup, never silence.
 
 ## Busy Handling
 
@@ -159,12 +161,16 @@ A [workflow-mode](/configuration/workflow-mode) run additionally reports determi
 
 ## Conversation Mapping
 
-Each WhatsApp JID (phone number identifier) maps to a Wolffish conversation. In practice:
+Each WhatsApp JID (phone number identifier) points at one active Wolffish conversation at a time. In practice:
 
 - Messages you send to yourself (via "Message Yourself" in WhatsApp) create one conversation
 - If you configure Wolffish to respond to a specific contact, that contact's JID gets its own conversation
 
-Conversations are shared across channels — you can start in WhatsApp and continue in the Electron UI or Telegram.
+`/resume` swaps which conversation the chat continues — its picker reaches **every conversation from every channel**, not just WhatsApp's own (see [Commands](#commands)). Scheduled automation runs are hidden from it by default; the **Hide automations from /resume** toggle in **Settings → Channels → WhatsApp** brings them back. They always remain in `/delete` and in the app.
+
+When Wolffish messages you out of band — an automation reporting a finished job, an in-app conversation dropping you a note — the chat re-points itself at the sending conversation, so your reply continues **that** conversation rather than whatever the chat was last on.
+
+Conversations are fully two-way with the app: start in WhatsApp and keep typing in the desktop UI, where messages landing on your phone appear in place and voice notes survive the round-trip untouched.
 
 ## Under the Hood
 

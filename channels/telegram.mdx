@@ -47,8 +47,8 @@ The bot recognizes these slash commands:
 |---|---|
 | `/stop` | Cancel the currently running task |
 | `/new` | Start a fresh conversation |
-| `/resume` | Continue the previous conversation |
-| `/delete` | Delete the current conversation |
+| `/resume` | Pick any conversation to continue — a numbered list of every conversation, from every channel, newest first (reply `next` for the following page) |
+| `/delete` | Pick a conversation to delete, from the same numbered list |
 | `/current` | Show which conversation is active |
 | `/status` | System report (model, memory usage, uptime) |
 | `/mode` | Switch chat mode: `/mode single` or `/mode workflow` |
@@ -75,14 +75,21 @@ Tap **Approve** to proceed or **Deny** to abort. The turn pauses until you respo
 
 ## Conversation Management
 
-Each Telegram chat maps to a Wolffish conversation. The mapping is:
+Each Telegram chat points at one active Wolffish conversation at a time — every message you send continues it. The commands manage which one that is:
 
-- **Private chat with your bot** = one conversation thread
-- Use `/new` to start fresh (previous conversation is preserved in memory)
-- Use `/resume` to return to the last active conversation
-- Use `/delete` to remove the current conversation from history
+- **`/new`** starts a fresh conversation (the previous one is preserved in memory).
+- **`/resume`** opens a numbered picker over **every conversation Wolffish has** — Telegram, WhatsApp, in-app, procedure runs — newest first, 25 to a page, each row tagged with its origin so you know what you're about to continue. Reply with a number to resume it, or `next` for the following page. Numbering is continuous across pages, so a number from a page you've scrolled past still selects.
+- **`/delete`** opens the same picker and deletes the number you reply with. Deleting the chat's active conversation rotates it to a fresh one; a conversation that's mid-turn refuses to delete until it finishes.
 
-Conversations are shared across channels. A conversation started in Telegram appears in the Electron UI's conversation list, and vice versa.
+Scheduled automation runs are **hidden from `/resume` by default** — they outnumber real chats and would bury them. Flip **Settings → Channels → Telegram → Hide automations from /resume** to include them; they always remain in `/delete` and in the app.
+
+### Replies land where they belong
+
+When Wolffish messages you out of band — an automation reporting a finished job, an in-app conversation dropping you a note — the chat re-points itself at the conversation that did the sending. Your reply continues **that** conversation, not whatever the chat was last on.
+
+### Fully two-way with the app
+
+Conversations are shared across channels, in both directions. A conversation started in Telegram appears in the desktop app's conversation list — and it's **continuable there**: open it and keep typing with a real keyboard. Messages that land on your phone while the same conversation is open on your desktop appear in place, and voice notes survive the round-trip untouched.
 
 ## File Handling
 
