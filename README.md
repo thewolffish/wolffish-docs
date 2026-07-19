@@ -45,14 +45,6 @@ Fully bilingual (English + Arabic). Covers everything from first launch to writi
 | [First Launch](getting-started/first-launch.mdx) | What happens when you run wolffish for the first time        |
 | [Quickstart](getting-started/quickstart.mdx)     | 5 steps to send your first message and inspect the internals |
 
-### Use Cases
-
-| Page                                                               | What You'll Learn                                                                       |
-| ------------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
-| [Overview](use-cases/overview.mdx)                                 | Real-world workflows that show what Wolffish can do end to end                          |
-| [Setting Up for Success](use-cases/setting-up-for-success.mdx)     | Permissions, prerequisites, and tips for reliable autonomous runs                       |
-| [AI News Daily LinkedIn Post](use-cases/ai-news-linkedin-post.mdx) | Automated daily AI news curation and LinkedIn posting — zero API, zero third-party code |
-
 ### Core Concepts
 
 | Page                                               | What You'll Learn                                      |
@@ -178,7 +170,6 @@ Can work 100% offline with Ollama, or cloud-only with no local models — your c
 wolffish-docs/
 ├── introduction/          What wolffish is and why
 ├── getting-started/       Install, first launch, quickstart
-├── use-cases/             Real-world workflows — AI news posting, and more
 ├── architecture/          Brain modules, pipeline, event bus, workspace
 ├── capabilities/          Skills, plugins, built-in capabilities
 ├── channels/              Electron, Telegram, WhatsApp

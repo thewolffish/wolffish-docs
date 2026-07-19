@@ -40,14 +40,14 @@ The safest scheduled jobs are **read-mostly and reversible** — they observe, s
   </Card>
 </CardGroup>
 
-These existing use cases are built to be scheduled:
+Typical examples of workflows built to be scheduled:
 
-| Use case | Why it's safe to schedule | Suggested cadence |
+| Workflow | Why it's safe to schedule | Suggested cadence |
 |----------|---------------------------|-------------------|
-| [Security Audit](/use-cases/mac-security-audit) | Read-only scan; reports findings, applies no fixes on its own | `Weekly (Sunday 06:00)` |
-| [Gmail Briefing](/use-cases/gmail-is-dead) | Reads and summarizes; explicitly told not to modify or send | `Weekday (07:30)` |
-| [Media Conversion](/use-cases/media-conversion) | Creates new audio files; originals untouched | `Daily (09:00)` or `Every (30m)` |
-| [PDFs Everywhere](/use-cases/pdfs-everywhere) | Generates new documents; nothing destructive | `Daily (08:00)` |
+| Security audit | Read-only scan; reports findings, applies no fixes on its own | `Weekly (Sunday 06:00)` |
+| Inbox briefing | Reads and summarizes; explicitly told not to modify or send | `Weekday (07:30)` |
+| Media conversion | Creates new audio files; originals untouched | `Daily (09:00)` or `Every (30m)` |
+| Report generation | Generates new documents; nothing destructive | `Daily (08:00)` |
 | Morning briefing / PR watch | Pure read-and-report across email, calendar, GitHub | `Weekday (07:45)` / `Every (30m)` |
 
 ## What NOT to Schedule
@@ -56,7 +56,7 @@ These are the red-light categories. Each one assumes the auto-approval rule abov
 
 <CardGroup cols={2}>
   <Card title="Destructive / irreversible" icon="trash">
-    Deletes, uninstalls, migrations, overwrites, formatting. Once a scheduled job deletes something, there's no approval gate and no undo. The canonical example is [Nuke Adobe](/use-cases/nuke-adobe) — a deliberate, one-time, human-approved excision, never a timer.
+    Deletes, uninstalls, migrations, overwrites, formatting. Once a scheduled job deletes something, there's no approval gate and no undo. That kind of excision is a deliberate, one-time, human-approved act — never a timer.
   </Card>
   <Card title="Money / financial" icon="credit-card">
     Purchases, trades, transfers, subscription changes, anything that moves funds. Never automate. Full stop.
@@ -88,7 +88,7 @@ Most "no" workflows have a "yes" version. The trick is to schedule the *safe hal
 | **Add a stop-check** | "Archive matching emails" | "If more than 20 emails match, stop and just show me the count first" |
 
 <Tip>
-The [Gmail Briefing](/use-cases/gmail-is-dead) and [Security Audit](/use-cases/mac-security-audit) prompts already use these patterns — they read and report on a schedule, but leave sending and fixing to you. Copy that shape.
+The best scheduled prompts follow these patterns — they read and report on a schedule, but leave sending and fixing to you. Copy that shape.
 </Tip>
 
 ## The Pre-Schedule Checklist
@@ -102,10 +102,9 @@ Before you paste a prompt into `heartbeat.md`, run it through this:
 - [ ] **Bounded scope** — limited to a known folder, batch, or account
 - [ ] **Comfortable unattended** — you'd accept this running at 3 AM with no confirmation
 
-If every box is checked, schedule it. If any box is empty, run it [on-demand](/use-cases/overview) instead — the heartbeat is for the workflows you trust to run without you.
+If every box is checked, schedule it. If any box is empty, run it on-demand instead — the heartbeat is for the workflows you trust to run without you.
 
 ## See Also
 
 - [Heartbeat & Scheduling](/configuration/heartbeat) — schedule formats, job execution, and how jobs are parsed
 - [Safety Patterns](/extending/safety-patterns) — how the Amygdala classifies and gates tool calls
-- [Nuke Adobe](/use-cases/nuke-adobe) — the textbook example of a workflow to run by hand, never on a timer
