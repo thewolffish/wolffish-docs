@@ -1,6 +1,6 @@
 ---
 title: "Context Lifecycle"
-description: "How Wolffish keeps every conversation inside the model's context window — a lean start, rolling prefix summaries, recovery-pointer stubs, attachment aging, and an in-turn safety net"
+description: "How Wolffish keeps every conversation inside the model's context window — a lean start, rolling prefix summaries, recovery-pointer stubs, model-led attachments, and an in-turn safety net"
 ---
 
 # The Context Window Problem
@@ -17,7 +17,7 @@ The old design answered both with one blunt tool: in-turn compaction. Once a con
 | Start lean | ~5K-token system prompt, core tools only | Free — it's what's *not* sent |
 | Fold history | Persisted rolling prefix summary | One LLM call per ~120K chars of growth, **ever** |
 | Stub stale payloads | Recovery-pointer stubs at replay time | Free — deterministic string replacement |
-| Age attachments | Metadata-only outside the recent window | Free, plus a processed-block cache |
+| Attachments as notes | Reference note only — content is read on demand, never injected | Free |
 | Crisis only | In-turn compaction at 75% of budget | One LLM call, rare in practice |
 
 ## Starting Lean
@@ -99,12 +99,15 @@ memory_search or conversation_read("conv-abc123") retrieves it verbatim]
 
 This is a deterministic string replacement — no LLM call — applied in both rebuild paths. The full bytes stay persisted in the conversation file and indexed by the cortex; the stub names the exact call that retrieves them. Replay cost stops growing with every old page dump while nothing is actually lost.
 
-## Attachment Aging
+## Model-Led Attachments
 
-Attachments used to be the silent killer: one message with a few photos or a PDF re-injected hundreds of kilobytes of base64 into *every* subsequent request, re-encoded from disk each time. Two fixes:
+Attachments used to be the silent killer twice over: full content blocks (base64 images, extracted PDF text) rode along with recent messages and were re-paid on every request — and a genuinely huge file could choke a turn outright, since a 3,000-page PDF extracts to megabytes of text no window survives. As of v1.0.224 the injection path is gone entirely:
 
-- **The verbatim window.** Only user messages within the last 4 history entries — plus the most recent attachment-bearing message, wherever it sits — get their attachments expanded into full content blocks (base64 images, PDF documents, extracted text). Older messages keep just their `<attachments>` metadata text, which already names each file's absolute path, so `file_read` or `memory_get` retrieves any of them on demand.
-- **The processed-block cache.** Within the window, processed attachment blocks are cached keyed on `(path, mtime, processing options)`, ending the per-turn re-reading and re-encoding of the same images and PDFs.
+- **No attachment content is ever auto-injected.** Every file you attach — any size, any type — becomes a compact **reference note**: its name, its absolute path, and real facts about it (a PDF's page count is probed lazily from the file's own index, so even an enormous scan gets an accurate note without a full parse).
+- **Wolffish reads on demand.** The note names the right tool for the type: `pdf_info` / `pdf_search` / `pdf_read` walk thousand-page documents a page range at a time, `file_read` streams line ranges of giant text files, spreadsheet and document tools handle their formats, and vision models pull an image's actual pixels with `image_view` only when they need to look. The arbitrary plugin size caps (100 MB documents/spreadsheets, 500 MB audio) fell with the redesign — the note tier varies with file size, never whether content is available.
+- **Nothing is ever silently unknown.** The operating contract forbids answering about a file that hasn't been read or searched this conversation — and because deep reads of big files take real time, Wolffish narrates them ("first search of this 3,000-page book — may take a minute") instead of going quiet.
+
+The same policy powers [project files](/configuration/projects): a project's file list is injected as names and facts, and content is always pulled through tools.
 
 ## The In-Turn Safety Net
 

@@ -53,6 +53,7 @@ The bot recognizes these slash commands:
 | `/status` | System report (model, memory usage, uptime) |
 | `/mode` | Switch chat mode: `/mode single` or `/mode workflow` |
 | `/model` | List connected cloud models — reply with a number, or type part of a name to filter |
+| `/project` | Show your [projects](/configuration/projects) as a numbered picker — reply with a number to start a conversation inside one; `/project close` leaves the current project |
 | `/local` | Switch to local model (Ollama) |
 | `/cloud` | Switch to cloud model (Claude/OpenAI) |
 
@@ -83,6 +84,10 @@ Each Telegram chat points at one active Wolffish conversation at a time — ever
 
 Scheduled automation runs are **hidden from `/resume` by default** — they outnumber real chats and would bury them. Flip **Settings → Channels → Telegram → Hide automations from /resume** to include them; they always remain in `/delete` and in the app.
 
+### Chatting inside a project
+
+`/project` lists your [projects](/configuration/projects) by number — reply with one to start a fresh conversation **inside that project**, briefed with its instructions and files. The binding lives on the conversation itself, so it survives restarts and can't drift: while you're in a project, `/new` deliberately starts the next conversation **in the same project**, and `/project close` is the way out (it rotates the chat to a fresh conversation outside it). `/project` with no reply needed also shows which project you're currently in.
+
 ### Replies land where they belong
 
 When Wolffish messages you out of band — an automation reporting a finished job, an in-app conversation dropping you a note — the chat re-points itself at the conversation that did the sending. Your reply continues **that** conversation, not whatever the chat was last on.
@@ -95,8 +100,8 @@ Conversations are shared across channels, in both directions. A conversation sta
 
 The bot can receive and process:
 
-- **Images** — screenshots, photos, diagrams (read directly by vision-capable models; text-only models receive a note with the file's name and path and can still operate on it with tools)
-- **Documents** — PDFs, text files, code files (content extracted and passed to the brain)
+- **Images** — screenshots, photos, diagrams (vision-capable models pull the pixels on demand with `image_view`; text-only models get the file's name and path and can still operate on it with tools)
+- **Documents** — PDFs, text files, code files (attached as a [reference note](/architecture/context-compaction#model-led-attachments) — Wolffish reads the content through its tools when it matters, so even huge files land safely)
 - **Voice notes** — transcribed via STT and processed as text input
 
 Send a file with or without a caption. If you include a caption, it becomes the user message with the file as context. If no caption, Wolffish infers intent from the file content.

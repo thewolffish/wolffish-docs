@@ -3,6 +3,22 @@ title: "Changelog"
 description: "Product updates and improvements to Wolffish"
 ---
 
+<Update label="July 22, 2026" description="v1.0.224">
+
+## New features
+
+- **Projects.** Some work is a dozen conversations sharing one context — [projects](/configuration/projects) give it a home. A project is a **name, an emoji, standing instructions, and a set of files**; every conversation inside it starts already briefed: instructions ride each turn, files are known by name and read on demand rather than stuffed into context. Manage them on the new **Projects page**; start one by **hovering the New Chat button** (your projects fan out as cards), and the rail and History group and badge every conversation under its project. [Procedures](/configuration/procedures) and [automations](/configuration/heartbeat) can be **bound to a project** too, and **`/project`** on [WhatsApp](/channels/whatsapp) and [Telegram](/channels/telegram) starts project conversations from your phone — with `/new` deliberately staying inside the project and `/project close` the way out. Wolffish manages projects itself through eight new `project_*` tools.
+- **Files the size of books.** Attachment content is **never injected into context anymore** — every file becomes a compact [reference note](/architecture/context-compaction#model-led-attachments) (name, path, real facts — a PDF's page count is probed lazily from its own index), and Wolffish reads on demand: new `pdf_info` and `pdf_search` plus a lazy, cached `pdf_read` walk thousand-page documents a page range at a time, `file_read` streams slices of giant text files, and vision models pull an image's pixels with the new `image_view` only when they actually look. The arbitrary size caps (100 MB documents/spreadsheets, 500 MB audio) are gone, and Wolffish **narrates long reads** instead of going silent.
+- **Automations, now with faces.** The [Automations page](/configuration/heartbeat) is rebuilt around **cards**: each job wears its own **emoji** (📧 for the inbox sweep, 📰 for the news digest), with a proper editor dialog — schedule **chips** for every form including full cron, a real **time input**, a live **next-run preview**, and autosave. The emoji is stamped on every conversation the job's runs create, so the rail tells you at a glance which automation an overnight run belongs to. [Procedures](/configuration/procedures) got the same treatment — an emoji per procedure, stamped on its runs.
+- **Several questions, one card.** `ask_user` now takes a **list of questions**: in the app they arrive as one card with **chip tabs** — flip through, answer everything, one resolution — and on WhatsApp and Telegram the same request walks you through them **one message at a time, in order**. Quizzes run through it too: every question up front, graded and explained after.
+
+## Updates
+
+- **Replies that fold.** Chat replies can use a careful, **sanitized slice of real HTML**: collapsible `<details>` sections with a clickable summary, highlighted `<mark>` text, keyboard keys, sub- and superscripts. Scripts, styles, frames, and event handlers are stripped outright; unknown tags degrade to their text. The PDF export renders the exact same subset, so an exported conversation shows what the feed showed.
+- **A card that opens the folder.** When the deliverable is a *place* rather than an attachable file — a folder Wolffish scaffolded, a batch of outputs, a file deliberately left where you asked — it pushes an **openable location card**: **Open** for folders, **Reveal** for files. The old path-guessing that parsed cards out of prose is deleted — a card now exists exactly because Wolffish chose to hand you the place, through a real tool with a checked path.
+
+</Update>
+
 <Update label="July 19, 2026" description="v1.0.223">
 
 ## New features

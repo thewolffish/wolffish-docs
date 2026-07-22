@@ -100,8 +100,9 @@ Conversations are fully two-way across channels — nothing is read-only:
 - **Automations too.** A finished automation or procedure run isn't a sealed record — continue it in the app to ask the follow-up question, and it becomes a live conversation again.
 - **Desktop → phone.** `/resume` on either channel opens a numbered picker over **every conversation Wolffish has** — all channels, newest first, 25 to a page with `next`, each row tagged with its origin. Scheduled automation runs are hidden from it by default (a per-channel settings toggle), while staying in `/delete` and the app.
 - **Replies land where they belong.** When Wolffish messages a channel out of band — an automation reporting a finished job, an in-app conversation dropping you a note — that chat re-points itself at the sending conversation, so your reply continues exactly the conversation that messaged you.
+- **Projects travel too.** `/project` on either channel starts a conversation inside one of your [projects](/configuration/projects) — briefed with its standing instructions and files, exactly like a project chat opened in the app. The binding lives on the conversation itself, so continuing it anywhere keeps the project context.
 
-In the app, the conversations rail and History mark each conversation with a small **origin badge** — Telegram, WhatsApp, automation, or procedure run — so a mixed list stays legible. In-app chats carry no badge: the app is the default.
+In the app, the conversations rail and History mark each conversation with a small **origin badge** — Telegram, WhatsApp, automation, or procedure run — so a mixed list stays legible. In-app chats carry no badge: the app is the default. Conversations that belong to a project or were run by an automation or procedure also wear that source's **emoji** on their rail chip.
 
 ## File Delivery
 

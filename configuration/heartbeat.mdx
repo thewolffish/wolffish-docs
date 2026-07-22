@@ -72,20 +72,28 @@ Heartbeat jobs run through the full agent pipeline — same brain, same capabili
   Because heartbeat jobs auto-approve every tool call, be careful what you schedule. A job that says "delete old files" will execute without asking. Write defensive instructions — "list files older than 30 days and tell me what you'd delete" beats "delete files older than 30 days." See [What to Schedule](/configuration/what-to-schedule) for the full safety decision layer.
 </Warning>
 
-### Per-job chat mode
+### Job setting markers
 
-Every job can pick how it runs: **Single** (one model, direct) or **[Workflow](/configuration/workflow-mode)** (the run can plan phases and drive parallel agents). Toggle it per job on the Heartbeat page, or by hand with an optional **first body line** in the job's block:
+A job's body may **start** with setting-marker lines — they're settings, not instruction text, and are stripped before the instruction reaches the agent:
 
 ```markdown
 ## Daily (08:00)
 
 mode: workflow
+icon: 📰
+project: 1f3a2b…
 
 Good morning routine. Summarize overnight messages, list today's
 calendar events, and highlight the top 3 priorities.
 ```
 
-The `mode:` line is stripped before the instruction reaches the agent, so it never reads as part of the job. A job without a marker follows whatever chat mode is active when it fires. Wolffish sets the marker itself when you ask it to schedule something (`automation_create` / `automation_edit` take an optional `mode`).
+| Marker | What it does |
+|---|---|
+| `mode: single` / `mode: workflow` | How the run executes — one model direct, or a [workflow](/configuration/workflow-mode) that can plan phases and drive parallel agents. No marker ⇒ whatever chat mode is active when it fires. |
+| `icon: <emoji>` | The job's **face**: shown on its card on the Automations page and stamped on every conversation its runs create, so the rail tells you at a glance which job an overnight run belongs to. |
+| `project: <id>` | Binds the job to a [project](/configuration/projects) — its runs get the project's instructions and file list, and their conversations register under the project. |
+
+You rarely write these by hand: the Automations page sets them from its editor, and Wolffish sets them itself when you ask it to schedule something (`automation_create` / `automation_edit` take optional `mode` and `icon`; the `automation_*` tools preserve marker lines automatically when editing).
 
 ### One at a time, queued — never dropped
 
@@ -94,6 +102,17 @@ Jobs run **one at a time**. If a job fires while another is still running, it **
 ### Missed runs catch up
 
 If Wolffish was closed when a job was due, it runs once on the next launch — **collapsed**: a recurring job that missed several fires during the downtime runs a *single* catch-up, not one per missed tick. Only misses within the last **24 hours** are replayed; older ones are dropped. A one-time job past its time runs if it's within that window, then deletes itself; if it's older, it's quietly retired without running.
+
+## The Automations Page
+
+The in-app home for the heartbeat is the **Automations page**, rebuilt in v1.0.224 around **cards**: each job is a card wearing an **emoji of its own** — 📧 for the inbox sweep, 📰 for the news digest — with its schedule in plain English, its instruction, and its last-run status in view. Editing opens a proper **dialog**:
+
+- **Schedule chips** for the common shapes — daily, weekday, weekly, monthly, interval, hourly, startup, one-time, and full cron — so you pick a form instead of remembering syntax.
+- A real **time input** rather than a text field to get `HH:MM` right.
+- A live **next-run preview** that shows exactly when the job will fire, computed from the schedule you're building, *before* you save.
+- **Autosave** with the same discipline as the procedures editor — no Save button, just Done.
+
+The raw markdown view of `heartbeat.md` stays one click away for hand-editing, and everything below about the file format remains true — the page and the file are two views of the same jobs. The card's emoji is stamped on every conversation the job's runs create, so automation runs are recognizable at a glance in the conversations rail and History.
 
 ## Managing Jobs
 

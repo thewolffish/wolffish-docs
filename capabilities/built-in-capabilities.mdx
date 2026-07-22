@@ -8,7 +8,7 @@ description: "All 20+ capabilities that ship with Wolffish by default"
 These capabilities are included in the default workspace when Wolffish creates `~/.wolffish/workspace/` on first launch. Each lives in its own folder under `brain/cerebellum/`.
 
 <Note>
-**No artificial guardrails.** Wolffish is built for smarter, more capable models. We've removed hard-coded timeouts, result caps, and arbitrary limits from all capability plugins. The LLM decides when to set a timeout and how many results to request. Commands run until they finish naturally. The only limits that remain are OOM-protection caps (100MB for documents, 500MB for audio, 100KB output buffer) — these protect memory, not restrict functionality.
+**No artificial guardrails.** Wolffish is built for smarter, more capable models. We've removed hard-coded timeouts, result caps, and arbitrary limits from all capability plugins — including the old file-size gates (100MB for documents and spreadsheets, 500MB for audio), which fell in v1.0.224 when attachments went [fully model-led](/architecture/context-compaction#model-led-attachments): file content is read on demand through tools, so a huge file costs nothing until it's actually consulted. The LLM decides when to set a timeout and how many results to request. Commands run until they finish naturally. The only limit that remains is the 100KB tool-output buffer — it protects memory, not functionality.
 </Note>
 
 <Note>
@@ -48,11 +48,13 @@ Wolffish can read, manage, and **write its own capabilities** at runtime — no 
 
     **Tools:**
     - `automation_list` — List every automation: schedule, plain-English timing, instruction, and whether it's valid/running
-    - `automation_create` — Create a job (recurring or one-time) from a schedule + instruction, with an optional `mode` ([single or workflow](/configuration/workflow-mode))
+    - `automation_create` — Create a job (recurring or one-time) from a schedule + instruction, with an optional `mode` ([single or workflow](/configuration/workflow-mode)) and an optional `icon` — an emoji Wolffish picks to fit the job (📧 for an inbox sweep, 📰 for a news digest), shown on the job's card and stamped on its run conversations
     - `automation_edit` — Change a job's schedule, instruction, and/or mode
     - `automation_delete` — Permanently remove a job (asks you to confirm)
     - `automation_check` — Runtime status: what's running now and how recent runs went
     - `automation_run` — Run a job immediately, to test it
+
+    A job's body can also carry [setting markers](/configuration/heartbeat#job-setting-markers) — `mode:`, `icon:`, and `project:` lines that bind a job to a [project](/configuration/projects) so its runs get the project's context. The tools preserve the markers automatically.
 
     Heartbeat jobs run with tool calls **auto-approved**, so it confirms anything recurring or consequential with you before scheduling it. Memory compaction is configured separately in Settings, not here.
   </Accordion>
@@ -71,6 +73,26 @@ Wolffish can read, manage, and **write its own capabilities** at runtime — no 
     - `procedure_edit` — Change a procedure's title, prompt, and/or mode
     - `procedure_delete` — Permanently remove a procedure
     - `procedure_run` — Run a procedure now, in a fresh background conversation
+
+    Every procedure wears an **emoji icon** (shown on its card and stamped on its run conversations in the rail), and a procedure can be **bound to a [project](/configuration/projects)** so its runs get the project's instructions and files.
+  </Accordion>
+
+  <Accordion title="projects — Manage projects: standing instructions plus files">
+    **Type:** Plugin
+
+    **Triggers:** project, projects, new project, project instructions, project files, add to project, workspace context
+
+    Lets Wolffish manage your [projects](/configuration/projects) — the named bundles of standing instructions and files that brief every conversation started inside them. Say "make a project for the kitchen renovation with these PDFs" and it creates the project, sets the instructions, and attaches the files — the same things the Projects page does by hand.
+
+    **Tools:**
+    - `project_list` — Every project: number, icon, title, file count, last-edited time
+    - `project_view` — One project in full: icon, title, complete instructions, and its file list with per-file existence and size
+    - `project_create` — Create a project (title, optional emoji icon, optional instructions)
+    - `project_update` — Change a project's title, icon, and/or instructions
+    - `project_add_files` — Attach files by path; each source is **copied into the project's own folder** (`uploads/project-<id>/`), so a project never dangles on a moved or deleted original
+    - `project_remove_file` — Detach a file (the project's own copy is deleted; originals outside the workspace are never touched)
+    - `project_conversations` — List every conversation belonging to a project: title, message count, last activity
+    - `project_delete` — Permanently remove a project; its past conversations stay in history and simply lose the project context on future turns
   </Accordion>
 
   <Accordion title="workflow — Design and drive a model-led multi-agent run">
@@ -163,9 +185,10 @@ When you ask, Wolffish:
     Wraps Node.js `fs` for precise file operations without needing shell access.
 
     **Tools:**
-    - `file_read` — Read file contents with optional line range (startLine/endLine)
+    - `file_read` — Read file contents with optional line range (startLine/endLine). Reads are **streamed**, so pulling a slice out of a gigabyte log costs only the slice.
     - `file_write` — Create or overwrite a file (supports append mode)
     - `file_patch` — Find and replace a literal string in a file (all occurrences)
+    - `image_view` — Return an image's actual pixels (downscaled) to a vision model on demand — the model-led way to *look* at an image instead of having it auto-injected
 
     Prefer these over `shell_exec` for file operations — they're faster, safer, and produce cleaner audit trails.
   </Accordion>
@@ -203,15 +226,16 @@ When you ask, Wolffish:
 ## File Delivery
 
 <AccordionGroup>
-  <Accordion title="utilities — Deliver files with send_file">
+  <Accordion title="utilities — Deliver files and openable location cards">
     **Type:** Plugin
 
-    **Triggers:** send file, attach, attachment, deliver file, share file, upload file
+    **Triggers:** send file, attach, attachment, deliver file, share file, upload file, open folder, reveal in finder
 
-    Small always-loaded helpers that don't belong to a bigger capability — currently, delivering files.
+    Small always-loaded helpers that don't belong to a bigger capability — delivering files, and handing you openable locations.
 
     **Tools:**
     - `send_file` — Deliver any file (up to 50 MB, any type) to you as an attachment in the conversation you're in. Renders as a file card in the desktop app and uploads natively on Telegram and WhatsApp.
+    - `show_path` — Push an **openable location card** into the in-app chat: a folder gets an **Open** button (straight into your OS file manager), a file gets **Reveal** (its folder opens with the file selected). This is how a *place* is delivered — a folder Wolffish scaffolded or organized, a batch of outputs, a file deliberately left where you asked. Nothing is parsed out of prose: the card exists only when the tool is called, and the path must actually exist. In-app only — on Telegram and WhatsApp the path is named in prose instead.
 
     **This is the only way a file reaches you.** No generation tool auto-delivers its output — not `pdf_create`, not ffmpeg, not the browser, not a shell script. Wolffish treats delivery as part of the task: the moment a file-producing task finishes, `send_file` is the final tool call — even for tiny text files, even when the content was also shown in chat. Ending with "saved to ~/path" is not delivery. If you explicitly ask for a file to just be saved somewhere, that's respected — and when Wolffish is genuinely unsure, it asks rather than silently withholding. The runtime lists files already sent this turn, so you never receive the same file twice.
 
@@ -279,16 +303,20 @@ When you ask, Wolffish:
 
     **Triggers:** pdf, merge pdf, split pdf, watermark, form fill, encrypt pdf, compress pdf
 
-    Full PDF toolkit with RTL/Arabic support.
+    Full PDF toolkit with RTL/Arabic support — built to handle **PDFs the size of books**. The reading engine is lazy and cached: a document is parsed once per conversation, page counts are probed from the file's own index without a full load, and nothing about a PDF is ever auto-injected into context — Wolffish consults it through these tools when its content matters.
 
     **Tools:**
-    - `pdf_read` — Extract text, metadata, and structure (with optional page range)
+    - `pdf_info` — A PDF's facts without reading it: page count, metadata, size — the first call on any big document
+    - `pdf_search` — Full-text search inside a PDF, returning matching pages with snippets — how a 3,000-page book gets navigated
+    - `pdf_read` — Extract text by page range (lazy and cached, so successive reads of a huge document stay fast)
     - `pdf_create` — Create PDFs with headings, paragraphs, images, tables (supports RTL with custom fonts)
+    - `pdf_modify` — Edit an existing PDF (pages, content)
+    - `pdf_form` — Read and fill PDF form fields
+    - `pdf_extract_images` — Pull embedded images out of a PDF
     - `pdf_merge` — Combine multiple PDFs
     - `pdf_split` — Extract page ranges into separate files
     - `pdf_secure` — Encrypt/decrypt with passwords
     - `pdf_compress` — Reduce file size
-    - `pdf_watermark` — Add text watermarks
   </Accordion>
 
   <Accordion title="spreadsheet — Excel and CSV files">
@@ -462,12 +490,12 @@ When you ask, Wolffish:
 
     **Triggers:** ask the user, ask me, which option, let me choose, give me options, clarify, confirm with me, multiple choice, quiz me
 
-    Lets Wolffish put a decision back to you with concrete choices instead of guessing. It pauses the turn, renders an interactive question card — the question, 2–5 numbered options each with a short description, and (unless disabled) a free-text box to type your own instructions — then resumes the moment you answer.
+    Lets Wolffish put a decision back to you with concrete choices instead of guessing. It pauses the turn, renders an interactive question card, then resumes the moment you answer.
 
     **Tools:**
-    - `ask_user` — Pose a multiple-choice question and wait for the answer. Returns the option you picked or the custom instructions you typed.
+    - `ask_user` — Pose **one or more** multiple-choice questions and wait for the answers. Each question carries 2–5 numbered options with short descriptions, plus (unless disabled) a free-text box for your own instructions. Returns every answer at once.
 
-    Works on every channel: the desktop UI shows the card; on Telegram and WhatsApp you reply with the option number (or your own text). If the run is stopped without an answer, Wolffish falls back to a sensible default instead of re-asking in a loop.
+    Related decisions arrive as **one card, not a chain**: in the desktop app a multi-question card shows the questions as chip tabs — flip through, answer everything, and the turn resumes with all the answers. On Telegram and WhatsApp the same request walks you through the questions **one message at a time, in order**, collecting each numbered reply (or your own text) before the work continues. Quizzes and knowledge checks run through this card too — every question posed up front, graded and explained after you answer, never a quiz pasted as text with the answers visible below. If the run is stopped without an answer, Wolffish falls back to a sensible default instead of re-asking in a loop.
   </Accordion>
 </AccordionGroup>
 

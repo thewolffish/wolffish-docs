@@ -51,6 +51,7 @@ The same slash commands available in Telegram work in WhatsApp:
 | `/status` | System report (model, memory usage, uptime) |
 | `/mode` | Switch chat mode: `/mode single` or `/mode workflow` |
 | `/model` | List connected cloud models — reply with a number, or type part of a name to filter |
+| `/project` | Show your [projects](/configuration/projects) as a numbered picker — reply with a number to start a conversation inside one; `/project close` leaves the current project |
 | `/local` | Switch to local model (Ollama) |
 | `/cloud` | Switch to cloud model (Claude/OpenAI) |
 
@@ -117,7 +118,7 @@ Voice notes sent in WhatsApp are transcribed via Wolffish's STT (speech-to-text)
 
 ## Sending Files to Wolffish
 
-Any file you send over WhatsApp — PDFs, documents (docx, xlsx, pptx), images, video, audio, even stickers — is downloaded and processed exactly like an attachment dropped into the desktop app: the content is extracted and enters the turn alongside your caption. Files that arrive without a name or extension are typed from the media itself, so nothing is silently dropped. Uploads are capped at 1 GB, matching the in-app limit.
+Any file you send over WhatsApp — PDFs, documents (docx, xlsx, pptx), images, video, audio, even stickers — is downloaded and processed exactly like an attachment dropped into the desktop app: it enters the turn as a [reference note](/architecture/context-compaction#model-led-attachments) alongside your caption, and Wolffish reads the content through its tools when it matters — so even a huge file lands safely. Files that arrive without a name or extension are typed from the media itself, so nothing is silently dropped. Uploads are capped at 1 GB, matching the in-app limit.
 
 ## Receiving Files from Wolffish
 
@@ -171,6 +172,8 @@ Each WhatsApp JID (phone number identifier) points at one active Wolffish conver
 When Wolffish messages you out of band — an automation reporting a finished job, an in-app conversation dropping you a note — the chat re-points itself at the sending conversation, so your reply continues **that** conversation rather than whatever the chat was last on.
 
 Conversations are fully two-way with the app: start in WhatsApp and keep typing in the desktop UI, where messages landing on your phone appear in place and voice notes survive the round-trip untouched.
+
+`/project` works here exactly as on Telegram: pick a [project](/configuration/projects) by number to start a fresh conversation inside it — briefed with the project's instructions and files — with `/new` staying in the current project and `/project close` the way out. The binding lives on the conversation itself, so it survives restarts.
 
 ## Under the Hood
 

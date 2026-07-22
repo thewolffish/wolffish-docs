@@ -7,7 +7,7 @@ description: "Save reusable prompts and run them on demand — the on-demand cou
 
 A **procedure** is a prompt you write once and run whenever you want — *"summarize my open PRs"*, *"draft my weekly update"*, *"triage my inbox"*. It's the on-demand twin of a [heartbeat job](/configuration/heartbeat): same execution machinery, but **no schedule**. A procedure never fires on its own — it sits on the Procedures page until you hit **Play** or ask Wolffish to run it.
 
-Saved procedures are plain data — a flat list of `{ title, prompt, mode }` records in `brain/procedures.json`. You never hand-edit that file. Manage them on the Procedures page, or just talk to Wolffish through its **`procedures`** capability (`procedure_list`, `procedure_view`, `procedure_create`, `procedure_edit`, `procedure_delete`, `procedure_run`).
+Saved procedures are plain data — a flat list of `{ title, prompt, mode, icon, projectId }` records in `brain/procedures.json`. You never hand-edit that file. Manage them on the Procedures page, or just talk to Wolffish through its **`procedures`** capability (`procedure_list`, `procedure_view`, `procedure_create`, `procedure_edit`, `procedure_delete`, `procedure_run`).
 
 ## Procedure or Automation?
 
@@ -27,7 +27,7 @@ Procedures and [automations](/configuration/heartbeat) are siblings that **share
 
 ## The Procedures Page
 
-Open **Procedures** from the app menu. Each saved procedure is a card showing its title, when it was last edited, and a preview of its prompt — most-recently-edited on top.
+Open **Procedures** from the app menu. Each saved procedure is a card showing its **emoji icon**, its title, when it was last edited, and a preview of its prompt — most-recently-edited on top. A procedure bound to a [project](/configuration/projects) shows the project's name on its card.
 
 | Control | What it does |
 |---|---|
@@ -37,7 +37,7 @@ Open **Procedures** from the app menu. Each saved procedure is a card showing it
 | **Edit** | Opens the title + prompt editor. |
 | **Delete** | Removes it for good, after a confirmation. |
 
-In the editor, the **title is required** — it's the card's name — and the **prompt** is a Markdown field. Edits **save automatically** about half a second after you stop typing, so there's no Save button, just **Done**.
+In the editor, the **title is required** — it's the card's name — and the **prompt** is a Markdown field. An **emoji picker** sets the card's icon (every procedure has one; new ones start as 📋), and a **project selector** optionally binds the procedure to a [project](/configuration/projects) — its runs then execute with the project's instructions and file list, and their conversations register under the project. Edits **save automatically** about half a second after you stop typing, so there's no Save button, just **Done**.
 
 <Note>
   A procedure carries no state of its own — there's no "enabled" toggle and no last-run field. It's inert data: it exists until you delete it, and "running" is a property of the run, not of the saved procedure.
@@ -52,7 +52,7 @@ Start a run two ways:
 
 Either way, the prompt runs as a **fresh, self-contained background conversation** — never inside the chat you're in — in the procedure's own mode (its Single/Workflow stamp, not whatever your chat happens to be set to). That's the one rule that shapes every procedure prompt: a run carries **no memory of your current chat**, so the prompt has to stand on its own.
 
-While it runs, a **live overlay** takes over the window with a running **timer** and an **activity log** of each step; the chat is paused until the run finishes. The completed run lands in your conversation **History** marked with a **Play** icon (origin tag `[procedure]`), so you can open it later to see exactly what happened.
+While it runs, a **live overlay** takes over the window with a running **timer** and an **activity log** of each step; the chat is paused until the run finishes. The completed run lands in your conversation **History** marked with a **Play** icon (origin tag `[procedure]`) and stamped with the procedure's **emoji**, so you can spot whose run it was at a glance and open it later to see exactly what happened.
 
 - **Sealed and isolated.** A run is its own conversation — it can't skew your live chat's context, hijack its Stop button, or overwrite it. It runs to completion on its own; Wolffish doesn't sit and wait on the result.
 - **One at a time, coalesced.** Procedure runs share the single-flight queue with automations: if something's already running, the run waits its turn — and asking to run the *same* procedure again while it's in flight folds in rather than running twice.
@@ -102,7 +102,7 @@ Append the digest to my daily log — don't message anyone.
 
 ## Where They Live
 
-Procedures are stored as a single JSON file at `brain/procedures.json` in your [workspace](/architecture/workspace) — a flat list, written atomically so it's never torn by a crash or a concurrent edit. Each record is `{ id, title, prompt, mode, createdAt, updatedAt }`; the list shows the most-recently-edited first. Treat the file as managed data: create, edit, and delete through the page or through Wolffish rather than hand-editing it.
+Procedures are stored as a single JSON file at `brain/procedures.json` in your [workspace](/architecture/workspace) — a flat list, written atomically so it's never torn by a crash or a concurrent edit. Each record is `{ id, title, prompt, mode, icon, projectId, createdAt, updatedAt }` (`projectId` only when bound); the list shows the most-recently-edited first. Treat the file as managed data: create, edit, and delete through the page or through Wolffish rather than hand-editing it.
 
 ## See Also
 
