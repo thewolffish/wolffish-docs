@@ -117,7 +117,7 @@ Compaction settings live in `config.json`:
 You can also configure these from the **Memory compaction** card in Settings, which shows the next scheduled run for each job in your local timezone.
 
 <Info>
-  Compaction jobs run through the brainstem's job queue — one job at a time, and an overlapping fire is queued rather than dropped. Summarization uses the same model your brain is configured with.
+  Compaction jobs run through the brainstem's run pool — up to three jobs at once, and an overflow fire is queued rather than dropped. Summarization uses the same model your brain is configured with.
 </Info>
 
 ## Retrieval

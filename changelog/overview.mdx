@@ -3,6 +3,20 @@ title: "Changelog"
 description: "Product updates and improvements to Wolffish"
 ---
 
+<Update label="July 22, 2026" description="v1.0.225">
+
+## New features
+
+- **Background runs stop taking over.** A firing [automation](/configuration/heartbeat) used to swap the whole app for a full-screen "chat is paused" overlay. Now it surfaces as a **floating live card** pinned over the top of the screen — pulsing icon, the job's name and mode, a live feed of what it's doing — while the rest of Wolffish stays **fully usable**. Click the card to expand the full activity panel (timer, instruction, step-by-step log); Escape or a click outside folds it back **without losing a line of history**. [Procedure](/configuration/procedures) runs deliberately get no card at all — a saved prompt doing its job needs no stage — though a failed run still raises a toast naming what broke.
+- **Three at once, the rest in line.** Background jobs used to run strictly one at a time — a slow nightly digest made the whole schedule late. The engine now runs **up to three jobs side by side**, each with its own card, and everything past three waits in a **visible queue** — a row under the cards counts and names what's waiting, and nothing is ever dropped: a queued job starts the moment a slot frees, and a job that fires while already running or queued **folds into the pending run** instead of stacking copies. On the [Automations page](/configuration/heartbeat), a running or queued job says so on its card and its **Run now** button rests until the run ends.
+
+## Updates
+
+- **An edit counts, whoever makes it.** The "Edited" stamp on an automation card used to notice only the card editor's own saves. Stamps now come **from the engine watching `heartbeat.md` itself**: any writer counts — the dialog, the markdown view, Wolffish's own `automation_*` tools, an external editor, even an edit made **while the app was closed** — while merely toggling a job on or off correctly doesn't restamp. The [Automations](/configuration/heartbeat), [Procedures](/configuration/procedures), and [Projects](/configuration/projects) pages all **refresh themselves live** when something changes underneath them — ask Wolffish mid-chat to add an automation and watch the card appear — and project cards now show their own **Edited** time next to last-used. The card editor's schedule field also stopped flashing red mid-keystroke: it waits out your typing pause before calling a schedule wrong.
+- **Admin rights reach the agents.** Wolffish keeps one **saved admin session** per app run — you type your password into a native dialog once, and `sudo` authenticates app-side from then on. That session is now genuinely **app-wide**: [workflow](/configuration/workflow-mode) agents and scheduled runs — automations and procedures — elevate through the same session as the chat, so a delegated task that needs admin rights just runs instead of coming back with "this needs elevation."
+
+</Update>
+
 <Update label="July 22, 2026" description="v1.0.224">
 
 ## New features

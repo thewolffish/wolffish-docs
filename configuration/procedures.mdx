@@ -27,7 +27,7 @@ Procedures and [automations](/configuration/heartbeat) are siblings that **share
 
 ## The Procedures Page
 
-Open **Procedures** from the app menu. Each saved procedure is a card showing its **emoji icon**, its title, when it was last edited, and a preview of its prompt — most-recently-edited on top. A procedure bound to a [project](/configuration/projects) shows the project's name on its card.
+Open **Procedures** from the app menu. Each saved procedure is a card showing its **emoji icon**, its title, when it was last edited, and a preview of its prompt — most-recently-edited on top. A procedure bound to a [project](/configuration/projects) shows the project's name on its card. The page refreshes itself live when the store changes underneath it — ask Wolffish mid-chat to save or tweak a procedure and its card appears or updates in place.
 
 | Control | What it does |
 |---|---|
@@ -52,10 +52,10 @@ Start a run two ways:
 
 Either way, the prompt runs as a **fresh, self-contained background conversation** — never inside the chat you're in — in the procedure's own mode (its Single/Workflow stamp, not whatever your chat happens to be set to). That's the one rule that shapes every procedure prompt: a run carries **no memory of your current chat**, so the prompt has to stand on its own.
 
-While it runs, a **live overlay** takes over the window with a running **timer** and an **activity log** of each step; the chat is paused until the run finishes. The completed run lands in your conversation **History** marked with a **Play** icon (origin tag `[procedure]`) and stamped with the procedure's **emoji**, so you can spot whose run it was at a glance and open it later to see exactly what happened.
+A run stays **out of your way** while it executes — deliberately so. A procedure is just a saved prompt doing its job, so there's no card, no overlay, and nothing to dismiss; the app remains fully usable, and only a run that *fails* raises a toast naming what broke. The completed run lands in your conversation **History** marked with a **Play** icon (origin tag `[procedure]`) and stamped with the procedure's **emoji**, so you can spot whose run it was at a glance and open it later to see exactly what happened.
 
 - **Sealed and isolated.** A run is its own conversation — it can't skew your live chat's context, hijack its Stop button, or overwrite it. It runs to completion on its own; Wolffish doesn't sit and wait on the result.
-- **One at a time, coalesced.** Procedure runs share the single-flight queue with automations: if something's already running, the run waits its turn — and asking to run the *same* procedure again while it's in flight folds in rather than running twice.
+- **Up to three at once, coalesced.** Procedure runs share the bounded run pool with [automations](/configuration/heartbeat) — three concurrent slots. If every slot is busy, the run queues and starts the moment one frees — and asking to run the *same* procedure again while it's in flight folds in rather than running twice.
 
 <Warning>
   **A procedure run auto-approves every tool call** — exactly like a [heartbeat job](/configuration/heartbeat#job-execution), the Amygdala confirmation dialog is bypassed. A procedure that sends messages or deletes files does so with no one watching. Only save prompts that are safe to run unattended; the same [What to Schedule](/configuration/what-to-schedule) decision layer applies here.

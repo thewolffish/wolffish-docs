@@ -67,6 +67,8 @@ The master drives the run through a small, dedicated toolset. You don't call the
 
 <Note>
   Delegation is **one level deep**. Agents are full agents with three exceptions: they can't spawn agents of their own, they can't message any channel, and they can't ask you questions — a blocker goes in their report to the master instead. The master is the only one who can reach you. That keeps the structure flat and the single-voice promise intact.
+
+  What agents *do* share is the app's **saved admin session**: a `sudo` command inside an agent authenticates exactly as it does in chat (at most one native password dialog per app run, handled app-side), so delegated admin work just runs instead of bouncing back as a blocker — the same holds for scheduled runs.
 </Note>
 
 ### Agent retries
