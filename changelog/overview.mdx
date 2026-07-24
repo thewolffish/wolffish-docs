@@ -3,6 +3,20 @@ title: "Changelog"
 description: "Product updates and improvements to Wolffish"
 ---
 
+<Update label="July 25, 2026" description="v1.0.229">
+
+## New features
+
+- **One button packs up everything that went wrong.** Explaining a broken conversation to the developer used to mean hunting down which log, which task file, and which prompt snapshot actually belonged to it. A new **bug button** in every chat runs the whole errand: one press bundles **that conversation and nothing else** — the transcript, the [event log](/debugging/event-logs) for the days it spans plus a slice filtered to its own turns, the [task files](/debugging/task-files) it spawned, the [memory](/memory/overview) behind it, the prompts and capability contracts it was working against, and your settings — into a single zip you can forward as-is. **Every credential is redacted** (a length marker, never the value) and **attachment media is left out**, so the archive is safe to hand over. On a cloud model it also asks **the model itself what it thinks went wrong** and tucks that into the bundle. See [Diagnostic Export](/debugging/diagnostic-export).
+- **Show me the figure.** Ask about a diagram, chart, algorithm or table inside a PDF and Wolffish could only ever read you the words around it. The new **`pdf_render_pages`** renders the page itself as an image — the figure exactly as printed, at whatever zoom the small print calls for — and sends it into the conversation. This is the fix for a quiet failure: a textbook figure is usually **drawn, not stored**, so there is no image inside the file to pull out and `pdf_extract_images` correctly came back with nothing. Extraction got sharper too — it now works on **the pages you name** rather than the whole book, and skips the sub-80px fragments that used to bury the one figure you wanted under thousands of unusable files. See [the pdf capability](/capabilities/built-in-capabilities).
+
+## Updates
+
+- **Big files say so while they copy.** Attach something large and the composer used to sit **blank** while it was copied into Wolffish, until the chip simply appeared seconds or minutes later. Every file you pick, drop, or paste now **claims its chip the instant you choose it**, with a filling ring and a live percentage counting real bytes, and hands over to the finished attachment when those bytes land. **Send waits for them** — the button rests, the Enter key is caught too, and a tooltip says why — because a message sent mid-copy would have quietly gone without the file. Stopping a running turn is never blocked. Adding files to a [project](/configuration/projects) got the same treatment: one bar across the whole batch, with which file of how many is moving.
+- **Record while it's still working.** The microphone used to go dark the moment Wolffish started answering. **Recording stays live now**, exactly like attaching: a take started mid-answer waits in the row above the composer — with a play button and its length, so you can hear it back before it goes — and **sends itself when the turn finishes**, uploaded, transcribed, and answered in its proper place in the queue.
+
+</Update>
+
 <Update label="July 24, 2026" description="v1.0.228">
 
 ## New features

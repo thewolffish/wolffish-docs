@@ -73,6 +73,14 @@ Problem observed
 
 Most issues resolve at step 1 — the debug snapshot shows you exactly what the LLM received, so you can immediately see if something was missing or wrong.
 
+## Sending a Conversation to Someone Else
+
+When the problem is someone else's to look at, you don't have to gather these files by hand. The **diagnostic export** button in any chat bundles a single conversation — its transcript, its slice of the event log, the task files it spawned, the memory and prompts behind it, and your redacted settings — into one zip, with credentials replaced by length markers and attachment media left out.
+
+<Card title="Diagnostic Export" icon="file-zipper" href="/debugging/diagnostic-export">
+  One button, one archive: what goes in, what stays out, and where it lands.
+</Card>
+
 ## Tools
 
 You don't need anything special to debug Wolffish. The app includes a built-in file viewer and markdown editor that lets you browse all debug artifacts without leaving Wolffish. For most debugging, it's all you need.

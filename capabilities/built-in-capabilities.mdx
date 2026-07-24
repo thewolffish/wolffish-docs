@@ -303,7 +303,7 @@ When you ask, Wolffish:
   <Accordion title="pdf — PDF creation and manipulation">
     **Type:** Plugin
 
-    **Triggers:** pdf, merge pdf, split pdf, watermark, form fill, encrypt pdf, compress pdf
+    **Triggers:** pdf, merge pdf, split pdf, watermark, form fill, encrypt pdf, compress pdf, figure, diagram, chart, render page, extract images
 
     Full PDF toolkit with RTL/Arabic support — built to handle **PDFs the size of books**. The reading engine is lazy and cached: a document is parsed once per conversation, page counts are probed from the file's own index without a full load, and nothing about a PDF is ever auto-injected into context — Wolffish consults it through these tools when its content matters.
 
@@ -314,11 +314,14 @@ When you ask, Wolffish:
     - `pdf_create` — Create PDFs with headings, paragraphs, images, tables (supports RTL with custom fonts)
     - `pdf_modify` — Edit an existing PDF (pages, content)
     - `pdf_form` — Read and fill PDF form fields
-    - `pdf_extract_images` — Pull embedded images out of a PDF
+    - `pdf_render_pages` — Render whole pages to PNG/JPEG — **how a figure, chart, algorithm or table gets shown**, since it captures the page as printed
+    - `pdf_extract_images` — Save the photos and raster figures **embedded in named pages** as image files
     - `pdf_merge` — Combine multiple PDFs
     - `pdf_split` — Extract page ranges into separate files
     - `pdf_secure` — Encrypt/decrypt with passwords
     - `pdf_compress` — Reduce file size
+
+    **Showing a figure vs. extracting one.** A textbook figure is usually *drawn* — vector lines, boxes and text laid down by the page's content stream — with no image stored in the file at all. So "show me Figure 7.2" is answered by `pdf_render_pages` (which captures the page as printed and always works), and `pdf_extract_images` is for the assets a PDF genuinely stores: a photograph, a scanned plate, an illustration wanted on its own. Both take a `pages` selection and are page-scoped, so neither needs the document split first — and extraction over a whole book is never the right call, since a large reference text stores tens of thousands of sub-kilobyte fragments. Fragments under 80px are skipped by default.
   </Accordion>
 
   <Accordion title="spreadsheet — Excel and CSV files">

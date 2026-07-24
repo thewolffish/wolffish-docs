@@ -200,6 +200,7 @@
                   "debugging/debug-snapshots",
                   "debugging/event-logs",
                   "debugging/task-files",
+                  "debugging/diagnostic-export",
                   "debugging/troubleshooting"
                 ]
               },
@@ -353,6 +354,7 @@
                   "ar/debugging/debug-snapshots",
                   "ar/debugging/event-logs",
                   "ar/debugging/task-files",
+                  "ar/debugging/diagnostic-export",
                   "ar/debugging/troubleshooting"
                 ]
               },
