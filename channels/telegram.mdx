@@ -45,7 +45,8 @@ The bot recognizes these slash commands:
 
 | Command | Action |
 |---|---|
-| `/stop` | Cancel the currently running task |
+| `/stop` | Stop the task running in this chat. Anything queued still runs after it — the reply tells you how many messages are waiting. |
+| `/cancel` | Drop every message waiting in the queue. The running task is left alone. |
 | `/new` | Start a fresh conversation |
 | `/resume` | Pick any conversation to continue — a numbered list of every conversation, from every channel, newest first (reply `next` for the following page) |
 | `/delete` | Pick a conversation to delete, from the same numbered list |
@@ -56,6 +57,23 @@ The bot recognizes these slash commands:
 | `/project` | Show your [projects](/configuration/projects) as a numbered picker — reply with a number to start a conversation inside one; `/project close` leaves the current project |
 | `/local` | Switch to local model (Ollama) |
 | `/cloud` | Switch to cloud model (Claude/OpenAI) |
+
+<Note>
+  On Telegram, `/cancel` is **not** a synonym for `/stop`. `/stop` stops the running task; `/cancel` clears the waiting queue. If you send `/cancel` with an empty queue, the reply points you at `/stop` for stopping the run.
+</Note>
+
+## Queued Messages
+
+Message the bot while it's still working on your last request and the message is **queued**, not declined — exactly like the desktop composer. A short reply confirms it landed and tells you where it sits in line, and it runs on its own turn the moment the current task finishes, **in the order you sent it**:
+
+```
+📥 Queued. It's next in line. I'll get to it as soon as the
+current task finishes. Send /cancel to drop everything queued.
+```
+
+- **Files and voice notes queue too.** They're downloaded and transcribed the instant they arrive — nothing goes stale while it waits — and the queued turn is byte-identical to one you'd sent when the chat was idle.
+- **`/cancel`** drops everything waiting and leaves the running task alone. **`/stop`** stops the run and lets the queue carry on.
+- **Switching conversations clears the queue.** `/new`, `/resume`, `/delete`, and a `/project` switch or close each drop the pending messages along with the conversation they were typed into — a message meant for one conversation never lands in another — and say so in their reply.
 
 ## Approval Flow
 

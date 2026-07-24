@@ -62,7 +62,7 @@ The master drives the run through a small, dedicated toolset. You don't call the
 | `workflow_plan(phases, note?)` | Declare (or revise) the run's phases. Renders on the workflow card; phases light up as their agents run and complete. |
 | `agent_spawn({task, name?, model?, effort?, phase?})` | Start a live agent in the background. Returns an id immediately; spawn several in a row for parallelism. `model` is any `provider/model-id` you've connected. |
 | `agent_send(agent_id, message, effort?)` | Send a follow-up to an idle agent — it runs again with its full prior context intact. |
-| `agents_await(agent_ids?)` | Block until the **next** agent lands (not all of them); returns the first completed report. |
+| `agents_await(agent_ids?)` | Block until the **next** agent lands (not all of them); returns the first completed report — or an early **no-progress notice** about a still-running agent that has gotten stuck repeating itself (see below). |
 | `agent_cancel(agent_id)` | Cancel an agent immediately, aborting its in-flight tool call. Cancel-and-respawn is also how the master steers an agent mid-run. |
 
 <Note>
@@ -74,6 +74,10 @@ The master drives the run through a small, dedicated toolset. You don't call the
 ### Agent retries
 
 Agents are **single-shot** — they don't retry on their own. Any failure surfaces straight to the master, which reads it and decides: re-run it, re-scope it, try a different model, or absorb the slice itself. (The master itself still gets a transient-error retry budget; agents don't.)
+
+### When an agent gets stuck
+
+An agent can wedge itself — re-issuing the **same tool call over and over** with nothing to show for it (a page that keeps reloading, a denied action retried on a loop). Wolffish watches for this and tells both ends. The stuck agent gets a note in its own feed that it's repeating itself and should wrap up with whatever it has. The master, meanwhile, is **woken out of `agents_await`** with a no-progress notice naming the agent, the call it keeps making, and how many times — so a master parked waiting on a result that may never come isn't blocked indefinitely. It then decides for itself: **wait a little longer** to let the agent conclude with partial findings, or **`agent_cancel`** it and cover that slice another way. Nothing is capped and nothing is killed automatically — the decision stays with the master. Real landings always take priority: if a finished report is ready, `agents_await` returns that first, and only surfaces a no-progress notice when nothing has landed.
 
 ## The Workflow Card
 

@@ -64,7 +64,7 @@ A conversation's own second message waits for its first to finish (preserving tr
 Every turn also broadcasts its lifecycle — started, done, canceled, error — back to the desktop app, which is what drives the [conversations rail's](/channels/overview) live status chips for in-app, Telegram, and WhatsApp runs alike.
 
 <Note>
-  A channel can still preempt **its own** conversation's in-flight turn — sending a new message aborts the previous one so the queued turn unwinds quickly. It never preempts a different conversation.
+  A new message on a busy chat is **queued behind the running turn**, not merged into it — Telegram and WhatsApp park it and run it next, in order (see each channel's *Queued Messages*). The TurnRunner still supports preempting a conversation's own in-flight turn by aborting it first — which is exactly what `/stop` does — but a plain message no longer triggers that, and nothing ever preempts a *different* conversation.
 </Note>
 
 ## The TurnRouter
@@ -96,7 +96,7 @@ All channels share the same brain state:
 
 Conversations are fully two-way across channels — nothing is read-only:
 
-- **Phone → desktop.** A conversation that started on Telegram or WhatsApp opens in the app as a live chat: the composer works, and you continue it with a real keyboard. Messages that land on your phone while the same conversation is open on your desktop appear in place, and voice notes survive the round-trip untouched.
+- **Phone → desktop, live.** A conversation that started on Telegram or WhatsApp opens in the app as a live chat: the composer works, and you continue it with a real keyboard. If a turn is **running on the phone right now** — or an automation is working the conversation — the desktop reflects it as it happens: the reply **streams into the feed as it's written**, the **Stop** button genuinely stops that run whichever device started it, and a message you type mid-run **queues and sends itself** when the run lands. Opening the window in the middle of a run still shows it as live. Messages that land on your phone appear in place, and voice notes survive the round-trip untouched.
 - **Automations too.** A finished automation or procedure run isn't a sealed record — continue it in the app to ask the follow-up question, and it becomes a live conversation again.
 - **Desktop → phone.** `/resume` on either channel opens a numbered picker over **every conversation Wolffish has** — all channels, newest first, 25 to a page with `next`, each row tagged with its origin. Scheduled automation runs are hidden from it by default (a per-channel settings toggle), while staying in `/delete` and the app.
 - **Replies land where they belong.** When Wolffish messages a channel out of band — an automation reporting a finished job, an in-app conversation dropping you a note — that chat re-points itself at the sending conversation, so your reply continues exactly the conversation that messaged you.

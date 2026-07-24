@@ -3,6 +3,41 @@ title: "Changelog"
 description: "Product updates and improvements to Wolffish"
 ---
 
+<Update label="July 24, 2026" description="v1.0.228">
+
+## New features
+
+- **Core capabilities can't be switched off by accident.** Settings lets you toggle individual [capabilities](/capabilities/overview) on and off — but a handful are **load-bearing**: the [workflow](/configuration/workflow-mode) engine, your secrets, the `skills` capability, [projects](/configuration/projects), [automations](/configuration/heartbeat), [procedures](/configuration/procedures), and the shared tools the rest leans on. Those now wear a **Core** badge, settle at the **bottom of the list**, and **can no longer be turned off** — a locked **Always on** marker sits where their switch used to be. Everything you added yourself stays exactly as toggleable as before; only the essentials are protected, so a stray click can't pull the floor out from under a feature you depend on.
+
+## Updates
+
+- **Workflow mode, working again.** In v1.0.227, [workflow mode](/configuration/workflow-mode) quietly stopped delegating: the tools it uses to plan phases, spawn agents, and gather their results **failed to load**, so it fell back to working alone with no hint of why. The cause was a small formatting slip in an internal file — now **fixed**, and workflow mode plans, delegates, and collects work the way it should again.
+
+</Update>
+
+<Update label="July 24, 2026" description="v1.0.227">
+
+## New features
+
+- **Nothing you send has to be resent.** Message Wolffish from [Telegram](/channels/telegram) or [WhatsApp](/channels/whatsapp) while it's still working and the message is now **queued**, not bounced with a "hold on, I'm busy" — files and voice notes included, downloaded and transcribed the instant they arrive so nothing goes stale in line. A reply confirms where it sits, and each queued message runs on its own turn, **in order**, the moment the current task finishes. Two commands keep you in charge: **`/cancel`** drops everything waiting and leaves the running task alone, while **`/stop`** stops the run and lets the queue carry on. Starting or switching conversations (`/new`, `/resume`, `/delete`, a project switch) clears the queue with the conversation it belonged to. One habit to unlearn: on Telegram `/cancel` is no longer another name for `/stop`.
+- **Your phone's chat, live on your desk.** A conversation that [Telegram, WhatsApp](/channels/overview), or an [automation](/configuration/heartbeat) is answering **right now** used to open in the app looking idle and finished, the whole reply landing in one lump at the end. It reads as live now: the reply **streams into the feed as it's written**, the **Stop** button genuinely stops the run whichever device started it, and a message you type mid-run queues and sends itself when that run lands — even if you opened the window in the middle of one.
+- **A stuck agent says so.** In [workflow mode](/configuration/workflow-mode), a delegated agent that wedged itself — re-issuing the same tool call to no effect — used to be invisible while the master sat blocked waiting for a result that never came. Both ends are told now: the spinning agent gets a note to wrap up with what it has, and the master is woken out of `agents_await` with the agent's name, the repeated call, and the count — then decides for itself whether to **wait it out** for partial findings or **cancel** it and cover that slice another way. Nothing is capped, nothing is killed automatically.
+
+## Updates
+
+- **Memory compaction shows its work.** The [Memory compaction](/memory/consolidation) card in Settings used to show only the *next* scheduled run. It now also shows each job's **last completed run** — when it ran, how long it took, the output it produced, and (for the daily summary's model call) the tokens in and out — and skipped or failed passes never overwrite it, so you're always reading the last pass that did something. The background side-calls got quicker too: naming a conversation and writing a summary now run **with reasoning off** on your configured Brain, whatever reasoning level you've picked for chat.
+
+</Update>
+
+<Update label="July 23, 2026" description="v1.0.226">
+
+## Updates
+
+- **Low on disk? Warned, not walled.** Launching with less than **5 GB free** used to be a locked door — the low-space screen had no way past it short of deleting files. It's a **warning** now: a **Continue anyway** button takes you straight to your usual screen, with a plain note that models, saves, and downloads can fail until you free room. The choice lasts one sitting — the warning still greets every launch while the disk stays low — and **Recalculate** now answers out loud, ending each re-check in a toast: a green "enough to continue" with the exact free amount when you've cleared the bar, the familiar warning when you haven't.
+- **One Arabic label, mended.** A garbled character had crept into the Arabic label for recording a voice note. It reads **«تسجيل رسالة صوتية»** again, as it should.
+
+</Update>
+
 <Update label="July 22, 2026" description="v1.0.225">
 
 ## New features

@@ -114,10 +114,10 @@ Compaction settings live in `config.json`:
 | `weeklyDay` | `0` | Day of week for weekly consolidation (0 = Sunday, 6 = Saturday) |
 | `weeklyHour` | `23` | Hour of day (0–23) for weekly consolidation |
 
-You can also configure these from the **Memory compaction** card in Settings, which shows the next scheduled run for each job in your local timezone.
+You can also configure these from the **Memory compaction** card in Settings, which shows the next scheduled run for each job in your local timezone. Once a job has run, the card also shows its **last completed run** — when it ran, how long it took, the output it produced (the daily summary, or the weekly coverage digest), and, for the daily summary's model call, the tokens in and out. Skipped or failed passes never overwrite it, so what you see is always the last run that actually produced something, and its timestamp stays honest about how long ago that was.
 
 <Info>
-  Compaction jobs run through the brainstem's run pool — up to three jobs at once, and an overflow fire is queued rather than dropped. Summarization uses the same model your brain is configured with.
+  Compaction jobs run through the brainstem's run pool — up to three jobs at once, and an overflow fire is queued rather than dropped. Summarization runs on your configured Brain **with reasoning off** — it's quick utility work, so it stays fast and cheap regardless of the reasoning level you've picked for chat. (The weekly pass makes no model call at all — it writes a computed coverage line.)
 </Info>
 
 ## Retrieval

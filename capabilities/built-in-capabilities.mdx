@@ -31,7 +31,7 @@ Wolffish can read, manage, and **write its own capabilities** at runtime — no 
     - `skill_list` — List every skill: name, description, enabled/official status, tool count
     - `skill_search` — Search skills by keyword across name, description, triggers, and tool names
     - `skill_read_source` — Read a skill's SKILL.md and plugin code before amending it or learning from it
-    - `skill_enable` / `skill_disable` — Toggle any skill on or off (reversible; only the `skills` capability itself can't be disabled)
+    - `skill_enable` / `skill_disable` — Toggle any skill on or off (reversible; the load-bearing **core** capabilities can't be disabled — see [Customizing Capabilities](#customizing-capabilities))
     - `skill_delete` — Permanently remove a skill you created (official/built-in skills are protected)
     - `skill_create` — Author a new pure skill or plugin capability from scratch
     - `skill_reload` — Re-scan the workspace so changes take effect
@@ -564,11 +564,15 @@ The motor cortex executes all tool calls with these defaults:
 
 Built-in capabilities are managed and updated by Wolffish — don't edit them directly, as your changes will be overwritten on the next update. Instead:
 
-- **Disable** a built-in capability from Settings if you don't need it
+- **Disable** a built-in capability from Settings if you don't need it (the load-bearing **core** ones are protected — see below)
 - **Fork** it — copy the folder to a new name, then edit the copy however you like
 - **Create your own** from scratch following the same structure
 
 Changes to custom capabilities take effect on the next message — no restart needed.
+
+<Note>
+  A handful of built-ins are **load-bearing** and can't be turned off: the [workflow](/configuration/workflow-mode) engine, your secrets, the `skills` capability, [projects](/configuration/projects), [automations](/configuration/heartbeat), [procedures](/configuration/procedures), and the shared file-delivery tools the rest leans on. In **Settings → Cellebrum** these wear a **Core** badge, sort to the **bottom** of the list, and show a locked **Always on** marker where their switch would be — so a stray click can't pull the floor out from under a feature you depend on. Everything you imported yourself stays fully toggleable.
+</Note>
 
 <Warning>
   Custom capabilities are not backed up automatically. If you delete a capability you created, it's gone — Wolffish has no copy of it. Use git or keep a manual backup of your `brain/cerebellum/` folder. Built-in capabilities are always restored automatically on launch.

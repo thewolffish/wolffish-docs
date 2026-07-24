@@ -43,7 +43,8 @@ The same slash commands available in Telegram work in WhatsApp:
 
 | Command | Action |
 |---|---|
-| `/stop` | Cancel the currently running task |
+| `/stop` | Stop the task running in this chat. Anything queued still runs after it. |
+| `/cancel` | Drop every message waiting in the queue. The running task is left alone. |
 | `/new` | Start a fresh conversation |
 | `/resume` | Pick any conversation to continue — a numbered list of every conversation, from every channel, newest first (reply `next` for the following page) |
 | `/delete` | Pick a conversation to delete, from the same numbered list |
@@ -134,16 +135,19 @@ Wolffish writes WhatsApp replies in WhatsApp's own text style — `*bold*`, `_it
 
 The gate can never lose a message: after two consecutive bounces for the same chat it stands aside and the message is delivered as composed — worst case you see raw markup, never silence.
 
-## Busy Handling
+## Queued Messages
 
-If a turn is already running when a new WhatsApp message arrives, Wolffish sends a brief acknowledgment:
+Message Wolffish while a turn is already running and the message is **queued**, not declined. A short acknowledgment confirms it landed and tells you where it sits in line:
 
 ```
-I'm working on something right now. Your message is queued
-and I'll get to it when I'm done.
+📥 Queued. It's next in line. I'll get to it as soon as the
+current task finishes. Send /cancel to drop everything queued.
 ```
 
-The message enters the TurnRunner queue and processes in order once the current turn completes.
+Each queued message runs on its own turn the moment the current one finishes, **in the order you sent it**. Files and voice notes queue with it — they're downloaded and transcribed the instant they arrive, so nothing goes stale while it waits, and the queued turn is byte-identical to one sent when the chat was idle.
+
+- **`/cancel`** drops everything waiting and leaves the running task alone. **`/stop`** stops the run and lets the queue carry on.
+- **Switching conversations clears the queue.** `/new`, `/resume`, `/delete`, and a `/project` switch or close each drop the pending messages along with the conversation they were typed into, and say so in their reply.
 
 ## Verbose Task Results
 
