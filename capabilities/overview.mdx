@@ -47,7 +47,7 @@ Every system prompt contains a `<capabilities>` index: one line per capability �
 
 ### Core capabilities — always loaded
 
-A bootstrap set ships its full tool schemas with every request (~29–47 tools): `tool-discovery`, `introspect`, `filesystem`, `shell`, `ask`, `utilities`, `web-search`, `secrets`, `system`, plus `workflow` (gated to the [workflow](/configuration/workflow-mode) master — agents never see its tools) and the channel capabilities (`telegram`, `whatsapp`, `electron`) while connected. These are the keys to everything else — discovery, memory retrieval, files, and replying — and must never require a discovery hop.
+A bootstrap set ships its full tool schemas with every request (~31–49 tools): `tool-discovery`, `introspect`, `filesystem`, `shell`, `ask`, `utilities`, `web-search`, `secrets`, `system`, the `pdf-design` and `dataviz` manuals (one schema line each — their manual bodies load only when called), plus `workflow` (gated to the [workflow](/configuration/workflow-mode) master — agents never see its tools) and the channel capabilities (`telegram`, `whatsapp`, `electron`) while connected. These are the keys to everything else — discovery, memory retrieval, files, and replying — and must never require a discovery hop.
 
 ### Everything else — discoverable on demand
 
@@ -79,12 +79,14 @@ Wolffish ships with these capabilities in the default workspace:
 | `ask` | Plugin | Ask you one or more multiple-choice questions on a single card and wait for your answers |
 | `skills` | Plugin | Manage and author Wolffish's own capabilities at runtime |
 | `projects` | Plugin | Create and manage [projects](/configuration/projects) — standing instructions + files that brief every conversation inside them |
+| `pdf-design` | Plugin | The core **document design manual** — loaded before authoring any PDF or styled document |
+| `dataviz` | Plugin | The core **visualization manual** — when to chart, which chart, and the interactive `.chart.json` cards |
 
 ## Adding and Removing Capabilities
 
 You can add your own capabilities two ways:
 
-- **Drop them onto Settings → Cellebrum** — a single `SKILL.md`, a folder, or a `.zip`. Each drop is validated before anything is written, then loaded immediately. Imported capabilities show an **Unknown** badge (they're yours, not bundled) and can be removed with the trash icon, which cleanly deletes their folder.
+- **Drop them onto Settings → Capabilities** — a single `SKILL.md`, a folder, or a `.zip`. Each drop is validated before anything is written, then loaded immediately. Imported capabilities show an **Unknown** badge (they're yours, not bundled) and can be removed with the trash icon, which cleanly deletes their folder.
 - **Create the folder by hand** under `brain/cerebellum/`, then click **Resync** in the panel (or restart Wolffish) to load it.
 
 See [Creating Capabilities](/capabilities/creating-capabilities) for the full walkthrough, the three import shapes, and the rules an importable capability must follow.

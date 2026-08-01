@@ -1,6 +1,6 @@
 ---
 title: "Browser Extension"
-description: "Control the user's real Chrome or Brave browser with 49 tools — navigate, click, read, screenshot, debugger mode, humanize, and more"
+description: "Control your real browsers — several at once — with 51 tools: navigate, click, read, screenshot, debugger mode, humanize, and more"
 ---
 
 # Your Real Browser, Not a Sandbox
@@ -73,13 +73,30 @@ Agent → Plugin (ext_* tools) → WebSocket (localhost:23151) → Extension Ser
 
 1. Open **Settings → Services → Browser Extension**
 2. Click **Reveal in Finder** to find the extension folder
-3. Open Chrome or Brave → `chrome://extensions`
+3. Open your browser → `chrome://extensions`
 4. Enable **Developer Mode** → **Load Unpacked** → select the extension folder
-5. The extension connects automatically — the status dot turns green
+5. The extension connects automatically — the browser appears as its own row with a green dot
+
+Repeat steps 3–5 in as many browsers as you like — the same folder loads into Chrome, Edge, and Brave side by side, and each connects as its own row.
 
 <Tip>
-  The extension auto-reconnects when the app restarts. You only need to load it once.
+  The extension auto-reconnects when the app restarts. You only need to load it once per browser.
 </Tip>
+
+## Several Browsers, One Extension
+
+The extension no longer assumes one browser. Load the same unpacked folder in **several browsers at once** — and **two profiles of the same browser count as two browsers**, told apart by each profile's **signed-in email**, so "work Chrome" and "personal Chrome" stop being guesswork.
+
+Every connecting browser **introduces itself on arrival**: alongside its extension version it reports its browser name and version, operating system, signed-in profile email (Chrome's `identity` API — empty when signed out), and a **persistent instance id** — a random id stored in the extension's local storage that stays stable per browser profile. The same unpacked folder produces the same extension id in every Chromium browser, so it's this instance id that lets Wolffish recognize a reconnecting browser and **replace its stale socket instead of listing the same browser twice**.
+
+In **Settings → Services → Browser Extension**, each connected browser gets **its own row**: browser icon, name and major version, a sub-line with the profile email, OS, and connection time, the extension version, and a per-row **Test connection** button. When more than one browser is connected, each row also shows its **selection key** — the browser's slug (`chrome`, `edge`, `brave`), suffixed `-2` when the same browser is connected twice. Rows hold steady through extension reloads (a reload has a 20-second grace window) instead of flickering away.
+
+### Which browser does the agent drive?
+
+- **One browser connected** — every `ext_*` tool targets it automatically. Nothing to pick.
+- **Several connected** — each conversation drives **exactly one browser**. The agent lists the roster with `ext_browsers` and picks one with `ext_use_browser` (by selection key, slug, name, or a profile-email fragment like `work@company.com`). The choice **sticks for that conversation** until it deliberately switches. It picks for itself when you named a browser or the context makes it obvious, and asks you first when nothing does — until a browser is chosen, `ext_*` calls return the roster instead of guessing.
+
+Each browser remains a fully separate world — its own tabs, tab ids, logins, cookies, and debugger attachment — and the agent is taught never to mix them up.
 
 ## Auto-Updates
 
@@ -92,9 +109,12 @@ The extension updates itself automatically when Wolffish updates — no manual s
 
 The entire process is seamless. You'll see a brief disconnect in the side panel (< 1 second) while the extension restarts, then it reconnects with the new version. You can also trigger a manual reload from **Settings → Services → Browser Extension → Reload Extension**.
 
-## 49 Tools
+## 51 Tools
 
 The agent sees these as `ext_*` tools. The plugin translates them to `browser_*` commands over the wire.
+
+### Browser Selection
+`ext_browsers` · `ext_use_browser`
 
 ### Navigation
 `ext_navigate` · `ext_back` · `ext_forward` · `ext_reload`
@@ -212,7 +232,7 @@ The extension includes a side panel that shows:
 - **Live event feed** — every tool call appears in real-time as the agent browses
 - **Conversation history** — browse events from past conversations
 
-Events are logged per-conversation to `~/.wolffish/workspace/logs/extension/{conversationId}.jsonl`.
+Events are logged per-conversation to `~/.wolffish/workspace/logs/extension/{conversationId}.jsonl`, tagged with the browser that ran them — so with several browsers connected, **each browser's side panel lists only the conversations that browser drove**.
 
 ## Customization
 

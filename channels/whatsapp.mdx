@@ -131,9 +131,13 @@ Inbound WhatsApp messages are kept in a rolling buffer (`whatsapp/read-history.j
 
 ## Message Formatting
 
-Wolffish writes WhatsApp replies in WhatsApp's own text style — `*bold*`, `_italic_`, `~strikethrough~`, backtick code, and plain `-` lists — never raw Markdown. A **format gate** validates every outgoing send: a message carrying markup WhatsApp would render as literal characters (a stray `<b>`, an `&amp;` entity, raw Markdown headings) is bounced back to the model to rewrite before it goes out. Drawn divider lines (`━━━━━` and friends) are rejected too — a phone's narrow chat bubble wraps them into several broken lines of stray characters — while code blocks keep their box-drawing untouched, since a CLI table inside a code block is content, not decoration.
+Wolffish writes WhatsApp replies in WhatsApp's own text style — `*bold*`, `_italic_`, `~strikethrough~`, backtick code, plain `-` lists, and `>` quotes — never raw Markdown. A **format gate** refuses an offending send outright: any HTML tags or entities (WhatsApp parses none), raw Markdown (`**bold**`, `__bold__`, `# headings`, `[text](url)` links, `| tables |`, `---` rules), and drawn divider lines (`━━━━━` and friends — a phone's narrow chat bubble wraps them into several broken lines) all bounce back to the model to rewrite in WhatsApp's own style before anything goes out. The guards keep honest text flowing: anything inside backticks or code fences is exempt (a CLI table inside a code block is content, not decoration), `x**2` and `f(**kwargs)` read as math and code, and mid-word underscores stay legal. The one soft check is the language tag on a code fence — delivered with a note, never blocked.
 
-The gate can never lose a message: after two consecutive bounces for the same chat it stands aside and the message is delivered as composed — worst case you see raw markup, never silence.
+The gate can never lose a message: when markup genuinely *is* the content the agent sends it verbatim, and after repeated bounces for the same chat the gate stands aside and the message is delivered as composed — worst case you see raw markup, never silence. Live narration between tool steps is delivered instantly, too fast to gate, so it's **watched instead of blocked**: a delivered line carrying raw markup earns the agent a **format notice** describing exactly what you received, steering the rest of the turn clean.
+
+## Scoring Replies (0–10)
+
+A reply that is nothing but a number from 0 to 10 is quietly captured as your **score for the last reply** — acknowledged with a small ✍️ reaction, never a chat bubble. Digits typed on an Arabic keyboard (٠–٩, ۰–۹) count the same, and the plumbing stays careful: a "3" answering a numbered question card or `/resume` picker still means option 3, and a number opening a fresh chat is just a message. A short line after each reply reminds you the option exists; the whole thing has its own switch in **Settings → Knowledge → Reflection**, and switching it off makes the channel fully silent about scoring. Your scores anchor the nightly [reflection](/memory/reflection).
 
 ## Queued Messages
 

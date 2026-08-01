@@ -17,6 +17,8 @@ The export only ever **reads**. The one thing it writes is the archive itself. I
 
 The **bug icon** sits in the chat's button row, next to the PDF export button. It is enabled once the conversation has been saved and has at least one message.
 
+You don't have to open a conversation to export it: **every row on the History page carries its own bug button** too, so you can hand over a bundle for a conversation you aren't in. That button rests in two cases — the conversation you currently have open (the composer's own button belongs to that one) and a conversation whose very first turn is still running, which has nothing saved yet to collect.
+
 An overlay takes over while collection runs, showing each stage as it completes and a running file count. It takes a few seconds. When it finishes you get a card listing what went in, with two actions:
 
 - **Reveal** — opens the archive in your file manager
@@ -29,7 +31,7 @@ The archive itself lands in your workspace either way:
 ```
 
 <Tip>
-Only one export runs at a time. The collectors read the same log files, so a second concurrent run would only fight the first for IO — it is refused rather than queued.
+Only one export runs at a time — the collectors read the same log files, so parallel runs would only fight for IO. Triggering the export again while one is in flight simply **attaches you to the running export** instead of failing it.
 </Tip>
 
 ## What Goes In
@@ -75,6 +77,8 @@ It is skipped, with the reason recorded on the result card, when:
 | `local-only` | The active model is local — the call is quick on a cloud provider and isn't on a local one |
 | `failed` | The provider didn't answer |
 | `empty` | The model returned nothing |
+
+The call is also on a clock: it gives up after **ninety seconds**, so a stalled provider costs the bundle this one section — never the whole export.
 
 <Note>
 The opinion is the model's unverified first read, not a verdict. The `00_README.md` inside the archive says so too — it is a starting point for whoever opens the bundle, not a diagnosis.

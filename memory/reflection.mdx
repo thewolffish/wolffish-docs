@@ -1,0 +1,144 @@
+---
+title: "Reflection & Turn Scoring"
+description: "How Wolffish reviews its finished conversations every night, distills a playbook that rides into every future turn, and treats your 0–10 scores as ground truth"
+---
+
+# Wolffish Sleeps On It
+
+Memory records what happened. The [feedback loop](/memory/feedback-loop) records what worked at the tool level. **Reflection** closes the last gap: every night, Wolffish reviews its own finished conversations the way a careful colleague reviews their day — what was attempted, how it actually ended, what worked well enough to repeat, what failed and why, and what you showed it about how you like things done. The lessons distill into a **playbook** that rides into every future conversation.
+
+The strongest signal in that review is yours: a **0–10 turn score**, given with one click in the app or by texting a bare number from your phone.
+
+## Location
+
+```
+~/.wolffish/workspace/brain/reflection/
+├── playbook.md          # The distilled lessons — injected into every prompt
+├── playbook.md.bak      # The previous version, kept on every rewrite
+├── 2026-08-01.md        # Nightly review blocks, one file per day
+└── reviewed.json        # Bookkeeping — which conversations were reviewed when
+```
+
+Like everything else in the workspace, these are plain markdown — open the playbook in any editor to see exactly what Wolffish has taught itself. `reviewed.json` entries are pruned after 14 days.
+
+## The Nightly Review
+
+The nightly job looks back over the last **7 days** and reviews every conversation — [automations](/configuration/heartbeat) and [procedure](/configuration/procedures) runs included — that has been **quiet for at least the configured window** (default 12 hours). A conversation that gets continued after its review is simply re-reviewed the next night.
+
+Each conversation gets one review call on your configured Brain (reasoning off, billed like the other utility side-calls, never against the conversation's own meter). The result is an honest block appended to the day file:
+
+```markdown
+## Draft the Q3 board update
+outcome: delivered after two false starts
+score: user=8 self=7
+win: pulled last quarter's deck for structure before writing
+fail: first draft used markdown tables in WhatsApp — rewritten after format bounce
+pref: user wants numbers rounded to one decimal in summaries
+note: template now saved under files/board/
+```
+
+The `score:` line records two things: the average of **your** 0–10 votes on the conversation's turns (`none` when you didn't vote), and the model's own honest **self-score** — kept internal to reflection, never shown in chat.
+
+## The Playbook
+
+The same nightly run folds new review blocks into `playbook.md` — a **living document rewritten whole**, never an append-only log. It has exactly five sections:
+
+```markdown
+# Playbook
+
+## Do
+- Pull prior-quarter documents for structure before drafting recurring reports (user-scored, 2026-07-29)
+
+## Avoid
+- Markdown tables in WhatsApp replies — the format gate bounces them (inferred, 2026-07-28)
+
+## User likes
+- Numbers rounded to one decimal in summaries (user-said, 2026-08-01)
+
+## User dislikes
+- Being asked to re-confirm file locations it already knows (user-said, 2026-07-26)
+
+## Recipes
+- Weekly news digest: three sources, five bullets each, one "so what" line (user-scored, 2026-07-27)
+```
+
+Every entry carries its **provenance and date** — `user-said` (you stated it), `user-scored` (your votes proved it), or `inferred` (the review concluded it). The merge rules keep it trustworthy:
+
+- **Newest evidence wins a contradiction** — a re-learned preference replaces the stale one instead of sitting beside it.
+- **Inferred entries decay after 30 days** unless reinforced; what you said yourself doesn't fade.
+- **Hard ceiling of 6,000 characters** — the playbook must stay a briefing, not an archive.
+- **Every rewrite keeps the previous version** as `playbook.md.bak`, so a bad night is one copy away from undone.
+
+The playbook rides in **every system prompt**, framed as tendencies rather than laws — your live instruction in the conversation always outranks it. Once the first playbook exists, it takes over the prompt slot previously held by the [learned-preferences digest](/memory/feedback-loop), which remains as the bootstrap fallback.
+
+## Your 0–10 Becomes Its Ground Truth
+
+Scoring is the fastest way to teach the reflection loop what good looks like — and it works from every surface:
+
+| Surface | How to score |
+|---|---|
+| In the app | A **Rate this turn** bar (0–10) appears above the composer once a reply completes. One click scores it; another click changes your mind. |
+| [Telegram](/channels/telegram) | Reply with **nothing but a number 0–10**. Captured silently, acknowledged with a small ✍ reaction — never a chat bubble. |
+| [WhatsApp](/channels/whatsapp) | Same — a bare 0–10 reply is your score, acknowledged with ✍️. |
+
+The plumbing stays careful on the channels:
+
+- Digits typed on an Arabic keyboard (٠–٩ and ۰–۹) count the same as Western digits.
+- A "3" answering a numbered question card or `/resume` picker still means **option 3** — the vote check runs only after pending pickers are ruled out.
+- A number opening a fresh conversation is just a message.
+- After each completed reply, a short line reminds you the option exists — controlled by the same per-surface toggles, so switching a surface off makes it fully silent.
+
+**Scores travel.** A vote cast on any surface appears live on the rating bar of the chat you have open, and reopened conversations show every score they've earned. When the same turn ends up voted on twice, the **most recent vote wins** — a re-vote from your phone can't be overwritten by a stale copy the desktop was still holding. In-app clicks paint instantly and roll themselves back on the rare failed write.
+
+<Tip>
+  Scoring is optional everywhere. Unscored turns are still reviewed — just without your verdict. If you only ever score the terrible and the excellent turns, that's already a strong signal.
+</Tip>
+
+## The Monthly Deep Reflection
+
+Nightly accumulation has a failure mode: self-taught bad habits. Once a month (the 1st, one hour after the nightly run), a **deep reflection** takes the opposite stance and attacks what the nights built up — stale rules, sweeping conclusions drawn from one incident, entries the evidence has turned against. It audits the playbook **and** the five [knowledge files](/memory/knowledge), reading up to a month of reflection day files as evidence, and rewrites only what changed — knowledge rewrites keep a `.bak` beside the original, same as the playbook.
+
+It skips itself until reflection has actually produced something to audit.
+
+## Schedule and Settings
+
+Everything lives in **Settings → Knowledge → Reflection** (the Knowledge page now has two tabs: **Compaction** and **Reflection**):
+
+- **Nightly reflection** — the hour it runs (default 3 AM).
+- **Review after quiet for** — how long a conversation must sit untouched before it counts as settled: 1, 2, 3, 6, 12 (default), 24, or 48 hours.
+- **Turn scoring** — three switches: In-app, Telegram, WhatsApp (all on by default).
+- **Run now** buttons for both the nightly review and the deep reflection, plus last-run cards showing when each ran, how long it took, the tokens in and out, and what it produced.
+
+The same settings persist in `config.json`:
+
+```json
+{
+  "reflection": {
+    "hour": 3,
+    "quietHours": 12,
+    "scoring": { "inapp": true, "telegram": true, "whatsapp": true }
+  }
+}
+```
+
+| Key | Default | Description |
+|---|---|---|
+| `hour` | `3` | Hour of day (0–23) for the nightly review; the monthly deep reflection runs at `hour + 1` on the 1st |
+| `quietHours` | `12` | How long a conversation must be quiet before it's reviewed (1, 2, 3, 6, 12, 24, or 48) |
+| `scoring.inapp` | `true` | Show the 0–10 rating bar in the app |
+| `scoring.telegram` | `true` | Capture bare-number scores on Telegram (off = fully silent, no invite line) |
+| `scoring.whatsapp` | `true` | Capture bare-number scores on WhatsApp (off = fully silent, no invite line) |
+
+<Info>
+  Reflection is **core** — there is no off switch, only the hour. Like [compaction](/memory/consolidation), it runs through the brainstem's scheduler: a laptop asleep at 3 AM simply runs its review on the next launch (missed fires are swept 90 seconds after startup and every 30 minutes after that). Both runs also appear on the [Automations page](/configuration/heartbeat) as "Nightly reflection" and "Deep reflection".
+</Info>
+
+## Reflection vs. the Other Learning Loops
+
+| Aspect | [Feedback loop](/memory/feedback-loop) | [Consolidation](/memory/consolidation) | Reflection |
+|---|---|---|---|
+| Watches | Individual tool calls | The day's episodes | Whole finished conversations |
+| Produces | Outcome records + digest | Weekly summaries + knowledge files | Review blocks + the playbook |
+| Cadence | Every tool call, instantly | Nightly + weekly | Nightly + monthly deep clean |
+| Your input | Approvals and denials | None | **0–10 turn scores** |
+| In the prompt | Digest (until the playbook exists) | Never — retrieved on demand | The playbook, every turn |

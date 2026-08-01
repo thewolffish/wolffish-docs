@@ -99,7 +99,7 @@ Successful calls are deliberately *not* enumerated — that was the firehose. Th
 ```
 
 <Info>
-  The digest is one of only two ambient memory pieces in the system prompt — the other is the `<memory_map>` coverage stub. Everything else is retrieved on demand. Today's file is excluded from the digest (today's actions are already visible in the live thread), which keeps the block byte-stable across a turn's tool loop so providers can reuse the cached prompt prefix.
+  The digest fills one of only two ambient memory slots in the system prompt — the other is the `<memory_map>` coverage stub. Since v1.0.233 that first slot belongs to the [reflection playbook](/memory/reflection) once one exists; the digest remains the bootstrap fallback until the first nightly reflection has run. Everything else is retrieved on demand. Today's file is excluded from the digest (today's actions are already visible in the live thread), which keeps the block byte-stable across a turn's tool loop so providers can reuse the cached prompt prefix.
 </Info>
 
 ### The Interface
@@ -141,6 +141,7 @@ This is the mechanism that makes Wolffish adaptive over time. It's not just reme
 1. **Knows your preferences** (knowledge) — what you said you want
 2. **Knows what actually works** (feedback) — what produced good outcomes
 3. **Avoids past mistakes** (corrections) — what went wrong before
+4. **Reviews whole conversations** ([reflection](/memory/reflection)) — nightly lessons distilled into a playbook, anchored by your 0–10 turn scores
 
 <Tip>
   The feedback loop is most powerful for tool-use patterns. If you find Wolffish repeatedly suggesting an approach you don't like, deny it once explicitly and explain why. The denial + reason gets recorded, surfaces in the corrections list, and shapes future behavior.
@@ -171,7 +172,7 @@ ls -la ~/.wolffish/workspace/brain/basalganglia/
 | Aspect | Knowledge Files | Feedback Loop |
 |---|---|---|
 | Stores | Facts and preferences | Outcomes and patterns |
-| Written by | Nightly promotion + `memory_save` | Automatic after every tool call |
+| Written by | Nightly curation + `memory_save` | Automatic after every tool call |
 | Answers | "What does the user want?" | "What actually works?" |
 | Example | "User prefers pnpm" | "214 calls, 96% success; rm -rf denied — don't repeat" |
 | In the prompt | Topics only (via `<memory_map>`) | Bounded digest (~500 tokens) |

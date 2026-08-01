@@ -502,7 +502,7 @@ still no cascade.
 **Three-tier memory.**
 - *Episodes* (`hippocampus/episodes/`) — appended every turn, zero-latency, no LLM.
 - *Consolidated* (`hippocampus/consolidated/`) — weekly LLM summaries, written by
-  nightly compaction (configured in Settings → Hippocampus → Compaction, not in
+  nightly compaction (configured in Settings → Knowledge → Compaction, not in
   `heartbeat.md`).
 - *Knowledge* (`hippocampus/knowledge/`) — durable facts, promoted from episodes or
   written by hand. All three tiers are indexed by the cortex; none of it is injected

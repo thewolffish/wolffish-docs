@@ -322,6 +322,37 @@ When you ask, Wolffish:
     - `pdf_compress` — Reduce file size
 
     **Showing a figure vs. extracting one.** A textbook figure is usually *drawn* — vector lines, boxes and text laid down by the page's content stream — with no image stored in the file at all. So "show me Figure 7.2" is answered by `pdf_render_pages` (which captures the page as printed and always works), and `pdf_extract_images` is for the assets a PDF genuinely stores: a photograph, a scanned plate, an illustration wanted on its own. Both take a `pages` selection and are page-scoped, so neither needs the document split first — and extraction over a whole book is never the right call, since a large reference text stores tens of thousands of sub-kilobyte fragments. Fragments under 80px are skipped by default.
+
+    Design guidance for *authored* documents lives in the `pdf-design` manual below — the agent loads it before creating anything styled; `pdf_create` remains the plain, unstyled fallback.
+  </Accordion>
+
+  <Accordion title="pdf-design — the document design manual (core)">
+    **Type:** Plugin — **Core**, always loaded, can't be disabled
+
+    **Triggers:** pdf design, document design, report layout, styled document
+
+    One tool with one job: `pdf_design` loads the **document design manual** into context, and the operating contract requires the agent to call it **before authoring any PDF or styled document you'll read**. Generated documents used to swing between genuinely good and visibly broken because the design recipe lived where the model rarely read it; the manual is now that recipe in one place — a page-planning step so no page ships half empty, a fixed-sheet page architecture with running footers and real page numbers, one type scale, one accent color with light body pages always, a component kit (cover, table of contents, section openers, stat tiles, hairline tables, callouts, provenance pills), Arabic/RTL rules, chart integration, and a **mandatory verify pass**: the agent renders sample pages as images with `pdf_render_pages` and looks at them before delivering anything.
+
+    **Tools:**
+    - `pdf_design` — Load the document design manual (the manual body costs nothing until called — always-on is just the schema line)
+
+    Your own instructions always win — an automation that asks for a minimal layout keeps getting exactly that.
+  </Accordion>
+
+  <Accordion title="dataviz — charts that earn their place (core)">
+    **Type:** Plugin — **Core**, always loaded, can't be disabled
+
+    **Triggers:** chart, graph, plot, visualize, data
+
+    `dataviz` loads the **visualization manual** the agent consults before laying out numbers — when a chart earns its place (and when a number or a table is the honest answer), which chart form fits which data, and how to label, order, and source it. It covers both output paths:
+
+    - **Interactive chart cards in the app chat.** The agent writes a spec file ending in **`.chart.json`** and delivers it with `send_file`; the app renders it as a live, app-themed chart card in light and dark. Eleven types — column, bar, line, area, pie, donut, scatter, heatmap, radar, gauge, funnel — with tooltips, legends, an expandable full-screen view with a **Chart ⇄ Data** toggle, and **Save as image**. An invalid or oversized (over 1 MB) spec degrades to a plain file card, still downloadable.
+    - **Charts inside generated PDFs**, drawn to the same visual system with print-perfect geometry and a fixed 8-slot, colorblind-validated palette assigned in order.
+
+    On WhatsApp and Telegram a `.chart.json` arrives as a plain document attachment, so the agent is taught to prefer a text table there.
+
+    **Tools:**
+    - `dataviz` — Load the visualization manual
   </Accordion>
 
   <Accordion title="spreadsheet — Excel and CSV files">
@@ -574,7 +605,7 @@ Built-in capabilities are managed and updated by Wolffish — don't edit them di
 Changes to custom capabilities take effect on the next message — no restart needed.
 
 <Note>
-  A handful of built-ins are **load-bearing** and can't be turned off: the [workflow](/configuration/workflow-mode) engine, your secrets, the `skills` capability, [projects](/configuration/projects), [automations](/configuration/heartbeat), [procedures](/configuration/procedures), and the shared file-delivery tools the rest leans on. In **Settings → Cellebrum** these wear a **Core** badge, sort to the **bottom** of the list, and show a locked **Always on** marker where their switch would be — so a stray click can't pull the floor out from under a feature you depend on. Everything you imported yourself stays fully toggleable.
+  A handful of built-ins are **load-bearing** and can't be turned off: the [workflow](/configuration/workflow-mode) engine, your secrets, the `skills` capability, [projects](/configuration/projects), [automations](/configuration/heartbeat), [procedures](/configuration/procedures), the `pdf-design` and `dataviz` manuals, and the shared file-delivery tools the rest leans on. In **Settings → Capabilities** these wear a **Core** badge, sort to the **bottom** of the list, and show a locked **Always on** marker where their switch would be — so a stray click can't pull the floor out from under a feature you depend on. Everything you imported yourself stays fully toggleable.
 </Note>
 
 <Warning>

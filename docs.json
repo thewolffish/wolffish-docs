@@ -160,6 +160,7 @@
                   "integrations/overview",
                   "integrations/mcp",
                   "integrations/browser-extension",
+                  "integrations/mobile-app",
                   "integrations/google-workspace",
                   "integrations/github",
                   "integrations/notion"
@@ -174,7 +175,8 @@
                   "memory/episodes",
                   "memory/consolidation",
                   "memory/knowledge",
-                  "memory/feedback-loop"
+                  "memory/feedback-loop",
+                  "memory/reflection"
                 ]
               },
               {
@@ -274,6 +276,7 @@
                   "ar/capabilities/skill-md-reference",
                   "ar/capabilities/writing-plugins",
                   "ar/capabilities/creating-capabilities",
+                  "ar/capabilities/self-authoring-skills",
                   "ar/capabilities/built-in-capabilities",
                   "ar/capabilities/community-capabilities"
                 ]
@@ -314,6 +317,7 @@
                   "ar/integrations/overview",
                   "ar/integrations/mcp",
                   "ar/integrations/browser-extension",
+                  "ar/integrations/mobile-app",
                   "ar/integrations/google-workspace",
                   "ar/integrations/github",
                   "ar/integrations/notion"
@@ -328,7 +332,8 @@
                   "ar/memory/episodes",
                   "ar/memory/consolidation",
                   "ar/memory/knowledge",
-                  "ar/memory/feedback-loop"
+                  "ar/memory/feedback-loop",
+                  "ar/memory/reflection"
                 ]
               },
               {

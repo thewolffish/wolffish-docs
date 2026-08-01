@@ -13,7 +13,7 @@ Wolffish's memory system mirrors the human hippocampus. Information flows throug
 |---|---|---|---|
 | Episodes | `hippocampus/episodes/YYYY-MM-DD.md` | Every turn (append) | No |
 | Consolidated | `hippocampus/consolidated/YYYY-WNN.md` | Daily compaction + weekly digest | Yes |
-| Knowledge | `hippocampus/knowledge/*.md` | Nightly promotion + `memory_save` | Yes |
+| Knowledge | `hippocampus/knowledge/*.md` | Nightly curation + `memory_save` | Yes |
 
 All memory lives as markdown files inside your workspace:
 
@@ -39,8 +39,9 @@ All memory lives as markdown files inside your workspace:
 ```
 Message arrives
   → hippocampus.appendEpisode()      [instant, no LLM]
-    → brainstem daily compaction      [LLM summarizes the day's episodes]
-      → knowledge promotion           [LLM extracts lasting facts, deduplicated]
+    → brainstem daily compaction      [LLM reads the day + current knowledge]
+      → knowledge curation            [files rewritten whole — merged, deduped,
+                                       newest wins, previous version kept as .bak]
 ```
 
 <Info>
@@ -51,7 +52,7 @@ Message arrives
 
 Memory is **not injected into the prompt**. The system prompt carries exactly two ambient memory pieces:
 
-1. **The learned-preferences digest** — a bounded (~500 token) summary of recent tool outcomes from the [feedback loop](/memory/feedback-loop), so checking your preferences never costs a retrieval round-trip.
+1. **The [reflection playbook](/memory/reflection)** — the distilled do/avoid/likes/dislikes/recipes lessons from the nightly self-review, capped at 6,000 characters. (Until the first playbook exists, this slot is filled by the bounded ~500-token learned-preferences digest from the [feedback loop](/memory/feedback-loop).)
 2. **The `<memory_map>` coverage stub** — a byte-stable-per-day map of what exists: per-source record counts, date ranges, knowledge-file topics, conversation and file counts. It is a map of *what* is recallable, never the content itself.
 
 Everything else is retrieved on demand through the retrieval toolset (the `introspect` capability):
@@ -92,5 +93,8 @@ Every memory operation produces a readable markdown file. You can open `~/.wolff
   </Card>
   <Card title="Feedback Loop" icon="arrows-spin" href="/memory/feedback-loop">
     How outcomes shape future behavior.
+  </Card>
+  <Card title="Reflection" icon="moon" href="/memory/reflection">
+    The nightly self-review, the playbook, and your 0–10 scores.
   </Card>
 </CardGroup>

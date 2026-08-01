@@ -36,9 +36,9 @@ Knowledge files are the agent's permanent memory — long-term facts that persis
 
 Knowledge enters the system through three paths:
 
-### 1. Automatic Promotion (LLM-driven)
+### 1. Automatic Curation (LLM-driven)
 
-During the nightly compaction pass, the LLM identifies facts that deserve permanent storage — preferences learned, project details, decisions made, people referenced — and promotes them to the appropriate knowledge file. Promotion is **deduplicated**: the nightly pass tends to re-derive the same facts night after night, so an exact-line check prevents knowledge files from silently filling with duplicate bullets.
+During the [nightly compaction pass](/memory/consolidation), the LLM works as a **curator**, not an extractor: it reads the day's episode log **alongside the current contents of the five knowledge files** and rewrites the files that changed, whole — one tidy `##` section per person, project, and topic; near-duplicates merged into a single line; contradictions resolved in favour of the newest evidence; junk deleted on sight. The section structure is enforced by the app itself (those `##` headers are exactly what the `<memory_map>` surfaces), every rewritten file keeps its previous version as `<file>.md.bak` right beside it, and your hand-written edits survive curation. A day with nothing durable ends in a no-op. Once a month, the [deep reflection](/memory/reflection) audits these same files adversarially — hunting stale entries and conclusions the evidence has turned against.
 
 ### 2. `memory_save` — The Model's Write Path
 
