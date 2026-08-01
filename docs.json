@@ -5,10 +5,10 @@
     "metatags": {
       "og:title": "Wolffish Documentation",
       "og:description": "A desktop agent with full access to your machine. Automate, create, and execute — entirely local. No cloud required.",
-      "og:image": "https://cdn.wolffi.sh/general/og_image.jpg",
+      "og:image": "https://cdn.wolffi.sh/generic/banner.jpg",
       "twitter:card": "summary_large_image",
       "twitter:title": "Wolffish Documentation",
-      "twitter:image": "https://cdn.wolffi.sh/general/og_image.jpg"
+      "twitter:image": "https://cdn.wolffi.sh/generic/banner.jpg"
     }
   },
   "colors": {
