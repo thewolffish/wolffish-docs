@@ -206,6 +206,30 @@ To add a new page:
 
 ---
 
+## Releases
+
+Every push to `main` cuts a versioned release automatically — see [`.github/workflows/release.yml`](.github/workflows/release.yml). The version lives in git tags only; nothing is ever committed back to `main`.
+
+Write a short topic in the commit message, and add a marker when the change is bigger than a patch:
+
+| Commit message                       | Result                          |
+| ------------------------------------ | ------------------------------- |
+| `update: fix broken install link`    | patch — `v1.0.3` → `v1.0.4`     |
+| `add: skills page [minor]`           | minor — `v1.0.4` → `v1.1.0`     |
+| `remove: use-cases section [major]`  | major — `v1.1.0` → `v2.0.0`     |
+| `update: typo [skip release]`        | no release                      |
+
+Each release publishes two archives:
+
+- **`wolffish-docs-vX.Y.Z.zip`** — the docs bundle: every `.mdx` page, `docs.json`, `static/`, English + Arabic
+- **Source code** (zip / tar.gz) — the full repository at that tag, attached by GitHub automatically
+
+The commit subject becomes the release title (`v1.1.0 — add: skills page`), and the notes list every commit since the previous tag.
+
+The first run seeds `v1.0.0`. Re-running the workflow on a commit that already carries a tag is a no-op, and you can cut a release by hand from the **Actions** tab with an explicit bump.
+
+---
+
 ## Links
 
 - **Live docs** — [docs.wolffi.sh](https://docs.wolffi.sh/)
