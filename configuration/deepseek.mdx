@@ -11,12 +11,14 @@ POST https://api.deepseek.com/chat/completions
 
 Uses SSE streaming with OpenAI-compatible tool-calling format.
 
-**DeepSeek V4 Pro is Wolffish's recommended default for agentic tasks.** Following the [permanent 75% price cut](https://deepseek.ai/blog/deepseek-v4-pro-api-price-cut-permanent) (May 2026), it delivers frontier-class reasoning and tool-use reliability at 29–34× less than competing frontier models on output-heavy workloads — while matching or exceeding their agentic performance on multi-step tool chains. It's also MIT-licensed, so you can self-host for $0 in API fees if you have the infra.
+**DeepSeek is Wolffish's recommended default provider for agentic tasks.** Following the [permanent 75% price cut](https://deepseek.ai/blog/deepseek-v4-pro-api-price-cut-permanent) (May 2026), the V4 family delivers frontier-class reasoning and tool-use reliability at 29–34× less than competing frontier models on output-heavy workloads — while matching or exceeding their agentic performance on multi-step tool chains. It's also MIT-licensed, so you can self-host for $0 in API fees if you have the infra.
+
+Since **v1.0.235**, connecting DeepSeek auto-selects **V4 Flash** — frontier-class at a third of Pro's price, and fast enough for the tool-heavy turns most agentic work is made of. **V4 Pro** is still one pick away in the composer's model switch for the heavier reasoning jobs.
 
 Best for: Agentic multi-step workflows, tool calling, research chains, cost-efficient daily automations.
 
 <Tip>
-  If you're setting up Wolffish for the first time and want one provider that does it all — reliable tool use, strong reasoning, fast responses, minimal cost — start with DeepSeek V4 Pro. You can always add Anthropic or OpenAI later for specific use cases.
+  If you're setting up Wolffish for the first time and want one provider that does it all — reliable tool use, strong reasoning, fast responses, minimal cost — start with DeepSeek and leave it on the V4 Flash default. You can always add Anthropic or OpenAI later for specific use cases.
 </Tip>
 
 ## Getting an API Key
@@ -30,8 +32,8 @@ Best for: Agentic multi-step workflows, tool calling, research chains, cost-effi
 
 | Model | Context | Modes | Input / Output (per MTok) | Notes |
 |-------|---------|-------|--------------------------|-------|
-| **deepseek-v4-pro** | 1M | Off, High, Max | $0.44 / $0.87 | Recommended default. Frontier agentic performance. Cached: $0.01/MTok. |
-| deepseek-v4-flash | 1M | Off, High, Max | $0.14 / $0.28 | Fast and cheap. Cached: $0.003/MTok. |
+| **deepseek-v4-flash** | 1M | Off, High, Max | $0.14 / $0.28 | Auto-selected on connect. Frontier agentic performance, fast and cheap. Cached: $0.003/MTok. |
+| deepseek-v4-pro | 1M | Off, High, Max | $0.44 / $0.87 | The heavier reasoning tier. Cached: $0.004/MTok. |
 
 ## Reasoning modes
 

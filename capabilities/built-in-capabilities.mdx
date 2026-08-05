@@ -12,7 +12,7 @@ These capabilities are included in the default workspace when Wolffish creates `
 </Note>
 
 <Note>
-**Not everything is in context at once.** Every capability below registers at startup and appears in the model's capability index, but only the **core set** ships full tool schemas on every request — `tool-discovery`, `introspect`, `filesystem`, `shell`, `ask`, `utilities`, `web-search`, `secrets`, `system`, plus the workflow and channel capabilities when active. Everything else (GitHub, Google, browsers, media, documents, MCP servers) loads on demand via `tool_search` / `tool_activate` and is callable the same turn. See [Capabilities Overview](/capabilities/overview) for how exposure works.
+**Not everything is in context at once.** Every capability below registers at startup and appears in the model's capability index, but only the **core set** ships full tool schemas on every request — `tool-discovery`, `introspect`, `filesystem`, `shell`, `ask`, `utilities`, `web-search`, `secrets`, `system`, `video`, plus the workflow and channel capabilities when active. Everything else (GitHub, Google, browsers, media, documents, MCP servers) loads on demand via `tool_search` / `tool_activate` and is callable the same turn. See [Capabilities Overview](/capabilities/overview) for how exposure works.
 </Note>
 
 ## Self-Management
@@ -369,6 +369,26 @@ When you ask, Wolffish:
     - `spreadsheet_analyze` — Compute statistics, summaries, and derived columns
   </Accordion>
 
+  <Accordion title="archive — Zip archives, without a shell">
+    **Type:** Plugin
+
+    **Triggers:** zip, unzip, archive, compress, extract, unpack, pack, make a zip, what's in the zip, bundle files
+
+    Four tools for `.zip` files, working in-process — no `unzip` or `zip` binary needed, same behaviour on macOS and Windows. A `.zip` is also a **first-class attachment** (up to 512 MB), so an archive arrives somewhere the tools can reach it.
+
+    **Tools:**
+    - `archive_list` — List what's inside **without unpacking**: entry paths, unpacked sizes, dates, top-level layout, totals, and which entries are encrypted. Reads only the archive's index, so it's fast at any size. Pages with `offset`/`limit` and filters by glob — and never truncates silently.
+    - `archive_read` — Read one text file **straight out of the zip**, nothing written to disk. Pages with `start_line`/`end_line`; a binary entry returns its size and the right tool to open it, not garbage bytes.
+    - `archive_extract` — Unpack everything, or only the entries you name. Without a destination it creates a new folder beside the archive (an uploaded one unpacks into the workspace `files/` folder) and never overwrites an existing folder.
+    - `archive_create` — Pack files and folders into a new `.zip`. A folder keeps its own name as the archive root, so unzipping produces a folder instead of loose files. Warns when `node_modules`, `.git` or `venv` went in, so you can re-run with `exclude`.
+
+    **The contract is look-before-you-unpack.** An archive is opaque until it's listed, and unpacking is a side effect on your disk — so a zip dropped in with no instructions gets listed, described in a line ("a 212-file React project — `src/`, `public/`, `package.json`, plus a 40 MB video"), and then you're **asked what you want done with it**. A request that already answers the question ("unzip this", "what does the README say") just gets done.
+
+    **Safety:** entries that would write outside the destination are refused outright, symlink entries are stored as plain files, and `__MACOSX/`, `.DS_Store` and `Thumbs.db` are skipped with the count reported. Encrypted archives still list (the index isn't encrypted); `archive_read` and `archive_extract` take a password.
+
+    Zip only — and the file's actual signature is checked, not its extension. A `.tar.gz`, `.7z` or `.rar` is rejected with the exact shell command that handles it. Office files (`.docx`, `.xlsx`, `.pptx`, `.epub`) *are* zips and open here, but that's a debugging move: use the document tools for those.
+  </Accordion>
+
   <Accordion title="ffmpeg — Audio and video processing">
     **Type:** Plugin
 
@@ -382,6 +402,23 @@ When you ask, Wolffish:
     - `ffmpeg_run` — Run any ffmpeg command (pass args after `ffmpeg`)
 
     The capability auto-checks for ffmpeg and offers to install it if missing.
+  </Accordion>
+
+  <Accordion title="video — Generate video with MiniMax H3">
+    **Type:** Plugin
+
+    **Triggers:** video, generate video, make a video, text to video, image to video, animate, clip, cinematic, footage, b-roll, minimax, hailuo, h3
+
+    Generates video through **MiniMax H3** — text to video, image to video, first-and-last-frame transitions, or reference images, clips and audio for consistent subjects, motion and voice. The prompt is written by **your current chat model**, not by you and not by H3: see [Video Generation](/integrations/video-generation) for director mode, limits, and setup.
+
+    **Tools:**
+    - `video_check` — Confirm the service is configured and the key works. Free, spends no credits.
+    - `video_generate` — Start a render; returns a task id immediately and raises a live task card in the chat
+    - `video_await` — Park until the task lands and return the saved mp4's absolute path
+    - `video_status` — Non-blocking snapshot of this conversation's video tasks
+    - `video_cancel` — Cancel a queued or running task server-side
+
+    Rendering takes minutes, so the flow is asynchronous by design: generate → await → deliver with `send_file` (or `telegram_send_video` / `whatsapp_send_video`). A render that outlives its turn is finished by the app itself — polled, saved, and delivered to the channel it came from. Runs on its own key under **Settings → Services → Video generation**, deliberately separate from the MiniMax chat provider.
   </Accordion>
 </AccordionGroup>
 

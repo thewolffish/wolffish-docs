@@ -1,31 +1,97 @@
 ---
 title: "Mobile App"
-description: "The iOS companion — the whole Wolffish experience in your hand, starting with a full-app Demo Mode"
+description: "The phone companion — pair once, then carry the same conversations, settings and usage over an end-to-end encrypted tunnel"
 ---
 
 # The Phone-Sized Companion
 
-The Wolffish mobile app puts the desktop experience on a phone: the chat feed with its tool cards and delivered files, the conversation history, the usage ledger, and every settings page — Model, Channels, Services, MCP, Variables, Capabilities, Knowledge, Usage, Data, Updates, Preferences, Appearance — laid out as the desktop's settings sidebar turned into a navigation list.
+Wolffish runs on your machine — which has always meant being at your machine. The mobile app puts the desktop experience on a phone: the chat feed with its tool cards and delivered files, the conversation history, the usage ledger, and every settings page — Model, Channels, Services, MCP, Variables, Capabilities, Knowledge, Usage, Data, Updates, Preferences, Appearance — laid out as the desktop's settings sidebar turned into a navigation list.
+
+Since **v1.0.235** it does that against *your* desktop. A phone pairs with this machine and carries the same conversations, the same settings, the same usage with it — over a link only the two devices can read.
+
+## Pairing
+
+Everything lives in **Settings → Mobile** on the desktop. Pairing happens once, and there is no token to paste: the desktop *offers* a pairing and the phone claims it.
+
+<CardGroup cols={1}>
+  <Card title="Pairing QR" icon="qrcode">
+    Generate a QR and scan it with your phone's camera. The secret travels **screen to camera** — it never crosses the network. The QR also carries the relay address, so a custom relay needs no extra typing.
+  </Card>
+  <Card title="Pairing code" icon="keyboard">
+    Generate a short code — eight characters, printed as `K7M9-2QXR` — and type it on the phone when the camera can't see the screen. Case, spaces and dashes don't matter, and look-alike characters (`O`/`0`, `I`/`1`) are folded for you.
+  </Card>
+</CardGroup>
+
+An offer expires after about **three minutes**; generate a new one whenever you need. Open Wolffish on the phone, tap **Connect to Desktop**, and scan or type.
+
+<Note>
+  The typed code carries only the secret. If you point the desktop at a **custom relay**, the phone must be told that address by hand — its pairing screen has a field for it, and the desktop's offer screen shows the exact URL to type. The QR does this for you.
+</Note>
+
+## The Encrypted Tunnel
+
+Once paired, the two devices talk **end to end encrypted** — **X25519** key agreement, **ChaCha20-Poly1305** for the frames. Everything is sealed on your devices before anything is sent, and only this desktop and your phone hold the keys. Each device keeps its own key and **pins the other's**: no account, no password, nothing to sign into.
+
+The paired panel shows the link's whole state — the tunnel status, the phone's name, model and OS, when it paired and when it was last seen, the relay and rendezvous, both key fingerprints, the session, and the frame counters. **Matching fingerprints on both devices mean nothing sits in between.**
+
+Pairing keys are stored on the desktop through the OS key store — Keychain on macOS, DPAPI on Windows, the secret service on Linux — and the panel names the backend actually in use.
+
+### The blind relay
+
+The two devices are rarely on the same network, so something has to carry the bytes. That something is a **blind relay**, and its ignorance is the point:
+
+- It helps the two find each other at a **rendezvous id** derived independently on both devices — the only fact about a pairing it ever learns.
+- It passes **sealed frames** along. It cannot read, alter or replay them.
+- It stores **nothing at all** — no database, no logs, no accounts, no message history.
+
+The relay is [open source and self-hostable](https://github.com/thewolffish/wolffish-relay). Point the desktop at your own deployment in the same panel and the next pairing carries that address to your phone.
+
+<Warning>
+  Changing the relay **unpairs a paired phone** — both the offer payload and the paired device name the old address. The desktop asks you to confirm before applying, then you pair again on the new relay.
+</Warning>
+
+### Disconnect vs. unpair
+
+Two exits sit at the foot of the panel and the difference between them is the whole point. **Disconnect** drops the live link; the pairing survives and the phone reconnects when it comes back to the foreground. **Unpair** forgets the device — its keys are cleared and the phone has to pair again from scratch.
 
 <Info>
-  Today the app ships as a **self-contained Demo Mode** — a complete, offline tour of the product filled with three months of real (anonymized) usage. Pairing the app with your own desktop is the next step on the roadmap; the home screen is deliberately just the fish, the name, and the Demo Mode door until it lands.
+  The desktop is the host: it parks on the relay and waits. The phone dials in when it is in the foreground and disappears when iOS suspends it, so **every reconnect re-handshakes** and nothing assumes continuity. A phone that has been in your pocket for an hour comes back to a freshly secured link.
 </Info>
 
-## Demo Mode
+## What Crosses the Link
 
-The home screen has one button: **Demo Mode**. The first tap downloads a curated dataset — about 4 MB over the wire, unpacking to **163 conversations** plus a full desktop settings snapshot — under a progress bar; later taps open straight into chat. The download is versioned, so a republished dataset refreshes itself on devices that already imported an older one, and an interrupted download leaves the previous dataset intact.
+The phone is a second view of the whole app, not a message stream — so the desktop answers for far more than chat, and **pushes changes as they happen** instead of leaving the phone to poll:
 
-After the import, the demo is **fully offline**. Everything is real data driving real screens:
+| The phone can | Notes |
+| --- | --- |
+| Browse conversations and read them | The index and each body on demand, kept live |
+| **Send a message and run a turn** | The turn runs on the desktop, with your desktop's models and tools |
+| Answer [`ask_user` cards](/capabilities/built-in-capabilities) and approval prompts | Parked requests live on the phone until answered — or until the turn is aborted |
+| Upload and download files | Chunked over the same sealed frames; uploads land in the workspace |
+| Read and change settings | Config, variables, capability switches, [reflection](/memory/reflection) schedule and run-now |
+| See usage and the changelog | The desktop's own ledger, mirrored |
 
-- **Chat** — tool cards, delivered files, workflow runs, compaction notices. Send a message and, after a short thinking animation, a friendly card explains that new messages aren't processed in the demo — browsing, editing, and configuring all work; real turns need a connected desktop.
-- **History** — date-grouped conversations with channel badges (Telegram, WhatsApp, automation, procedure) and relative times.
-- **Settings** — every page mirrors the snapshot: capabilities with their Core/Official badges, MCP servers, variables, projects, channels, services, usage, and the desktop's own vitals (disk, RAM, CPU). Edits persist locally on the phone. Credential fields are placeholders — **secrets are never entered on the phone**.
+Because a turn started on the phone is a real turn, it gets its own **channel badge**: conversations that began there wear a phone glyph in the desktop's History list and conversations rail, next to the Telegram, WhatsApp, automation and procedure badges.
 
-Attachment bytes load lazily too: each file type in the demo resolves to one published sample fetched on first view and cached, so the file viewers have something genuine to open for over a hundred formats.
+<Note>
+  Credential fields on the phone stay placeholders — **secrets are never entered on the phone**. Keys are pasted on the desktop, where they live.
+</Note>
 
-### Leaving the demo
+## Phone Notifications
 
-The only exit is deliberate: **Settings → Data → Factory reset this device**, confirmed by typing the phrase **FACTORY RESET**. It wipes the conversations, cached media, and mirrored settings from the phone, keeps your language and theme, and never touches a desktop.
+With **Phone notifications** on, the agent can reach you through its `notify_phone` tool when a run finishes, fails, or needs you. Nothing is ever sent automatically — the agent has to deliberately call the tool, and **Off makes the tool refuse outright** before anything is built or sent.
+
+The model chooses the words and the importance; the harness owns everything else:
+
+- **Phase** — `needs_input`, `failed`, `completed`, `started`, or `info` — sets how long a notification stays relevant. A blocking question expires in five minutes, because a stale approval prompt arriving forty minutes late is worse than no prompt at all; terminal outcomes wait an hour.
+- **Rate limits** — at most **one notification per phase per run**, and never more than **five per run**. Overruns fail loudly rather than dropping quietly.
+- **Identity** — the notification id and the phone it routes to are stamped by the desktop, never taken from the model. The title is clamped to one line of 60 characters and the body to 180, control characters are stripped, and a deep link is rejected unless it uses the app's own `wolffish://` scheme.
+
+If the phone is connected, the notification rides the live tunnel. If it isn't, it queues as a platform push instead.
+
+### Task results
+
+One switch decides how much of a run the phone's feed relays. **Off** — the default — keeps it clean: assistant messages, file-bearing results, and errors. **On** relays every tool call and activity. Connection logging is separate and always on.
 
 ## The Chat Feed
 
@@ -51,5 +117,15 @@ Settings → Services mirrors the desktop's [multi-browser extension](/integrati
 ## Updates
 
 Two cards in **Settings → Updates** keep the surfaces distinct: **This app** (the mobile version and build, whether you're on a store build or an over-the-air update, and an automatic-updates switch that genuinely governs update checks) and **Desktop app** (the mirrored desktop version, platform, and its own auto-update setting).
+
+## Demo Mode
+
+The app still ships a **self-contained Demo Mode** — a complete, offline tour of the product filled with three months of real (anonymized) usage, for trying it before pairing anything. The first tap downloads a curated dataset — about 4 MB over the wire, unpacking to **163 conversations** plus a full desktop settings snapshot — under a progress bar; later taps open straight into chat. The download is versioned, so a republished dataset refreshes itself on devices that already imported an older one, and an interrupted download leaves the previous dataset intact.
+
+After the import, the demo is fully offline. Sending a message returns a friendly card explaining that new messages aren't processed in the demo — browsing, editing, and configuring all work; real turns need a paired desktop. Attachment bytes load lazily: each file type resolves to one published sample fetched on first view and cached, so the file viewers have something genuine to open for over a hundred formats.
+
+### Leaving the demo
+
+The only exit is deliberate: **Settings → Data → Factory reset this device**, confirmed by typing the phrase **FACTORY RESET**. It wipes the conversations, cached media, and mirrored settings from the phone, keeps your language and theme, and never touches a desktop.
 
 The app is iOS-first, portrait, and fully bilingual — English and Arabic with complete RTL mirroring; switching language restarts the app.

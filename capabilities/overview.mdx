@@ -47,7 +47,7 @@ Every system prompt contains a `<capabilities>` index: one line per capability �
 
 ### Core capabilities — always loaded
 
-A bootstrap set ships its full tool schemas with every request (~31–49 tools): `tool-discovery`, `introspect`, `filesystem`, `shell`, `ask`, `utilities`, `web-search`, `secrets`, `system`, the `pdf-design` and `dataviz` manuals (one schema line each — their manual bodies load only when called), plus `workflow` (gated to the [workflow](/configuration/workflow-mode) master — agents never see its tools) and the channel capabilities (`telegram`, `whatsapp`, `electron`) while connected. These are the keys to everything else — discovery, memory retrieval, files, and replying — and must never require a discovery hop.
+A bootstrap set ships its full tool schemas with every request (~31–49 tools): `tool-discovery`, `introspect`, `filesystem`, `shell`, `ask`, `utilities`, `web-search`, `secrets`, `system`, the `operating-manual`, `pdf-design` and `dataviz` manuals (one schema line each — their manual bodies load only when called), [`video`](/integrations/video-generation) (a render request must reach the tool without a discovery hop), plus `workflow` (gated to the [workflow](/configuration/workflow-mode) master — agents never see its tools) and the channel capabilities (`telegram`, `whatsapp`, `electron`, and `phone` for [notifications](/integrations/mobile-app#phone-notifications)) while connected. These are the keys to everything else — discovery, memory retrieval, files, and replying — and must never require a discovery hop.
 
 ### Everything else — discoverable on demand
 
@@ -90,6 +90,12 @@ You can add your own capabilities two ways:
 - **Create the folder by hand** under `brain/cerebellum/`, then click **Resync** in the panel (or restart Wolffish) to load it.
 
 See [Creating Capabilities](/capabilities/creating-capabilities) for the full walkthrough, the three import shapes, and the rules an importable capability must follow.
+
+### When a settings page depends on a capability
+
+Most service pages in Settings are the front end of a capability — Computer Use, Memes, Speech-to-Text, Text-to-Speech, GitHub, Notion, Brave, [Video generation](/integrations/video-generation). Turn that capability off (or have it fail to load) and the page used to sit there with controls that quietly did nothing.
+
+Each panel now **checks for itself** and says which of three things is wrong — the capability is **missing**, **switched off**, or **failed to load** (showing the underlying error) — with a button straight through to the **Capabilities** page. The controls underneath go visibly inert rather than pretending to work.
 
 <Card title="Create Your Own" icon="plus" href="/capabilities/creating-capabilities">
   Learn how to build a new capability from scratch.

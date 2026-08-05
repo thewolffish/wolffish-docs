@@ -161,6 +161,7 @@
                   "integrations/mcp",
                   "integrations/browser-extension",
                   "integrations/mobile-app",
+                  "integrations/video-generation",
                   "integrations/google-workspace",
                   "integrations/github",
                   "integrations/notion"
@@ -318,6 +319,7 @@
                   "ar/integrations/mcp",
                   "ar/integrations/browser-extension",
                   "ar/integrations/mobile-app",
+                  "ar/integrations/video-generation",
                   "ar/integrations/google-workspace",
                   "ar/integrations/github",
                   "ar/integrations/notion"
