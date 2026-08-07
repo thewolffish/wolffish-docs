@@ -1,6 +1,6 @@
 ---
 title: "Browser Extension"
-description: "Control your real browsers — several at once — with 51 tools: navigate, click, read, screenshot, debugger mode, humanize, and more"
+description: "Control your real browsers — several at once — with 62 tools: navigate, click, read, screenshot, debugger mode, humanize, and more, all inside Wolffish's own tab group"
 ---
 
 # Your Real Browser, Not a Sandbox
@@ -10,6 +10,56 @@ The Wolffish browser extension gives the agent direct control of your real brows
 <Info>
   The agent automatically prefers `ext_*` tools over Playwright `browser_*` tools when the extension is connected. No configuration needed.
 </Info>
+
+## Three Routes to the Web
+
+Wolffish has three ways to reach a web page, and it used to habitually reach for the weakest. Since **v1.0.236** the routing is deliberate, and the extension is the default for anything that matters:
+
+| Route | Reaches | Costs |
+| --- | --- | --- |
+| `web_search` | An index — titles, snippets and URLs, **never a page** | Real money per query; very fast |
+| `web_fetch` | Whatever a server returns to a bare GET | Free and instant; blind to JS, paywalls, logins, consent walls, bot checks |
+| **The extension** | Essentially any page you can open — and it can click, scroll and fill | More tokens, more seconds; needs a connected browser |
+
+The agent is taught to **lean on the browser** whenever:
+
+- The task names a **specific site**, or one that is logged-in, paid-for, paywalled, or behind a consent or bot wall — your own session is already authenticated here.
+- The page is **JS-rendered** (most modern apps), infinite-scrolls, or hides content behind a click. `web_fetch` returns an empty shell for these.
+- The work is **more than reading** — filling a form, posting, downloading, clicking through a flow.
+- A `web_fetch` already came back thin, boilerplate, or paywalled. It doesn't retry the fetch; it comes here.
+- The task spans **several pages**, where the per-page cost of a fetch-then-fail cycle overtakes opening the browser once.
+
+Search keeps what search is genuinely good at: settling one fact, or discovering *which* URL to open. Search first, then open the result in the browser, is the recommended pattern — better than opening a search engine in the browser and reading its results page.
+
+A page that comes back as a few hundred characters, a cookie banner, "enable JavaScript", a login form, or a subscribe wall **did not load** — it failed quietly with a 200. The agent is taught to read what came back before trusting it, and to escalate to the extension rather than answer from the fragment.
+
+<Tip>
+  If nothing is connected, **`ext_launch_browser`** starts your default browser (or a named one — `chrome`, `edge`, `brave`, `arc`, `vivaldi`, `opera`, `chromium`, `firefox`), waits up to 30 seconds for the extension to come online, and carries on with the task. It's treated as a normal recovery step, not something to check in about. If the browser launches but the extension never connects, it isn't installed there — the agent says so and offers to try another.
+</Tip>
+
+## The Wolffish Tab Group
+
+The agent works in **its own tab group**, never in your tabs. The first command that needs a page creates a fresh tab, coloured blue and titled **Wolffish**, and every later command lands there by default. Your own tabs are never navigated, clicked, or typed into.
+
+- **A new task or a new site gets a fresh tab** — `ext_navigate` takes a `newTab` flag, and `ext_tab_open` always opens inside the group. Tabs from unrelated tasks are not reused.
+- **Working across sites** means one tab each, all inside the group, moving between them with `ext_tab_switch`.
+- **Reading the tab you're on** happens only when you ask for it ("what's on this page?"). `ext_tabs_list` marks every tab with a `wolffish` flag — `true` for the agent's own, `false` for yours — and the agent passes your tab's id explicitly. An explicit `tabId` always wins over the default. It reads a tab of yours; it never *acts* on one.
+- **`ext_window_open` sits outside the group** — a new window's first tab can't join it, so the tool returns that `tabId` and commands must name it. `ext_tab_open` is preferred unless a separate window is genuinely needed.
+- Close the agent's tab or the whole group and the next command quietly creates a new one.
+
+### The group's label is a status line
+
+The group's title is the only thing you see while the agent works, and `ext_set_activity` is how it keeps that honest — an emoji plus a few words, under about 24 characters because tab groups are narrow.
+
+Labeling is a **judgement, not a ritual** (tuned in v1.0.237):
+
+- **A one-off lookup keeps the plain `Wolffish` name.** Opening a single page or settling one fact needs no announcement — the plain name already says everything there is to say.
+- **A real task — several steps, more than one page, more than a moment — carries a label**, updated as the work moves from one phase to the next: `🔎 Comparing flights`, `🛒 Checking out`, `✍️ Writing reply`, `📖 Reading docs`. A stale label is worse than none.
+- Calling `ext_set_activity` with no arguments resets the group to plain **Wolffish**.
+
+<Note>
+  The group needs Chrome's `tabGroups` permission, which the extension now requests. A browser without tab-group support simply gets a plain dedicated tab instead — labeling is cosmetic and never fails a task.
+</Note>
 
 ## Why This Exists
 
@@ -109,24 +159,27 @@ The extension updates itself automatically when Wolffish updates — no manual s
 
 The entire process is seamless. You'll see a brief disconnect in the side panel (< 1 second) while the extension restarts, then it reconnects with the new version. You can also trigger a manual reload from **Settings → Services → Browser Extension → Reload Extension**.
 
-## 51 Tools
+## 62 Tools
 
 The agent sees these as `ext_*` tools. The plugin translates them to `browser_*` commands over the wire.
 
-### Browser Selection
-`ext_browsers` · `ext_use_browser`
+### Browser Selection & Launch
+`ext_browsers` · `ext_use_browser` · `ext_launch_browser`
 
 ### Navigation
 `ext_navigate` · `ext_back` · `ext_forward` · `ext_reload`
 
 ### Page Interaction
-`ext_click` · `ext_type` · `ext_select` · `ext_hover` · `ext_scroll` · `ext_focus` · `ext_keypress` · `ext_drag_drop` · `ext_file_upload`
+`ext_click` · `ext_type` · `ext_select` · `ext_hover` · `ext_scroll` · `ext_focus` · `ext_keypress` · `ext_drag_drop` · `ext_file_upload` · `ext_set_value` · `ext_submit_form`
 
 ### Page Reading
 `ext_read_page` · `ext_query_selector` · `ext_get_attribute` · `ext_get_value` · `ext_get_url` · `ext_get_page_info`
 
 ### Tab & Window Management
 `ext_tabs_list` · `ext_tab_open` · `ext_tab_close` · `ext_tab_switch` · `ext_tab_duplicate` · `ext_tab_move` · `ext_windows_list` · `ext_window_open` · `ext_window_close` · `ext_window_resize`
+
+### The Wolffish Tab Group
+`ext_set_activity`
 
 ### Capture
 `ext_screenshot` · `ext_pdf` · `ext_download`
@@ -135,13 +188,13 @@ The agent sees these as `ext_*` tools. The plugin translates them to `browser_*`
 `ext_cookies_get` · `ext_cookies_set` · `ext_cookies_remove` · `ext_storage_get` · `ext_storage_set` · `ext_clipboard_read` · `ext_clipboard_write`
 
 ### Advanced
-`ext_execute_js` · `ext_wait_for` · `ext_wait_for_navigation` · `ext_wait_for_network_idle` · `ext_notify`
+`ext_execute_js` · `ext_wait` · `ext_wait_for` · `ext_wait_for_navigation` · `ext_wait_for_network_idle` · `ext_notify`
 
 ### Debugger Mode
 `ext_debugger_attach` · `ext_debugger_detach` · `ext_debugger_status`
 
-### Mouse & Humanize
-`ext_mouse_move` · `ext_humanize`
+### Mouse, Coordinates & Humanize
+`ext_mouse_move` · `ext_mouse_click` · `ext_mouse_down` · `ext_mouse_up` · `ext_mouse_drag` · `ext_element_from_point` · `ext_get_interactive_elements` · `ext_humanize`
 
 ## Debugger Mode
 

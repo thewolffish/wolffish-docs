@@ -5,9 +5,9 @@ description: "The phone companion — pair once, then carry the same conversatio
 
 # The Phone-Sized Companion
 
-Wolffish runs on your machine — which has always meant being at your machine. The mobile app puts the desktop experience on a phone: the chat feed with its tool cards and delivered files, the conversation history, the usage ledger, and every settings page — Model, Channels, Services, MCP, Variables, Capabilities, Knowledge, Usage, Data, Updates, Preferences, Appearance — laid out as the desktop's settings sidebar turned into a navigation list.
+Wolffish runs on your machine — which has always meant being at your machine. The mobile app puts the desktop experience on a phone: the chat feed with its tool cards and delivered files, the conversation history, the usage ledger, and every settings page — Model, Channels, Services, MCP, Variables, Capabilities, Knowledge, Projects, Automations, Procedures, Customization, Usage, Data, Updates, Preferences, Appearance — laid out as the desktop's settings sidebar turned into a navigation list.
 
-Since **v1.0.235** it does that against *your* desktop. A phone pairs with this machine and carries the same conversations, the same settings, the same usage with it — over a link only the two devices can read.
+Since **v1.0.235** it does that against *your* desktop. A phone pairs with this machine and carries the same conversations, the same settings, the same usage with it — over a link only the two devices can read. Since **v1.0.236** it also carries everything that *shapes* those conversations: [projects, procedures, automations](#the-workspace-editable) and the three documents behind every reply are edited from either device, against the very same files.
 
 ## Pairing
 
@@ -69,12 +69,57 @@ The phone is a second view of the whole app, not a message stream — so the des
 | Answer [`ask_user` cards](/capabilities/built-in-capabilities) and approval prompts | Parked requests live on the phone until answered — or until the turn is aborted |
 | Upload and download files | Chunked over the same sealed frames; uploads land in the workspace |
 | Read and change settings | Config, variables, capability switches, [reflection](/memory/reflection) schedule and run-now |
+| **Edit projects, procedures and automations** | The same files the desktop writes — see [The Workspace, Editable](#the-workspace-editable) |
+| **Edit Soul, User and Agents** | The three documents behind every reply, saved straight into the workspace |
+| **Score a finished turn** | The 0–10 bar, landing live on the desktop's own bar |
+| **Collect a diagnostic bundle** | The same [export](/debugging/diagnostic-export) the desktop's bug button runs |
 | See usage and the changelog | The desktop's own ledger, mirrored |
 
 Because a turn started on the phone is a real turn, it gets its own **channel badge**: conversations that began there wear a phone glyph in the desktop's History list and conversations rail, next to the Telegram, WhatsApp, automation and procedure badges.
 
 <Note>
   Credential fields on the phone stay placeholders — **secrets are never entered on the phone**. Keys are pasted on the desktop, where they live.
+</Note>
+
+## The Workspace, Editable
+
+Pairing brought your conversations across; until **v1.0.236** everything that *shapes* them stayed at the machine. [Projects](/configuration/projects), [procedures](/configuration/procedures) and [automations](/configuration/heartbeat) were things the phone could show and only the desktop could change. All three are now edited from either screen.
+
+<CardGroup cols={1}>
+  <Card title="Projects" icon="folder">
+    A project gathers the standing instructions and files that fresh conversations start from. Create one, give it an emoji from the picker, edit its instructions, **add files from the phone itself**, and **file an existing conversation under it**. A chat opened inside a project carries its briefing from the very first turn rather than picking it up a moment later.
+  </Card>
+  <Card title="Procedures" icon="play">
+    A saved prompt you run on demand — created, edited, deleted and **run** from the phone, with the run reporting back what the scheduler actually did.
+  </Card>
+  <Card title="Automations" icon="clock">
+    A prompt that runs on a schedule, edited here as **the same `heartbeat.md` the desktop's own editor writes** — with the time of its next run and a play button beside it.
+  </Card>
+  <Card title="Customization" icon="file-pen">
+    [**Soul**](/configuration/soul-md), [**User**](/configuration/user-md) and [**Agents**](/configuration/agents-md) — who Wolffish is, what it should always know about you, and the procedures of yours that outrank the built-in ones — open as editors and save straight into the desktop workspace. These are the files that shape every reply on every surface, chat and Telegram and WhatsApp alike.
+  </Card>
+</CardGroup>
+
+Every one of these writes goes **through the desktop's own code**, so a change made on the phone and a change made at the machine are the same act, against the same files — never a second copy that quietly disagrees. Both screens show it at once: the desktop's markdown editor **adopts a save made on the phone live**, unless you are mid-draft, in which case your unsaved text stands and wins when you save it.
+
+### Turns you can score
+
+Every finished answer carries a **0–10 [rating bar](/memory/reflection)**. A score cast on the phone lands on the desktop exactly as the desktop's own does, and a score cast anywhere else — the desktop's bar, a bare number replied to Telegram — appears here without waiting for anything to reload. It is the same signal the nightly reflection learns from; it simply stopped requiring the desktop.
+
+### Every conversation, without leaving the one you're in
+
+A sheet slides over the chat carrying the **whole conversation list**, grouped by recency, showing which project each one belongs to and which one is running right now. Switching is a tap, and the turn you were watching keeps streaming while you look. Its five destinations — Settings, Projects, Automations, Procedures and Customization — **stay pinned at the top** while the conversations scroll underneath them.
+
+### What the desktop is busy with
+
+Work that takes the desktop's whole screen shows on the phone as a **card in a stack over whatever screen you are on**, with the prompt behind each one a tap away: an [automation](/configuration/heartbeat) mid-run, a [compaction](/memory/consolidation), the [nightly reflection](/memory/reflection), a memory index being rebuilt. They appear the moment the phone connects — including for a run that started while it was asleep — and they go when the connection goes, because a card claiming something is running on a machine the phone can no longer see is a card that lies. The phone stays usable while they happen instead of looking broken.
+
+### Diagnostics from the phone
+
+Collecting a conversation's [diagnostic bundle](/debugging/diagnostic-export) — logs, tasks, memory, context, settings, attachments, and the model's own account of what went wrong — is something the phone can start, **watch step by step**, and hand to the system share sheet when it finishes. It runs behind the same single-flight guard as the desktop's own button, so a run started here and one started there can never fight over the same files.
+
+<Note>
+  A turn you are watching from the phone shows **the question above the answer**: the prompt travels with every live update, so a phone that pairs — or opens a conversation — mid-turn is no longer reading a reply to nothing.
 </Note>
 
 ## Phone Notifications
@@ -89,6 +134,32 @@ The model chooses the words and the importance; the harness owns everything else
 
 If the phone is connected, the notification rides the live tunnel. If it isn't, it queues as a platform push instead.
 
+### Where a tap lands
+
+A notification can name a screen, and since **v1.0.237** it can name **this run's own conversation** without knowing its id:
+
+```
+wolffish://chat?id=current
+```
+
+The desktop fills the id in **from the turn scope** — the same place the run's identity already comes from. This matters because a run does not reliably know which conversation it is answering in: the agent used to either go hunting for the id or guess one, and **a guessed id opens someone else's transcript**. `current` removes the guess.
+
+The destinations are a fixed list, shared by both apps, and cover every screen the phone actually has:
+
+| Route | Opens |
+| --- | --- |
+| `chat` · `chat?id=…` | The chat screen, optionally a specific conversation |
+| `history` | The conversation list |
+| `settings` | The settings index |
+| `settings/model` · `settings/appearance` · `settings/preferences` | Model, appearance, preferences |
+| `settings/projects` · `settings/automations` · `settings/procedures` · `settings/customization` | The [editable workspace](#the-workspace-editable) |
+| `settings/channels` · `settings/capabilities` · `settings/knowledge` · `settings/mcp` · `settings/services` · `settings/variables` | The mirrored settings pages |
+| `settings/usage` · `settings/data` · `settings/updates` · `settings/relay` · `settings/changelog` | Usage, data, updates, relay, changelog |
+
+A link naming anything else is **refused at the call**, with the list of real destinations in the error, rather than traveling all the way to the phone to quietly drop you on the home screen — which looks exactly like a notification that doesn't work. The phone ignores an unresolvable link too, leaving you where you are instead of falling through to a not-found route.
+
+A tap that **launched** the app is read on the entry screen's first render, so its destination is the boot destination rather than a second navigation racing the redirect. A conversation reached this way waits out a short grace period for the desktop instead of flashing an empty new chat, and the back arrow on a screen opened straight from a notification falls through to chat rather than sitting on a stack of one.
+
 ### Task results
 
 One switch decides how much of a run the phone's feed relays. **Off** — the default — keeps it clean: assistant messages, file-bearing results, and errors. **On** relays every tool call and activity. Connection logging is separate and always on.
@@ -100,15 +171,19 @@ The feed renders what the desktop renders — markdown replies, tool activity, d
 - **Reasoning** — when a reply carried model thinking, a collapsed card sits at the end of the turn; tap to unfold the raw thinking text. The desktop app shows the same card, so both surfaces tell the same story about how an answer came to be.
 - **Status pills** — a turn that stopped at the response limit or hit a connection error says so in place.
 
-The composer's menu sheet carries the desktop's chat controls: cloud/local model switch, model picker, single vs. [workflow](/configuration/workflow-mode) mode, the thinking-level dial, a [project](/configuration/projects) picker with the project's instructions in preview, and a context meter. Voice notes record from the mic and ride as audio attachments.
+The composer's menu sheet carries the desktop's chat controls: cloud/local model switch, model picker, single vs. [workflow](/configuration/workflow-mode) mode, the thinking-level dial, a [project](/configuration/projects) picker with the project's instructions in preview, and a context meter. Its button wears **vertical faders** so it doesn't read as a second copy of the conversations navigator beside it, and the Model screen leads with the two knobs touched every session — chat mode and thinking — keeping the picker below them. Voice notes record from the mic and ride as audio attachments.
 
 ## File Viewers
 
-Tap any attachment to expand it full screen (sharing hands off to the system share sheet): images and SVG with a lightbox, video and audio players, PDF, Word documents, spreadsheets — with CSV/TSV rendered as tables — Markdown, plain text, HTML with a preview/source toggle, and code files as line-numbered cards.
+Tap any attachment to expand it full screen (sharing hands off to the system share sheet): images with pinch-to-zoom and pan, SVG with a lightbox, video and audio players, PDF, Word documents, spreadsheets — with CSV/TSV rendered as tables — Markdown, plain text, HTML with a preview/source toggle, and code files as line-numbered cards.
+
+**PDFs render in the card on both platforms.** Android's WebView has never shipped a PDF engine, so the card used to hand the document off to whatever viewer the phone happened to have. The reader is now vendored into the app — a self-contained pdf.js page composed around the file's own bytes — so the preview and the expanded document are the same on Android as on iPhone: a real first page, scrollable and pinch-zoomable. Nothing is handed to another app, the sandbox stays shut, and the page drawing the document can reach no file but the one you opened. Very large PDFs still go to the system viewer, which is where they belong.
 
 ## Usage On the Go
 
 The Usage screen is the desktop's Usage panel on one column: an **Activity** month grid, a **day card** that's always visible (it opens on today and moves when you tap a day — tokens, cost, messages, per-model rows, Brave Search queries), six ranges from Today to All Time, overview stats (conversations, messages, total tokens, active days, longest streak, favourite model), a **Costs** section (total spend, top day, daily average), and per-provider cards.
+
+Each range **reports its own window**: every total is closed at today as well as opened at its start, so a figure labelled Today can never quietly carry tomorrow, and stepping from 3 Months to 6 Months to Year to Date moves the numbers instead of repeating them. The closing bound applies to the range totals only — the activity calendar and its day card still draw every row the ledger holds, since a month rendering blank because the clock hasn't reached it is indistinguishable from a month with no usage. The range switch fills its row as one control, splitting the width evenly between the six.
 
 ## Browser Extension Rows
 
@@ -123,6 +198,8 @@ Two cards in **Settings → Updates** keep the surfaces distinct: **This app** (
 The app still ships a **self-contained Demo Mode** — a complete, offline tour of the product filled with three months of real (anonymized) usage, for trying it before pairing anything. The first tap downloads a curated dataset — about 4 MB over the wire, unpacking to **163 conversations** plus a full desktop settings snapshot — under a progress bar; later taps open straight into chat. The download is versioned, so a republished dataset refreshes itself on devices that already imported an older one, and an interrupted download leaves the previous dataset intact.
 
 After the import, the demo is fully offline. Sending a message returns a friendly card explaining that new messages aren't processed in the demo — browsing, editing, and configuring all work; real turns need a paired desktop. Attachment bytes load lazily: each file type resolves to one published sample fetched on first view and cached, so the file viewers have something genuine to open for over a hundred formats.
+
+The dataset covers the parts of Wolffish a transcript alone can't show: an agent **asking permission** before something dangerous — and being refused once — a **twenty-question [ask card](/capabilities/built-in-capabilities)** answered one chip at a time, and a whole session **held by voice**, spoken in both directions. The workspace behind the demo is populated too, so Projects, Procedures, Automations and the customization documents carry real content from the first screen rather than filling in a moment later.
 
 ### Leaving the demo
 

@@ -7,7 +7,7 @@ description: "Turn the one agent you talk to into the master of a run it designs
 
 Most of the time Wolffish is one model doing one thing at a time. Workflow mode keeps that feel — you still talk to one agent — but lets it architect how a hard job gets executed. The agent you message becomes the **master** of the run: it declares the phases of its plan, spawns live agents that work in parallel, collects each one's report the moment it lands, sends follow-ups, cancels dead ends, and folds everything into a single reply. You watch it all happen on a live **workflow card** in the chat.
 
-It's opt-in. By default Wolffish runs in **Single** mode — one model answering directly. You switch modes with the **mode pill beside the chat input**: click it, pick Single or Workflow, and it takes effect from your next message.
+It's opt-in. By default Wolffish runs in **Single** mode — one model answering directly. You switch modes inside the **model card beside the chat input**: open it, pick Single or Workflow from the chip row above the search, and it takes effect from your next message.
 
 ## Workflow vs. Single Mode
 
@@ -114,7 +114,7 @@ For a small, quick, or strictly **sequential** task — where each step needs th
 
 ## Turning It On
 
-- **Globally:** the **mode pill** beside the chat input — click it, pick **Single** or **Workflow**. It applies from your next message, and scheduled jobs and procedures inherit it by default.
+- **Globally:** open the **model card** beside the chat input — Single/Workflow is a chip row inside it, above the search. It applies from your next message, and scheduled jobs and procedures inherit it by default. (Before v1.0.236 this was a separate mode pill on the composer; it moved so every model knob sits in one panel.)
 - **Per automation:** every job on the [Heartbeat page](/configuration/heartbeat) has its own Single/Workflow toggle — under the hood it's an optional first body line `mode: workflow` (or `mode: single`) in the job's block, which is stripped before the instruction reaches the agent. Wolffish can set it by conversation too when you ask it to schedule something.
 - **Per procedure:** each saved [procedure](/configuration/procedures) carries its own mode, toggled next to its Play button — so the morning brief stays a quick single-model run while the weekly deep-dive fans out into agents.
 

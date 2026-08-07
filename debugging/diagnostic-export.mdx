@@ -15,9 +15,11 @@ The export only ever **reads**. The one thing it writes is the archive itself. I
 
 ## Running It
 
-The **bug icon** sits in the chat's button row, next to the PDF export button. It is enabled once the conversation has been saved and has at least one message.
+**The export lives on the History page.** Since **v1.0.236** the bug icon has left the chat's button row, which had grown a button per feature: every row on **History** carries its own bug button, including the row for the conversation you currently have open. One home, one button, and no ambiguity about which conversation a press belongs to.
 
-You don't have to open a conversation to export it: **every row on the History page carries its own bug button** too, so you can hand over a bundle for a conversation you aren't in. That button rests in two cases — the conversation you currently have open (the composer's own button belongs to that one) and a conversation whose very first turn is still running, which has nothing saved yet to collect.
+A row's button rests only when there is nothing yet to collect — a conversation whose very first turn is still running has no saved transcript. A conversation that exists but hasn't reached the index yet says **"Not indexed yet"** rather than going quietly dead on the click.
+
+You can also start one **from your phone**: the [mobile app](/integrations/mobile-app#diagnostics-from-the-phone) collects the same bundle, shows the same step-by-step progress, and hands the finished archive to the system share sheet.
 
 An overlay takes over while collection runs, showing each stage as it completes and a running file count. It takes a few seconds. When it finishes you get a card listing what went in, with two actions:
 
@@ -31,7 +33,7 @@ The archive itself lands in your workspace either way:
 ```
 
 <Tip>
-Only one export runs at a time — the collectors read the same log files, so parallel runs would only fight for IO. Triggering the export again while one is in flight simply **attaches you to the running export** instead of failing it.
+Only one export runs at a time — the collectors read the same log files, so parallel runs would only fight for IO. Triggering the export again while one is in flight simply **attaches you to the running export** instead of failing it. The same single-flight guard covers the phone, so a run started there and one started here can never fight over the same files.
 </Tip>
 
 ## What Goes In

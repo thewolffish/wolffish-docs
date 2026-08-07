@@ -47,7 +47,7 @@ Every system prompt contains a `<capabilities>` index: one line per capability �
 
 ### Core capabilities — always loaded
 
-A bootstrap set ships its full tool schemas with every request (~31–49 tools): `tool-discovery`, `introspect`, `filesystem`, `shell`, `ask`, `utilities`, `web-search`, `secrets`, `system`, the `operating-manual`, `pdf-design` and `dataviz` manuals (one schema line each — their manual bodies load only when called), [`video`](/integrations/video-generation) (a render request must reach the tool without a discovery hop), plus `workflow` (gated to the [workflow](/configuration/workflow-mode) master — agents never see its tools) and the channel capabilities (`telegram`, `whatsapp`, `electron`, and `phone` for [notifications](/integrations/mobile-app#phone-notifications)) while connected. These are the keys to everything else — discovery, memory retrieval, files, and replying — and must never require a discovery hop.
+A bootstrap set ships its full tool schemas with every request (~31–49 tools): `tool-discovery`, `introspect`, `filesystem`, `shell`, `ask`, `utilities`, `web-search`, `secrets`, `system`, the `operating-manual`, `pdf-design`, `dataviz` and `web-design` manuals (one schema line each — their manual bodies load only when called), [`video`](/integrations/video-generation) (a render request must reach the tool without a discovery hop), plus `workflow` (gated to the [workflow](/configuration/workflow-mode) master — agents never see its tools) and the channel capabilities (`telegram`, `whatsapp`, `electron`, and `phone` for [notifications](/integrations/mobile-app#phone-notifications)) while connected. These are the keys to everything else — discovery, memory retrieval, files, and replying — and must never require a discovery hop.
 
 ### Everything else — discoverable on demand
 
@@ -81,6 +81,7 @@ Wolffish ships with these capabilities in the default workspace:
 | `projects` | Plugin | Create and manage [projects](/configuration/projects) — standing instructions + files that brief every conversation inside them |
 | `pdf-design` | Plugin | The core **document design manual** — loaded before authoring any PDF or styled document |
 | `dataviz` | Plugin | The core **visualization manual** — when to chart, which chart, and the interactive `.chart.json` cards |
+| `web-design` | Plugin | The core **web design manual** — loaded before writing a line of HTML for any page you'll open in a browser |
 
 ## Adding and Removing Capabilities
 

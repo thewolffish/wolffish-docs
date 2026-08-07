@@ -256,10 +256,14 @@ When you ask, Wolffish:
     Provides web search and page fetching for current information.
 
     **Tools:**
-    - `web_search` — Search the web, returns titles, snippets, and URLs. Defaults to 5 results, no upper limit enforced.
-    - `web_fetch` — Fetch full text content of a web page. No length floor — the LLM decides how much content to request.
+    - `web_search` — Search the web. Returns titles, snippets and URLs — **never a page**. Defaults to 5 results, no upper limit enforced. Each query spends real money, so it's for settling one fact or finding which URL to open.
+    - `web_fetch` — One plain HTTP GET of a URL, returned as text. Instant and free, but it sees only what the server sends a bare request: JS-rendered pages come back empty, and paywalls, logins, consent walls and bot checks defeat it.
 
-    Use `web_search` for discovery, then `web_fetch` to read specific results in detail. If a Brave API key is configured in Variables, the agent prefers the Brave search tool instead.
+    **These are one of three routes, not the only one.** Since v1.0.236 the skill teaches the trade-off explicitly, and the third route — the [browser extension](/integrations/browser-extension#three-routes-to-the-web), driving your real browser — is the default whenever reach or reliability matters: a named site, a logged-in or paid-for page, anything JS-rendered, anything needing a click, or a task spanning more than a page or two. Two failed fetches cost more than opening the browser would have.
+
+    A page that comes back as a few hundred characters, a cookie banner, "enable JavaScript", a login form, or a subscribe wall **did not load** — it failed quietly with a 200. The agent is taught to read what came back before trusting it, and to escalate rather than re-fetch or answer from the fragment.
+
+    If a Brave API key is configured in Variables, the agent prefers the Brave search tool instead.
   </Accordion>
 
   <Accordion title="browser — Headless browser automation">
@@ -353,6 +357,32 @@ When you ask, Wolffish:
 
     **Tools:**
     - `dataviz` — Load the visualization manual
+  </Accordion>
+
+  <Accordion title="web-design — the web design manual (core)">
+    **Type:** Plugin — **Core**, always loaded, can't be disabled
+
+    **Triggers:** web design, website, web page, html page, info site, docs site, microsite, landing page, interactive report, one-pager
+
+    The third design manual, and the newest. Ask for a guide, a handbook, or a report **as a web page** and what came back used to depend on the model's mood that day. `web_design` loads the **web design manual** into context, and the operating contract requires the agent to call it **before writing a line of HTML** for anything a person will open in a browser — exactly as `pdf-design` already works for documents.
+
+    The manual carries:
+
+    - **Treatment calibration and a section map** — a planning step before any markup, so the page's shape is decided rather than discovered.
+    - **A rail-and-column architecture** that stays responsive from desktop down to phone widths.
+    - **Dual light and dark themes** — system preference plus a toggle override — built on one set of tokens.
+    - **Type voices** from system font stacks, and a component kit: cover plate, index rail, notes, figure plates, hairline tables, pills, card grids, Q&A, steps, checklists.
+    - **Hand-drawn SVG figure rules**, themed to the page rather than dropped in as stock art.
+    - **JS as enhancement** — a page must read complete with scripts switched off, and arrives as **one self-contained file**.
+    - **Arabic and RTL rules**, the same discipline the document manual applies.
+    - A **mandatory verify pass**: the agent screenshots the finished page with `browser_screenshot` and looks at it through `image_view` — **both themes, desktop and phone widths** — before handing it over.
+
+    **Tools:**
+    - `web_design` — Load the web design manual (the manual body costs nothing until called — always-on is just the schema line). Takes an optional `page` line naming what you're about to design; stating it commits the agent to the manual.
+
+    Because the preview card in chat is deliberately sandboxed, every website card now carries an **Open in browser** button — the live page, from its real location, with its scripts running.
+
+    Your own instructions always win — a prompt or automation that fully specifies the design keeps getting exactly that.
   </Accordion>
 
   <Accordion title="spreadsheet — Excel and CSV files">
@@ -642,7 +672,7 @@ Built-in capabilities are managed and updated by Wolffish — don't edit them di
 Changes to custom capabilities take effect on the next message — no restart needed.
 
 <Note>
-  A handful of built-ins are **load-bearing** and can't be turned off: the [workflow](/configuration/workflow-mode) engine, your secrets, the `skills` capability, [projects](/configuration/projects), [automations](/configuration/heartbeat), [procedures](/configuration/procedures), the `pdf-design` and `dataviz` manuals, and the shared file-delivery tools the rest leans on. In **Settings → Capabilities** these wear a **Core** badge, sort to the **bottom** of the list, and show a locked **Always on** marker where their switch would be — so a stray click can't pull the floor out from under a feature you depend on. Everything you imported yourself stays fully toggleable.
+  A handful of built-ins are **load-bearing** and can't be turned off: the [workflow](/configuration/workflow-mode) engine, your secrets, the `skills` capability, [projects](/configuration/projects), [automations](/configuration/heartbeat), [procedures](/configuration/procedures), the `pdf-design`, `dataviz` and `web-design` manuals, and the shared file-delivery tools the rest leans on. In **Settings → Capabilities** these wear a **Core** badge, sort to the **bottom** of the list, and show a locked **Always on** marker where their switch would be — so a stray click can't pull the floor out from under a feature you depend on. Everything you imported yourself stays fully toggleable.
 </Note>
 
 <Warning>

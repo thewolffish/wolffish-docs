@@ -50,9 +50,13 @@ The integration is seamless — select a local model and start chatting. Wolffis
   </Step>
 
   <Step title="Select in Wolffish">
-    Open Settings → Models, select the Ollama tab, and choose your model. That's it — you're running local.
+    Open the **model card beside the chat input**, flip it to **Local**, and pick your model. That's it — you're running local. (Settings → Models → Ollama still works, and is where the pull UI lives.)
   </Step>
 </Steps>
+
+<Tip>
+  Since **v1.0.236** the model card **lists the Ollama models you have installed**, read fresh each time it opens — pull one in a terminal and it's there without relaunching Wolffish. That turns "switch to local" and "pick which local model" into a single click instead of a trip through Settings, and choosing a model you've already downloaded no longer pretends to download it again.
+</Tip>
 
 <Note>
   Ollama is **optional**. You can skip it entirely during onboarding and use only cloud providers (Claude, OpenAI). Wolffish will prompt you to configure at least one provider before you can start chatting.
