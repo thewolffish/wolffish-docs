@@ -93,7 +93,9 @@
                   "getting-started/installation",
                   "introduction/philosophy",
                   "getting-started/first-launch",
-                  "getting-started/quickstart"
+                  "getting-started/quickstart",
+                  "getting-started/cli",
+                  "getting-started/server-deployment"
                 ]
               },
               {
@@ -161,6 +163,7 @@
                   "integrations/mcp",
                   "integrations/browser-extension",
                   "integrations/mobile-app",
+                  "integrations/notifications",
                   "integrations/video-generation",
                   "integrations/google-workspace",
                   "integrations/github",
@@ -251,7 +254,9 @@
                   "ar/getting-started/installation",
                   "ar/introduction/philosophy",
                   "ar/getting-started/first-launch",
-                  "ar/getting-started/quickstart"
+                  "ar/getting-started/quickstart",
+                  "ar/getting-started/cli",
+                  "ar/getting-started/server-deployment"
                 ]
               },
               {
@@ -319,6 +324,7 @@
                   "ar/integrations/mcp",
                   "ar/integrations/browser-extension",
                   "ar/integrations/mobile-app",
+                  "ar/integrations/notifications",
                   "ar/integrations/video-generation",
                   "ar/integrations/google-workspace",
                   "ar/integrations/github",
@@ -366,7 +372,7 @@
                 ]
               },
               {
-                "group": "توسيع وولف فيش",
+                "group": "توسيع وولفيش",
                 "expanded": true,
                 "pages": [
                   "ar/extending/agents-md",

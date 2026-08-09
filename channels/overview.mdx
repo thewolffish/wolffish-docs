@@ -1,17 +1,20 @@
 ---
 title: "Channels Overview"
-description: "How Wolffish communicates — Electron UI, Telegram, WhatsApp, and your paired phone"
+description: "How Wolffish communicates — Electron UI, the terminal, Telegram, WhatsApp, and your paired phone"
 ---
 
 # Same Brain, Every Channel
 
-Wolffish communicates through four channels: the Electron desktop UI, a Telegram bot, WhatsApp direct messaging, and a [paired phone](/integrations/mobile-app). All four run the same brain pipeline — the only difference is how input arrives and how output is rendered.
+Wolffish communicates through five channels: the Electron desktop UI, a [terminal](/getting-started/cli), a Telegram bot, WhatsApp direct messaging, and a [paired phone](/integrations/mobile-app). All five run the same brain pipeline — the only difference is how input arrives and how output is rendered.
 
-## The Four Channels
+## The Five Channels
 
 <CardGroup cols={1}>
   <Card title="Electron UI" icon="desktop">
     The native desktop interface. Real-time streaming, rich markdown, approval dialogs, and full conversation management.
+  </Card>
+  <Card title="Terminal" icon="terminal">
+    The [`wolffish` command](/getting-started/cli) — an interactive session or a one-shot prompt, attached to the running agent. Markdown rendered in ANSI, approvals answered with a keystroke, files as paths in both directions. The only channel that works on a [headless server](/getting-started/server-deployment).
   </Card>
   <Card title="Telegram" icon="paper-plane">
     A personal bot that responds to your private messages. Inline buttons for approvals, HTML formatting, file handling.
@@ -30,8 +33,9 @@ Every channel feeds into the same pipeline. The channel is just a transport laye
 
 ```
 User ─┬─ Electron UI ──┐
-      ├─ Telegram Bot ──┤
-      ├─ WhatsApp ──────┼──► TurnRunner ──► Agent Pipeline ──► TurnRouter ──► Channel ──► User
+      ├─ Terminal ──────┤
+      ├─ Telegram Bot ──┼──► TurnRunner ──► Agent Pipeline ──► TurnRouter ──► Channel ──► User
+      ├─ WhatsApp ──────┤
       └─ Phone ─────────┘
 ```
 
@@ -77,7 +81,7 @@ When the amygdala flags a tool call for approval, the TurnRouter routes the appr
 
 The routing logic is straightforward:
 
-1. Each turn carries a `channelId` (electron, telegram, whatsapp, or mobile)
+1. Each turn carries a `channelId` (electron, cli, telegram, whatsapp, or mobile)
 2. When `amygdala.classify()` returns `confirm`, the TurnRunner emits an approval request
 3. The TurnRouter looks up the active turn's `channelId` and calls `onApprovalRequest` on that channel's sink
 4. The channel presents the approval in its native format (dialog, inline button, or text prompt)
@@ -106,7 +110,7 @@ Conversations are fully two-way across channels — nothing is read-only:
 - **Replies land where they belong.** When Wolffish messages a channel out of band — an automation reporting a finished job, an in-app conversation dropping you a note — that chat re-points itself at the sending conversation, so your reply continues exactly the conversation that messaged you.
 - **Projects travel too.** `/project` on either channel starts a conversation inside one of your [projects](/configuration/projects) — briefed with its standing instructions and files, exactly like a project chat opened in the app. The binding lives on the conversation itself, so continuing it anywhere keeps the project context.
 
-In the app, the conversations rail and History mark each conversation with a small **origin badge** — Telegram, WhatsApp, the phone, an automation, or a procedure run — so a mixed list stays legible. In-app chats carry no badge: the app is the default. Conversations that belong to a project or were run by an automation or procedure also wear that source's **emoji** on their rail chip.
+In the app, the conversations rail and History mark each conversation with a small **origin badge** — the terminal, Telegram, WhatsApp, the phone, an automation, or a procedure run — so a mixed list stays legible. In-app chats carry no badge: the app is the default. Conversations that belong to a project or were run by an automation or procedure also wear that source's **emoji** on their rail chip.
 
 ## File Delivery
 
@@ -117,6 +121,7 @@ When Wolffish produces a file — a PDF, a converted video, a spreadsheet — de
 | Channel | How a sent file arrives |
 |---|---|
 | Electron UI | File card in the chat (image, audio, video, document, or generic file) |
+| Terminal | The path, printed — the terminal and the agent share one filesystem, so nothing is uploaded or encoded |
 | Telegram | Real upload — document, photo, audio, or video message |
 | WhatsApp | Real upload — media message or document |
 | Phone | File card in the mirrored feed; the bytes stream over the encrypted tunnel when you open it |
@@ -133,9 +138,10 @@ The toggle lives in each channel's own settings, all under **Settings → Channe
 | Channel | Where | What the toggle affects |
 |---|---|---|
 | In-App | Settings → Channels → In-App | What the desktop feed **displays** |
+| Terminal | Settings → Channels → CLI | What the terminal **displays** — with `--tools` / `--clean` overriding it for a single command |
 | Telegram | Settings → Channels → Telegram | What is **relayed** to the chat |
 | WhatsApp | Settings → Channels → WhatsApp | What is **relayed** to the chat |
-| Phone | Settings → Mobile → Task results | What is **relayed** to the phone's feed (connection logging is separate and always on) |
+| Phone | Settings → Channels → Mobile → Task results | What is **relayed** to the phone's feed (connection logging is separate and always on) |
 
 <Note>
   Verbose only changes what is **shown** or **relayed** — never what the agent does. Every segment is still saved to history and memory in full, so flipping the toggle simply re-renders the feed; nothing is lost when it is off.
@@ -151,17 +157,20 @@ When Wolffish needs to message you out-of-band — a finished background task, a
 
 ## Channel Comparison
 
-| Feature | Electron UI | Telegram | WhatsApp | Phone |
-|---|---|---|---|---|
-| Streaming | Real-time chunks | Batched messages | Batched messages | Real-time chunks |
-| Formatting | Rich markdown | HTML subset | Plain text | Rich markdown |
-| Approvals | Native dialog | Inline buttons | Text prompt | Native card |
-| Files | Drag and drop | Attachments | Media messages | Chunked upload / download |
-| Voice | N/A | Voice notes | Voice notes | Voice notes |
-| Reconnection | Always on | Persistent | Auto-reconnect | Re-handshakes on foreground |
-| Verbose feed | Display toggle, off by default | Relay toggle, off by default | Relay toggle, off by default | Relay toggle, off by default |
+| Feature | Electron UI | Terminal | Telegram | WhatsApp | Phone |
+|---|---|---|---|---|---|
+| Streaming | Real-time chunks | Real-time chunks | Batched messages | Batched messages | Real-time chunks |
+| Formatting | Rich markdown | Markdown → ANSI | HTML subset | Plain text | Rich markdown |
+| Approvals | Native dialog | `[y]es / [n]o / [a]lways` card | Inline buttons | Text prompt | Native card |
+| Files | Drag and drop | Paths, both directions | Attachments | Media messages | Chunked upload / download |
+| Voice | N/A | N/A | Voice notes | Voice notes | Voice notes |
+| Reconnection | Always on | Attach / detach at will | Persistent | Auto-reconnect | Re-handshakes on foreground |
+| Verbose feed | Display toggle, off by default | Display toggle + per-command override | Relay toggle, off by default | Relay toggle, off by default | Relay toggle, off by default |
 
 <CardGroup cols={2}>
+  <Card title="Terminal CLI" icon="terminal" href="/getting-started/cli">
+    The whole app in a terminal — and on a server.
+  </Card>
   <Card title="Telegram Channel" icon="paper-plane" href="/channels/telegram">
     Set up and use the Telegram bot.
   </Card>

@@ -40,6 +40,18 @@ Wolffish is a self-contained Electron app. No Node.js, no Python, no Docker. Jus
 
 ## Download
 
+The fastest route on any platform is the install script — it picks the right artifact, verifies it, and puts the [`wolffish` terminal command](/getting-started/cli) on your PATH:
+
+```bash
+curl -fsSL https://releases.wolffi.sh/install.sh | sh
+```
+
+```powershell
+irm https://releases.wolffi.sh/install.ps1 | iex
+```
+
+Or install by hand:
+
 <Tabs>
   <Tab title="macOS">
     Download the latest `.dmg` from the [download page](https://www.wolffi.sh/).
@@ -79,6 +91,10 @@ Wolffish is a self-contained Electron app. No Node.js, no Python, no Docker. Jus
 
   </Tab>
 </Tabs>
+
+<Note>
+  Installing on a **server with no display**? The same install command works on a headless box — verified end to end on Ubuntu 24.04 — and the [Server Deployment](/getting-started/server-deployment) page covers the background service, autostart, and pairing your phone as the interface.
+</Note>
 
 ## What's Bundled
 

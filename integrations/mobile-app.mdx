@@ -7,11 +7,11 @@ description: "The phone companion — pair once, then carry the same conversatio
 
 Wolffish runs on your machine — which has always meant being at your machine. The mobile app puts the desktop experience on a phone: the chat feed with its tool cards and delivered files, the conversation history, the usage ledger, and every settings page — Model, Channels, Services, MCP, Variables, Capabilities, Knowledge, Projects, Automations, Procedures, Customization, Usage, Data, Updates, Preferences, Appearance — laid out as the desktop's settings sidebar turned into a navigation list.
 
-Since **v1.0.235** it does that against *your* desktop. A phone pairs with this machine and carries the same conversations, the same settings, the same usage with it — over a link only the two devices can read. Since **v1.0.236** it also carries everything that *shapes* those conversations: [projects, procedures, automations](#the-workspace-editable) and the three documents behind every reply are edited from either device, against the very same files.
+Since **v1.0.235** it does that against *your* desktop. A phone pairs with this machine and carries the same conversations, the same settings, the same usage with it — over a link only the two devices can read. Since **v1.0.236** it also carries everything that *shapes* those conversations: [projects, procedures, automations](#the-workspace-editable) and the three documents behind every reply are edited from either device, against the very same files. And since **v1.0.239** the machine on the other end doesn't need a screen at all — a phone pairs with a [headless server](#paired-to-a-server) exactly as it pairs with a desktop.
 
 ## Pairing
 
-Everything lives in **Settings → Mobile** on the desktop. Pairing happens once, and there is no token to paste: the desktop *offers* a pairing and the phone claims it.
+Everything lives in **Settings → Channels → Mobile** on the desktop. Pairing happens once, and there is no token to paste: the desktop *offers* a pairing and the phone claims it.
 
 <CardGroup cols={1}>
   <Card title="Pairing QR" icon="qrcode">
@@ -54,6 +54,8 @@ The relay is [open source and self-hostable](https://github.com/thewolffish/wolf
 
 Two exits sit at the foot of the panel and the difference between them is the whole point. **Disconnect** drops the live link; the pairing survives and the phone reconnects when it comes back to the foreground. **Unpair** forgets the device — its keys are cleared and the phone has to pair again from scratch.
 
+Leaving from the phone's side leaves **nothing behind anywhere**: badges are cleared — buckets, tray, app icon — the relay is told to zero its copy and [forget the device's push registration](/integrations/notifications#registration-and-leaving-no-trace), and only then does the phone drop its keys and wipe everything it synced, back to a fresh install. Your desktop keeps the originals, so pairing again restores them.
+
 <Info>
   The desktop is the host: it parks on the relay and waits. The phone dials in when it is in the foreground and disappears when iOS suspends it, so **every reconnect re-handshakes** and nothing assumes continuity. A phone that has been in your pocket for an hour comes back to a freshly secured link.
 </Info>
@@ -75,7 +77,7 @@ The phone is a second view of the whole app, not a message stream — so the des
 | **Collect a diagnostic bundle** | The same [export](/debugging/diagnostic-export) the desktop's bug button runs |
 | See usage and the changelog | The desktop's own ledger, mirrored |
 
-Because a turn started on the phone is a real turn, it gets its own **channel badge**: conversations that began there wear a phone glyph in the desktop's History list and conversations rail, next to the Telegram, WhatsApp, automation and procedure badges.
+Because a turn started on the phone is a real turn, it gets its own **channel badge**: conversations that began there wear a phone glyph in the desktop's History list and conversations rail, next to the Telegram, WhatsApp, [terminal](/getting-started/cli), automation and procedure badges.
 
 <Note>
   Credential fields on the phone stay placeholders — **secrets are never entered on the phone**. Keys are pasted on the desktop, where they live.
@@ -102,13 +104,15 @@ Pairing brought your conversations across; until **v1.0.236** everything that *s
 
 Every one of these writes goes **through the desktop's own code**, so a change made on the phone and a change made at the machine are the same act, against the same files — never a second copy that quietly disagrees. Both screens show it at once: the desktop's markdown editor **adopts a save made on the phone live**, unless you are mid-draft, in which case your unsaved text stands and wins when you save it.
 
+Projects, procedures and automations all carry **attached files and working folders**, editable from the phone since **v1.0.239**. An attached file is copied into the workspace, so a run can never break because the original moved; a working folder is the real folder the work happens in, so it is deliberately *not* copied. Folders are **typed, not browsed** — the desktop validates the path against its own filesystem and answers with its own refusal when it doesn't exist — and the chip wears the full desktop path, so there is never a doubt about *which machine's* folder it names.
+
 ### Turns you can score
 
 Every finished answer carries a **0–10 [rating bar](/memory/reflection)**. A score cast on the phone lands on the desktop exactly as the desktop's own does, and a score cast anywhere else — the desktop's bar, a bare number replied to Telegram — appears here without waiting for anything to reload. It is the same signal the nightly reflection learns from; it simply stopped requiring the desktop.
 
 ### Every conversation, without leaving the one you're in
 
-A sheet slides over the chat carrying the **whole conversation list**, grouped by recency, showing which project each one belongs to and which one is running right now. Switching is a tap, and the turn you were watching keeps streaming while you look. Its five destinations — Settings, Projects, Automations, Procedures and Customization — **stay pinned at the top** while the conversations scroll underneath them.
+A sheet slides over the chat carrying the **whole conversation list**, grouped by recency, showing which project each one belongs to, which one is running right now, and where each one came from — the **origin glyph rides the very first live update**, so a conversation the phone has only ever seen running still wears its Telegram plane or terminal prompt from the first instant, instead of sitting blank until the metadata catches up. Switching is a tap, and the turn you were watching keeps streaming while you look. Its five destinations — Settings, Projects, Automations, Procedures and Customization — **stay pinned at the top** while the conversations scroll underneath them.
 
 ### What the desktop is busy with
 
@@ -119,46 +123,18 @@ Work that takes the desktop's whole screen shows on the phone as a **card in a s
 Collecting a conversation's [diagnostic bundle](/debugging/diagnostic-export) — logs, tasks, memory, context, settings, attachments, and the model's own account of what went wrong — is something the phone can start, **watch step by step**, and hand to the system share sheet when it finishes. It runs behind the same single-flight guard as the desktop's own button, so a run started here and one started there can never fight over the same files.
 
 <Note>
-  A turn you are watching from the phone shows **the question above the answer**: the prompt travels with every live update, so a phone that pairs — or opens a conversation — mid-turn is no longer reading a reply to nothing.
+  A turn you are watching from the phone shows **the question above the answer**: the prompt travels with every live update, so a phone that pairs — or opens a conversation — mid-turn is no longer reading a reply to nothing. And a tunnel that comes up **mid-run knows the run exists**: on every connect the phone asks the desktop what is running right now, so a busy conversation shows its stop button and its streaming pulse instead of an idle composer, a parked approval card comes back to be answered, and the rating bar appears only once the desktop has actually said the turn ended — never over an answer still being written.
 </Note>
 
 ## Phone Notifications
 
-With **Phone notifications** on, the agent can reach you through its `notify_phone` tool when a run finishes, fails, or needs you. Nothing is ever sent automatically — the agent has to deliberately call the tool, and **Off makes the tool refuse outright** before anything is built or sent.
+With **Phone notifications** on, the agent can reach you through its `notify_phone` tool when a run finishes, fails, or needs you. Nothing is ever sent automatically — the agent has to deliberately call the tool, and **Off makes the tool refuse outright** by removing it from the agent's hands entirely. A tap lands where the notification points — including **this run's own conversation**, via `wolffish://chat?id=current` — and if the phone is connected, the notification rides the live tunnel; if it isn't, it goes out as a platform push instead.
 
-The model chooses the words and the importance; the harness owns everything else:
+The whole system now has [**its own page**](/integrations/notifications): the phases and how long each stays relevant, what the desktop stamps on every send and what the model is never trusted with, the fixed list of screens a tap can open, how unread badges stay honest, and exactly what the relay can and cannot see along the way.
 
-- **Phase** — `needs_input`, `failed`, `completed`, `started`, or `info` — sets how long a notification stays relevant. A blocking question expires in five minutes, because a stale approval prompt arriving forty minutes late is worse than no prompt at all; terminal outcomes wait an hour.
-- **Rate limits** — at most **one notification per phase per run**, and never more than **five per run**. Overruns fail loudly rather than dropping quietly.
-- **Identity** — the notification id and the phone it routes to are stamped by the desktop, never taken from the model. The title is clamped to one line of 60 characters and the body to 180, control characters are stripped, and a deep link is rejected unless it uses the app's own `wolffish://` scheme.
+### Unread badges
 
-If the phone is connected, the notification rides the live tunnel. If it isn't, it queues as a platform push instead.
-
-### Where a tap lands
-
-A notification can name a screen, and since **v1.0.237** it can name **this run's own conversation** without knowing its id:
-
-```
-wolffish://chat?id=current
-```
-
-The desktop fills the id in **from the turn scope** — the same place the run's identity already comes from. This matters because a run does not reliably know which conversation it is answering in: the agent used to either go hunting for the id or guess one, and **a guessed id opens someone else's transcript**. `current` removes the guess.
-
-The destinations are a fixed list, shared by both apps, and cover every screen the phone actually has:
-
-| Route | Opens |
-| --- | --- |
-| `chat` · `chat?id=…` | The chat screen, optionally a specific conversation |
-| `history` | The conversation list |
-| `settings` | The settings index |
-| `settings/model` · `settings/appearance` · `settings/preferences` | Model, appearance, preferences |
-| `settings/projects` · `settings/automations` · `settings/procedures` · `settings/customization` | The [editable workspace](#the-workspace-editable) |
-| `settings/channels` · `settings/capabilities` · `settings/knowledge` · `settings/mcp` · `settings/services` · `settings/variables` | The mirrored settings pages |
-| `settings/usage` · `settings/data` · `settings/updates` · `settings/relay` · `settings/changelog` | Usage, data, updates, relay, changelog |
-
-A link naming anything else is **refused at the call**, with the list of real destinations in the error, rather than traveling all the way to the phone to quietly drop you on the home screen — which looks exactly like a notification that doesn't work. The phone ignores an unresolvable link too, leaving you where you are instead of falling through to a not-found route.
-
-A tap that **launched** the app is read on the entry screen's first render, so its destination is the boot destination rather than a second navigation racing the redirect. A conversation reached this way waits out a short grace period for the desktop instead of flashing an empty new chat, and the back arrow on a screen opened straight from a notification falls through to chat rather than sitting on a stack of one.
+Every notification that names a conversation feeds a **per-conversation unread count** — on the conversation rows here and in History, summed on the floating menu button, and as the number on the app icon, correct even before the app has woken. Clearing is reading: open the conversation and its count is gone, tray notifications included; there is no mark-as-read chore. The [notifications page](/integrations/notifications#unread-badges) has the full mechanics.
 
 ### Task results
 
@@ -170,6 +146,8 @@ The feed renders what the desktop renders — markdown replies, tool activity, d
 
 - **Reasoning** — when a reply carried model thinking, a collapsed card sits at the end of the turn; tap to unfold the raw thinking text. The desktop app shows the same card, so both surfaces tell the same story about how an answer came to be.
 - **Status pills** — a turn that stopped at the response limit or hit a connection error says so in place.
+
+Text is yours to take: **long-press any bubble or tool card** to select from the *rendered* reply — in place on Android, and on iPhone in a dedicated sheet where you drag across the styled text and copy exactly the part you need, instead of fighting a screenshot.
 
 The composer's menu sheet carries the desktop's chat controls: cloud/local model switch, model picker, single vs. [workflow](/configuration/workflow-mode) mode, the thinking-level dial, a [project](/configuration/projects) picker with the project's instructions in preview, and a context meter. Its button wears **vertical faders** so it doesn't read as a second copy of the conversations navigator beside it, and the Model screen leads with the two knobs touched every session — chat mode and thinking — keeping the picker below them. Voice notes record from the mic and ride as audio attachments.
 
@@ -187,15 +165,25 @@ Each range **reports its own window**: every total is closed at today as well as
 
 ## Browser Extension Rows
 
-Settings → Services mirrors the desktop's [multi-browser extension](/integrations/browser-extension) roster: **one row per connected browser profile** — browser name with the profile email, version, and OS — with the pairing port and screenshot settings editable from the phone. A snapshot from an older desktop that predates multi-browser support falls back to a single "Chrome extension" row with its port. Installing and pairing the extension itself always happens on the desktop.
+Settings → Services mirrors the desktop's [multi-browser extension](/integrations/browser-extension) roster: **one row per connected browser profile** — browser name with the profile email, version, and OS — with the screenshot settings editable from the phone. The pairing port stays desktop-managed: moving it restarts the desktop's pairing server, which is the desktop's own act. A snapshot from an older desktop that predates multi-browser support falls back to a single "Chrome extension" row with its port. Installing and pairing the extension itself always happens on the desktop.
 
 ## Updates
 
 Two cards in **Settings → Updates** keep the surfaces distinct: **This app** (the mobile version and build, whether you're on a store build or an over-the-air update, and an automatic-updates switch that genuinely governs update checks) and **Desktop app** (the mirrored desktop version, platform, and its own auto-update setting).
 
+## Paired to a Server
+
+The phone doesn't care what answers the tunnel. Pair it with the desktop app on your laptop, or with a **headless Wolffish on a [VPS](/getting-started/server-deployment)** — the same feed, the same workspace, the same settings pages, over the same sealed link. For a server deployment this is **the recommended interface**: the [terminal CLI](/getting-started/cli) administers the box, and the phone is the surface you actually live in — conversations streaming live, automations watchable as they run, [notifications](/integrations/notifications) when something finishes or needs you, and projects, procedures, automations and the customization documents all editable against the server's own files.
+
+Pairing works from the terminal — `wolffish pair phone` draws a scanner-friendly QR when the window fits it, and falls back to the **typed code** by itself when it doesn't. And the phone reports the server's terminal state right back: the **Settings → Channels → CLI** card says whether the `wolffish` command resolves on the desktop's own PATH, whether autostart is registered, and which mechanism holds it — `systemd`, `launchd`, or `schtasks`. Registering with the operating system is the desktop's own act, so this device reports it rather than changing it.
+
+<Note>
+  On a self-hosted relay, the typed code carries only the secret — enter the relay's address in the **Relay** card on the phone's pairing screen. The QR carries it for you.
+</Note>
+
 ## Demo Mode
 
-The app still ships a **self-contained Demo Mode** — a complete, offline tour of the product filled with three months of real (anonymized) usage, for trying it before pairing anything. The first tap downloads a curated dataset — about 4 MB over the wire, unpacking to **163 conversations** plus a full desktop settings snapshot — under a progress bar; later taps open straight into chat. The download is versioned, so a republished dataset refreshes itself on devices that already imported an older one, and an interrupted download leaves the previous dataset intact.
+The app still ships a **self-contained Demo Mode** — a complete, offline tour of the product filled with three months of real (anonymized) usage, for trying it before pairing anything. The first tap downloads a curated dataset — about 19 MB over the wire in eleven shards, unpacking to **167 conversations** plus a full desktop settings snapshot — under a progress bar; later taps open straight into chat. The download is versioned, so a republished dataset refreshes itself on devices that already imported an older one, and an interrupted download leaves the previous dataset intact.
 
 After the import, the demo is fully offline. Sending a message returns a friendly card explaining that new messages aren't processed in the demo — browsing, editing, and configuring all work; real turns need a paired desktop. Attachment bytes load lazily: each file type resolves to one published sample fetched on first view and cached, so the file viewers have something genuine to open for over a hundred formats.
 
@@ -205,4 +193,4 @@ The dataset covers the parts of Wolffish a transcript alone can't show: an agent
 
 The only exit is deliberate: **Settings → Data → Factory reset this device**, confirmed by typing the phrase **FACTORY RESET**. It wipes the conversations, cached media, and mirrored settings from the phone, keeps your language and theme, and never touches a desktop.
 
-The app is iOS-first, portrait, and fully bilingual — English and Arabic with complete RTL mirroring; switching language restarts the app.
+The app runs on iPhone and Android, portrait, and fully bilingual — English and Arabic with complete RTL mirroring; switching language restarts the app.
