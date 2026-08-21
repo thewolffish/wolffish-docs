@@ -144,10 +144,6 @@ A **format gate** validates every outgoing send, and raw Markdown is refused out
 
 Live narration between tool steps is delivered the instant it's written — too fast to gate — so it is **watched instead of blocked**: when a delivered line carries raw markup, a **format notice** hands the agent exactly what you received, with the delivered message's id, so it can quietly repair it in place with `telegram_edit_message` and keep the rest of the turn clean.
 
-## Scoring Replies (0–10)
-
-A reply that is nothing but a number from 0 to 10 is quietly captured as your **score for the last reply** — acknowledged with a small ✍ reaction, never a chat bubble. Digits typed on an Arabic keyboard (٠–٩, ۰–۹) count the same, and the plumbing stays careful: a "3" answering a numbered question card or `/resume` picker still means option 3, and a number opening a fresh chat is just a message. A short line after each reply reminds you the option exists; the whole thing has its own switch in **Settings → Knowledge → Reflection**, and switching it off makes the channel fully silent about scoring. Your scores anchor the nightly [reflection](/memory/reflection).
-
 ## Verbose Task Results
 
 By default, Telegram receives a **clean feed** — the agent's replies, any files it sends, and errors. The step-by-step tool activity stays in the desktop UI so your chat doesn't fill up with internal steps.

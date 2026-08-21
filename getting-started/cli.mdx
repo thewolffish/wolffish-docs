@@ -5,7 +5,7 @@ description: "The whole app in a terminal — a wolffish command that attaches t
 
 # The Whole App, in a Terminal
 
-Since **v1.0.239** there is a `wolffish` command, and it is not a smaller second Wolffish. Every command it has is a call into **the same code the desktop windows call** — the same settings with the same labels and descriptions, in your own language, Arabic included; the same conversations; the same agent. The desktop app remains the primary way to live with Wolffish. The terminal is the same app for the places a window can't go: an SSH session, a script, a [server with no screen](/getting-started/server-deployment).
+Since **v1.0.239** there is a `wolffish` command, and it is not a smaller second Wolffish. Every command it has is a call into **the same code the desktop windows call** — the same settings, the same conversations, the same agent. Every settings row carries a real label and a sentence or two of description, the same facts the desktop cards teach — written where the settings are defined, so the terminal can never print a raw key where a name should be. One deliberate trade since **v1.0.243**: **the terminal is an English surface** — the desktop app still speaks your language, Arabic included; only the terminal stopped translating. The desktop app remains the primary way to live with Wolffish. The terminal is the same app for the places a window can't go: an SSH session, a script, a [server with no screen](/getting-started/server-deployment).
 
 ```bash
 wolffish "what changed in the workspace today?"
@@ -50,7 +50,6 @@ Inside a session, `/help` lists the whole slash vocabulary — the highlights:
 | `/show [tools\|clean] [n]` | Read the conversation back, paged, with or without tool calls |
 | `/attach <path…>` · `/files` · `/open <n>` · `/save <n> <dest>` | Stage files for the next message; collect what the agent delivered |
 | `/pending` | Answer approvals parked by an earlier session |
-| `/rate <0-10>` | Score the last answer — the same signal [reflection](/memory/reflection) learns from |
 | `/cancel` · `/info` · `/status` · `/usage` · `/logs` · `/diagnose` | The running turn, the conversation, the machine |
 | `/projects` · `/procedures` · `/automations` · `/customizations` | The [workspace](#the-app-in-the-terminal), browsable in place |
 | `/settings [name]` · `/set <id> <value>` · `/model` · `/mode` · `/verbose` | Settings, from a browser to a one-liner |
@@ -62,7 +61,7 @@ Inside a session, `/help` lists the whole slash vocabulary — the highlights:
 The top level is the app's own navigation and nothing more — `conversations`, `projects`, `procedures`, `automations`, `customizations`, `settings` — because a second taxonomy to memorize would be a second app:
 
 ```bash
-wolffish conversations            # list · show · resume · diagnose · rate · rm
+wolffish conversations            # list · show · resume · diagnose · rm
 wolffish projects                 # browse · new · show · edit · rename · rm
 wolffish procedures               # browse · new · run · edit · mode · project · rm
 wolffish automations              # browse · show <label> · run <label> · edit
@@ -107,9 +106,18 @@ A handful of window-only actions — file pickers, reveal-in-folder — are refu
 
 ## The Terminal Is a Channel
 
-A conversation started from the terminal is a real conversation on a real channel — id `cli`, label **Terminal**. It wears its own **origin badge** in the desktop's History and rail and on [your phone's lists](/integrations/mobile-app), a score cast here is recorded as coming from here, and the agent's own channel roster names the terminal as a route to you, exactly like Telegram, WhatsApp, and the phone. **Settings → Channels → CLI** holds its two knobs: verbose task results, and [autostart](/getting-started/server-deployment#make-it-survive-a-reboot) — with `--tools` / `--clean` overriding verbosity for a single command.
+A conversation started from the terminal is a real conversation on a real channel — id `cli`, label **Terminal**. It wears its own **origin badge** in the desktop's History and rail and on [your phone's lists](/integrations/mobile-app), and the agent's own channel roster names the terminal as a route to you, exactly like Telegram, WhatsApp, and the phone. **Settings → Channels → CLI** holds its two knobs: verbose task results, and [autostart](/getting-started/server-deployment#make-it-survive-a-reboot) — with `--tools` / `--clean` overriding verbosity for a single command.
 
 The panel also answers whether the `wolffish` command is on your PATH — from **your shell's PATH, not the app's** — installs it if it isn't, takes it back off when you want it gone, and warns when something else named `wolffish` comes first. From the terminal side, the same answers live under `wolffish path status` and `wolffish path install`. On Linux the `.deb` and `.rpm` **ship the command** at `/usr/bin/wolffish`, there the moment the install finishes; on Windows the installer puts it on your user PATH; on macOS, one `wolffish path install` prints the line to add.
+
+## On Windows
+
+Wolffish ships as a windowed application, and Windows hands a windowed program **no way to write into the console that started it** — which is why, before **v1.0.256**, typing `wolffish` earned you a blank line and the prompt straight back. A small **console companion now sits beside the app**, whose only job is to hold a real terminal open and hand it to Wolffish, and with it the command behaves like a command everywhere:
+
+- **`wolffish` opens a session and stays open** — it used to print its prompt and exit before you could reach the keyboard.
+- **Piping works in both directions**: `type notes.txt | wolffish -p "what changed?"` genuinely sends the file, and `wolffish --help | findstr` filters what it should.
+- Colour, box-drawing and the true width of your window come back, and **a secret typed at a prompt is hidden** rather than left sitting in your scrollback.
+- **Git Bash finds it too.** Bash looks for a file named exactly `wolffish` while cmd and PowerShell look for `wolffish.cmd`; Wolffish installs **both**, so each shell finds the one it is looking for. Inside Git Bash a session gets a real terminal bridged in — colours, prompts and typing all behave — while pipes and redirects are left exactly as they were.
 
 ## Pairing From a Terminal
 

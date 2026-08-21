@@ -11,9 +11,9 @@ POST https://api.deepseek.com/chat/completions
 
 Uses SSE streaming with OpenAI-compatible tool-calling format.
 
-**DeepSeek is Wolffish's recommended default provider for agentic tasks.** Following the [permanent 75% price cut](https://deepseek.ai/blog/deepseek-v4-pro-api-price-cut-permanent) (May 2026), the V4 family delivers frontier-class reasoning and tool-use reliability at 29–34× less than competing frontier models on output-heavy workloads — while matching or exceeding their agentic performance on multi-step tool chains. It's also MIT-licensed, so you can self-host for $0 in API fees if you have the infra.
+**DeepSeek is Wolffish's recommended default provider for agentic tasks.** The V4 family delivers frontier-class reasoning and tool-use reliability at a fraction of what competing frontier models charge on output-heavy workloads — while matching or exceeding their agentic performance on multi-step tool chains. It's also MIT-licensed, so you can self-host for $0 in API fees if you have the infra. Since August 2026 DeepSeek bills **peak/off-peak** (peak 01:00–04:00 and 06:00–10:00 UTC; off-peak is half price), which is why prices below read as ranges.
 
-Since **v1.0.235**, connecting DeepSeek auto-selects **V4 Flash** — frontier-class at a third of Pro's price, and fast enough for the tool-heavy turns most agentic work is made of. **V4 Pro** is still one pick away in the composer's model switch for the heavier reasoning jobs.
+Connecting DeepSeek auto-selects **V4 Flash** — fast, a third of Pro's price, and built for the tool-heavy turns most agentic work is made of. **V4 Pro** is the frontier model of the pair, one pick away in the composer's model switch for the heavier reasoning jobs.
 
 Best for: Agentic multi-step workflows, tool calling, research chains, cost-efficient daily automations.
 
@@ -32,8 +32,13 @@ Best for: Agentic multi-step workflows, tool calling, research chains, cost-effi
 
 | Model | Context | Modes | Input / Output (per MTok) | Notes |
 |-------|---------|-------|--------------------------|-------|
-| **deepseek-v4-flash** | 1M | Off, High, Max | $0.14 / $0.28 | Auto-selected on connect. Frontier agentic performance, fast and cheap. Cached: $0.003/MTok. |
-| deepseek-v4-pro | 1M | Off, High, Max | $0.44 / $0.87 | The heavier reasoning tier. Cached: $0.004/MTok. |
+| **deepseek-v4-pro** | 1M | Off, High, Max | $0.66–1.32 / $1.98–3.96 | The frontier model of the pair — the heavier reasoning tier. Cached: $0.022–0.044/MTok. |
+| deepseek-v4-flash | 1M | Off, High, Max | $0.22–0.44 / $0.66–1.32 | Auto-selected on connect. Fast, strong agentic performance, cheap. Cached: $0.007–0.014/MTok. |
+| deepseek-v4-flash-vision-exp | 1M | Off, High, Max | $0.22–0.44 / $0.66–1.32 | Flash with experimental vision. Cached: $0.007–0.014/MTok. |
+
+## Vision
+
+DeepSeek was text-only across the lineup until **August 21, 2026**, when **deepseek-v4-flash-vision-exp** arrived — V4 Flash with eyes, at Flash's price and Flash's speed. Pick it and the agent genuinely looks: screenshots, attached photos and [`image_view`](/capabilities/built-in-capabilities) crops reach the model as pixels, verified live against the API. The bare V4 chat models remain text-only — an image part is rejected outright — so on them the agent works from captions and tools rather than sight, and Wolffish's vision gate makes sure pixels are only ever sent where they're accepted. The `-exp` suffix is DeepSeek's own honesty: the model is experimental, so expect it to move.
 
 ## Reasoning modes
 
@@ -62,7 +67,7 @@ Only effort-capable models expose this; it applies once thinking is on.
 
 Each model shows only the states it genuinely supports. If a model always reasons (can't be turned off) or has no effort control, the button reflects that and locks where there's nothing to change. Wolffish remembers your choice per model.
 
-**On DeepSeek:** Both V4 models support Off / High / Max. In current testing High and Max produce similar depth, but Max is exposed so it benefits automatically if DeepSeek differentiates the tiers later.
+**On DeepSeek:** All V4 models support Off / High / Max — and since **v1.0.251** the three settings genuinely differ. The effort field used to be sent one level too deep in the request, where nothing complained and nothing listened, so High and Max measured less than a third of a percent apart — two settings that were never sent. With the field in its correct place and measured live: **Off thinks not at all, High thinks hard, and Max thinks roughly twice as long as High** on a problem that rewards it.
 
 ---
 

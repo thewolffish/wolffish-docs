@@ -190,7 +190,7 @@ When you ask, Wolffish:
     - `file_read` — Read file contents with optional line range (startLine/endLine). Reads are **streamed**, so pulling a slice out of a gigabyte log costs only the slice.
     - `file_write` — Create or overwrite a file (supports append mode)
     - `file_patch` — Find and replace a literal string in a file (all occurrences)
-    - `image_view` — Return an image's actual pixels (downscaled) to a vision model on demand — the model-led way to *look* at an image instead of having it auto-injected
+    - `image_view` — Return an image's actual pixels to a vision model on demand — the model-led way to *look* at an image instead of having it auto-injected. Since **v1.0.254** the model chooses the view: a **crop region** to read one part at native sharpness (a crop is cheaper too — the price follows the pixels actually sent), a **resolution** when small text needs resolving, and **lossless PNG** for screenshots, interfaces and charts where JPEG smearing hurts. A view too big to send is shrunk automatically, and since v1.0.253 the pixels genuinely reach **every vision-capable model** — Grok, Kimi, Qwen, StepFun, GLM, the MiniMax/Mimo `-VL` variants and DeepSeek's [`deepseek-v4-flash-vision-exp`](/configuration/deepseek#vision) included, not just Claude and GPT
 
     Prefer these over `shell_exec` for file operations — they're faster, safer, and produce cleaner audit trails.
   </Accordion>
@@ -571,17 +571,21 @@ When you ask, Wolffish:
 
     **Triggers:** screenshot, click, screen, desktop, mouse, keyboard, computer use, automate, UI
 
-    Desktop automation for visual tasks — screenshots, mouse clicks, keyboard typing, scrolling.
+    Desktop automation for visual tasks — rebuilt in **v1.0.260** around **verification instead of hope**. Every screenshot carries a **crosshair marking where the cursor is**; a small or crowded target is **zoomed** — re-captured at native resolution — before it is ever clicked; and every click, move, drag and scroll returns a **magnified close-up proving where it landed**, so a miss is visible immediately and corrected in the close-up itself with surgical precision. While Wolffish drives, the display wears a **soft blue glow** (invisible in its own screenshots) so you always know it's at the wheel, and older screenshots are retired from the model's context as fresh ones arrive, so long sessions stay grounded on the current screen — and affordable.
 
     **Tools:**
-    - `computer_screenshot` — Capture the full screen (or specific display)
-    - `computer_mouse_move` — Move cursor to x,y coordinates
-    - `computer_mouse_click` — Click at position (left/right/double)
-    - `computer_keyboard_type` — Type text
-    - `computer_keyboard_press` — Press key combinations
-    - `computer_scroll` — Scroll at position
+    - `computer_screenshot` — Capture a display; the image becomes the current frame, cursor marked with a crosshair
+    - `computer_zoom` — Magnify a region at up to native resolution — the precision instrument for small targets and small text
+    - `computer_mouse_move` — Aim without clicking; returns a close-up to verify before committing
+    - `computer_mouse_click` — Click (left/right/double); returns a magnified proof of the exact point pressed
+    - `computer_mouse_drag` — Press, glide, release — drag-and-drop, sliders, resizing, text selection
+    - `computer_mouse_scroll` — Scroll whatever is under the cursor, with a magnified after-view
+    - `computer_keyboard_type` — Type text — Arabic, emoji and long text arrive exactly as written, via the clipboard
+    - `computer_keyboard_press` — Press key combinations, written the way you'd say them (`cmd+shift+s`)
+    - `computer_list_displays` — Enumerate displays; coordinates always mean the image being looked at, on any monitor
+    - `computer_wait` — Pause for animations, loads and dialogs
 
-    Must be enabled in Settings > Computer Use. The agent sees screenshots and can interact with any application on screen.
+    Must be enabled in Settings > Computer Use — and it needs a **vision-capable Brain**: the panel says so plainly when the selected model cannot see images, instead of letting a blind model click by imagination.
   </Accordion>
 </AccordionGroup>
 

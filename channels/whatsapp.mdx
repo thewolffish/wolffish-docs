@@ -135,10 +135,6 @@ Wolffish writes WhatsApp replies in WhatsApp's own text style — `*bold*`, `_it
 
 The gate can never lose a message: when markup genuinely *is* the content the agent sends it verbatim, and after repeated bounces for the same chat the gate stands aside and the message is delivered as composed — worst case you see raw markup, never silence. Live narration between tool steps is delivered instantly, too fast to gate, so it's **watched instead of blocked**: a delivered line carrying raw markup earns the agent a **format notice** describing exactly what you received, steering the rest of the turn clean.
 
-## Scoring Replies (0–10)
-
-A reply that is nothing but a number from 0 to 10 is quietly captured as your **score for the last reply** — acknowledged with a small ✍️ reaction, never a chat bubble. Digits typed on an Arabic keyboard (٠–٩, ۰–۹) count the same, and the plumbing stays careful: a "3" answering a numbered question card or `/resume` picker still means option 3, and a number opening a fresh chat is just a message. A short line after each reply reminds you the option exists; the whole thing has its own switch in **Settings → Knowledge → Reflection**, and switching it off makes the channel fully silent about scoring. Your scores anchor the nightly [reflection](/memory/reflection).
-
 ## Queued Messages
 
 Message Wolffish while a turn is already running and the message is **queued**, not declined. A short acknowledgment confirms it landed and tells you where it sits in line:

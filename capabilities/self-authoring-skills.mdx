@@ -56,6 +56,8 @@ Wolffish doesn't write files and hope. Because a freshly created tool becomes ca
 
 It's deliberately **forgiving about how the plugin is written** — it accepts the common conventions (an `execute` dispatcher *or* per-tool handlers, and several return shapes) and derives the `SKILL.md` boilerplate for you. You don't have to know the exact format; a reasonable attempt becomes a working skill instead of an error.
 
+Since **v1.0.260** the standard is visible from the outside too. Wolffish now **offers to build a skill** when it spots you repeating a pattern, every skill it creates is stamped as its own work — a **Wolffish badge** in Settings → Capabilities, distinct from Official and imported ones — and a freshly built or freshly edited skill wears **Untested** until one of its tools **succeeds in a real call**. The badge cannot be talked away, only earned: it clears live the moment the first genuine call passes, so a skill that claims to be ready has to prove it.
+
 ## A complete example: build, exercise, and delete a skill in one turn
 
 You can drive the whole lifecycle from a single message. Copy this prompt and paste it into chat — it has Wolffish create a tiny `coinflip` skill, use it, edit it, toggle it, and remove it, exercising every part of self-authoring end to end:

@@ -128,6 +128,8 @@ In the app, the workflow card is always there. On [WhatsApp](/channels/whatsapp)
 
 With **Verbose task results** on (per channel, in **Settings → Channels**), each agent also gets a verdict line as it lands — its name, model, duration, and tool-call count. Verbose off keeps the clean feed: the master's reply, nothing else. Verbose affects **display only**, not execution.
 
+Two rules keep the feed honest. **Workers save; Wolffish delivers** — agents carry no send tools at all (withdrawn since v1.0.246, not merely discouraged): their files are saved under the [workspace](/architecture/workspace) and reported by path, and the master alone decides what actually reaches you, so a background worker can never drop an unannounced file onto your Desktop. And since v1.0.259, agents browsing [in your browser](/integrations/browser-extension) put their **milestone screenshots on the record**, flagged as worth seeing — the master relays the telling ones into your chat as the run progresses, so you see *what* the work looks like, not just that it's moving.
+
 ## Cost & Limitations
 
 <Warning>

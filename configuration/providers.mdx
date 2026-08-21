@@ -15,19 +15,19 @@ All supported cloud providers can handle agentic tasks — including complex mul
 
 **Mid-range tier — xAI** sits between budget and premium, offering Grok models with strong reasoning, vision, and code generation at moderate pricing.
 
-**Premium tier — Anthropic and OpenAI** deliver the strongest raw model capability. Claude Opus 4.8 and GPT-5.5 excel where the cost-efficient tier falls short — particularly **computer-use** (screen interaction), which only Anthropic supports, and edge cases where execution reliability on the cheaper models isn't sufficient.
+**Premium tier — Anthropic and OpenAI** deliver the strongest raw model capability. Claude Opus 4.8 and GPT-5.5 excel where the cost-efficient tier falls short — the hardest reasoning, and edge cases where execution reliability on the cheaper models isn't sufficient. (Computer use, once an Anthropic-only affair, now runs on **any vision-capable Brain** — since v1.0.253 every vision model receives the actual screenshots.)
 
 | Tier | Provider | Flagship Model | Input / Output (per MTok) | Best For |
 |------|----------|---------------|--------------------------|----------|
-| Cost-efficient | **DeepSeek** | deepseek-v4-flash | $0.14 / $0.28 | Default for most agentic tasks |
+| Cost-efficient | **DeepSeek** | deepseek-v4-flash | $0.22–0.44 / $0.66–1.32 | Default for most agentic tasks (peak/off-peak billing) |
 | Cost-efficient | **MiMo** | mimo-v2.5-pro | $0.20 / $2.00 | Cheapest option, multilingual |
 | Cost-efficient | **Qwen** | qwen3.8-max | $2.00 / $6.00 | Wide model range, ultra-cheap flash |
 | Cost-efficient | **Kimi** | kimi-k3 | $3.00 / $15.00 | Frontier reasoning, 1M context, vision |
 | Cost-efficient | **MiniMax** | MiniMax-M3 | $0.30 / $1.20 | Reasoning and code |
 | Cost-efficient | **Stepfun** | step-3.7-flash | $0.83 / $6.94 | Always-on reasoning |
-| Cost-efficient | **Z.ai** | glm-4.6 | $0.60 / $2.20 | GLM models, 1M-context flagship |
-| Mid-range | **xAI** | grok-4.3 | $1.25 / $2.50 | Reasoning, vision, code |
-| Premium | **Anthropic** | claude-opus-4-8 | $5.00 / $25.00 | Hardest tasks, computer-use |
+| Cost-efficient | **Z.ai** | glm-5.2 | $1.40 / $4.40 | GLM models, 1M-context frontier flagship |
+| Mid-range | **xAI** | grok-4.6 | $2.00 / $6.00 | Frontier reasoning, vision, code |
+| Premium | **Anthropic** | claude-opus-4-8 | $5.00 / $25.00 | Hardest tasks |
 | Premium | **OpenAI** | gpt-5.5 | $5.00 / $30.00 | Hardest tasks, broad knowledge |
 | Local | **Ollama** | varies | Free | Privacy, offline fallback |
 
@@ -52,7 +52,7 @@ POST https://api.deepseek.com/chat/completions
 
 Uses SSE streaming with OpenAI-compatible tool-calling format.
 
-**DeepSeek is Wolffish's recommended default provider for agentic tasks.** Following the [permanent 75% price cut](https://deepseek.ai/blog/deepseek-v4-pro-api-price-cut-permanent) (May 2026), the V4 family delivers frontier-class reasoning and tool-use reliability at 29–34× less than competing frontier models on output-heavy workloads — while matching or exceeding their agentic performance on multi-step tool chains. It's also MIT-licensed, so you can self-host for $0 in API fees if you have the infra. Connecting DeepSeek auto-selects **V4 Flash**; **V4 Pro** is one pick away for heavier reasoning.
+**DeepSeek is Wolffish's recommended default provider for agentic tasks.** The V4 family delivers frontier-class reasoning and tool-use reliability at a fraction of what competing frontier models charge on output-heavy workloads — while matching or exceeding their agentic performance on multi-step tool chains. It's also MIT-licensed, so you can self-host for $0 in API fees if you have the infra. Connecting DeepSeek auto-selects **V4 Flash**; **V4 Pro**, the frontier model of the pair, is one pick away for heavier reasoning. Billing is peak/off-peak since August 2026 — see [the DeepSeek page](/configuration/deepseek) for the ranges. And since **August 21, 2026** DeepSeek has its first vision option: [**deepseek-v4-flash-vision-exp**](/configuration/deepseek#vision) — V4 Flash with eyes, at the same price.
 
 Best for: Agentic multi-step workflows, tool calling, research chains, cost-efficient daily automations.
 
@@ -71,8 +71,11 @@ Best for: Agentic multi-step workflows, tool calling, research chains, cost-effi
 
 | Model | Context | Max Output | Input / Output (per MTok) | Notes |
 |-------|---------|------------|--------------------------|-------|
-| **deepseek-v4-flash** | 1M | 32K | $0.14 / $0.28 | Auto-selected on connect. Frontier agentic performance, fast and cheap. Cached: $0.003/MTok. |
-| deepseek-v4-pro | 1M | 32K | $0.44 / $0.87 | The heavier reasoning tier. Cached: $0.004/MTok. |
+| **deepseek-v4-pro** | 1M | 32K | $0.66–1.32 / $1.98–3.96 | The frontier model of the pair — the heavier reasoning tier. Cached: $0.022–0.044/MTok. |
+| deepseek-v4-flash | 1M | 32K | $0.22–0.44 / $0.66–1.32 | Auto-selected on connect. Fast, strong agentic performance, cheap. Cached: $0.007–0.014/MTok. |
+| deepseek-v4-flash-vision-exp | 1M | 32K | $0.22–0.44 / $0.66–1.32 | Flash with experimental vision. Cached: $0.007–0.014/MTok. |
+
+Prices read as ranges because DeepSeek bills **peak/off-peak** since August 2026 — peak 01:00–04:00 and 06:00–10:00 UTC, off-peak half price.
 
 ---
 
@@ -253,7 +256,7 @@ POST https://api.anthropic.com/v1/messages
 
 Uses SSE streaming. Tool calls arrive as `tool_use` content blocks.
 
-Best for: Complex reasoning, detailed instruction following, nuanced tool use, computer-use (screen interaction).
+Best for: Complex reasoning, detailed instruction following, nuanced tool use.
 
 ### Getting an API Key
 
@@ -271,7 +274,7 @@ Best for: Complex reasoning, detailed instruction following, nuanced tool use, c
 | claude-haiku-4-5 | 200K | 8K | None, High | $1.00 / $5.00 | Fast and cheap. Not recommended for agentic tasks. |
 
 <Note>
-  Anthropic is the only provider that supports **computer-use** (screen interaction). If you need Wolffish to drive a browser or desktop UI, you need an Anthropic key.
+  **Computer-use** (screen interaction) is no longer Anthropic-only: since v1.0.253 every vision-capable model receives the actual screenshots, so any vision Brain can drive it. Anthropic remains a strong choice for it — but no longer the gate.
 </Note>
 
 ---
@@ -297,8 +300,10 @@ Best for: Reasoning-heavy workflows, code generation, vision tasks.
 
 | Model | Context | Max Output | Modes | Input / Output (per MTok) | Notes |
 |-------|---------|------------|-------|--------------------------|-------|
-| **grok-4.3** | 1M | 64K | None, High, Max | $1.25 / $2.50 | Flagship. Vision + reasoning. |
-| grok-build-0.1 | 256K | 32K | None, High, Max | $1.00 / $2.00 | Code-optimized. |
+| **grok-4.6** | 500K | 64K | On, High, Max | $2.00 / $6.00 | Flagship and the connect default. Frontier, vision + reasoning. |
+| grok-4.5 | 500K | 64K | On, High, Max | $2.00 / $6.00 | Vision + reasoning. |
+| grok-4.3 | 1M | 64K | None, High, Max | $1.25 / $2.50 | The value pick — full 1M context. Vision + reasoning. |
+| grok-build-0.1 | 256K | 32K | On | $1.00 / $2.00 | Code-optimized. |
 | grok-3-mini | 131K | 32K | None, High | $0.30 / $0.50 | Fast and cheap. |
 
 ---

@@ -3,6 +3,209 @@ title: "Changelog"
 description: "Product updates and improvements to Wolffish"
 ---
 
+<Update label="August 21, 2026" description="v1.0.260">
+
+## New features
+
+- **Computer use that proves its aim.** Controlling the screen used to be an act of faith: screenshot, guess the button's pixels, click, hope. The whole loop is rebuilt around **verification instead of hope**. Every screenshot carries a **crosshair marking exactly where the cursor is**; a small or crowded target is no longer squinted at — a new **zoom** re-captures just that region at **native resolution**, so a tiny control becomes dozens of pixels wide before it is ever clicked; and every click, move and scroll comes back with a **magnified close-up proving precisely where it landed**, so a miss is visible immediately and corrected in the close-up itself instead of by guessing again on the full frame. The hands improved with the eyes: a new **drag** action for drag-and-drop, sliders and text selection, shortcuts written the way you'd say them (`cmd+shift+s`), and **Arabic, emoji and long text arriving exactly as written** instead of being mangled key by key. Multi-monitor setups need no arithmetic — coordinates always mean the image being looked at — ultrawide screens stay readable, and the display being controlled wears a **soft blue glow** so you always know Wolffish is at the wheel; the glow is invisible in its own screenshots and fades when the work stops. Older screenshots are **retired from the model's context** as fresh ones arrive, so a long session grounds its next click on the current screen and stays affordable — and if your selected Brain **cannot see images at all**, the [Computer Use](/capabilities/built-in-capabilities) panel now says so plainly instead of letting a blind model click by imagination.
+- **Skills it builds now carry proof.** Wolffish can author brand-new tools for itself — and now it both **offers to** when it spots you repeating a pattern, and is **held to a standard** when it does. Every [skill it creates](/capabilities/self-authoring-skills) is stamped as its own work and wears a **Wolffish badge** in Settings → Capabilities, distinct from Official and imported ones — and a freshly built or freshly edited skill is visibly **Untested** until one of its tools **succeeds in a real call**. The badge cannot be talked away, only earned, and it clears live the moment the first genuine call passes.
+- **It knows you've been away.** Come back to a conversation after three weeks and Wolffish used to answer as if you'd never left — treating the transcript's "today", prices and running state as still current. Resuming after a real gap now tells the model **how long it has been** — "about 3 weeks ago", with the exact timestamp — and reminds it that the older turns spoke from an older *now*, so it re-checks what matters instead of confidently quoting the past.
+
+## Updates
+
+- **The composer is one card.** The chat input is redrawn as **a single quiet card**: the message box *is* the surface, with New Chat and your project on the top edge, the model switch and usage meter in the footer, and attach, folder, mic and a round Send at the end. Nothing moved home behind your back — every control kept its exact behavior; only the chrome dissolved. [The phone](/integrations/mobile-app#the-chat-feed) got the same redraw, plus something its screen never had: **the model about to answer, worn as a chip** you read at a glance and tap to change, with provider and model pickers flattened into **rows of chips** — the whole list on one slidable line — and, on iPhone, a floating chevron that finally puts the keyboard away without costing you a word of the draft.
+- **Learning from your words, not your grades.** The 0–10 turn scoring is **retired everywhere** — the rating bar above the composer, the "rate this reply" invitations on Telegram and WhatsApp, the bare-number votes, the terminal's `/rate`, and the switches that governed them. Grading every answer was homework, and the numbers told the nightly [reflection](/memory/reflection) less than what you already say naturally in conversation — so reflection now reads exactly that, **your own words in the transcript**, when it reviews each settled conversation and folds the lessons into its playbook. A number you type is simply a message again, on every surface.
+- **No more stray gibberish at the end.** Certain models occasionally "say nothing" by writing their internal end-of-sequence marker as visible text — a literal `<|eos|>` in your chat or stuck to a conversation title. Wolffish never rewrites what a model says, so it fixes this where it belongs: it **notices the leak and tells the model**, and ending a turn in genuine silence is now explicitly recognized as valid, so the model is never pressured into filler. The link to a [paired phone](/integrations/mobile-app) grew more patient alongside — a connection that is merely **busy for a moment is asked twice before being replaced**, ending a whole class of needless mid-use reconnects, and on the relay a control-plane hiccup now costs **the notification it was carrying, never the tunnel**.
+
+</Update>
+
+<Update label="August 19, 2026" description="v1.0.259">
+
+## New features
+
+- **See what Wolffish sees.** Wolffish works inside [your real browser](/integrations/browser-extension) — reading pages, filling forms, clicking through whole flows — and until now every screenshot it took along the way was for its own eyes: on your phone, on Telegram or WhatsApp, a long browser task was a wall of silence with an answer at the end. It now **shows you the moments that matter, as they happen**: the results page it was hunting for, a form filled in just before an important submit, the confirmation right after, the final state that proves the job is done — sent into **the conversation you're actually in**, an image in the app and a real photo on Telegram and WhatsApp, delivered mid-task with a one-line caption. Surprises get the same treatment — an error page, a login wall — so when it reports a blocker, you **see** the blocker. And it is deliberately not a firehose: routine navigation and scrolling stay private, so the handful of shots that arrive are the ones that tell the story.
+- **Workflow runs show their pages too.** In a [workflow](/configuration/workflow-mode) run the browsing is often done by agents — and only the master speaks to you. Agents now put their **milestone screenshots on the record**, flagged as worth seeing, and the master **relays the telling ones** into your chat as the run progresses. The live card has always shown *that* things are moving; now you also see *what* they look like.
+
+</Update>
+
+<Update label="August 19, 2026" description="v1.0.258">
+
+## Updates
+
+- **Queued behind nothing at all.** Press **Run now** on an [automation](/configuration/heartbeat) and you could be told it was queued — while the page in front of you showed nothing running whatsoever. Two separate faults were holding slots no work occupied. An automation was tracked by its **position in the heartbeat file** rather than by its name, so editing the file mid-run could hand one automation's identity to another — every later press folded into a run that was never its own. Automations are now tracked **by their heading, which an edit does not move**. Quieter and worse: a run announcing itself to a window mid-close could fail **before the slot was booked for release**, and the slot stayed held for the life of the app — three of those and every automation, procedure, compaction and reflection run queued forever behind work that finished hours earlier. A slot is now **released no matter how its announcement goes**.
+- **Told what you are actually waiting for.** "Queued" had been doing the work of two very different answers. **Waiting for a slot** means it will run on its own, shortly. **Folded into a run already going** means there will be no second run at all — the button did nothing, by design. Wolffish now says which, in the app, on your phone and in the terminal alike — a waiting automation also says **how many runs are holding the pool**, worth knowing because compaction, reflection and procedure runs share those slots and draw no card unless asked. The model is told the same thing just as plainly, so it stops re-firing an automation that was already lined up.
+- **The project prompt you came to read.** A new conversation inside a [project](/configuration/projects) used to greet you with the project's name and the first two lines of its instructions, trailing into an ellipsis. The empty chat now shows the **instructions in full**, in the same scrollable block the Projects page uses — there to be read before you type.
+
+</Update>
+
+<Update label="August 18, 2026" description="v1.0.257">
+
+## Updates
+
+- **Step zero of pairing.** Pairing your phone has always assumed the one thing the panel never helped with: the app already being on the phone. Wolffish Mobile lives on **the App Store and Google Play**, and **Settings → Mobile now carries a "Get the app" card** holding the two links themselves — the App Store for iPhone and iPad, Google Play for Android — so the path finally reads the way it runs: [install, open, scan](/integrations/mobile-app#get-the-app), with nothing to hunt for in between. The project's README on GitHub hands out the same two badges, for anyone who arrives that way first.
+
+</Update>
+
+<Update label="August 16, 2026" description="v1.0.256">
+
+## Updates
+
+- **The terminal command that never said anything.** Every Windows user who typed `wolffish` got the same answer: nothing — not an error, silence. Wolffish ships as a windowed application, and Windows hands a windowed program **no way to write into the console that started it**, a detail no wrapper can paper over. A small **console companion now sits beside the app**, whose only job is to hold a real terminal open and hand it to Wolffish — and the command finally [behaves like a command](/getting-started/cli#on-windows): `wolffish` opens a session and **stays open** instead of exiting before you reach the keyboard, piping works in both directions (`type notes.txt | wolffish -p "what changed?"` genuinely sends the file), colour, box-drawing and the true width of the window come back, and **a secret typed at a prompt is hidden again** rather than left in your scrollback. The settings panel also stops accusing another program of having taken the name — it was reading the wrong answer out of Windows, and the command was correctly installed the whole time.
+- **And Git Bash finds it too.** Git Bash looks for a file named exactly `wolffish`, while Windows' own shells look for `wolffish.cmd` — the folder was on the PATH, but as far as bash was concerned the command did not exist. **Wolffish now installs both**, so cmd, PowerShell and Git Bash each find the one they are looking for, and a Git Bash session gets **a real terminal bridged in** — colours, prompts and typing all behave, while pipes and redirects are left exactly as they were.
+
+</Update>
+
+<Update label="August 16, 2026" description="v1.0.255">
+
+## New features
+
+- **The card that stopped showing up uninvited.** Wolffish runs work in the background on your behalf — an [automation](/configuration/heartbeat), a [procedure](/configuration/procedures) the model started, the nightly [reflection](/memory/reflection), the daily and weekly [compaction](/memory/consolidation) passes — and every one of them used to float a live card over your chat while it ran, whether or not you had any interest in watching. **Every one of those cards is now off by default, and each family has its own switch**: automations and procedures share one in **Settings → Channels → In-app**, compaction has its own under **Knowledge → Compaction**, reflection under **Knowledge → Reflection**. Off changes exactly one thing — whether the card appears. **The run still happens, still logs, still reports on its own page**, and a failed run still says so. The switches take effect **the instant you flip them** — on the run already in flight — and they follow you across surfaces: flip one in another window, or from your paired phone, and this app agrees at once. All four are editable from the phone and the terminal, alongside the settings they sit beside.
+- **Your phone gets its own answer.** A card worth having on your desk is not automatically one worth having in your pocket: the [paired phone](/integrations/mobile-app#what-the-desktop-is-busy-with) carries **its own switches**, separate from the desktop's — so a background run can announce itself on the machine you are sitting at and stay silent on the phone, or the reverse. Off by default there too. And **procedure runs are now shown at all**: they ride the same background pool as everything else but were previously filtered out completely — they now appear like any other run, under the automations switch, because *"is something running for me right now"* is one question, not two.
+
+</Update>
+
+<Update label="August 15, 2026" description="v1.0.254">
+
+## New features
+
+- **Reading the fine print.** Wolffish could show a model a picture, but only ever one picture at one size: the whole frame, shrunk to fit 1024 pixels — enough to recognize a room, useless for a receipt, a code screenshot, a chart's axis labels, a serial number. Now **the model chooses the view**: [`image_view`](/capabilities/built-in-capabilities) takes a **crop region**, a **resolution**, and a **lossless PNG** option for anything made of text, so it can pull the part that matters out of a twelve-megapixel photo and read it at native sharpness. A crop is not only clearer, it is *cheaper* — the price follows the pixels actually sent, not the size of the file on disk. None of it needs your attention: ask about a detail and the model decides how close it has to get, and a view too big to send is shrunk automatically instead of vanishing quietly on the way out.
+
+## Updates
+
+- **What it actually received.** Ask a model whether it really saw your photo and it would hedge — for a good reason: nothing ever told it. The tool now **states plainly that the pixels are attached**, and that they last for **this turn only**, so instead of answering later questions from a fading description it opens the image again. A provider that refuses a picture for some unrelated reason **no longer blinds a capable model for the rest of the session** — Wolffish tries pictures again every so often — and the running estimate of how much room images take up was overstating them **roughly twenty-five-fold**, which in an image-heavy conversation could trigger a needless tidy-up of a context that was never full.
+
+</Update>
+
+<Update label="August 14, 2026" description="v1.0.253">
+
+## Updates
+
+- **The screenshot it described without ever seeing.** A screenshot, a photo opened with `image_view`, a page captured in the browser — Wolffish has been taking them for a long time. What it had not been doing, on most of the models that can see, is **showing them the picture**: the caption went out, the pixels stayed home. Claude, ChatGPT and anything through OpenRouter already received the image; **Grok, Kimi, Qwen, StepFun and GLM** were working from the label alone, and so were the vision variants of MiniMax and Mimo. They now get the photograph itself, inline — the bare MiniMax and Mimo chat models still receive the caption alone, because they cannot see at all. A capture **too large to send** stays on disk with its path in the caption rather than being forced onto the wire to fail there, and a provider that refuses pictures inside a tool result no longer kills the turn: Wolffish retries without those pictures, then without any, and **remembers what worked for the rest of the session**.
+- **Your appearance choice survives a language switch.** On the [phone](/integrations/mobile-app), switching the app's language could bring it back in your phone's colours rather than your own — Light chosen on a dark phone returned a dark app, with Light still selected in Settings. The app now **confirms the scheme it asked for is the one actually showing** before it appears, so your choice comes back with your language.
+
+</Update>
+
+<Update label="August 13, 2026" description="v1.0.252">
+
+## Updates
+
+- **The reconnect that waited half a minute for a reply it already had.** The wake probe that made reconnecting instant could, now and then, leave you watching the opposite: a phone that came back, reached the relay, received everything it needed — and sat for **thirty seconds before admitting it was connected**. Every handshake arms a thirty-second deadline, and when an attempt was replaced mid-flight, nothing cancelled the abandoned attempt's timer: half a minute later it fired and **emptied the mailbox belonging to its own successor**, so the reply landed in a slot nobody was watching. A handshake now **only clears the slot while the slot is still its own** — the reconnect finishes the moment the relay replies, which is what it should have been doing all along.
+
+</Update>
+
+<Update label="August 13, 2026" description="v1.0.251">
+
+## New features
+
+- **Grok 4.6, and a thinking dial that finally turns.** [Grok 4.6](/configuration/xai) joins the model list and becomes the **xAI default** — 500K of context, vision, frontier-class, at the same price as the 4.5 it succeeds. It arrives alongside a correction reaching every Grok you already use: Wolffish believed the model's thinking control was a two-position switch, so the three settings you can pick — On, High and Max — were squeezed onto two rungs and **Max quietly sent exactly what High sent**. Sweeping the parameter against the live API told a different story: it is a **five-rung ladder**, with a rung above High that Wolffish had never once used. The three settings now land where they belong — **Max reaching the top of the ladder at last**, and becoming a real option on 4.5 and 4.3. Two catalogue figures were corrected against the API's own answer while we were there: the 4.20 pair holds **a million tokens of context**, not the 256K we were showing.
+- **DeepSeek's Max was talking to nobody.** The same fault, deeper and quieter: [DeepSeek](/configuration/deepseek)'s thinking effort was sent **one level too far inside the request**, where nothing complains and nothing listens — so the setting simply never reached the model. The tell had been sitting in our own notes for months: High and Max measured less than a third of a percent apart, which is not two settings behaving similarly, it is two settings that were never sent. With the field in its correct place and measured live, the difference is the one you'd expect — **Off thinks not at all, High thinks hard, and Max thinks roughly twice as long as High** on a problem that rewards it. **DeepSeek V4 Pro** also takes its rightful place at the head of the list as the frontier model of the pair.
+
+## Updates
+
+- **Your phone reconnects the moment you look at it.** Bring the [phone app](/integrations/mobile-app) back after it has been away and you could meet ten seconds of nothing — a connection that read as healthy and answered nothing, because phones are suspended mid-breath and the link dies with nobody awake to notice. Returning to the app now **sends a probe and holds the link to a reply within seconds**; a link that fails to answer is **replaced immediately**, with no backoff to sit through, and the app starts reaching for your desktop **while it is still starting up**. Walking out of Wi-Fi range onto mobile data no longer strands it either — the app **watches for the network moving** and reconnects the moment it does. Keepalives are held to a ten-second answer rather than inferred from a long silence, and a first-time pairing by code that loses its connection mid-way now redials **as the pairing it actually is**, instead of asking you to re-pair a device that only needed to reconnect.
+
+</Update>
+
+<Update label="August 12, 2026" description="v1.0.250">
+
+## New features
+
+- **Your phone stops being quiet.** Wolffish could always buzz your phone, and almost never did — its own instructions rationed notifications, so work finished, automations ran, findings landed, and your pocket stayed silent. That is now [inverted](/integrations/notifications): **every turn ends with one notification carrying the actual result** — the number, the outcome, what's next, and a tap that opens the very conversation it came from — because five minutes later you are somewhere else, and a notification reaches a closed app, a backgrounded app, or a phone with no signal that gets it the moment signal returns, which no open window can. **A blocker, a failure, or a finding worth acting on no longer waits for the end** either: it goes out the instant it happens, mid-run, so the question that stopped the work reaches you while it still matters. Long work announces itself when it starts, a scheduled digest closes with its own, and the bar for the words rose with the count: **"Task completed" is not a notification** — "Sheet rebuilt — 214 rows, 3 broken dates fixed" is.
+- **Louder, not noisier.** More notifications are only better if none is a repeat. A **Telegram or WhatsApp reply never gets a second buzz** — that message already arrived on the same phone with its own notification, so there the push is saved for what a chat message cannot tell you: a blocker, a failure, a finding. **The same news is never sent twice**, and the one genuinely dangerous case is handled at the root: when the phone never confirms, the delivery is *unknown* rather than failed — the notification is most likely on your lock screen already — so it **counts as sent instead of being tried again**, which was the one way a single buzz could ever become three. Small talk and bare acknowledgments still pass in silence, and **an instruction to stay quiet outranks all of it**.
+
+## Updates
+
+- **Pushes that actually arrive.** The policy inversion would have rung hollow on phones the pushes couldn't reach. Android builds were **missing the registration that makes remote delivery possible at all** — a notification landed only while the app sat open and connected — and they now carry it: a run that finishes, fails or needs you reaches the lock screen with the app **closed, backgrounded, or the phone asleep**. An iPhone's registration could stall indefinitely on a question iOS is free to leave unanswered; it now goes out **within seconds, with a token or without one**, and lock-screen delivery switches itself on the moment the token arrives. And on the relay, Android pushes go out at **FCM high priority**, so a sleeping phone shows them now rather than when it happens to stir.
+
+</Update>
+
+<Update label="August 11, 2026" description="v1.0.249">
+
+## Updates
+
+- **Copy from the conversation, the way your hands expect.** Select a line of a reply, right-click it — and nothing came: the app-wide menu answered only where text could be *edited*, while the conversation itself, the place most worth quoting, had no menu at all. Right-click now speaks wherever text merely *sits*: a message bubble — yours or the reply's — offers **Select all and Copy**, Copy takes exactly what you highlighted (with nothing highlighted, the whole bubble), the expanded **Reasoning** text answers the same way, and a selection sweeping several messages copies whole from wherever you right-click it. The empty parts of the window stay silent, and every editable surface keeps its fuller menu, spelling suggestions and all.
+
+</Update>
+
+<Update label="August 11, 2026" description="v1.0.248">
+
+## New features
+
+- **Your desktop's updater, live on the phone.** The phone's Updates screen could say what a new version changed, but the desktop's **self-updater** — the machine that actually fetches one — worked invisibly on the far end. It now [mirrors to the phone live](/integrations/mobile-app#updates): checking, downloading with a moving progress percent, verifying, ready, installing — every move pushed the instant it happens, the same state the desktop's own panel renders, so the two screens can never tell different stories. A phone that connects mid-download is handed the current picture up front, and a phone that meets a phase it doesn't know — an older app against a newer desktop — chooses to show **no card rather than a wrong one**.
+- **Check and install from wherever you are.** The two acts that matter became taps. **Check from the phone** and it is the desktop's own check — the exact handler its panel and the terminal invoke, guards included — and a found update starts downloading on its own, progress ticking on your screen. **Install from the phone** and the desktop answers before it acts: the confirmation leaves the line a beat before the graceful shutdown closes it, you watch the connection drop and re-form, and **the new version introduces itself the moment it reconnects**. The buttons keep their word: a desktop that cannot self-update at all says so honestly and the phone **hides controls that would have to lie**, the Check row **holds its place dimmed** while no desktop can answer instead of vanishing with every dropped link, and an install tap racing a state change is refused quietly instead of blooming error cards on two screens at once.
+
+</Update>
+
+<Update label="August 10, 2026" description="v1.0.247">
+
+## Updates
+
+- **The failure that read as a normal reply.** A turn that died mid-run — a provider outage, an expired key — showed its error card on the phone while the run was live; open the same conversation again and the failure had vanished into a clean transcript, because the stored copy of a message never carried how the turn ended. Every message now travels with its **stop reason and its error**, so a failed turn **stays visibly failed** however you arrive at it. The card itself grew up too: [the phone](/integrations/mobile-app#the-chat-feed) renders the desktop's own provider error card — the provider's logo, a plain reading of what went wrong, a **View details** fold with the verbatim trace — and a **Try again** button that doesn't blindly re-send: it opens a fresh turn that tells the model what broke, so it checks what already finished and continues instead of redoing it.
+- **On your phone from the first instant.** Start a run the phone didn't start itself — an automation firing on schedule, a Telegram or WhatsApp message — and the phone's conversation list used to improvise a stand-in row with no real title, icon or origin, because a conversation's details were pushed at every stage of a run *except its start*. The identity now rides **every phase of a run, start included**, so the list shows the real title, icon and origin from the moment a run begins — and History **merges in the turns running right now**, pulsing chip and all, instead of waiting for the first save.
+
+</Update>
+
+<Update label="August 10, 2026" description="v1.0.246">
+
+## Updates
+
+- **Paste anything into an automation.** An automation's instructions live in a markdown file with a grammar of its own — `## ` begins the next automation, a dashed `---` separator is structure, HTML comment markers wrap a switched-off job. Paste a prompt carrying any of those and everything after the first heading **silently vanished**, at display and at run time alike. The [editor](/configuration/heartbeat) now **escapes those lines the moment it saves** — each respelled in the closest form the file reads as plain text, proven against the engine's own parsers, never growing on re-save, and byte-identical to what the phone's editor already writes. The agent's own automation tools take the other road, as they always have: they decline the prompt and say how to rephrase it — now covering the dashed separator too.
+- **Workers save; Wolffish delivers.** When a [workflow](/configuration/workflow-mode) run spins up background workers, each worker used to carry the delivery tools — and one read the standing "send the file when it's done" instruction meant for Wolffish itself, and dropped a file straight onto the Desktop unannounced. Delivery is now the master's act alone: workers **have no send tools at all** — withdrawn, not merely discouraged — their marching orders say files are **saved under the workspace and reported by path**, and Wolffish decides what actually reaches you.
+- **The failure report that missed the point.** Export a [diagnostic bundle](/debugging/diagnostic-export) over a conversation whose background worker had failed and the front page could say **"FAILED: 0"** — technically true of the transcript, useless as a diagnosis, because a worker's stumbles live in task records the bundle copied but never read. The bundle now **reads every task record step by step**: a separate task-steps line in the metrics, each failed step in full with its arguments and untruncated error, and the AI opinion that rides in the bundle is shown the same evidence. A worker that stumbled and recovered still ends SUCCEEDED — which is exactly why the bundle checks steps, not statuses.
+- **The number you typed into a menu that wasn't ready.** In the [terminal](/getting-started/cli), a line typed into the gap between a menu's questions found no question waiting, fell through to the chat queue, and replayed as a message to the live agent the moment the menu closed — a double-tapped Enter reprinted the menu, a stray "2" became words nobody wrote. Typed-ahead lines now **wait for the flow that owns them** and whatever is left when the menu closes **dies with it**, and nested prompts hold the cursor behind a visible input bar instead of parking it on a bare line that looked exactly like a stall.
+- **Buttons that keep their word.** Press Save and half the app's buttons used to swap their label mid-flight — "Saving…", "Deleting…", or just "…" — the word jumping, the button resizing, for work that finishes in a blink. A working button now simply **keeps its label and dims** until the work lands, on the desktop and the phone alike; where the wait is genuinely long — a model downloading, a channel connecting — the real progress indicators are untouched. And the Model page's sub-nav clouds now **tint green for providers holding a saved key**, so one glance says which clouds are ready.
+
+</Update>
+
+<Update label="August 10, 2026" description="v1.0.245">
+
+## Updates
+
+- **The voice-reply switch found its home.** Yesterday the spoken-reply rule grew a switch on the Text-to-Speech card; today it lives where it belonged all along — **the Wolffish page, with the app-wide preferences** — because whether a voice note earns a spoken answer is a preference about *how Wolffish answers you*, not a fact about the speech engine. The wiring beneath it was cut to **one honest rule**: the switch decides whether the voice-reply instructions exist *at all*. On — the default — and every conversation carries the standing policy along with its every-step reminder; off, and the instructions are **gone entirely**, not flipped into a paragraph explaining what won't happen. Flip it from the desktop, the terminal or your phone, and the other surfaces follow live.
+- **Settings that say what they change — and what they don't.** The Appearance page kept its two choices behind dropdowns with no explanation. Both are now the **segmented controls** the rest of Settings speaks — System / Light / Dark for the theme, English / العربية for the language — with **a plain sentence underneath each** saying what it changes and, just as deliberately, what it doesn't: these are display settings only. The theme never touches the model, and the language the agent *replies* in follows, as it always has, whatever language you write to it in.
+- **Start of week, now from the phone.** The preference could be read from the [phone](/integrations/mobile-app) but not changed there. It can now, and the edit is **the desktop's own**: it lands in the exact handler the desktop control calls, refuses anything that isn't Sunday or Monday, and announces itself so an open desktop window adopts it without a refetch.
+
+</Update>
+
+<Update label="August 10, 2026" description="v1.0.244">
+
+## New features
+
+- **The voice reply grew a switch — and teeth.** The last release made a spoken prompt earn a spoken reply by default; now that default is **a switch you own** — and the rule itself grew teeth. It used to live as a paragraph buried in a very long prompt, and the failure was exactly the one you'd guess: the rule got read, and the reply came back silent text anyway. The instruction is now **built from the live setting on every turn** — what the agent is told can never contradict what the switch says — and a voice-prompted turn carries a **reminder at the tail of the request on every single step**, the position a model attends to most. Files, tables and code still arrive exactly as a typed turn would deliver them; the memo speaks the answer over them. Your own words still beat everything — say **"reply in text"** and it's a text turn.
+- **The transcriber stopped guessing your language.** Speak a short sentence and automatic language detection could mishear the whole clip — the failure that forced this was an English voice note coming back **transcribed into Arabic script**. Transcription is now **pinned to a language you choose**: a Language setting on the Speech-to-Text card, a searchable list of **100 languages**, and Auto-detect demoted to an explicit opt-in for people who genuinely live in two tongues. Every voice note from every surface follows the pin, naming a language for one specific file still wins for that file, and the default model moved up a size — from base to small — because the smaller model's hearing was part of the problem. The same 100 languages appear everywhere the setting does: desktop, terminal, phone.
+
+## Updates
+
+- **Fifteen seconds means fifteen seconds.** Ask for "a 15-second vertical clip" and what came back was six seconds of landscape: the [video generator](/integrations/video-generation) never reads format words out of prose — length, quality and orientation are parameters of their own, and specs left in the prompt silently produced the defaults. The agent now treats your specs as **orders, not scenery** — a named length goes in the duration parameter, named quality in resolution, "vertical" or "for Reels" in the aspect ratio — and this holds in **both Director modes**, because a cinematic rewrite must never eat a spec. Impossible asks stopped being silent too: past the 15-second ceiling the agent says so and offers one 15-second clip or a sequence to stitch, and a task's confirmation **echoes the settings actually in flight** while cancelling still saves the credits.
+
+</Update>
+
+<Update label="August 10, 2026" description="v1.0.243">
+
+## New features
+
+- **Talk to it and it talks back.** Speak instead of typing — the in-app mic, a Telegram or WhatsApp voice note, [your phone](/integrations/mobile-app) — and Wolffish now **answers out loud by default**. A conversational exchange comes back as **one voice memo that is the whole reply**, not a memo trailing a wall of text that restates it; a turn that produced real things — files, tables, code, charts — still delivers them exactly as a typed turn would, then **closes with one voice memo** speaking the answer over them. The reply arrives **in the language you spoke**: every voice note carries the language the transcriber heard, and the agent treats that as final, so an English question gets an English answer even if the rest of your life with it runs in Arabic. Your words always win — say "write it down", or keep a standing preference for text, and it is a normal typed turn. One companion fix rides along: the agent is told, firmly, that your voice note is **already transcribed**, so it never wastes a turn running speech-to-text on the message you just spoke to it.
+
+## Updates
+
+- **A terminal that explains every setting.** `wolffish settings` walks the same page → card → row tree as the desktop's screens, but two thirds of its rows stopped at a bare label — fetched through translation files where a missed lookup printed a raw key like `chat.mode` where a name should be. The words are now **written directly where the settings are defined**: every one of the 53 rows carries a real label and **a sentence or two of description** — what the setting does, what the default is, what the trade is. One trade is made deliberately and worth saying plainly: **the [terminal](/getting-started/cli) is an English surface now**. The desktop app still speaks your language, Arabic included — only the terminal stopped translating, and in exchange nothing in it can ever print a key instead of a word.
+
+</Update>
+
+<Update label="August 9, 2026" description="v1.0.242">
+
+## New features
+
+- **Every row your phone shows now takes an edit.** The [phone](/integrations/mobile-app) has been able to *read* the desktop's settings for a while; editing was another story — most rows were a look, not a control. The write side is there now. **The Model screen edits from the phone** — chat mode, the thinking chip, local-only, the local model, the cloud provider and its model, even a newly typed provider key — and every one routes into **the exact handler the desktop's own control calls**: same persistence, same live update, same announcement, so an open desktop window adopts the change without a refetch. The details carry the same care: a key shows as a **twelve-character preview** that round-trips on every edit, so a masked value can never overwrite the real credential it abbreviates, and a local model pick is checked against **what is actually installed** — refusing a stale row beats silently starting a multi-gigabyte download. **MCP switches**, the **compaction schedule** and the in-app feed's verbosity flip from the phone as well, and the Telegram and WhatsApp cards became editable end to end — allow-lists, auto-refresh, stale hours, verbose — through the same code path the desktop takes, so a change that touches the connection restarts a running bridge and a preference-only change deliberately does not. Two switches stayed home on purpose: the bridge **power switches**, because starting a bridge process is this machine's act, and the phone shows them as what they are — status.
+
+## Updates
+
+- **The QR a packaged install could never draw.** `wolffish pair` ends in a QR — and in every packaged install, on every platform, it ended in "no QR renderer available" and a wall of raw text. The terminal client ships as loose files next to the app archive while the QR library lives *inside* it, so the terminal's own import failed everywhere except a development checkout — exactly where nobody would notice. The **daemon now computes the matrix and the terminal only draws it**, and a terminal updated ahead of its daemon falls back to the old raw-text payload instead of dying, because [a pairing flow](/getting-started/cli#pairing-from-a-terminal) must never dead-end.
+- **Bad news in one shape.** When an update failed to download, the Updates page grew a red box of its own design — a title, a paragraph, the raw error dumped at full length. The chat already solved this: the provider error card, with its one-line summary, its **View details** fold, and a detail block you can copy with one click. The update failure now *is* that card, with retry sitting beside it — one design for "something went wrong", wherever you meet it.
+- **The agent's manual caught up.** Two lines of the agent's own instructions had quietly gone stale: they still described [phone notifications](/integrations/notifications) as budgeted — one per phase, five per run — though nothing has counted or capped a send since v1.0.239; restraint is a judgement the instructions teach, not a meter that runs out, and now they say so. And where a notification wants its tap to land on the conversation that produced it, **`wolffish://chat?id=current`** names this run's own conversation and the app resolves it — one less lookup, one less way to point a tap at the wrong place.
+
+</Update>
+
 <Update label="August 9, 2026" description="v1.0.241">
 
 ## New features
