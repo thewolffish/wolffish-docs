@@ -56,7 +56,7 @@ Located at `brain/config.json`, this file stores application-level settings. It'
 
 Wolffish runs on an explicitly selected model — there is no automatic fallback. You choose your **Brain** model (provider + model) from the model switch beside the chat input, and that's the model that runs. The model you pick is the one that answers; if it fails, the turn fails rather than silently routing to another provider.
 
-Optionally, switch the chat into **workflow mode** (`llm.mode: "workflow"`, toggled from the composer's mode pill) — each turn can then plan phases and spawn parallel agents, with the master picking every agent's model from your connected providers. See [Workflow Mode](/configuration/workflow-mode) for how that works. Even then there's no cascade — every model that runs was explicitly chosen, by you or by the master.
+Optionally, switch the chat into **workflow mode** (`llm.mode: "workflow"`, toggled from the **Mode** chip row inside the model card beside the chat input) — each turn can then plan phases and spawn parallel agents, with the master picking every agent's model from your connected providers. See [Workflow Mode](/configuration/workflow-mode) for how that works. Even then there's no cascade — every model that runs was explicitly chosen, by you or by the master.
 
 All providers are optional — you only need the ones you actually select. To use Ollama, select it as your Brain model; there's no automatic fall-through to local.
 

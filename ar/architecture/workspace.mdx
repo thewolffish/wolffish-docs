@@ -14,7 +14,9 @@ description: "شرح بنية مجلد ~/.wolffish/workspace/"
 ├── brain/
 │   ├── identity/
 │   │   ├── soul.md                    # شخصية الوكيل
-│   │   └── user.md                    # ملف المستخدم
+│   │   ├── user.md                    # ملف المستخدم
+│   │   ├── workflow.md                # عقد القائد في وضع سير العمل
+│   │   └── workflow-agent.md          # العقد المسلَّم لكل وكيل يُطلَق
 │   ├── prefrontal/
 │   │   ├── agents.core.md             # عقد التشغيل (مملوك لوولفيش)
 │   │   ├── agents.md                  # إجراءاتك + تجاوزاتك (لا يُستبدل أبدًا)
@@ -35,6 +37,8 @@ description: "شرح بنية مجلد ~/.wolffish/workspace/"
 │   │   └── run-history.md             # سجل دائم لتشغيلات الأتمتة
 │   ├── corpus/YYYY-MM-DD.log.md       # سجلات الأحداث اليومية (تُحذف بعد 7 أيام)
 │   ├── conversations/                 # سجل الدردشة (مفهرس رسالة برسالة)
+│   ├── projects.json                  # مخزن المشاريع (ما تحرّره صفحة المشاريع)
+│   ├── procedures.json                # مخزن الإجراءات المحفوظة
 │   └── cortex.db                      # فهرس سجلات SQLite (قابل للتخلص)
 ├── files/, uploads/, screenshots/, speech/   # المخرجات (تُفهرس كبيانات وصفية)
 ├── logs/                              # سجلات التطبيق + الامتداد (يُفهرس آخرها)

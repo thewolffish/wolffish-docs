@@ -17,7 +17,7 @@ description: "الصفحات وقواعد البيانات وقواعد المع
     بعد الإنشاء، انسخ رمز التكامل الداخلي (يبدأ بـ `ntn_` أو `secret_`).
   </Step>
   <Step title="التهيئة في وولفيش">
-    افتح الإعدادات > التكاملات > Notion، واضغط **إضافة**، وأعطِ الاتصال تسمية (مثل «شخصي»)، والصق الرمز. زرّ **اختبار** يتحقق منه ويعرض مساحة العمل التي يقود إليها.
+    افتح **الإعدادات ← الخدمات ← Notion**، واضغط **إضافة**، وأعطِ الاتصال تسمية (مثل «شخصي»)، والصق الرمز. زرّ **اختبار** يتحقق منه ويعرض مساحة العمل التي يقود إليها.
   </Step>
   <Step title="مشاركة الصفحات مع التكامل">
     في Notion، افتح كل صفحة أو قاعدة بيانات تريد أن يصل إليها وولفيش. اضغط قائمة "..." > "الاتصالات" > ابحث عن تكاملك واربطه.
@@ -43,29 +43,48 @@ description: "الصفحات وقواعد البيانات وقواعد المع
 
 | الأداة | الوصف |
 |---|---|
-| `notion_search` | البحث في الصفحات وقواعد البيانات بالعنوان أو المحتوى |
-| `notion_read_page` | قراءة خصائص الصفحة (العنوان، التواريخ، الوسوم، إلخ) |
-| `notion_read_blocks` | قراءة محتوى كتل الصفحة (فقرات، قوائم، شفرة برمجية، إلخ) |
+| `notion_search` | البحث في كلّ صفحة وقاعدة بيانات يصل إليها التكامل |
+| `notion_read_page` | قراءة خصائص صفحة (العنوان والحالة والتواريخ والعلاقات) |
+| `notion_read_blocks` | قراءة محتوى كتل صفحةٍ أو كتلة |
+| `notion_connections` | سرد الاتصالات المهيّأة والحساب الذي يحلّ إليه كلٌّ منها |
 
 ### الإنشاء والتحديث
 
 | الأداة | الوصف |
 |---|---|
-| `notion_create_page` | إنشاء صفحة جديدة في صفحة أب أو قاعدة بيانات |
-| `notion_update_page` | تحديث خصائص الصفحة |
-| `notion_append_blocks` | إلحاق كتل جديدة بنهاية الصفحة |
+| `notion_create_page` | إنشاء صفحة — والأب (قاعدة بيانات أو صفحة) إلزاميّ، فلا افتراضيّ هنا |
+| `notion_update_page` | تحديث خصائص الصفحة أو أيقونتها أو غلافها أو أرشفتها (لا متنها) |
+| `notion_append_blocks` | إلحاق كتل بصفحةٍ أو كتلة |
+| `notion_update_block` | تحديث محتوى كتلة قائمة، أو أرشفتها |
+| `notion_delete_block` | أرشفة كتلة، فتُزال من الصفحة |
 
 ### قواعد البيانات
 
 | الأداة | الوصف |
 |---|---|
-| `notion_create_database` | إنشاء قاعدة بيانات جديدة بخصائص محددة |
-| `notion_query_database` | استعلام قاعدة بيانات بفلاتر وترتيب |
-| `notion_add_comment` | إضافة تعليق على صفحة أو نقاش |
+| `notion_read_database` | استعلام قاعدة بيانات بفلاتر وترتيبٍ اختياريَّين؛ ويعيد كائنات الصفحات |
+| `notion_get_database` | قراءة بيانات قاعدة البيانات الوصفيّة و**مخطّط** خصائصها (أسماء الأعمدة وأنواعها) |
+| `notion_create_database` | إنشاء قاعدة بيانات تحت صفحةٍ قائمة، بمخطّطٍ محدَّد |
+| `notion_update_database` | تحديث عنوان قاعدة البيانات أو وصفها أو مخطّط خصائصها |
 
-## الاستعلام في قواعد البيانات
+### المستخدمون والتعليقات
 
-تدعم أداة `notion_query_database` صيغة الفلترة والترتيب في Notion:
+| الأداة | الوصف |
+|---|---|
+| `notion_list_users` | سرد مستخدمي مساحة العمل (الأعضاء والروبوتات) |
+| `notion_get_user` | تفاصيل مستخدمٍ واحد بمعرّفه |
+| `notion_add_comment` | التعليق على صفحةٍ أو نقاشٍ قائم |
+| `notion_list_comments` | سرد التعليقات على صفحةٍ أو كتلة |
+
+### مخرج الطوارئ
+
+| الأداة | الوصف |
+|---|---|
+| `notion_api` | طلب مُصادَق خام إلى أيّ نقطة نهاية في واجهة Notion — لكلّ ما لا تغطّيه الأدوات أعلاه |
+
+## استعلام قواعد البيانات
+
+تدعم أداة `notion_read_database` صيغة الفلترة والترتيب في Notion:
 
 ```json
 {
@@ -133,9 +152,9 @@ description: "الصفحات وقواعد البيانات وقواعد المع
 تُفعّل قدرة Notion عندما تتطابق رسالتك مع أي من هذه الأنماط:
 
 ```
-notion, workspace, wiki, knowledge base,
-database, page, kanban, board, backlog,
-sprint, project tracker, notes
+notion, workspace, wiki, knowledge base, database, page, note, document,
+kanban, board, table, task tracker, project management, block, property,
+relation, rollup, filter, sort, view, gallery, list, timeline, calendar, template
 ```
 
 ## أمثلة على سير العمل
@@ -158,7 +177,7 @@ sprint, project tracker, notes
   <Accordion title="استعلام المهام قيد التنفيذ">
     ```
     You: "What tasks are in progress?"
-    Wolffish: Calls notion_query_database with a Status = "In Progress" filter
+    Wolffish: Calls notion_read_database with a Status = "In Progress" filter
     and returns matching entries with their properties.
     ```
   </Accordion>

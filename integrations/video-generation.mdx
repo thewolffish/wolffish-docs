@@ -23,7 +23,7 @@ The status line reads **Ready**, **Key rejected**, or **No key set**. The agent 
 
 ### Why the key is separate
 
-MiniMax issues one credential that unlocks both its chat models and its video API, so the value you paste here is the same string you may already have under **Settings → Providers → MiniMax**. The app never copies one field into the other, and that is deliberate:
+MiniMax issues one credential that unlocks both its chat models and its video API, so the value you paste here is the same string you may already have under **Settings → Models → MiniMax**. The app never copies one field into the other, and that is deliberate:
 
 - They are **independent decisions**. Video generation is a service — like Brave Search or Giphy — not a property of whichever brain you happen to be chatting with. If the keys were shared, switching your chat brain away from MiniMax would silently take video with it.
 - **Rotating one never drags the other with it.** Revoke a chat key and video keeps working, and the reverse.

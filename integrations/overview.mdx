@@ -120,7 +120,7 @@ Integrations are plugin capabilities that require external credentials and make 
 
 Integrations are **discoverable capabilities**. Their tool schemas don't ship on every request — each integration costs one line in the system prompt's capability index (name, short description, tool count). When a task calls for one, the model activates it with `tool_search` (or by calling one of its tools directly, which auto-activates the capability) and its tools are callable the same turn.
 
-For example, saying "check my email" leads the model to activate the Google capability and call the right tool (`gmail_search`, `gmail_read`, etc.) based on your intent. Activation is scoped to the conversation, so a background job loading GitHub never touches your live chat.
+For example, saying "check my email" leads the model to activate the Google capability and call the right tool (`google_gmail_search`, `google_gmail_read`, etc.) based on your intent. Activation is scoped to the conversation, so a background job loading GitHub never touches your live chat.
 
 <Tip>
   Use an integration constantly? Add it to `pinnedCapabilities` in [config.json](/configuration/config-json) to ship its tools on every request alongside the built-in core set.

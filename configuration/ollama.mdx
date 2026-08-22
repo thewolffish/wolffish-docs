@@ -137,31 +137,19 @@ Models with small context windows automatically get a slimmed **bootstrap toolse
 
 ### Hardware protection
 
-The **Restrict powerful local models** toggle (Settings → Wolffish, on by default) blocks the model picker from installing local models whose memory footprint exceeds what your system can handle comfortably (~55% of total RAM). This is an *installation* gate, not a context restriction — it exists to prevent swap thrashing, and you can turn it off to install anything regardless of hardware limits (not recommended).
+The **Restrict powerful local models** toggle (Settings → Preferences, on by default) blocks the model picker from installing local models whose memory footprint exceeds what your system can handle comfortably (~55% of total RAM). This is an *installation* gate, not a context restriction — it exists to prevent swap thrashing, and you can turn it off to install anything regardless of hardware limits (not recommended).
 
 ## Reasoning modes
 
-The **brain icon** next to the message box controls whether this model reasons. Click it to toggle reasoning on or off for models that support it.
+Thinking on Ollama is **binary and automatic** — no effort tiers, and nothing to pick. Wolffish reads each pulled model's capabilities from Ollama's `/api/show` and sends a top-level `think` field only to models that advertise the `thinking` capability; every other model never sees the field at all.
 
-### Thinking — *whether* the model reasons
+There is no reasoning control for a local model. The **Thinking** chip row inside the model card reads whichever *cloud* model is selected, so in **Local Only** mode it shows *"Reasoning is not supported by this model."* — thinking is settled by the pulled model's own capability rather than by a switch you set.
 
-- **Off** — the model answers immediately. Fastest; ideal for simple, direct tasks.
-- **On** — the model first works through the problem in a dedicated reasoning pass before replying. Slower and uses more tokens, but markedly more accurate on multi-step, logical, or ambiguous tasks.
-
-### Button states
-
-| State | Colour | Meaning |
-|-------|--------|---------|
-| Off | gray | Thinking off — direct answer |
-| On | blue | Thinking on |
-
-Each model shows only the states it genuinely supports. If a model can't reason, the button locks where there's nothing to change. Wolffish remembers your choice per model.
-
-**On Ollama:** Reasoning is detected per pulled model from Ollama's capabilities — models that advertise a thinking capability (e.g. qwen3, deepseek-r1, gpt-oss) reason, others don't. It's a simple on/off with no effort tiers, and no API key or cost since it runs locally.
+**On Ollama:** Models that advertise a thinking capability (e.g. qwen3, deepseek-r1, gpt-oss) can reason; the rest can't. No API key and no cost either way, since it runs locally.
 
 ## Local-Only Mode
 
-Wolffish includes a "Local Only" toggle that restricts all inference to Ollama — no data ever touches a cloud API, no matter which Brain model is selected. Enable it in the chat sidebar when you need absolute privacy for a sensitive task.
+Wolffish includes a "Local Only" toggle that restricts all inference to Ollama — no data ever touches a cloud API, no matter which Brain model is selected. Turn it on from the **model card beside the chat input** — flip the switch to **Local** — when you need absolute privacy for a sensitive task.
 
 In local-only mode:
 - Inference is forced to the local Ollama model regardless of which Brain you've selected

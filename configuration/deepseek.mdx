@@ -42,12 +42,12 @@ DeepSeek was text-only across the lineup until **August 21, 2026**, when **deeps
 
 ## Reasoning modes
 
-The **brain icon** next to the message box controls how this model reasons. Click it to cycle through the modes the selected model supports. Two separate ideas combine here:
+How this model reasons is set in the **model card beside the chat input** — hover the model switch to preview the card, click to pin it open. The top chip row, labelled **Thinking**, is the control: pick a chip and it applies from your next message. Two separate ideas combine here:
 
 ### Thinking — *whether* the model reasons
 
 - **Off** — the model answers immediately. Fastest and cheapest; ideal for simple, direct tasks.
-- **On** — the model first works through the problem in a dedicated reasoning pass before replying. Slower and uses more tokens, but markedly more accurate on multi-step, logical, or ambiguous tasks.
+- **On** (the chip reads **Normal**) — the model first works through the problem in a dedicated reasoning pass before replying. Slower and uses more tokens, but markedly more accurate on multi-step, logical, or ambiguous tasks.
 
 ### Effort — *how hard* it thinks
 
@@ -56,16 +56,16 @@ Only effort-capable models expose this; it applies once thinking is on.
 - **High** — standard reasoning depth. The right default for most agentic work.
 - **Max** — the model reasons longer and deeper for the hardest problems. More tokens and latency in exchange for higher quality on complex work.
 
-### Button states
+### The chip row
 
-| State | Colour | Meaning |
-|-------|--------|---------|
-| Off | gray | Thinking off — direct answer |
-| On | blue | Thinking on — no effort control |
-| High | purple | Thinking on, standard effort |
-| Max | orange | Thinking on, maximum effort |
+| Chip | Icon | Meaning |
+|------|------|---------|
+| Off | lightning | Thinking off — direct answer |
+| Normal | brain | Thinking on — no effort control |
+| High | AI brain | Thinking on, standard effort |
+| Max | flame | Thinking on, maximum effort |
 
-Each model shows only the states it genuinely supports. If a model always reasons (can't be turned off) or has no effort control, the button reflects that and locks where there's nothing to change. Wolffish remembers your choice per model.
+The active chip is tinted; the rest sit quiet. Each model shows only the chips it genuinely supports — a model that always reasons has no **Off**, a model with a single mode shows that one chip inert, and a model that can't reason at all replaces the row with *"Reasoning is not supported by this model."* Wolffish remembers your choice per model. (Before **v1.0.236** this was a colour-coded brain button on the composer; it moved into the model card, beside the Single/Workflow row, so every model knob sits in one panel.)
 
 **On DeepSeek:** All V4 models support Off / High / Max — and since **v1.0.251** the three settings genuinely differ. The effort field used to be sent one level too deep in the request, where nothing complained and nothing listened, so High and Max measured less than a third of a percent apart — two settings that were never sent. With the field in its correct place and measured live: **Off thinks not at all, High thinks hard, and Max thinks roughly twice as long as High** on a problem that rewards it.
 
@@ -73,7 +73,7 @@ Each model shows only the states it genuinely supports. If a model always reason
 
 ## Model Selection & Retries
 
-Wolffish communicates with LLMs via nine cloud providers plus a local option, all using pure `fetch()` — no SDKs. Each provider has its own streaming format and tool-calling convention, which `wernicke.ts` normalizes into a single interface.
+Wolffish communicates with LLMs via ten native cloud providers, an aggregator (OpenRouter), and a local option, all using pure `fetch()` — no SDKs. Each provider has its own streaming format and tool-calling convention, which `wernicke.ts` normalizes into a single interface.
 
 Select your Brain model explicitly from the **model switch beside the chat input** — the model you choose is the one that runs. There's no cascade or fallback order; for parallel work, switch the chat into [workflow mode](/configuration/workflow-mode), where the master can run agents on any connected model, DeepSeek included.
 

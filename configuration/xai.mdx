@@ -35,12 +35,12 @@ Best for: Reasoning-heavy workflows, code generation, vision tasks, and agentic 
 
 ## Reasoning modes
 
-The **brain icon** next to the message box controls how this model reasons. Click it to cycle through the modes the selected model supports. Two separate ideas combine here:
+How this model reasons is set in the **model card beside the chat input** — hover the model switch to preview the card, click to pin it open. The top chip row, labelled **Thinking**, is the control: pick a chip and it applies from your next message. Two separate ideas combine here:
 
 ### Thinking — *whether* the model reasons
 
 - **Off** — the model answers immediately. Fastest and cheapest; ideal for simple, direct tasks.
-- **On** — the model first works through the problem in a dedicated reasoning pass before replying. Slower and uses more tokens, but markedly more accurate on multi-step, logical, or ambiguous tasks.
+- **On** (the chip reads **Normal**) — the model first works through the problem in a dedicated reasoning pass before replying. Slower and uses more tokens, but markedly more accurate on multi-step, logical, or ambiguous tasks.
 
 ### Effort — *how hard* it thinks
 
@@ -49,16 +49,16 @@ Only effort-capable models expose this; it applies once thinking is on.
 - **High** — standard reasoning depth. The right default for most agentic work.
 - **Max** — the model reasons longer and deeper for the hardest problems. More tokens and latency in exchange for higher quality on complex work.
 
-### Button states
+### The chip row
 
-| State | Colour | Meaning |
-|-------|--------|---------|
-| Off | gray | Thinking off — direct answer |
-| On | blue | Thinking on — no effort control |
-| High | purple | Thinking on, standard effort |
-| Max | orange | Thinking on, maximum effort |
+| Chip | Icon | Meaning |
+|------|------|---------|
+| Off | lightning | Thinking off — direct answer |
+| Normal | brain | Thinking on — no effort control |
+| High | AI brain | Thinking on, standard effort |
+| Max | flame | Thinking on, maximum effort |
 
-Each model shows only the states it genuinely supports. If a model always reasons (can't be turned off) or has no effort control, the button reflects that and locks where there's nothing to change. Wolffish remembers your choice per model.
+The active chip is tinted; the rest sit quiet. Each model shows only the chips it genuinely supports — a model that always reasons has no **Off**, a model with a single mode shows that one chip inert, and a model that can't reason at all replaces the row with *"Reasoning is not supported by this model."* Wolffish remembers your choice per model. (Before **v1.0.236** this was a colour-coded brain button on the composer; it moved into the model card, beside the Single/Workflow row, so every model knob sits in one panel.)
 
 **On xAI:** Grok's effort knob is a **five-rung ladder, not a low/high pair** — a fact established in v1.0.251 by sweeping the parameter against the live API, which found a rung above High that had never been used. The three settings now land on distinct rungs, with **Max reaching the top of the ladder**. grok-4.6 and 4.5 reason always-on with High and Max as real, different depths; grok-4.3 adds Off; grok-4.20-reasoning and grok-build reason always-on with no effort control; the non-reasoning 4.20 variant has none.
 

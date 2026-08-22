@@ -14,7 +14,9 @@ Everything Wolffish knows, remembers, and can do lives in `~/.wolffish/workspace
 ├── brain/
 │   ├── identity/
 │   │   ├── soul.md                    # Agent personality
-│   │   └── user.md                    # User profile
+│   │   ├── user.md                    # User profile
+│   │   ├── workflow.md                # Master's contract in workflow mode
+│   │   └── workflow-agent.md          # Contract handed to each spawned agent
 │   ├── prefrontal/
 │   │   ├── agents.core.md             # Operating contract (Wolffish-owned)
 │   │   ├── agents.md                  # Your procedures + overrides (never overwritten)
@@ -35,6 +37,8 @@ Everything Wolffish knows, remembers, and can do lives in `~/.wolffish/workspace
 │   │   └── run-history.md             # Durable automation run history
 │   ├── corpus/YYYY-MM-DD.log.md       # Daily event logs (purged after 7 days)
 │   ├── conversations/                 # Chat history (indexed message by message)
+│   ├── projects.json                  # Projects store (what the Projects page edits)
+│   ├── procedures.json                # Saved-procedures store
 │   └── cortex.db                      # SQLite records index (disposable)
 ├── files/, uploads/, screenshots/, speech/   # Artifacts (indexed as metadata)
 ├── logs/                              # App + extension logs (tail-indexed)

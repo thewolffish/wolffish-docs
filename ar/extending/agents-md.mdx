@@ -498,7 +498,7 @@ automatic substitution between providers: on a transient error the thalamus
 retries the **same** Brain on a backoff schedule (using `net.isOnline()` for
 instant offline detection) rather than falling through to a different one. To
 run offline, flip the model switch to Local (`llm.localOnly`). Workflow mode
-(`llm.mode: "workflow"`, the composer's mode pill) lets each turn plan phases
+(`llm.mode: "workflow"`, the **Mode** chip row in the model card) lets each turn plan phases
 and spawn parallel agents, the master picking every agent's model from the
 connected providers at spawn time; every model that runs is an explicit choice,
 still no cascade.

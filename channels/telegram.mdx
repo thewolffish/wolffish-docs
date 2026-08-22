@@ -26,7 +26,7 @@ The Telegram channel turns Wolffish into a personal bot that responds to your pr
     Copy this token.
   </Tab>
   <Tab title="Step 2: Configure Wolffish">
-    In Wolffish, open **Settings > Telegram** and paste your bot token. Click **Connect**.
+    In Wolffish, open **Settings → Channels → Telegram** and paste your bot token. Click **Connect**.
 
     Wolffish will verify the token and confirm the connection. Your bot is now live.
   </Tab>
@@ -173,7 +173,7 @@ The Telegram channel is built on the [grammy](https://grammy.dev/) library — a
 
 Wolffish includes an optional filter that discards messages containing credentials before they reach the agent. It is **off by default** — discussing secrets is a legitimate part of many workflows (setting up integrations, debugging auth, rotating keys).
 
-**Enable it:** Settings → Wolffish → Block sensitive data in messages
+**Enable it:** Settings → Preferences → Block sensitive data in messages
 
 When enabled, any incoming message matching a credential pattern is immediately discarded in its entirety. The turn does not process, nothing is stored, and the user receives a short notification. This applies equally to Desktop, Telegram, and WhatsApp.
 

@@ -14,7 +14,7 @@ When a message arrives, it flows through the modules like a neural signal:
 1. **Input arrives** — the channel adapter (Desktop, Telegram, or WhatsApp) emits a `message.received` event on the corpus
 2. **Context is built** — the prefrontal cortex assembles a lean system prompt: your identity files, device facts, the operating contract, a learned-preferences digest, a one-line capability index from the cerebellum, and a memory map describing what exists to be recalled — never memory content itself. The RAS guards the token budget
 3. **The LLM thinks** — the thalamus sends the assembled prompt to the one Brain model you selected (`config.llm.brain`) and streams the response back; there's no cascade between providers
-4. **Response is parsed** — Wernicke's area extracts tool calls and text from the stream, normalizing across all nine cloud provider formats
+4. **Response is parsed** — Wernicke's area extracts tool calls and text from the stream, normalizing across all eleven cloud provider formats
 5. **Safety is checked** — if tool calls are present, the amygdala checks them against danger patterns and either approves, requests confirmation, or blocks
 6. **Tools execute** — the motor cortex runs approved tools, logging every step to task files with retry logic. This is also where memory happens: when the turn needs something from the past, the model calls `memory_search` against the cortex index instead of having memories pre-injected
 7. **Response is delivered** — Broca's area streams the final text back to the user through the channel
@@ -39,7 +39,7 @@ Built on `mitt` with 80+ typed events. A wildcard handler logs every event to da
 
 ## thalamus.ts — Model Gateway
 
-Maps to the **thalamus** (sensory gateway). Manages nine cloud LLM providers plus Ollama via pure `fetch()`.
+Maps to the **thalamus** (sensory gateway). Manages eleven cloud LLM providers plus Ollama via pure `fetch()`.
 
 Resolves the one Brain model you selected (`config.llm.brain`) and streams from it — there's no cascade or automatic substitution between providers. Uses `net.isOnline()` for instant offline detection. On a transient error it retries the **same** Brain on a backoff schedule; health tracking with exponential backoff feeds that same-model retry and diagnostics, not provider switching. Exposes a unified `async *stream()` generator yielding `StreamChunk` types.
 
@@ -77,7 +77,7 @@ Maps to the **cerebellum** (motor coordination). Discovers and loads capabilitie
 
 Scans `brain/cerebellum/` for capability folders, parses SKILL.md frontmatter (YAML), dynamic-imports plugins, registers tools and danger patterns. Passes `PluginContext` (pluginDir + workspaceRoot) to plugins on init.
 
-It also decides which tool schemas ship to the model. A core set is always loaded — tool-discovery, introspect, filesystem, shell, ask, utilities, web-search, secrets, system, plus workflow (master-gated) and telegram/whatsapp/electron while connected. Everything else — github, google, notion, browser, computer-use, media tools, all MCP servers — is one `tool_search` or `tool_activate` away, callable the same turn. Activations are conversation-scoped (an `ActiveToolset` keyed by conversationId, LRU-capped at 10 non-core capabilities), so loading github in a heartbeat run never invalidates a live chat's prompt cache, and calling an evicted tool transparently reactivates it. `pinnedCapabilities` in config.json adds extra always-loaded capabilities.
+It also decides which tool schemas ship to the model. A core set is always loaded — tool-discovery, introspect, filesystem, shell, ask, utilities, web-search, secrets, system, video, the operating-manual loader and the pdf-design/web-design/dataviz manuals, plus workflow (master-gated) and telegram/whatsapp/phone/electron while connected. Everything else — github, google, notion, browser, computer-use, media tools, all MCP servers — is one `tool_search` or `tool_activate` away, callable the same turn. Activations are conversation-scoped (an `ActiveToolset` keyed by conversationId, LRU-capped at 10 non-core capabilities), so loading github in a heartbeat run never invalidates a live chat's prompt cache, and calling an evicted tool transparently reactivates it. `pinnedCapabilities` in config.json adds extra always-loaded capabilities.
 
 ## wernicke.ts — Response Parser
 
